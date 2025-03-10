@@ -1,0 +1,81 @@
+---
+# 基础配置
+Language: Cpp
+BasedOnStyle: LLVM
+Standard: c++17
+
+# 缩进配置
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+MaxEmptyLinesToKeep: 1
+IndentCaseLabels: true
+
+# 对齐和空格
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignEscapedNewlines: Right
+AlignOperands: true
+AlignTrailingComments: true
+
+# 括号和换行
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+
+# 函数和参数
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+
+# 空格规则
+SpaceAfterCStyleCast: true
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# 包含文件排序
+SortIncludes: true
+IncludeCategories:
+  - Regex: '^<[Qq][^>]*>'  # Qt 头文件
+    Priority: 1
+  - Regex: '^<.*>'         # 系统头文件
+    Priority: 2
+  - Regex: '^".*"'         # 项目头文件
+    Priority: 3
+
+# 命名空间
+NamespaceIndentation: None
+CompactNamespaces: false
+
+# 模板
+AlwaysBreakTemplateDeclarations: Yes
+
+# 注释
+ReflowComments: true
+CommentPragmas: '^ IWYU pragma:'
+
+# 其他
+KeepEmptyLinesAtTheStartOfBlocks: false
+PointerAlignment: Left
