@@ -26,8 +26,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 # 查找依赖
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets )
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets )
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 # 收集源文件 - 修改方式收集所有需要的文件
 file(GLOB_RECURSE QtNativeUI_SOURCES
@@ -46,23 +46,21 @@ set(QtNativeUI_RESOURCES
 
 # 创建库目标
 if (BUILD_SHARED_LIBS)
-    add_library(QtNativeUI SHARED ${QtNativeUI_SOURCES} ${QtNativeUI_HEADERS} ${QtNativeUI_RESOURCES})
+    qt_add_library(QtNativeUI SHARED ${QtNativeUI_SOURCES} ${QtNativeUI_HEADERS} ${QtNativeUI_RESOURCES})
     target_compile_definitions(QtNativeUI
             PRIVATE
-            QtNativeUI_EXPORTS  # 确保使用与export.h匹配的宏名称
-            QtNativeUI_EXPORTS  # 添加这个以确保兼容性
+            QTNATIVEUI_LIBRARY
             PUBLIC
             QtNativeUI_SHARED
-            PUBLIC
             QT_SHARED
     )
-    if(MSVC)
+    if (MSVC)
         set_target_properties(QtNativeUI PROPERTIES
                 WINDOWS_EXPORT_ALL_SYMBOLS ON
         )
-    endif()
+    endif ()
 else ()
-    add_library(QtNativeUI STATIC ${QtNativeUI_SOURCES} ${QtNativeUI_HEADERS}
+    qt_add_library(QtNativeUI STATIC ${QtNativeUI_SOURCES} ${QtNativeUI_HEADERS}
     )
 endif ()
 
@@ -75,22 +73,16 @@ set_target_properties(QtNativeUI PROPERTIES
 
 add_library(QtNativeUI::QtNativeUI ALIAS QtNativeUI)
 
-# 生成导出头文件
-include(GenerateExportHeader)
-generate_export_header(QtNativeUI
-        BASE_NAME QtNativeUI
-        EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/include/QtNativeUI/QtNativeUI_export.h
-)
 
 # 设置目标属性
 target_include_directories(QtNativeUI
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
         $<INSTALL_INTERFACE:include>
         PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/private
 )
 
 install(

@@ -15,6 +15,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 # 收集所有源文件
 file(GLOB_RECURSE EXAMPLE_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/components/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/components/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
 )
@@ -37,10 +39,12 @@ set_target_properties(QtNativeUIExamples PROPERTIES
         AUTOMOC ON
         AUTORCC ON
         AUTOUIC ON
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+
 )
 target_compile_definitions(QtNativeUIExamples
         PRIVATE
-        QtNativeUI_IMPORTS
         QT_SHARED
 )
 
@@ -60,13 +64,13 @@ target_link_libraries(QtNativeUIExamples
 )
 
 # 设置编译选项
-if(MSVC)
+if (MSVC)
     target_compile_options(QtNativeUIExamples
             PRIVATE
             /W4
             /utf-8
     )
-endif()
+endif ()
 
 # 完成Qt设置
 qt_finalize_executable(QtNativeUIExamples)
