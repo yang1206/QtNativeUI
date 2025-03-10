@@ -1,45 +1,111 @@
 #ifndef QTNATIVEUI_NTHEME_H
 #define QTNATIVEUI_NTHEME_H
 
-#include <QColor>
 #include <QObject>
+#include <QColor>
+#include <QVariant>
+#include <QHash>
+#include "NColor.h"
 #include "NEnums.h"
 #include "stdafx.h"
 
 /**
- * @brief 主题管理类
- * 提供对简化的Fluent Design主题系统的访问
+ * @brief Fluent Design主题管理类
+ * 提供对Windows 11 Fluent UI设计系统的访问
  */
 class QTNATIVEUI_EXPORT NTheme : public QObject {
     Q_OBJECT
   public:
     static NTheme* instance();
 
-    // 获取语义颜色角色对应的颜色
-    QColor color(NThemeType::ColorRole role) const;
+    // 主题模式
+    enum class ThemeMode {
+        Light,
+        Dark,
+        System
+    };
+    Q_ENUM(ThemeMode)
 
-    // 设置语义颜色角色对应的颜色
-    void setColor(NThemeType::ColorRole role, const QColor& color);
-
-    // 判断当前是否为暗色模式
+    // 获取/设置主题模式
     bool isDarkMode() const;
-
-    // 设置暗色模式
     void setDarkMode(bool dark);
+    void setThemeMode(ThemeMode mode);
+    ThemeMode themeMode() const;
 
-    // 设置主题模式
-    void setThemeMode(NThemeType::ThemeMode mode);
+    // 颜色系统
+    NAccentColor accentColor() const;
+    void setAccentColor(const NAccentColor& color);
+    void setAccentColor(const QColor& color);
 
-    // 获取当前主题模式
-    NThemeType::ThemeMode themeMode() const;
+    // 颜色获取与设置
+    QColor getColor(const QString& key) const;
+    void setColor(const QString& key, const QColor& color);
 
-    // 重置为默认颜色
+    // 设计令牌
+    QVariant getToken(const QString& key) const;
+    void setToken(const QString& key, const QVariant& value);
+
+    // 常用令牌快捷访问
+    qreal cornerRadius(const QString& key = "cornerRadiusDefault") const;
+    int spacing(const QString& key = "spacingM") const;
+    int fontSize(const QString& key = "fontSizeBody") const;
+    int fontWeight(const QString& key = "fontWeightRegular") const;
+    QString elevation(const QString& key = "elevationRest") const;
+    int animationDuration(const QString& key = "animationNormal") const;
+    QString easingCurve(const QString& key = "easingStandard") const;
+
+    // 重置为默认值
     void resetToDefaults();
+    void resetTokensToDefaults();
+    void resetColorsToDefaults();
+
+    // 预定义的颜色键
+    static const QString TextPrimary;
+    static const QString TextSecondary;
+    static const QString TextTertiary;
+    static const QString TextDisabled;
+    static const QString TextOnAccent;
+    static const QString TextLink;
+    
+    static const QString Background;
+    static const QString BackgroundSecondary;
+    static const QString BackgroundTertiary;
+    static const QString Surface;
+    static const QString SurfaceSecondary;
+    
+    static const QString ControlFill;
+    static const QString ControlFillHover;
+    static const QString ControlFillPressed;
+    static const QString ControlFillSelected;
+    static const QString ControlFillDisabled;
+    
+    static const QString ControlStroke;
+    static const QString ControlStrokeHover;
+    static const QString ControlStrokePressed;
+    static const QString ControlStrokeSelected;
+    static const QString ControlStrokeDisabled;
+    
+    static const QString CardBackground;
+    static const QString CardBackgroundHover;
+    static const QString CardBackgroundPressed;
+    static const QString CardStroke;
+    static const QString CardStrokeHover;
+    
+    static const QString Success;
+    static const QString Warning;
+    static const QString Error;
+    static const QString Info;
+    
+    static const QString Divider;
+    static const QString DividerStrong;
+    static const QString Shadow;
 
   signals:
-    void colorChanged(NThemeType::ColorRole role, const QColor& color);
+    void colorChanged(const QString& key, const QColor& color);
+    void tokenChanged(const QString& key, const QVariant& value);
+    void accentColorChanged(const NAccentColor& color);
     void darkModeChanged(bool isDark);
-    void themeModeChanged(NThemeType::ThemeMode mode);
+    void themeModeChanged(ThemeMode mode);
 
   private:
     NTheme(QObject* parent = nullptr);
@@ -51,5 +117,10 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
 
     static NTheme* s_instance;
 };
+
+// 便捷访问宏
+#define N_COLOR(KEY) NTheme::instance()->getColor(KEY)
+#define N_TOKEN(KEY) NTheme::instance()->getToken(KEY)
+#define N_ACCENT NTheme::instance()->accentColor()
 
 #endif // QTNATIVEUI_NTHEME_H
