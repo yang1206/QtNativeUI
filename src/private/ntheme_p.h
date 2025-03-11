@@ -2,10 +2,8 @@
 #define QTNATIVEUI_NTHEME_P_H
 
 #include <QColor>
-#include <QHash>
-#include <QtNativeUI/NTheme.h>
 #include <QtNativeUI/NColor.h>
-#include <QtNativeUI/NFluentColors.h>
+#include <QtNativeUI/NTheme.h>
 
 class NTheme::NThemePrivate {
   public:
@@ -14,7 +12,7 @@ class NTheme::NThemePrivate {
 
     // 主题状态
     NTheme::ThemeMode _themeMode;
-    bool _isDark;
+    bool              _isDark;
 
     // 强调色
     NAccentColor _accentColor;
@@ -32,7 +30,7 @@ class NTheme::NThemePrivate {
     void initLightColors();
     void initDarkColors();
     void initDesignTokens();
-    
+
     // 映射 Fluent 颜色到主题颜色
     void mapFluentColorsToTheme(bool isDark);
 

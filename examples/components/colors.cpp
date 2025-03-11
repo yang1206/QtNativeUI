@@ -167,9 +167,10 @@ void ColorsExample::initUI() {
 
     QLabel*    themeLabel = new QLabel("主题模式:", this);
     QComboBox* themeCombo = new QComboBox(this);
-    themeCombo->addItem("系统", static_cast<int>(NTheme::ThemeMode::System));
     themeCombo->addItem("亮色", static_cast<int>(NTheme::ThemeMode::Light));
     themeCombo->addItem("暗色", static_cast<int>(NTheme::ThemeMode::Dark));
+    themeCombo->addItem("系统", static_cast<int>(NTheme::ThemeMode::System));
+
     themeCombo->setCurrentIndex(static_cast<int>(m_theme->themeMode()));
 
     connect(themeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
@@ -385,6 +386,7 @@ void ColorsExample::populateAccentColors() {
 }
 
 void ColorsExample::onThemeChanged(bool isDark) {
+    qDebug() << isDark;
     // 主题变化时，所有颜色都会通过 colorChanged 信号更新
     // 这里可以添加额外的主题相关逻辑
 }

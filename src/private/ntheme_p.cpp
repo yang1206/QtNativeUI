@@ -3,6 +3,7 @@
 #include <QPalette>
 #include <QScreen>
 #include <QStyle>
+#include <QStyleHints>
 #include <QVariant>
 #include <QtNativeUI/NFluentColors.h>
 
@@ -13,7 +14,7 @@ NTheme::NThemePrivate::NThemePrivate(NTheme* q)
     initLightColors();
     initDarkColors();
     initDesignTokens();
-    
+
     // 然后再检测系统主题
     setupSystemThemeDetection();
     updateDarkModeState();
@@ -218,15 +219,24 @@ QVariant NTheme::NThemePrivate::resolveToken(const QString& key) const {
 // 设置系统主题检测
 void NTheme::NThemePrivate::setupSystemThemeDetection() {
     // 确保颜色哈希表已初始化
-    if (_lightColors.isEmpty()) initLightColors();
-    if (_darkColors.isEmpty()) initDarkColors();
-    
-    // 连接应用程序调色板变化信号
+    if (_lightColors.isEmpty())
+        initLightColors();
+    if (_darkColors.isEmpty())
+        initDarkColors();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    QObject::connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, [this]() {
+        if (_themeMode == ThemeMode::System) {
+            updateThemeBasedOnSystem();
+        }
+    });
+#else
     QObject::connect(qApp, &QApplication::paletteChanged, [this]() {
         if (_themeMode == NTheme::ThemeMode::System) {
             updateThemeBasedOnSystem();
         }
     });
+#endif
 
     // 安全的初始检测
     try {
@@ -242,26 +252,39 @@ void NTheme::NThemePrivate::setupSystemThemeDetection() {
 // 根据系统主题更新
 void NTheme::NThemePrivate::updateThemeBasedOnSystem() {
     if (_themeMode == NTheme::ThemeMode::System) {
-        // 获取系统调色板
-        QPalette pal = QApplication::palette();
-        
-        // 通过调色板的基色来判断是否为深色主题
-        QColor windowColor = pal.color(QPalette::Window);
-        int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
-        
-        bool newIsDark = brightness < 128; // 简单的亮度检测
-        
+        bool newIsDark = false;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        // 在 Qt 6.5 及更高版本中使用 QStyleHints::colorScheme
+        newIsDark = qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+        // 在较旧版本中使用调色板检测
+        QPalette pal         = QApplication::palette();
+        QColor   windowColor = pal.color(QPalette::Window);
+        QColor   textColor   = pal.color(QPalette::WindowText);
+
+        // 更可靠的方法：比较文本与背景的相对亮度
+        newIsDark = textColor.lightness() > windowColor.lightness();
+
+        // 如果上面的方法不可靠，备选方案
+        if (!newIsDark) {
+            int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
+            newIsDark      = brightness < 128;
+        }
+#endif
+
         if (_isDark != newIsDark) {
             _isDark = newIsDark;
             Q_Q(NTheme);
             emit q->darkModeChanged(_isDark);
-            
-            // 重要：确保主题色表已经被初始化
-            if (_lightColors.isEmpty()) initLightColors();
-            if (_darkColors.isEmpty()) initDarkColors();
-            
-            // 发出所有颜色变化的信号 - 使用安全的方法
-            QHash<QString, QColor> const & colors = _isDark ? _darkColors : _lightColors;
+
+            // 确保主题色表已经被初始化
+            if (_lightColors.isEmpty())
+                initLightColors();
+            if (_darkColors.isEmpty())
+                initDarkColors();
+
+            // 发出所有颜色变化的信号
+            QHash<QString, QColor> const& colors = _isDark ? _darkColors : _lightColors;
             for (auto it = colors.constBegin(); it != colors.constEnd(); ++it) {
                 emit q->colorChanged(it.key(), it.value());
             }
@@ -272,7 +295,7 @@ void NTheme::NThemePrivate::updateThemeBasedOnSystem() {
 // 更新暗色模式状态
 void NTheme::NThemePrivate::updateDarkModeState() {
     bool newIsDark = false;
-    
+
     switch (_themeMode) {
         case NTheme::ThemeMode::Light:
             newIsDark = false;
@@ -281,25 +304,38 @@ void NTheme::NThemePrivate::updateDarkModeState() {
             newIsDark = true;
             break;
         case NTheme::ThemeMode::System:
-            // 获取系统主题
-            {
-                QPalette pal = QApplication::palette();
-                QColor windowColor = pal.color(QPalette::Window);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+            newIsDark = qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+        {
+            QPalette pal         = QApplication::palette();
+            QColor   windowColor = pal.color(QPalette::Window);
+            QColor   textColor   = pal.color(QPalette::WindowText);
+
+            // 主要方法：比较文本与背景的相对亮度
+            newIsDark = textColor.lightness() > windowColor.lightness();
+
+            // 备选方法
+            if (!newIsDark) {
                 int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
-                newIsDark = brightness < 128;
+                newIsDark      = brightness < 128;
             }
+        }
+#endif
             break;
     }
-    
+
     if (_isDark != newIsDark) {
         _isDark = newIsDark;
         Q_Q(NTheme);
         emit q->darkModeChanged(_isDark);
-        
+
         // 确保颜色哈希表已初始化
-        if (_lightColors.isEmpty()) initLightColors();
-        if (_darkColors.isEmpty()) initDarkColors();
-        
+        if (_lightColors.isEmpty())
+            initLightColors();
+        if (_darkColors.isEmpty())
+            initDarkColors();
+
         // 安全地发送颜色变化信号
         const QHash<QString, QColor>& colors = _isDark ? _darkColors : _lightColors;
         for (auto it = colors.constBegin(); it != colors.constEnd(); ++it) {
