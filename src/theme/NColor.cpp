@@ -115,6 +115,38 @@ NAccentColor NAccentColor::lerp(const NAccentColor& a, const NAccentColor& b, do
     return NAccentColor(result);
 }
 
+bool NAccentColor::operator==(const NAccentColor& other) const {
+    // 比较主要色调
+    if (normal() != other.normal()) {
+        return false;
+    }
+    
+    // 比较所有色调
+    QSet<QString> allKeys;
+    for (auto it = _swatch.begin(); it != _swatch.end(); ++it) {
+        allKeys.insert(it.key());
+    }
+    for (auto it = other._swatch.begin(); it != other._swatch.end(); ++it) {
+        allKeys.insert(it.key());
+    }
+    
+    for (const QString& key : allKeys) {
+        if (_swatch.contains(key) && other._swatch.contains(key)) {
+            if (_swatch[key] != other._swatch[key]) {
+                return false;
+            }
+        } else if (_swatch.contains(key) || other._swatch.contains(key)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool NAccentColor::operator!=(const NAccentColor& other) const {
+    return !(*this == other);
+}
+
 // NColors 实现
 const QColor NColors::transparent = QColor(0, 0, 0, 0);
 const QColor NColors::black       = QColor(0, 0, 0);

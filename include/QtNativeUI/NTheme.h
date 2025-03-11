@@ -5,6 +5,7 @@
 #include <QColor>
 #include <QVariant>
 #include <QHash>
+#include <QList>
 #include "NColor.h"
 #include "NEnums.h"
 #include "stdafx.h"
@@ -15,6 +16,10 @@
  */
 class QTNATIVEUI_EXPORT NTheme : public QObject {
     Q_OBJECT
+    Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY darkModeChanged)
+    Q_PROPERTY(ThemeMode themeMode READ themeMode WRITE setThemeMode NOTIFY themeModeChanged)
+    Q_PROPERTY(NAccentColor accentColor READ accentColor WRITE setAccentColor NOTIFY accentColorChanged)
+
   public:
     static NTheme* instance();
 
@@ -36,6 +41,23 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     NAccentColor accentColor() const;
     void setAccentColor(const NAccentColor& color);
     void setAccentColor(const QColor& color);
+
+    // 获取强调色的特定色调
+    QColor accentDarkest() const;
+    QColor accentDarker() const;
+    QColor accentDark() const;
+    QColor accentNormal() const;
+    QColor accentLight() const;
+    QColor accentLighter() const;
+    QColor accentLightest() const;
+    
+    // 获取当前主题下推荐的强调色变体
+    QColor accentDefault() const;
+    QColor accentSecondary() const;
+    QColor accentTertiary() const;
+    
+    // 获取所有可用的强调色
+    QList<NAccentColor> availableAccentColors() const;
 
     // 颜色获取与设置
     QColor getColor(const QString& key) const;
@@ -122,5 +144,6 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
 #define N_COLOR(KEY) NTheme::instance()->getColor(KEY)
 #define N_TOKEN(KEY) NTheme::instance()->getToken(KEY)
 #define N_ACCENT NTheme::instance()->accentColor()
+#define N_ACCENT_COLOR(SHADE) NTheme::instance()->accentColor().shade(SHADE)
 
 #endif // QTNATIVEUI_NTHEME_H

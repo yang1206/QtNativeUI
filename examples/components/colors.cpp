@@ -62,55 +62,78 @@ AccentColorItem::AccentColorItem(const QString& name, const NAccentColor& accent
     : QWidget(parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(5, 5, 5, 5);
+    mainLayout->setContentsMargins(5, 10, 5, 10);
     
     // 名称标签
     m_nameLabel = new QLabel(name, this);
     QFont nameFont = m_nameLabel->font();
     nameFont.setBold(true);
     m_nameLabel->setFont(nameFont);
-    
     mainLayout->addWidget(m_nameLabel);
     
-    // 创建色调展示区域
-    QHBoxLayout* swatchLayout = new QHBoxLayout();
-    swatchLayout->setSpacing(2);
-    
-    QStringList swatchNames = {"darkest", "darker", "dark", "normal", "light", "lighter", "lightest"};
-    
-    for (const QString& swatchName : swatchNames) {
-        QLabel* swatch = new QLabel(this);
-        swatch->setFixedSize(30, 30);
-        swatch->setAutoFillBackground(true);
-        swatch->setToolTip(swatchName);
-        
-        // 设置边框
-        swatch->setFrameShape(QFrame::Box);
-        swatch->setFrameShadow(QFrame::Plain);
-        swatch->setLineWidth(1);
-        
-        m_swatchLabels[swatchName] = swatch;
-        swatchLayout->addWidget(swatch);
-    }
-    
+    // 色调预览
+    QGridLayout* swatchLayout = new QGridLayout();
+    swatchLayout->setSpacing(8);
     mainLayout->addLayout(swatchLayout);
     
-    // 更新颜色
-    updateAccentColor(accentColor);
+    // 添加各个色调
+    QStringList shades = {"darkest", "darker", "dark", "normal", "light", "lighter", "lightest"};
+    int col = 0;
+    
+    for (const QString& shade : shades) {
+        QColor color;
+        if (shade == "darkest") color = accentColor.darkest();
+        else if (shade == "darker") color = accentColor.darker();
+        else if (shade == "dark") color = accentColor.dark();
+        else if (shade == "normal") color = accentColor.normal();
+        else if (shade == "light") color = accentColor.light();
+        else if (shade == "lighter") color = accentColor.lighter();
+        else if (shade == "lightest") color = accentColor.lightest();
+        
+        // 颜色预览
+        QLabel* colorPreview = new QLabel(this);
+        colorPreview->setFixedSize(30, 30);
+        colorPreview->setAutoFillBackground(true);
+        
+        QPalette pal = colorPreview->palette();
+        pal.setColor(QPalette::Window, color);
+        colorPreview->setPalette(pal);
+        
+        // 颜色值标签
+        QLabel* valueLabel = new QLabel(QString("RGB(%1,%2,%3)").arg(color.red()).arg(color.green()).arg(color.blue()), this);
+        valueLabel->setFixedWidth(100);
+        valueLabel->setFont(QFont("Monospace", 8));
+        
+        swatchLayout->addWidget(colorPreview, 0, col);
+        swatchLayout->addWidget(new QLabel(shade, this), 1, col);
+        swatchLayout->addWidget(valueLabel, 2, col);
+        
+        m_colorPreviews[shade] = colorPreview;
+        m_valueLabels[shade] = valueLabel;
+        
+        col++;
+    }
 }
 
-void AccentColorItem::updateAccentColor(const NAccentColor& accentColor)
-{
-    // 更新所有色调
-    QStringList swatchNames = {"darkest", "darker", "dark", "normal", "light", "lighter", "lightest"};
+void AccentColorItem::updateAccentColor(const NAccentColor& accentColor) {
+    // 更新各个色调预览
+    QStringList shades = {"darkest", "darker", "dark", "normal", "light", "lighter", "lightest"};
     
-    for (const QString& swatchName : swatchNames) {
-        QLabel* swatch = m_swatchLabels[swatchName];
-        QColor color = accentColor[swatchName];
+    for (const QString& shade : shades) {
+        QColor color;
+        if (shade == "darkest") color = accentColor.darkest();
+        else if (shade == "darker") color = accentColor.darker();
+        else if (shade == "dark") color = accentColor.dark();
+        else if (shade == "normal") color = accentColor.normal();
+        else if (shade == "light") color = accentColor.light();
+        else if (shade == "lighter") color = accentColor.lighter();
+        else if (shade == "lightest") color = accentColor.lightest();
         
-        QPalette pal = swatch->palette();
+        QPalette pal = m_colorPreviews[shade]->palette();
         pal.setColor(QPalette::Window, color);
-        swatch->setPalette(pal);
+        m_colorPreviews[shade]->setPalette(pal);
+        
+        m_valueLabels[shade]->setText(QString("RGB(%1,%2,%3)").arg(color.red()).arg(color.green()).arg(color.blue()));
     }
 }
 
@@ -344,48 +367,44 @@ void ColorsExample::populateColors()
 
 void ColorsExample::populateAccentColors()
 {
-    int row = m_colorsLayout->rowCount();
-    int col = 0;
-    
-    // 添加强调色标题
-    QFont sectionFont = sectionFont.defaultFamily();
-    sectionFont.setBold(true);
-    sectionFont.setPointSize(12);
-    
-    QLabel* accentColorsLabel = new QLabel("强调色系统", this);
-    accentColorsLabel->setFont(sectionFont);
-    m_colorsLayout->addWidget(accentColorsLabel, row++, 0, 1, 3);
-    
     // 添加当前强调色
-    AccentColorItem* currentAccentItem = new AccentColorItem("当前强调色", m_theme->accentColor());
+    QWidget* accentSection = new QWidget(m_colorContainer);
+    QVBoxLayout* accentLayout = new QVBoxLayout(accentSection);
+    
+    QLabel* sectionTitle = new QLabel(tr("当前强调色"), accentSection);
+    QFont titleFont = sectionTitle->font();
+    titleFont.setBold(true);
+    titleFont.setPointSize(titleFont.pointSize() + 2);
+    sectionTitle->setFont(titleFont);
+    
+    accentLayout->addWidget(sectionTitle);
+    
+    // 添加当前强调色预览
+    AccentColorItem* currentAccentItem = new AccentColorItem("Current Accent", m_theme->accentColor(), accentSection);
+    accentLayout->addWidget(currentAccentItem);
     m_accentColorItems["current"] = currentAccentItem;
-    m_colorsLayout->addWidget(currentAccentItem, row++, 0, 1, 3);
     
-    // 添加预定义的强调色
-    struct NamedAccentColor {
-        QString name;
-        NAccentColor color;
-    };
+    // 添加强调色选择器
+    QComboBox* accentSelector = new QComboBox(accentSection);
+    accentSelector->addItem("Blue (Default)", 0);
+    accentSelector->addItem("Purple", 1);
+    accentSelector->addItem("Magenta", 2);
+    accentSelector->addItem("Red", 3);
+    accentSelector->addItem("Orange", 4);
+    accentSelector->addItem("Yellow", 5);
+    accentSelector->addItem("Green", 6);
+    accentSelector->addItem("Teal", 7);
     
-    QList<NamedAccentColor> namedColors = {
-        {"蓝色 (Blue)", NColors::blue},
-        {"红色 (Red)", NColors::red},
-        {"绿色 (Green)", NColors::green},
-        {"黄色 (Yellow)", NColors::yellow},
-        {"橙色 (Orange)", NColors::orange},
-        {"紫色 (Purple)", NColors::purple},
-        {"品红 (Magenta)", NColors::magenta},
-        {"青色 (Teal)", NColors::teal}
-    };
+    connect(accentSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
+        if (index >= 0 && index < m_theme->availableAccentColors().size()) {
+            m_theme->setAccentColor(m_theme->availableAccentColors().at(index));
+        }
+    });
     
-    for (const auto& namedColor : namedColors) {
-        AccentColorItem* item = new AccentColorItem(namedColor.name, namedColor.color);
-        m_accentColorItems[namedColor.name] = item;
-        m_colorsLayout->addWidget(item, row++, 0, 1, 3);
-    }
+    accentLayout->addWidget(accentSelector);
     
-    // 添加一个空白区域
-    m_colorsLayout->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding), row, 0);
+    // 添加到主布局
+    m_colorsLayout->addWidget(accentSection, m_colorsLayout->rowCount(), 0, 1, 2);
 }
 
 void ColorsExample::onThemeChanged(bool isDark)

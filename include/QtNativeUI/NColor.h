@@ -65,6 +65,10 @@ public:
     // 插值两个强调色
     static NAccentColor lerp(const NAccentColor& a, const NAccentColor& b, double t);
     
+    // 添加比较运算符
+    bool operator==(const NAccentColor& other) const;
+    bool operator!=(const NAccentColor& other) const;
+    
 private:
     QMap<QString, QColor> _swatch;
 };

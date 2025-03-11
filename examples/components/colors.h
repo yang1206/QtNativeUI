@@ -28,7 +28,8 @@ public:
 
 private:
     QLabel* m_nameLabel;
-    QMap<QString, QLabel*> m_swatchLabels;
+    QMap<QString, QLabel*> m_colorPreviews;
+    QMap<QString, QLabel*> m_valueLabels;
 };
 
 class ColorsExample : public QWidget {

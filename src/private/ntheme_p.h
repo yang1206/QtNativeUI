@@ -47,6 +47,9 @@ class NTheme::NThemePrivate {
     void updateThemeBasedOnSystem();
     void updateDarkModeState();
 
+    // 更新依赖于强调色的颜色
+    void updateAccentDependentColors();
+
     // 使用宏声明公共类
     N_DECLARE_PUBLIC(NTheme)
 };

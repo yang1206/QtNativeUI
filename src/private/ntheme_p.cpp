@@ -147,6 +147,14 @@ void NTheme::NThemePrivate::mapFluentColorsToTheme(bool isDark) {
     colors[NTheme::Divider] = colors[NFluentColorConstants::DividerStrokeColorDefault];
     colors[NTheme::DividerStrong] = colors[NFluentColorConstants::ControlStrongStrokeColorDefault];
     colors[NTheme::Shadow] = colors[NFluentColorConstants::SmokeFillColorDefault];
+
+    // 强调色相关颜色
+    colors["accent"] = _accentColor.normal();
+    colors["accentDark"] = _accentColor.dark();
+    colors["accentLight"] = _accentColor.light();
+    colors["accentDefault"] = _accentColor.defaultBrushFor(isDark);
+    colors["accentSecondary"] = _accentColor.secondaryBrushFor(isDark);
+    colors["accentTertiary"] = _accentColor.tertiaryBrushFor(isDark);
 }
 
 // 解析颜色 - 考虑当前主题模式和自定义颜色
@@ -155,18 +163,38 @@ QColor NTheme::NThemePrivate::resolveColor(const QString& key) const {
     if (_customColors.contains(key)) {
         return _customColors[key];
     }
-
+    
     // 然后根据当前主题模式选择颜色
-    if (_isDark) {
-        if (_darkColors.contains(key)) {
-            return _darkColors[key];
-        }
-    } else {
-        if (_lightColors.contains(key)) {
-            return _lightColors[key];
+    const QHash<QString, QColor>& themeColors = _isDark ? _darkColors : _lightColors;
+    if (themeColors.contains(key)) {
+        return themeColors[key];
+    }
+    
+    // 处理强调色相关的特殊键
+    if (key.startsWith("accent")) {
+        if (key == "accent") {
+            return _accentColor.normal();
+        } else if (key == "accentDarkest") {
+            return _accentColor.darkest();
+        } else if (key == "accentDarker") {
+            return _accentColor.darker();
+        } else if (key == "accentDark") {
+            return _accentColor.dark();
+        } else if (key == "accentLight") {
+            return _accentColor.light();
+        } else if (key == "accentLighter") {
+            return _accentColor.lighter();
+        } else if (key == "accentLightest") {
+            return _accentColor.lightest();
+        } else if (key == "accentDefault") {
+            return _accentColor.defaultBrushFor(_isDark);
+        } else if (key == "accentSecondary") {
+            return _accentColor.secondaryBrushFor(_isDark);
+        } else if (key == "accentTertiary") {
+            return _accentColor.tertiaryBrushFor(_isDark);
         }
     }
-
+    
     // 如果找不到颜色，返回默认颜色
     return _isDark ? QColor("#FFFFFF") : QColor("#000000");
 }
@@ -238,4 +266,22 @@ void NTheme::NThemePrivate::updateDarkModeState() {
             emit q->colorChanged(it.key(), q->getColor(it.key()));
         }
     }
+}
+
+void NTheme::NThemePrivate::updateAccentDependentColors() {
+    // 更新依赖于强调色的颜色
+    QHash<QString, QColor>& colors = _isDark ? _darkColors : _lightColors;
+    
+    // 文本链接颜色
+    colors[NTheme::TextLink] = _accentColor.defaultBrushFor(_isDark);
+    
+    // 控件选中状态颜色
+    colors[NTheme::ControlFillSelected] = _accentColor.defaultBrushFor(_isDark);
+    colors[NTheme::ControlStrokeSelected] = _accentColor.defaultBrushFor(_isDark);
+    
+    // 发出颜色变化信号
+    Q_Q(NTheme);
+    emit q->colorChanged(NTheme::TextLink, colors[NTheme::TextLink]);
+    emit q->colorChanged(NTheme::ControlFillSelected, colors[NTheme::ControlFillSelected]);
+    emit q->colorChanged(NTheme::ControlStrokeSelected, colors[NTheme::ControlStrokeSelected]);
 }

@@ -107,11 +107,73 @@ NAccentColor NTheme::accentColor() const {
 
 void NTheme::setAccentColor(const NAccentColor& color) {
     Q_D(NTheme);
-    d->_accentColor = color;
-    emit accentColorChanged(color);
+    if (d->_accentColor != color) {
+        d->_accentColor = color;
+        
+        // 更新依赖于强调色的主题颜色
+        d->updateAccentDependentColors();
+        
+        emit accentColorChanged(color);
+    }
 }
 
-void NTheme::setAccentColor(const QColor& color) { setAccentColor(NAccentColor::fromColor(color)); }
+void NTheme::setAccentColor(const QColor& color) {
+    setAccentColor(NColorUtils::toAccentColor(color));
+}
+
+QColor NTheme::accentDarkest() const {
+    Q_D(const NTheme);
+    return d->_accentColor.darkest();
+}
+
+QColor NTheme::accentDarker() const {
+    Q_D(const NTheme);
+    return d->_accentColor.darker();
+}
+
+QColor NTheme::accentDark() const {
+    Q_D(const NTheme);
+    return d->_accentColor.dark();
+}
+
+QColor NTheme::accentNormal() const {
+    Q_D(const NTheme);
+    return d->_accentColor.normal();
+}
+
+QColor NTheme::accentLight() const {
+    Q_D(const NTheme);
+    return d->_accentColor.light();
+}
+
+QColor NTheme::accentLighter() const {
+    Q_D(const NTheme);
+    return d->_accentColor.lighter();
+}
+
+QColor NTheme::accentLightest() const {
+    Q_D(const NTheme);
+    return d->_accentColor.lightest();
+}
+
+QColor NTheme::accentDefault() const {
+    Q_D(const NTheme);
+    return d->_accentColor.defaultBrushFor(d->_isDark);
+}
+
+QColor NTheme::accentSecondary() const {
+    Q_D(const NTheme);
+    return d->_accentColor.secondaryBrushFor(d->_isDark);
+}
+
+QColor NTheme::accentTertiary() const {
+    Q_D(const NTheme);
+    return d->_accentColor.tertiaryBrushFor(d->_isDark);
+}
+
+QList<NAccentColor> NTheme::availableAccentColors() const {
+    return NColors::accentColors;
+}
 
 QColor NTheme::getColor(const QString& key) const {
     Q_D(const NTheme);
