@@ -9,12 +9,12 @@
 // 初始化私有实现
 NTheme::NThemePrivate::NThemePrivate(NTheme* q)
     : _themeMode(NTheme::ThemeMode::System), _isDark(false), _accentColor(NColors::blue), q_ptr(q) {
-    // 初始化颜色和设计令牌
+    // 确保颜色哈希表先初始化
     initLightColors();
     initDarkColors();
     initDesignTokens();
-
-    // 设置系统主题检测
+    
+    // 然后再检测系统主题
     setupSystemThemeDetection();
     updateDarkModeState();
 }
@@ -82,7 +82,7 @@ void NTheme::NThemePrivate::initLightColors() {
     for (auto it = LightThemeColors.begin(); it != LightThemeColors.end(); ++it) {
         _lightColors[it.key()] = it.value();
     }
-    
+
     // 映射 Fluent 颜色到主题颜色
     mapFluentColorsToTheme(false);
 }
@@ -93,85 +93,85 @@ void NTheme::NThemePrivate::initDarkColors() {
     for (auto it = DarkThemeColors.begin(); it != DarkThemeColors.end(); ++it) {
         _darkColors[it.key()] = it.value();
     }
-    
+
     // 映射 Fluent 颜色到主题颜色
     mapFluentColorsToTheme(true);
 }
 
 void NTheme::NThemePrivate::mapFluentColorsToTheme(bool isDark) {
     QHash<QString, QColor>& colors = isDark ? _darkColors : _lightColors;
-    
+
     // 文本颜色
-    colors[NTheme::TextPrimary] = colors[NFluentColorConstants::TextFillColorPrimary];
+    colors[NTheme::TextPrimary]   = colors[NFluentColorConstants::TextFillColorPrimary];
     colors[NTheme::TextSecondary] = colors[NFluentColorConstants::TextFillColorSecondary];
-    colors[NTheme::TextTertiary] = colors[NFluentColorConstants::TextFillColorTertiary];
-    colors[NTheme::TextDisabled] = colors[NFluentColorConstants::TextFillColorDisabled];
-    colors[NTheme::TextOnAccent] = colors[NFluentColorConstants::TextOnAccentFillColorPrimary];
-    colors[NTheme::TextLink] = _accentColor.defaultBrushFor(isDark);
-    
+    colors[NTheme::TextTertiary]  = colors[NFluentColorConstants::TextFillColorTertiary];
+    colors[NTheme::TextDisabled]  = colors[NFluentColorConstants::TextFillColorDisabled];
+    colors[NTheme::TextOnAccent]  = colors[NFluentColorConstants::TextOnAccentFillColorPrimary];
+    colors[NTheme::TextLink]      = _accentColor.defaultBrushFor(isDark);
+
     // 背景颜色
-    colors[NTheme::Background] = colors[NFluentColorConstants::SolidBackgroundFillColorBase];
+    colors[NTheme::Background]          = colors[NFluentColorConstants::SolidBackgroundFillColorBase];
     colors[NTheme::BackgroundSecondary] = colors[NFluentColorConstants::SolidBackgroundFillColorSecondary];
-    colors[NTheme::BackgroundTertiary] = colors[NFluentColorConstants::SolidBackgroundFillColorTertiary];
-    colors[NTheme::Surface] = colors[NFluentColorConstants::CardBackgroundFillColorDefault];
-    colors[NTheme::SurfaceSecondary] = colors[NFluentColorConstants::CardBackgroundFillColorSecondary];
-    
+    colors[NTheme::BackgroundTertiary]  = colors[NFluentColorConstants::SolidBackgroundFillColorTertiary];
+    colors[NTheme::Surface]             = colors[NFluentColorConstants::CardBackgroundFillColorDefault];
+    colors[NTheme::SurfaceSecondary]    = colors[NFluentColorConstants::CardBackgroundFillColorSecondary];
+
     // 控件填充颜色
-    colors[NTheme::ControlFill] = colors[NFluentColorConstants::ControlFillColorDefault];
-    colors[NTheme::ControlFillHover] = colors[NFluentColorConstants::ControlFillColorSecondary];
-    colors[NTheme::ControlFillPressed] = colors[NFluentColorConstants::ControlFillColorTertiary];
+    colors[NTheme::ControlFill]         = colors[NFluentColorConstants::ControlFillColorDefault];
+    colors[NTheme::ControlFillHover]    = colors[NFluentColorConstants::ControlFillColorSecondary];
+    colors[NTheme::ControlFillPressed]  = colors[NFluentColorConstants::ControlFillColorTertiary];
     colors[NTheme::ControlFillSelected] = _accentColor.defaultBrushFor(isDark);
     colors[NTheme::ControlFillDisabled] = colors[NFluentColorConstants::ControlFillColorDisabled];
-    
+
     // 控件描边颜色
-    colors[NTheme::ControlStroke] = colors[NFluentColorConstants::ControlStrokeColorDefault];
-    colors[NTheme::ControlStrokeHover] = colors[NFluentColorConstants::ControlStrokeColorSecondary];
-    colors[NTheme::ControlStrokePressed] = colors[NFluentColorConstants::ControlStrokeColorDefault];
+    colors[NTheme::ControlStroke]         = colors[NFluentColorConstants::ControlStrokeColorDefault];
+    colors[NTheme::ControlStrokeHover]    = colors[NFluentColorConstants::ControlStrokeColorSecondary];
+    colors[NTheme::ControlStrokePressed]  = colors[NFluentColorConstants::ControlStrokeColorDefault];
     colors[NTheme::ControlStrokeSelected] = _accentColor.defaultBrushFor(isDark);
     colors[NTheme::ControlStrokeDisabled] = colors[NFluentColorConstants::ControlStrongStrokeColorDisabled];
-    
+
     // 卡片颜色
-    colors[NTheme::CardBackground] = colors[NFluentColorConstants::CardBackgroundFillColorDefault];
-    colors[NTheme::CardBackgroundHover] = colors[NFluentColorConstants::CardBackgroundFillColorSecondary];
+    colors[NTheme::CardBackground]        = colors[NFluentColorConstants::CardBackgroundFillColorDefault];
+    colors[NTheme::CardBackgroundHover]   = colors[NFluentColorConstants::CardBackgroundFillColorSecondary];
     colors[NTheme::CardBackgroundPressed] = colors[NFluentColorConstants::LayerFillColorDefault];
-    colors[NTheme::CardStroke] = colors[NFluentColorConstants::CardStrokeColorDefault];
-    colors[NTheme::CardStrokeHover] = colors[NFluentColorConstants::ControlStrokeColorSecondary];
-    
+    colors[NTheme::CardStroke]            = colors[NFluentColorConstants::CardStrokeColorDefault];
+    colors[NTheme::CardStrokeHover]       = colors[NFluentColorConstants::ControlStrokeColorSecondary];
+
     // 状态颜色
     colors[NTheme::Success] = colors[NFluentColorConstants::SystemFillColorSuccess];
     colors[NTheme::Warning] = colors[NFluentColorConstants::SystemFillColorCaution];
-    colors[NTheme::Error] = colors[NFluentColorConstants::SystemFillColorCritical];
-    colors[NTheme::Info] = colors[NFluentColorConstants::SystemFillColorNeutral];
-    
+    colors[NTheme::Error]   = colors[NFluentColorConstants::SystemFillColorCritical];
+    colors[NTheme::Info]    = colors[NFluentColorConstants::SystemFillColorNeutral];
+
     // 其他颜色
-    colors[NTheme::Divider] = colors[NFluentColorConstants::DividerStrokeColorDefault];
+    colors[NTheme::Divider]       = colors[NFluentColorConstants::DividerStrokeColorDefault];
     colors[NTheme::DividerStrong] = colors[NFluentColorConstants::ControlStrongStrokeColorDefault];
-    colors[NTheme::Shadow] = colors[NFluentColorConstants::SmokeFillColorDefault];
+    colors[NTheme::Shadow]        = colors[NFluentColorConstants::SmokeFillColorDefault];
 
     // 强调色相关颜色
-    colors["accent"] = _accentColor.normal();
-    colors["accentDark"] = _accentColor.dark();
-    colors["accentLight"] = _accentColor.light();
-    colors["accentDefault"] = _accentColor.defaultBrushFor(isDark);
+    colors["accent"]          = _accentColor.normal();
+    colors["accentDark"]      = _accentColor.dark();
+    colors["accentLight"]     = _accentColor.light();
+    colors["accentDefault"]   = _accentColor.defaultBrushFor(isDark);
     colors["accentSecondary"] = _accentColor.secondaryBrushFor(isDark);
-    colors["accentTertiary"] = _accentColor.tertiaryBrushFor(isDark);
+    colors["accentTertiary"]  = _accentColor.tertiaryBrushFor(isDark);
 }
 
 // 解析颜色 - 考虑当前主题模式和自定义颜色
 QColor NTheme::NThemePrivate::resolveColor(const QString& key) const {
     // 首先检查自定义颜色
-    if (_customColors.contains(key)) {
+    if (!key.isEmpty() && _customColors.contains(key)) {
         return _customColors[key];
     }
-    
+
     // 然后根据当前主题模式选择颜色
     const QHash<QString, QColor>& themeColors = _isDark ? _darkColors : _lightColors;
-    if (themeColors.contains(key)) {
+    if (!key.isEmpty() && themeColors.contains(key)) {
         return themeColors[key];
     }
-    
+
     // 处理强调色相关的特殊键
-    if (key.startsWith("accent")) {
+    if (!key.isEmpty() && key.startsWith("accent")) {
         if (key == "accent") {
             return _accentColor.normal();
         } else if (key == "accentDarkest") {
@@ -194,9 +194,9 @@ QColor NTheme::NThemePrivate::resolveColor(const QString& key) const {
             return _accentColor.tertiaryBrushFor(_isDark);
         }
     }
-    
-    // 如果找不到颜色，返回默认颜色
-    return _isDark ? QColor("#FFFFFF") : QColor("#000000");
+
+    // 返回安全的默认颜色而不是崩溃
+    return QColor(128, 128, 128); // 返回中性灰色作为默认值
 }
 
 // 解析设计令牌
@@ -217,6 +217,10 @@ QVariant NTheme::NThemePrivate::resolveToken(const QString& key) const {
 
 // 设置系统主题检测
 void NTheme::NThemePrivate::setupSystemThemeDetection() {
+    // 确保颜色哈希表已初始化
+    if (_lightColors.isEmpty()) initLightColors();
+    if (_darkColors.isEmpty()) initDarkColors();
+    
     // 连接应用程序调色板变化信号
     QObject::connect(qApp, &QApplication::paletteChanged, [this]() {
         if (_themeMode == NTheme::ThemeMode::System) {
@@ -224,29 +228,42 @@ void NTheme::NThemePrivate::setupSystemThemeDetection() {
         }
     });
 
-    // 初始检测
-    updateThemeBasedOnSystem();
+    // 安全的初始检测
+    try {
+        updateThemeBasedOnSystem();
+    } catch (...) {
+        // 出现异常则默认为亮色模式
+        _isDark = false;
+        Q_Q(NTheme);
+        emit q->darkModeChanged(_isDark);
+    }
 }
 
 // 根据系统主题更新
 void NTheme::NThemePrivate::updateThemeBasedOnSystem() {
     if (_themeMode == NTheme::ThemeMode::System) {
-        // 检测系统主题
-        QPalette palette    = qApp->palette();
-        QColor   windowText = palette.color(QPalette::WindowText);
-        QColor   window     = palette.color(QPalette::Window);
-
-        // 如果窗口文本比窗口背景亮，则认为是暗色主题
-        bool isDark = windowText.lightness() > window.lightness();
-
-        if (_isDark != isDark) {
-            _isDark = isDark;
+        // 获取系统调色板
+        QPalette pal = QApplication::palette();
+        
+        // 通过调色板的基色来判断是否为深色主题
+        QColor windowColor = pal.color(QPalette::Window);
+        int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
+        
+        bool newIsDark = brightness < 128; // 简单的亮度检测
+        
+        if (_isDark != newIsDark) {
+            _isDark = newIsDark;
             Q_Q(NTheme);
             emit q->darkModeChanged(_isDark);
-
-            // 发出所有颜色变化的信号
-            for (auto it = _lightColors.constBegin(); it != _lightColors.constEnd(); ++it) {
-                emit q->colorChanged(it.key(), q->getColor(it.key()));
+            
+            // 重要：确保主题色表已经被初始化
+            if (_lightColors.isEmpty()) initLightColors();
+            if (_darkColors.isEmpty()) initDarkColors();
+            
+            // 发出所有颜色变化的信号 - 使用安全的方法
+            QHash<QString, QColor> const & colors = _isDark ? _darkColors : _lightColors;
+            for (auto it = colors.constBegin(); it != colors.constEnd(); ++it) {
+                emit q->colorChanged(it.key(), it.value());
             }
         }
     }
@@ -254,16 +271,39 @@ void NTheme::NThemePrivate::updateThemeBasedOnSystem() {
 
 // 更新暗色模式状态
 void NTheme::NThemePrivate::updateDarkModeState() {
-    bool newIsDark = (_themeMode == NTheme::ThemeMode::Dark);
-
+    bool newIsDark = false;
+    
+    switch (_themeMode) {
+        case NTheme::ThemeMode::Light:
+            newIsDark = false;
+            break;
+        case NTheme::ThemeMode::Dark:
+            newIsDark = true;
+            break;
+        case NTheme::ThemeMode::System:
+            // 获取系统主题
+            {
+                QPalette pal = QApplication::palette();
+                QColor windowColor = pal.color(QPalette::Window);
+                int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
+                newIsDark = brightness < 128;
+            }
+            break;
+    }
+    
     if (_isDark != newIsDark) {
         _isDark = newIsDark;
         Q_Q(NTheme);
         emit q->darkModeChanged(_isDark);
-
-        // 发出所有颜色变化的信号
-        for (auto it = _lightColors.constBegin(); it != _lightColors.constEnd(); ++it) {
-            emit q->colorChanged(it.key(), q->getColor(it.key()));
+        
+        // 确保颜色哈希表已初始化
+        if (_lightColors.isEmpty()) initLightColors();
+        if (_darkColors.isEmpty()) initDarkColors();
+        
+        // 安全地发送颜色变化信号
+        const QHash<QString, QColor>& colors = _isDark ? _darkColors : _lightColors;
+        for (auto it = colors.constBegin(); it != colors.constEnd(); ++it) {
+            emit q->colorChanged(it.key(), it.value());
         }
     }
 }
@@ -271,14 +311,14 @@ void NTheme::NThemePrivate::updateDarkModeState() {
 void NTheme::NThemePrivate::updateAccentDependentColors() {
     // 更新依赖于强调色的颜色
     QHash<QString, QColor>& colors = _isDark ? _darkColors : _lightColors;
-    
+
     // 文本链接颜色
     colors[NTheme::TextLink] = _accentColor.defaultBrushFor(_isDark);
-    
+
     // 控件选中状态颜色
-    colors[NTheme::ControlFillSelected] = _accentColor.defaultBrushFor(_isDark);
+    colors[NTheme::ControlFillSelected]   = _accentColor.defaultBrushFor(_isDark);
     colors[NTheme::ControlStrokeSelected] = _accentColor.defaultBrushFor(_isDark);
-    
+
     // 发出颜色变化信号
     Q_Q(NTheme);
     emit q->colorChanged(NTheme::TextLink, colors[NTheme::TextLink]);

@@ -100,7 +100,6 @@ AccentColorItem::AccentColorItem(const QString& name, const NAccentColor& accent
         QLabel* valueLabel =
             new QLabel(QString("RGB(%1,%2,%3)").arg(color.red()).arg(color.green()).arg(color.blue()), this);
         valueLabel->setFixedWidth(100);
-        valueLabel->setFont(QFont("Monospace", 8));
 
         swatchLayout->addWidget(colorPreview, 0, col);
         swatchLayout->addWidget(new QLabel(shade, this), 1, col);
