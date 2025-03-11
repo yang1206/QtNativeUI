@@ -4,6 +4,7 @@
 #include <QScreen>
 #include <QStyle>
 #include <QVariant>
+#include <QtNativeUI/NFluentColors.h>
 
 // 初始化私有实现
 NTheme::NThemePrivate::NThemePrivate(NTheme* q)
@@ -77,218 +78,75 @@ void NTheme::NThemePrivate::initDesignTokens() {
 
 // 初始化亮色主题颜色
 void NTheme::NThemePrivate::initLightColors() {
-    // 文本颜色 - Windows 11 亮色模式规范
-    _lightColors[NTheme::TextPrimary]   = QColor("#000000"); // 主要文本
-    _lightColors[NTheme::TextSecondary] = QColor("#5D5D5D"); // 次要文本
-    _lightColors[NTheme::TextTertiary]  = QColor("#919191"); // 第三级文本
-    _lightColors[NTheme::TextDisabled]  = QColor("#BDBDBD"); // 禁用文本
-    _lightColors[NTheme::TextOnAccent]  = QColor("#FFFFFF"); // 强调色上的文本
-    _lightColors[NTheme::TextLink]      = QColor("#0078D4"); // 链接文本
-
-    // 背景颜色 - Windows 11 亮色模式
-    _lightColors[NTheme::Background]          = QColor("#F9F9F9"); // 主背景
-    _lightColors[NTheme::BackgroundSecondary] = QColor("#F3F3F3"); // 次级背景
-    _lightColors[NTheme::BackgroundTertiary]  = QColor("#EEEEEE"); // 第三级背景
-    _lightColors[NTheme::Surface]             = QColor("#FFFFFF"); // 表面
-    _lightColors[NTheme::SurfaceSecondary]    = QColor("#F9F9F9"); // 次级表面
-
-    // 控件颜色 - Windows 11 亮色模式规范
-    _lightColors[NTheme::ControlFill]         = QColor("#F9F9F9");
-    _lightColors[NTheme::ControlFillHover]    = QColor("#F3F3F3");
-    _lightColors[NTheme::ControlFillPressed]  = QColor("#EEEEEE");
-    _lightColors[NTheme::ControlFillSelected] = QColor("#E6F2FF");
-    _lightColors[NTheme::ControlFillDisabled] = QColor("#F9F9F9");
-
-    _lightColors[NTheme::ControlStroke]         = QColor("#CCCCCC");
-    _lightColors[NTheme::ControlStrokeHover]    = QColor("#BDBDBD");
-    _lightColors[NTheme::ControlStrokePressed]  = QColor("#ADADAD");
-    _lightColors[NTheme::ControlStrokeSelected] = QColor("#0078D4");
-    _lightColors[NTheme::ControlStrokeDisabled] = QColor("#E0E0E0");
-
-    // 卡片颜色
-    _lightColors[NTheme::CardBackground]        = QColor("#FFFFFF");
-    _lightColors[NTheme::CardBackgroundHover]   = QColor("#F9F9F9");
-    _lightColors[NTheme::CardBackgroundPressed] = QColor("#F3F3F3");
-    _lightColors[NTheme::CardStroke]            = QColor("#E0E0E0");
-    _lightColors[NTheme::CardStrokeHover]       = QColor("#CCCCCC");
-
-    // 状态颜色 - Windows 11 亮色模式
-    _lightColors[NTheme::Success] = QColor("#0F7B0F"); // 成功
-    _lightColors[NTheme::Warning] = QColor("#9D5D00"); // 警告
-    _lightColors[NTheme::Error]   = QColor("#C42B1C"); // 错误
-    _lightColors[NTheme::Info]    = QColor("#0078D4"); // 信息
-
-    // 分隔线颜色
-    _lightColors[NTheme::Divider]       = QColor("#E0E0E0"); // 分隔线
-    _lightColors[NTheme::DividerStrong] = QColor("#CCCCCC"); // 强调分隔线
-
-    // 阴影颜色
-    _lightColors[NTheme::Shadow] = QColor(0, 0, 0, 20); // 阴影
-
-    // 添加 Fluent Design 颜色 - 亮色模式
-    _lightColors["yellowGold"]   = QColor("#FFB900");
-    _lightColors["gold"]         = QColor("#FF8C00");
-    _lightColors["orangeBright"] = QColor("#F7630C");
-    _lightColors["orangeDark"]   = QColor("#CA5010");
-    _lightColors["rust"]         = QColor("#DA3B01");
-    _lightColors["paleRust"]     = QColor("#EF6950");
-
-    _lightColors["brickRed"]   = QColor("#D13438");
-    _lightColors["modRed"]     = QColor("#FF4343");
-    _lightColors["paleRed"]    = QColor("#E74856");
-    _lightColors["red"]        = QColor("#E81123");
-    _lightColors["roseBright"] = QColor("#EA005E");
-    _lightColors["rose"]       = QColor("#C30052");
-
-    _lightColors["plumLight"]   = QColor("#E3008C");
-    _lightColors["plum"]        = QColor("#BF0077");
-    _lightColors["orchidLight"] = QColor("#C239B3");
-    _lightColors["orchid"]      = QColor("#9A0089");
-    _lightColors["defaultBlue"] = QColor("#0078D7");
-    _lightColors["navyBlue"]    = QColor("#0063B1");
-
-    _lightColors["purpleShadow"]     = QColor("#8E8CD8");
-    _lightColors["purpleShadowDark"] = QColor("#6B69D6");
-    _lightColors["irisPastel"]       = QColor("#8764B8");
-    _lightColors["irisSpring"]       = QColor("#744DA9");
-    _lightColors["violetRedLight"]   = QColor("#B146C2");
-    _lightColors["violetRed"]        = QColor("#881798");
-
-    _lightColors["coolBlueBright"] = QColor("#0099BC");
-    _lightColors["coolBlue"]       = QColor("#2D7D9A");
-    _lightColors["seafoam"]        = QColor("#00B7C3");
-    _lightColors["seafoamTeal"]    = QColor("#038387");
-    _lightColors["mintLight"]      = QColor("#00B294");
-    _lightColors["mintDark"]       = QColor("#018574");
-
-    _lightColors["turfGreen"]  = QColor("#00CC6A");
-    _lightColors["sportGreen"] = QColor("#10893E");
-    _lightColors["gray"]       = QColor("#7A7574");
-    _lightColors["grayBrown"]  = QColor("#5D5A58");
-    _lightColors["steelBlue"]  = QColor("#68768A");
-    _lightColors["metalBlue"]  = QColor("#515C6B");
-
-    _lightColors["paleMoss"]    = QColor("#567C73");
-    _lightColors["moss"]        = QColor("#486860");
-    _lightColors["meadowGreen"] = QColor("#498205");
-    _lightColors["green"]       = QColor("#107C10");
-    _lightColors["overcast"]    = QColor("#767676");
-    _lightColors["storm"]       = QColor("#4C4A48");
-
-    _lightColors["blueGray"]         = QColor("#69797E");
-    _lightColors["grayDark"]         = QColor("#4A5459");
-    _lightColors["liddyGreen"]       = QColor("#647C64");
-    _lightColors["sage"]             = QColor("#525E54");
-    _lightColors["camouflageDesert"] = QColor("#847545");
-    _lightColors["camouflage"]       = QColor("#7E735F");
+    // 使用自动生成的 Fluent 颜色
+    for (auto it = LightThemeColors.begin(); it != LightThemeColors.end(); ++it) {
+        _lightColors[it.key()] = it.value();
+    }
+    
+    // 映射 Fluent 颜色到主题颜色
+    mapFluentColorsToTheme(false);
 }
 
 // 初始化暗色主题颜色
 void NTheme::NThemePrivate::initDarkColors() {
-    // 文本颜色 - Windows 11 暗色模式规范
-    _darkColors[NTheme::TextPrimary]   = QColor("#FFFFFF"); // 主要文本
-    _darkColors[NTheme::TextSecondary] = QColor("#CCCCCC"); // 次要文本
-    _darkColors[NTheme::TextTertiary]  = QColor("#9A9A9A"); // 第三级文本
-    _darkColors[NTheme::TextDisabled]  = QColor("#5D5D5D"); // 禁用文本
-    _darkColors[NTheme::TextOnAccent]  = QColor("#000000"); // 强调色上的文本
-    _darkColors[NTheme::TextLink]      = QColor("#4CC2FF"); // 链接文本
+    // 使用自动生成的 Fluent 颜色
+    for (auto it = DarkThemeColors.begin(); it != DarkThemeColors.end(); ++it) {
+        _darkColors[it.key()] = it.value();
+    }
+    
+    // 映射 Fluent 颜色到主题颜色
+    mapFluentColorsToTheme(true);
+}
 
-    // 背景颜色 - Windows 11 暗色模式
-    _darkColors[NTheme::Background]          = QColor("#202020"); // 主背景
-    _darkColors[NTheme::BackgroundSecondary] = QColor("#272727"); // 次级背景
-    _darkColors[NTheme::BackgroundTertiary]  = QColor("#2C2C2C"); // 第三级背景
-    _darkColors[NTheme::Surface]             = QColor("#323232"); // 表面
-    _darkColors[NTheme::SurfaceSecondary]    = QColor("#2E2E2E"); // 次级表面
-
-    // 控件颜色 - Windows 11 暗色模式规范
-    _darkColors[NTheme::ControlFill]         = QColor("#424242");
-    _darkColors[NTheme::ControlFillHover]    = QColor("#5B5B5B");
-    _darkColors[NTheme::ControlFillPressed]  = QColor("#6E6E6E");
-    _darkColors[NTheme::ControlFillSelected] = QColor("#0A3C5A");
-    _darkColors[NTheme::ControlFillDisabled] = QColor("#2C2C2C");
-
-    _darkColors[NTheme::ControlStroke]         = QColor("#636363");
-    _darkColors[NTheme::ControlStrokeHover]    = QColor("#818181");
-    _darkColors[NTheme::ControlStrokePressed]  = QColor("#9C9C9C");
-    _darkColors[NTheme::ControlStrokeSelected] = QColor("#60CDFF");
-    _darkColors[NTheme::ControlStrokeDisabled] = QColor("#434343");
-
+void NTheme::NThemePrivate::mapFluentColorsToTheme(bool isDark) {
+    QHash<QString, QColor>& colors = isDark ? _darkColors : _lightColors;
+    
+    // 文本颜色
+    colors[NTheme::TextPrimary] = colors[NFluentColorConstants::TextFillColorPrimary];
+    colors[NTheme::TextSecondary] = colors[NFluentColorConstants::TextFillColorSecondary];
+    colors[NTheme::TextTertiary] = colors[NFluentColorConstants::TextFillColorTertiary];
+    colors[NTheme::TextDisabled] = colors[NFluentColorConstants::TextFillColorDisabled];
+    colors[NTheme::TextOnAccent] = colors[NFluentColorConstants::TextOnAccentFillColorPrimary];
+    colors[NTheme::TextLink] = _accentColor.defaultBrushFor(isDark);
+    
+    // 背景颜色
+    colors[NTheme::Background] = colors[NFluentColorConstants::SolidBackgroundFillColorBase];
+    colors[NTheme::BackgroundSecondary] = colors[NFluentColorConstants::SolidBackgroundFillColorSecondary];
+    colors[NTheme::BackgroundTertiary] = colors[NFluentColorConstants::SolidBackgroundFillColorTertiary];
+    colors[NTheme::Surface] = colors[NFluentColorConstants::CardBackgroundFillColorDefault];
+    colors[NTheme::SurfaceSecondary] = colors[NFluentColorConstants::CardBackgroundFillColorSecondary];
+    
+    // 控件填充颜色
+    colors[NTheme::ControlFill] = colors[NFluentColorConstants::ControlFillColorDefault];
+    colors[NTheme::ControlFillHover] = colors[NFluentColorConstants::ControlFillColorSecondary];
+    colors[NTheme::ControlFillPressed] = colors[NFluentColorConstants::ControlFillColorTertiary];
+    colors[NTheme::ControlFillSelected] = _accentColor.defaultBrushFor(isDark);
+    colors[NTheme::ControlFillDisabled] = colors[NFluentColorConstants::ControlFillColorDisabled];
+    
+    // 控件描边颜色
+    colors[NTheme::ControlStroke] = colors[NFluentColorConstants::ControlStrokeColorDefault];
+    colors[NTheme::ControlStrokeHover] = colors[NFluentColorConstants::ControlStrokeColorSecondary];
+    colors[NTheme::ControlStrokePressed] = colors[NFluentColorConstants::ControlStrokeColorDefault];
+    colors[NTheme::ControlStrokeSelected] = _accentColor.defaultBrushFor(isDark);
+    colors[NTheme::ControlStrokeDisabled] = colors[NFluentColorConstants::ControlStrongStrokeColorDisabled];
+    
     // 卡片颜色
-    _darkColors[NTheme::CardBackground]        = QColor("#323232");
-    _darkColors[NTheme::CardBackgroundHover]   = QColor("#383838");
-    _darkColors[NTheme::CardBackgroundPressed] = QColor("#404040");
-    _darkColors[NTheme::CardStroke]            = QColor("#484848");
-    _darkColors[NTheme::CardStrokeHover]       = QColor("#5A5A5A");
-
-    // 状态颜色 - Windows 11 暗色模式
-    _darkColors[NTheme::Success] = QColor("#6CCB5F"); // 成功
-    _darkColors[NTheme::Warning] = QColor("#FCE100"); // 警告
-    _darkColors[NTheme::Error]   = QColor("#FF99A4"); // 错误
-    _darkColors[NTheme::Info]    = QColor("#60CDFF"); // 信息
-
-    // 分隔线颜色
-    _darkColors[NTheme::Divider]       = QColor("#474747"); // 分隔线
-    _darkColors[NTheme::DividerStrong] = QColor("#636363"); // 强调分隔线
-
-    // 阴影颜色
-    _darkColors[NTheme::Shadow] = QColor(0, 0, 0, 70); // 阴影 (暗色下透明度更高)
-
-    // 添加 Fluent Design 颜色 - 暗色模式下的调整版本
-    _darkColors["yellowGold"]   = QColor("#FFB900").lighter(110);
-    _darkColors["gold"]         = QColor("#FF8C00").lighter(110);
-    _darkColors["orangeBright"] = QColor("#F7630C").lighter(110);
-    _darkColors["orangeDark"]   = QColor("#CA5010").lighter(110);
-    _darkColors["rust"]         = QColor("#DA3B01").lighter(110);
-    _darkColors["paleRust"]     = QColor("#EF6950").lighter(110);
-
-    _darkColors["brickRed"]   = QColor("#D13438").lighter(110);
-    _darkColors["modRed"]     = QColor("#FF4343").lighter(110);
-    _darkColors["paleRed"]    = QColor("#E74856").lighter(110);
-    _darkColors["red"]        = QColor("#E81123").lighter(110);
-    _darkColors["roseBright"] = QColor("#EA005E").lighter(110);
-    _darkColors["rose"]       = QColor("#C30052").lighter(110);
-
-    _darkColors["plumLight"]   = QColor("#E3008C").lighter(110);
-    _darkColors["plum"]        = QColor("#BF0077").lighter(110);
-    _darkColors["orchidLight"] = QColor("#C239B3").lighter(110);
-    _darkColors["orchid"]      = QColor("#9A0089").lighter(110);
-    _darkColors["defaultBlue"] = QColor("#0078D7").lighter(110);
-    _darkColors["navyBlue"]    = QColor("#0063B1").lighter(110);
-
-    _darkColors["purpleShadow"]     = QColor("#8E8CD8").lighter(110);
-    _darkColors["purpleShadowDark"] = QColor("#6B69D6").lighter(110);
-    _darkColors["irisPastel"]       = QColor("#8764B8").lighter(110);
-    _darkColors["irisSpring"]       = QColor("#744DA9").lighter(110);
-    _darkColors["violetRedLight"]   = QColor("#B146C2").lighter(110);
-    _darkColors["violetRed"]        = QColor("#881798").lighter(110);
-
-    _darkColors["coolBlueBright"] = QColor("#0099BC").lighter(110);
-    _darkColors["coolBlue"]       = QColor("#2D7D9A").lighter(110);
-    _darkColors["seafoam"]        = QColor("#00B7C3").lighter(110);
-    _darkColors["seafoamTeal"]    = QColor("#038387").lighter(110);
-    _darkColors["mintLight"]      = QColor("#00B294").lighter(110);
-    _darkColors["mintDark"]       = QColor("#018574").lighter(110);
-
-    _darkColors["turfGreen"]  = QColor("#00CC6A").lighter(110);
-    _darkColors["sportGreen"] = QColor("#10893E").lighter(110);
-    _darkColors["gray"]       = QColor("#7A7574").lighter(110);
-    _darkColors["grayBrown"]  = QColor("#5D5A58").lighter(110);
-    _darkColors["steelBlue"]  = QColor("#68768A").lighter(110);
-    _darkColors["metalBlue"]  = QColor("#515C6B").lighter(110);
-
-    _darkColors["paleMoss"]    = QColor("#567C73").lighter(110);
-    _darkColors["moss"]        = QColor("#486860").lighter(110);
-    _darkColors["meadowGreen"] = QColor("#498205").lighter(110);
-    _darkColors["green"]       = QColor("#107C10").lighter(110);
-    _darkColors["overcast"]    = QColor("#767676").lighter(110);
-    _darkColors["storm"]       = QColor("#4C4A48").lighter(110);
-
-    _darkColors["blueGray"]         = QColor("#69797E").lighter(110);
-    _darkColors["grayDark"]         = QColor("#4A5459").lighter(110);
-    _darkColors["liddyGreen"]       = QColor("#647C64").lighter(110);
-    _darkColors["sage"]             = QColor("#525E54").lighter(110);
-    _darkColors["camouflageDesert"] = QColor("#847545").lighter(110);
-    _darkColors["camouflage"]       = QColor("#7E735F").lighter(110);
+    colors[NTheme::CardBackground] = colors[NFluentColorConstants::CardBackgroundFillColorDefault];
+    colors[NTheme::CardBackgroundHover] = colors[NFluentColorConstants::CardBackgroundFillColorSecondary];
+    colors[NTheme::CardBackgroundPressed] = colors[NFluentColorConstants::LayerFillColorDefault];
+    colors[NTheme::CardStroke] = colors[NFluentColorConstants::CardStrokeColorDefault];
+    colors[NTheme::CardStrokeHover] = colors[NFluentColorConstants::ControlStrokeColorSecondary];
+    
+    // 状态颜色
+    colors[NTheme::Success] = colors[NFluentColorConstants::SystemFillColorSuccess];
+    colors[NTheme::Warning] = colors[NFluentColorConstants::SystemFillColorCaution];
+    colors[NTheme::Error] = colors[NFluentColorConstants::SystemFillColorCritical];
+    colors[NTheme::Info] = colors[NFluentColorConstants::SystemFillColorNeutral];
+    
+    // 其他颜色
+    colors[NTheme::Divider] = colors[NFluentColorConstants::DividerStrokeColorDefault];
+    colors[NTheme::DividerStrong] = colors[NFluentColorConstants::ControlStrongStrokeColorDefault];
+    colors[NTheme::Shadow] = colors[NFluentColorConstants::SmokeFillColorDefault];
 }
 
 // 解析颜色 - 考虑当前主题模式和自定义颜色

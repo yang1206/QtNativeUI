@@ -2,6 +2,7 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 #include "components/button.h"
+#include "components/colors.h"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -10,6 +11,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     auto btn = new ButtonExample(this);
     m_tabWidget->addTab(btn, "Button");
+    
+    // 添加颜色展示页面
+    auto colors = new ColorsExample(this);
+    m_tabWidget->addTab(colors, "Colors");
 
     // 设置窗口属性
     setWindowTitle("QtNativeUI by Yang1206");

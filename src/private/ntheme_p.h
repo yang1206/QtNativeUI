@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QtNativeUI/NTheme.h>
 #include <QtNativeUI/NColor.h>
+#include <QtNativeUI/NFluentColors.h>
 
 class NTheme::NThemePrivate {
   public:
@@ -31,6 +32,9 @@ class NTheme::NThemePrivate {
     void initLightColors();
     void initDarkColors();
     void initDesignTokens();
+    
+    // 映射 Fluent 颜色到主题颜色
+    void mapFluentColorsToTheme(bool isDark);
 
     // 颜色解析
     QColor resolveColor(const QString& key) const;
