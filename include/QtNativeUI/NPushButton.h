@@ -9,36 +9,28 @@
 class NPushButtonPrivate;
 class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     Q_OBJECT
-    N_DECLARE_PRIVATE(NPushButton)
-    Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
-    Q_PROPERTY(qreal rippleProgress READ rippleProgress WRITE setRippleProgress)
+    Q_Q_CREATE(NPushButton)
+    Q_PROPERTY_CREATE_Q_H(int, BorderRadius)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightDefaultColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkDefaultColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightHoverColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkHoverColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightPressColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkPressColor)
 
   public:
     explicit NPushButton(QWidget* parent = nullptr);
     explicit NPushButton(const QString& text, QWidget* parent = nullptr);
     ~NPushButton();
 
-    QColor backgroundColor() const { return m_backgroundColor; }
-    void   setBackgroundColor(const QColor& color);
-    qreal  rippleProgress() const { return m_rippleProgress; }
-    void   setRippleProgress(qreal progress);
+    void   setLightTextColor(QColor color);
+    QColor getLightTextColor() const;
+
+    void   setDarkTextColor(QColor color);
+    QColor getDarkTextColor() const;
 
   protected:
     void paintEvent(QPaintEvent* event) override;
-    void enterEvent(QEnterEvent* event) override;
-    void leaveEvent(QEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-
-  private:
-    bool                m_isHovered = false;
-    bool                m_isPressed = false;
-    QColor              m_backgroundColor;
-    QPropertyAnimation* m_colorAnimation;
-
-    QPropertyAnimation* m_rippleAnimation;
-    QPointF             m_rippleCenter;
-    qreal               m_rippleProgress = 0.0;
 };
 
 #endif // QTNATIVEUI_NPUSHBUTTON_H

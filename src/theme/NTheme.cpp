@@ -3,8 +3,6 @@
 #include <QtNativeUI/NTheme.h>
 #include "../private/ntheme_p.h"
 
-// 静态实例
-
 Q_SINGLETON_CREATE_CPP(NTheme)
 NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
@@ -114,6 +112,59 @@ QColor NTheme::getColor(NFluentColorKey::Key key) const {
 void NTheme::setColor(NFluentColorKey::Key key, const QColor& color) {
     Q_D(NTheme);
     d->_customColors[key] = color;
+}
+
+QColor NTheme::getColorForTheme(NFluentColorKey::Key key, NThemeType::ThemeMode mode) const {
+    Q_D(const NTheme);
+
+    // 保存当前主题模式
+    NThemeType::ThemeMode originalMode   = d->_themeMode;
+    bool                  originalIsDark = d->_isDark;
+
+    // 临时修改内部状态以获取指定主题模式的颜色
+    const_cast<NThemePrivate*>(d)->_themeMode = mode;
+
+    // 根据指定的主题模式设置暗色状态
+    bool isDarkForMode = false;
+    switch (mode) {
+        case NThemeType::ThemeMode::Light:
+            isDarkForMode = false;
+            break;
+        case NThemeType::ThemeMode::Dark:
+            isDarkForMode = true;
+            break;
+        case NThemeType::ThemeMode::System:
+            isDarkForMode = detectSystemTheme();
+            break;
+    }
+    const_cast<NThemePrivate*>(d)->_isDark = isDarkForMode;
+
+    // 获取指定主题模式下的颜色
+    QColor result = d->resolveColor(key);
+
+    // 恢复原始主题模式
+    const_cast<NThemePrivate*>(d)->_themeMode = originalMode;
+    const_cast<NThemePrivate*>(d)->_isDark    = originalIsDark;
+
+    return result;
+}
+
+NAccentColor NTheme::getAccentColor(NAccentColorType::Type type) const {
+    if (type == NAccentColorType::Custom) {
+        return accentColor();
+    }
+    return NColors::getAccentColor(type);
+}
+
+QColor NTheme::getThemedAccentColor(NAccentColorType::Type type) const {
+    Q_D(const NTheme);
+    NAccentColor color = getAccentColor(type);
+    return color.defaultBrushFor(d->_isDark);
+}
+
+QColor NTheme::getAccentColorVariant(NAccentColorType::Type type, const QString& variant) const {
+    NAccentColor color = getAccentColor(type);
+    return color[variant];
 }
 
 QList<NFluentColorKey::Key> NTheme::getAllColorKeys() const {

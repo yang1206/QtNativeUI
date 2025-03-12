@@ -9,7 +9,7 @@
 
 class NTheme;
 class NThemePrivate {
-    N_DECLARE_PUBLIC(NTheme)
+    Q_D_CREATE(NTheme)
   public:
     NThemePrivate(NTheme* q);
     ~NThemePrivate();

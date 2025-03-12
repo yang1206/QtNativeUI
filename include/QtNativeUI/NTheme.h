@@ -7,16 +7,17 @@
 #include "singleton.h"
 #include "stdafx.h"
 
-/**
- * @brief Fluent Design主题管理类
- * 提供对Windows 11 Fluent UI设计系统的访问
- */
 #define nTheme NTheme::getInstance()
+#define NThemeColor(key, themeMode) nTheme->getColorForTheme(key, themeMode)
+#define NAccentColor(type) getAccentColor(type)
 // 使用宏创建d指针
 class NThemePrivate;
+/**
+ * @brief 主题管理类
+ */
 class QTNATIVEUI_EXPORT NTheme : public QObject {
     Q_OBJECT
-    N_DECLARE_PRIVATE(NTheme)
+    Q_Q_CREATE(NTheme)
     Q_SINGLETON_CREATE_H(NTheme)
 
     Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY darkModeChanged)
@@ -37,6 +38,17 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     // 颜色获取与设置 - 类型安全版本
     QColor getColor(NFluentColorKey::Key key) const;
     void   setColor(NFluentColorKey::Key key, const QColor& color);
+
+    QColor getColorForTheme(NFluentColorKey::Key key, NThemeType::ThemeMode mode) const;
+
+    // 获取预定义的强调色
+    NAccentColor getAccentColor(NAccentColorType::Type type) const;
+
+    // 根据当前主题获取预定义强调色的适当变体
+    QColor getThemedAccentColor(NAccentColorType::Type type) const;
+
+    // 获取强调色的特定变体
+    QColor getAccentColorVariant(NAccentColorType::Type type, const QString& variant) const;
 
     // 获取所有可用的颜色键
     QList<NFluentColorKey::Key> getAllColorKeys() const;

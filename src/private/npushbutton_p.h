@@ -3,15 +3,28 @@
 
 #include <QtNativeUI/NPushButton.h>
 
+#include "QtNativeUI/NEnums.h"
+
 class NPushButtonPrivate : public QObject {
     Q_OBJECT
-    N_DECLARE_PUBLIC(NPushButton)
+    Q_D_CREATE(NPushButton)
+    Q_PROPERTY_CREATE_D(int, BorderRadius)
+    Q_PROPERTY_CREATE_D(QColor, LightDefaultColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkDefaultColor)
+    Q_PROPERTY_CREATE_D(QColor, LightHoverColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkHoverColor)
+    Q_PROPERTY_CREATE_D(QColor, LightPressColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkPressColor)
   public:
     NPushButtonPrivate(NPushButton* q);
     ~NPushButtonPrivate();
 
   private:
-    bool _isPressed{false};
+    QColor                _lightTextColor;
+    QColor                _darkTextColor;
+    bool                  _isPressed{false};
+    int                   _shadowBorderWidth{3};
+    NThemeType::ThemeMode _themeMode;
 };
 
 #endif // QTNATIVEUI_NPUSHBUTTON_P_H

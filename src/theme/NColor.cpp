@@ -120,7 +120,7 @@ bool NAccentColor::operator==(const NAccentColor& other) const {
     if (normal() != other.normal()) {
         return false;
     }
-    
+
     // 比较所有色调
     QSet<QString> allKeys;
     for (auto it = _swatch.begin(); it != _swatch.end(); ++it) {
@@ -129,7 +129,7 @@ bool NAccentColor::operator==(const NAccentColor& other) const {
     for (auto it = other._swatch.begin(); it != other._swatch.end(); ++it) {
         allKeys.insert(it.key());
     }
-    
+
     for (const QString& key : allKeys) {
         if (_swatch.contains(key) && other._swatch.contains(key)) {
             if (_swatch[key] != other._swatch[key]) {
@@ -139,13 +139,11 @@ bool NAccentColor::operator==(const NAccentColor& other) const {
             return false;
         }
     }
-    
+
     return true;
 }
 
-bool NAccentColor::operator!=(const NAccentColor& other) const {
-    return !(*this == other);
-}
+bool NAccentColor::operator!=(const NAccentColor& other) const { return !(*this == other); }
 
 // NColors 实现
 const QColor NColors::transparent = QColor(0, 0, 0, 0);
@@ -242,6 +240,31 @@ const NAccentColor NColors::errorSecondaryColor =
 const QColor       NColors::successPrimaryColor = QColor(0x10, 0x7c, 0x10);
 const NAccentColor NColors::successSecondaryColor =
     NAccentColor(QMap<QString, QColor>({{"dark", QColor(0x39, 0x3d, 0x1b)}, {"normal", QColor(0xdf, 0xf6, 0xdd)}}));
+
+NAccentColor NColors::getAccentColor(NAccentColorType::Type type) {
+    switch (type) {
+        case NAccentColorType::Yellow:
+            return NColors::yellow;
+        case NAccentColorType::Orange:
+            return NColors::orange;
+        case NAccentColorType::Red:
+            return NColors::red;
+        case NAccentColorType::Magenta:
+            return NColors::magenta;
+        case NAccentColorType::Purple:
+            return NColors::purple;
+        case NAccentColorType::Blue:
+            return NColors::blue;
+        case NAccentColorType::Teal:
+            return NColors::teal;
+        case NAccentColorType::Green:
+            return NColors::green;
+        case NAccentColorType::Custom:
+        default:
+            // 默认返回蓝色
+            return NColors::blue;
+    }
+}
 
 // 所有强调色列表
 const QList<NAccentColor> NColors::accentColors = {NColors::yellow,
