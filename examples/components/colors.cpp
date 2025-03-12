@@ -7,7 +7,8 @@
 #include <QtNativeUI/NTheme.h>
 
 // 颜色项实现
-ColorItem::ColorItem(const QString& name, const QColor& color, QWidget* parent) : QWidget(parent) {
+ColorItem::ColorItem(NFluentColorKey::Key key, const QString& name, const QColor& color, QWidget* parent) 
+    : QWidget(parent), m_key(key) {
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
 
@@ -152,7 +153,12 @@ ColorsExample::ColorsExample(QWidget* parent)
 
     // 连接主题变化信号
     connect(m_theme, &NTheme::darkModeChanged, this, &ColorsExample::onThemeChanged);
-    connect(m_theme, &NTheme::colorChanged, this, &ColorsExample::onColorChanged);
+    connect(m_theme, &NTheme::themeModeChanged, this, [this]() {
+        // 主题模式变化时更新所有颜色
+        for (auto it = m_colorItems.begin(); it != m_colorItems.end(); ++it) {
+            it.value()->updateColor(m_theme->getColor(it.key()));
+        }
+    });
     connect(m_theme, &NTheme::accentColorChanged, this, &ColorsExample::onAccentColorChanged);
 }
 
@@ -167,14 +173,14 @@ void ColorsExample::initUI() {
 
     QLabel*    themeLabel = new QLabel("主题模式:", this);
     QComboBox* themeCombo = new QComboBox(this);
-    themeCombo->addItem("亮色", static_cast<int>(NTheme::ThemeMode::Light));
-    themeCombo->addItem("暗色", static_cast<int>(NTheme::ThemeMode::Dark));
-    themeCombo->addItem("系统", static_cast<int>(NTheme::ThemeMode::System));
+    themeCombo->addItem("亮色", static_cast<int>(NThemeType::ThemeMode::Light));
+    themeCombo->addItem("暗色", static_cast<int>(NThemeType::ThemeMode::Dark));
+    themeCombo->addItem("系统", static_cast<int>(NThemeType::ThemeMode::System));
 
     themeCombo->setCurrentIndex(static_cast<int>(m_theme->themeMode()));
 
     connect(themeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
-        m_theme->setThemeMode(static_cast<NTheme::ThemeMode>(index));
+        m_theme->setThemeMode(static_cast<NThemeType::ThemeMode>(index));
     });
 
     QLabel*    accentLabel = new QLabel("强调色:", this);
@@ -255,14 +261,20 @@ void ColorsExample::populateColors() {
     textColorsLabel->setFont(sectionFont);
     m_colorsLayout->addWidget(textColorsLabel, row++, 0, 1, 3);
 
-    QStringList textColors = {NFluentColorConstants::TextFillColorPrimary,
-                              NFluentColorConstants::TextFillColorSecondary,
-                              NFluentColorConstants::TextFillColorTertiary,
-                              NFluentColorConstants::TextFillColorDisabled,
-                              NFluentColorConstants::TextFillColorInverse};
+    // 定义文本颜色键数组
+    NFluentColorKey::Key textColors[] = {
+        NFluentColorKey::TextFillColorPrimary,
+        NFluentColorKey::TextFillColorSecondary,
+        NFluentColorKey::TextFillColorTertiary,
+        NFluentColorKey::TextFillColorDisabled,
+        NFluentColorKey::TextFillColorInverse
+    };
 
-    for (const QString& key : textColors) {
-        ColorItem* item   = new ColorItem(key, m_theme->getColor(key));
+    for (NFluentColorKey::Key key : textColors) {
+        // 获取颜色键的字符串表示
+        QString keyName = fluentColorKeyToString(key);
+        // 创建颜色项
+        ColorItem* item = new ColorItem(key, keyName, m_theme->getColor(key));
         m_colorItems[key] = item;
         m_colorsLayout->addWidget(item, row, col);
 
@@ -283,18 +295,22 @@ void ColorsExample::populateColors() {
     controlColorsLabel->setFont(sectionFont);
     m_colorsLayout->addWidget(controlColorsLabel, row++, 0, 1, 3);
 
-    QStringList controlColors = {NFluentColorConstants::ControlFillColorDefault,
-                                 NFluentColorConstants::ControlFillColorSecondary,
-                                 NFluentColorConstants::ControlFillColorTertiary,
-                                 NFluentColorConstants::ControlFillColorDisabled,
-                                 NFluentColorConstants::ControlFillColorTransparent,
-                                 NFluentColorConstants::ControlFillColorInputActive,
-                                 NFluentColorConstants::ControlStrongFillColorDefault,
-                                 NFluentColorConstants::ControlStrongFillColorDisabled,
-                                 NFluentColorConstants::ControlSolidFillColorDefault};
+    // 定义控件颜色键数组
+    NFluentColorKey::Key controlColors[] = {
+        NFluentColorKey::ControlFillColorDefault,
+        NFluentColorKey::ControlFillColorSecondary,
+        NFluentColorKey::ControlFillColorTertiary,
+        NFluentColorKey::ControlFillColorDisabled,
+        NFluentColorKey::ControlFillColorTransparent,
+        NFluentColorKey::ControlFillColorInputActive,
+        NFluentColorKey::ControlStrongFillColorDefault,
+        NFluentColorKey::ControlStrongFillColorDisabled,
+        NFluentColorKey::ControlSolidFillColorDefault
+    };
 
-    for (const QString& key : controlColors) {
-        ColorItem* item   = new ColorItem(key, m_theme->getColor(key));
+    for (NFluentColorKey::Key key : controlColors) {
+        QString keyName = fluentColorKeyToString(key);
+        ColorItem* item = new ColorItem(key, keyName, m_theme->getColor(key));
         m_colorItems[key] = item;
         m_colorsLayout->addWidget(item, row, col);
 
@@ -315,14 +331,18 @@ void ColorsExample::populateColors() {
     bgColorsLabel->setFont(sectionFont);
     m_colorsLayout->addWidget(bgColorsLabel, row++, 0, 1, 3);
 
-    QStringList bgColors = {NFluentColorConstants::SolidBackgroundFillColorBase,
-                            NFluentColorConstants::SolidBackgroundFillColorBaseAlt,
-                            NFluentColorConstants::SolidBackgroundFillColorSecondary,
-                            NFluentColorConstants::SolidBackgroundFillColorTertiary,
-                            NFluentColorConstants::SolidBackgroundFillColorQuarternary};
+    // 定义背景颜色键数组
+    NFluentColorKey::Key bgColors[] = {
+        NFluentColorKey::SolidBackgroundFillColorBase,
+        NFluentColorKey::SolidBackgroundFillColorBaseAlt,
+        NFluentColorKey::SolidBackgroundFillColorSecondary,
+        NFluentColorKey::SolidBackgroundFillColorTertiary,
+        NFluentColorKey::SolidBackgroundFillColorQuarternary
+    };
 
-    for (const QString& key : bgColors) {
-        ColorItem* item   = new ColorItem(key, m_theme->getColor(key));
+    for (NFluentColorKey::Key key : bgColors) {
+        QString keyName = fluentColorKeyToString(key);
+        ColorItem* item = new ColorItem(key, keyName, m_theme->getColor(key));
         m_colorItems[key] = item;
         m_colorsLayout->addWidget(item, row, col);
 
@@ -343,15 +363,19 @@ void ColorsExample::populateColors() {
     borderColorsLabel->setFont(sectionFont);
     m_colorsLayout->addWidget(borderColorsLabel, row++, 0, 1, 3);
 
-    QStringList borderColors = {NFluentColorConstants::ControlStrokeColorDefault,
-                                NFluentColorConstants::ControlStrokeColorSecondary,
-                                NFluentColorConstants::ControlStrokeColorOnAccentDefault,
-                                NFluentColorConstants::ControlStrokeColorOnAccentSecondary,
-                                NFluentColorConstants::ControlStrokeColorOnAccentTertiary,
-                                NFluentColorConstants::ControlStrokeColorOnAccentDisabled};
+    // 定义边框颜色键数组
+    NFluentColorKey::Key borderColors[] = {
+        NFluentColorKey::ControlStrokeColorDefault,
+        NFluentColorKey::ControlStrokeColorSecondary,
+        NFluentColorKey::ControlStrokeColorOnAccentDefault,
+        NFluentColorKey::ControlStrokeColorOnAccentSecondary,
+        NFluentColorKey::ControlStrokeColorOnAccentTertiary,
+        NFluentColorKey::ControlStrokeColorOnAccentDisabled
+    };
 
-    for (const QString& key : borderColors) {
-        ColorItem* item   = new ColorItem(key, m_theme->getColor(key));
+    for (NFluentColorKey::Key key : borderColors) {
+        QString keyName = fluentColorKeyToString(key);
+        ColorItem* item = new ColorItem(key, keyName, m_theme->getColor(key));
         m_colorItems[key] = item;
         m_colorsLayout->addWidget(item, row, col);
 
@@ -387,11 +411,11 @@ void ColorsExample::populateAccentColors() {
 
 void ColorsExample::onThemeChanged(bool isDark) {
     qDebug() << isDark;
-    // 主题变化时，所有颜色都会通过 colorChanged 信号更新
+    // 主题变化时，所有颜色都会通过单独更新
     // 这里可以添加额外的主题相关逻辑
 }
 
-void ColorsExample::onColorChanged(const QString& key, const QColor& color) {
+void ColorsExample::onColorChanged(NFluentColorKey::Key key, const QColor& color) {
     // 更新对应的颜色项
     if (m_colorItems.contains(key)) {
         m_colorItems[key]->updateColor(color);

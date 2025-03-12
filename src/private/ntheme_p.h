@@ -2,7 +2,9 @@
 #define QTNATIVEUI_NTHEME_P_H
 
 #include <QColor>
+#include <QVariant>
 #include <QtNativeUI/NColor.h>
+#include <QtNativeUI/NFluentColors.h>
 #include <QtNativeUI/NTheme.h>
 
 class NTheme::NThemePrivate {
@@ -11,16 +13,16 @@ class NTheme::NThemePrivate {
     ~NThemePrivate();
 
     // 主题状态
-    NTheme::ThemeMode _themeMode;
-    bool              _isDark;
+    NThemeType::ThemeMode _themeMode;
+    bool                  _isDark;
 
     // 强调色
     NAccentColor _accentColor;
 
-    // 颜色存储
-    QHash<QString, QColor> _lightColors;
-    QHash<QString, QColor> _darkColors;
-    QHash<QString, QColor> _customColors;
+    // 颜色存储 - 使用枚举键
+    QMap<NFluentColorKey::Key, QColor> _lightColors;
+    QMap<NFluentColorKey::Key, QColor> _darkColors;
+    QMap<NFluentColorKey::Key, QColor> _customColors;
 
     // 设计令牌
     QHash<QString, QVariant> _designTokens;
@@ -31,19 +33,11 @@ class NTheme::NThemePrivate {
     void initDarkColors();
     void initDesignTokens();
 
-    // 映射 Fluent 颜色到主题颜色
-    void mapFluentColorsToTheme(bool isDark);
-
     // 颜色解析
-    QColor resolveColor(const QString& key) const;
+    QColor resolveColor(NFluentColorKey::Key key) const;
 
     // 令牌解析
     QVariant resolveToken(const QString& key) const;
-
-    // 系统主题检测
-    void setupSystemThemeDetection();
-    void updateThemeBasedOnSystem();
-    void updateDarkModeState();
 
     // 更新依赖于强调色的颜色
     void updateAccentDependentColors();

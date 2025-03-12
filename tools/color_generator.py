@@ -68,7 +68,8 @@ def generate_header(dark_colors, light_colors, output_file):
         f.write("#define NFLUENTCOLORS_H\n\n")
         f.write("#include <QColor>\n")
         f.write("#include <QString>\n")
-        f.write("#include <QMap>\n\n")
+        f.write("#include <QMap>\n")
+        f.write("#include <QMetaEnum>\n\n")
         
         # 添加辅助函数
         f.write("// 辅助函数：创建带有alpha值的颜色\n")
@@ -78,42 +79,60 @@ def generate_header(dark_colors, light_colors, output_file):
         f.write("    return color;\n")
         f.write("}\n\n")
         
-        # 生成暗色主题颜色
+        # 生成颜色枚举
+        f.write("// Fluent Design 颜色枚举 - 自动生成\n")
+        f.write("namespace NFluentColorKey {\n")
+        f.write("    enum Key {\n")
+        
+        # 收集所有唯一的键，并排序以生成一致的枚举
+        all_keys = sorted(set(list(dark_colors.keys()) + list(light_colors.keys())))
+        
+        # 生成枚举项
+        for i, key in enumerate(all_keys):
+            if i < len(all_keys) - 1:
+                f.write(f"        {key},\n")
+            else:
+                f.write(f"        {key},\n")
+                f.write("        Count  // 用于计数和边界检查\n")
+        
+        f.write("    };\n")
+        f.write("}\n\n")
+        
+        # 添加枚举到字符串的转换函数
+        f.write("// 枚举到字符串的转换函数\n")
+        f.write("inline QString fluentColorKeyToString(NFluentColorKey::Key key) {\n")
+        f.write("    switch (key) {\n")
+        for key in all_keys:
+            f.write(f"        case NFluentColorKey::{key}:\n")
+            f.write(f"            return \"{key}\";\n")
+        f.write("        case NFluentColorKey::Count:\n")
+        f.write("            return \"\";\n")
+        f.write("    }\n")
+        f.write("    return \"\";\n")
+        f.write("}\n\n")
+        
+        # 添加字符串到枚举的转换函数
+        f.write("// 字符串到枚举的转换函数\n")
+        f.write("inline NFluentColorKey::Key stringToFluentColorKey(const QString& keyString) {\n")
+        for key in all_keys:
+            f.write(f"    if (keyString == \"{key}\") return NFluentColorKey::{key};\n")
+        f.write("    return NFluentColorKey::Count; // 无效的键\n")
+        f.write("}\n\n")
+        
+        # 生成使用枚举索引的颜色映射
         f.write("// 暗色主题颜色\n")
-        f.write("static const QMap<QString, QColor> DarkThemeColors = {\n")
+        f.write("static const QMap<NFluentColorKey::Key, QColor> DarkThemeColors = {\n")
         for key, value in dark_colors.items():
-            f.write(f"    {{\"{key}\", {value}}},\n")
+            f.write(f"    {{NFluentColorKey::{key}, {value}}},\n")
         f.write("};\n\n")
         
-        # 生成亮色主题颜色
         f.write("// 亮色主题颜色\n")
-        f.write("static const QMap<QString, QColor> LightThemeColors = {\n")
+        f.write("static const QMap<NFluentColorKey::Key, QColor> LightThemeColors = {\n")
         for key, value in light_colors.items():
-            f.write(f"    {{\"{key}\", {value}}},\n")
+            f.write(f"    {{NFluentColorKey::{key}, {value}}},\n")
         f.write("};\n\n")
         
-        # 生成颜色常量类
-        f.write("// 颜色常量\n")
-        f.write("class NFluentColorConstants {\n")
-        f.write("public:\n")
-        
-        # 收集所有唯一的键
-        all_keys = set(list(dark_colors.keys()) + list(light_colors.keys()))
-        
-        # 生成常量声明
-        for key in sorted(all_keys):
-            # 将键转换为有效的C++标识符
-            cpp_key = key
-            f.write(f"    static const QString {cpp_key};\n")
-        
-        f.write("};\n\n")
-        
-        # 生成常量定义
-        for key in sorted(all_keys):
-            cpp_key = key
-            f.write(f'inline const QString NFluentColorConstants::{cpp_key} = "{key}";\n')
-        
-        f.write("\n#endif // NFLUENTCOLORS_H\n")
+        f.write("#endif // NFLUENTCOLORS_H\n")
 
 def download_xaml(url, output_file):
     """下载XAML文件"""
