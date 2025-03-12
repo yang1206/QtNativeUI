@@ -7,7 +7,9 @@
 #include <QtNativeUI/NFluentColors.h>
 #include <QtNativeUI/NTheme.h>
 
-class NTheme::NThemePrivate {
+class NTheme;
+class NThemePrivate {
+    N_DECLARE_PUBLIC(NTheme)
   public:
     NThemePrivate(NTheme* q);
     ~NThemePrivate();
@@ -43,7 +45,6 @@ class NTheme::NThemePrivate {
     void updateAccentDependentColors();
 
     // 使用宏声明公共类
-    N_DECLARE_PUBLIC(NTheme)
 };
 
 #endif // QTNATIVEUI_NTHEME_P_H

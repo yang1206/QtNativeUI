@@ -1,64 +1,62 @@
 #ifndef COLORS_H
 #define COLORS_H
 
-#include <QWidget>
-#include <QScrollArea>
-#include <QLabel>
 #include <QGridLayout>
+#include <QLabel>
+#include <QScrollArea>
+#include <QWidget>
 #include <QtNativeUI/NTheme.h>
-#include <QtNativeUI/NColor.h>
-#include <QtNativeUI/NFluentColors.h>
 
 class ColorItem : public QWidget {
     Q_OBJECT
-public:
+  public:
     explicit ColorItem(NFluentColorKey::Key key, const QString& name, const QColor& color, QWidget* parent = nullptr);
     void updateColor(const QColor& color);
-    
+
     // 获取该项的颜色键
     NFluentColorKey::Key key() const { return m_key; }
 
-private:
+  private:
     NFluentColorKey::Key m_key;
-    QLabel* m_colorPreview;
-    QLabel* m_nameLabel;
-    QLabel* m_valueLabel;
+    QLabel*              m_colorPreview;
+    QLabel*              m_nameLabel;
+    QLabel*              m_valueLabel;
 };
 
 class AccentColorItem : public QWidget {
     Q_OBJECT
-public:
+  public:
     explicit AccentColorItem(const QString& name, const NAccentColor& accentColor, QWidget* parent = nullptr);
     void updateAccentColor(const NAccentColor& accentColor);
 
-private:
-    QLabel* m_nameLabel;
+  private:
+    QLabel*                m_nameLabel;
     QMap<QString, QLabel*> m_colorPreviews;
     QMap<QString, QLabel*> m_valueLabels;
 };
 
 class ColorsExample : public QWidget {
     Q_OBJECT
-public:
+  public:
     explicit ColorsExample(QWidget* parent = nullptr);
     ~ColorsExample() override;
 
-private slots:
+  private slots:
     void onThemeChanged(bool isDark);
     void onColorChanged(NFluentColorKey::Key key, const QColor& color);
     void onAccentColorChanged(const NAccentColor& color);
 
-private:
+  private:
     void initUI();
     void populateColors();
     void populateAccentColors();
-    
-    QScrollArea* m_scrollArea;
-    QWidget* m_colorContainer;
-    QGridLayout* m_colorsLayout;
+
+    QScrollArea*                           m_scrollArea;
+    QWidget*                               m_colorContainer;
+    QGridLayout*                           m_colorsLayout;
     QMap<NFluentColorKey::Key, ColorItem*> m_colorItems;
-    QMap<QString, AccentColorItem*> m_accentColorItems;
-    NTheme* m_theme;
+    QMap<QString, AccentColorItem*>        m_accentColorItems;
+    NTheme*                                m_theme;
 };
 
-#endif // COLORS_H 
+#endif // COLORS_H

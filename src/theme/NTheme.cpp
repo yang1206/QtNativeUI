@@ -4,9 +4,8 @@
 #include "../private/ntheme_p.h"
 
 // 静态实例
-NTheme* NTheme::s_instance = nullptr;
 
-// 构造函数
+Q_SINGLETON_CREATE_CPP(NTheme)
 NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme) {
@@ -24,13 +23,6 @@ NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)
 }
 
 NTheme::~NTheme() {}
-
-NTheme* NTheme::instance() {
-    if (!s_instance) {
-        s_instance = new NTheme(qApp);
-    }
-    return s_instance;
-}
 
 bool NTheme::isDarkMode() const {
     Q_D(const NTheme);
@@ -112,9 +104,7 @@ void NTheme::setAccentColor(const NAccentColor& color) {
     }
 }
 
-void NTheme::setAccentColor(const QColor& color) { 
-    setAccentColor(NColorUtils::toAccentColor(color)); 
-}
+void NTheme::setAccentColor(const QColor& color) { setAccentColor(NColorUtils::toAccentColor(color)); }
 
 QColor NTheme::getColor(NFluentColorKey::Key key) const {
     Q_D(const NTheme);
@@ -138,13 +128,13 @@ QList<NFluentColorKey::Key> NTheme::getAllColorKeys() const {
 QMap<NFluentColorKey::Key, QColor> NTheme::getAllColors() const {
     Q_D(const NTheme);
     QMap<NFluentColorKey::Key, QColor> result;
-    
+
     // 遍历所有颜色键
     for (int i = 0; i < NFluentColorKey::Count; i++) {
         NFluentColorKey::Key key = static_cast<NFluentColorKey::Key>(i);
-        result[key] = d->resolveColor(key);
+        result[key]              = d->resolveColor(key);
     }
-    
+
     return result;
 }
 

@@ -4,21 +4,26 @@
 #include "NColor.h"
 #include "NEnums.h"
 #include "NFluentColors.h"
+#include "singleton.h"
 #include "stdafx.h"
 
 /**
  * @brief Fluent Design主题管理类
  * 提供对Windows 11 Fluent UI设计系统的访问
  */
+#define nTheme NTheme::getInstance()
+// 使用宏创建d指针
+class NThemePrivate;
 class QTNATIVEUI_EXPORT NTheme : public QObject {
     Q_OBJECT
+    N_DECLARE_PRIVATE(NTheme)
+    Q_SINGLETON_CREATE_H(NTheme)
+
     Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY darkModeChanged)
     Q_PROPERTY(NThemeType::ThemeMode themeMode READ themeMode WRITE setThemeMode NOTIFY themeModeChanged)
     Q_PROPERTY(NAccentColor accentColor READ accentColor WRITE setAccentColor NOTIFY accentColorChanged)
 
   public:
-    static NTheme* instance();
-
     // 获取/设置主题模式
     bool                  isDarkMode() const;
     NThemeType::ThemeMode themeMode() const;
@@ -60,10 +65,6 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
 
     // 更新主题状态
     void updateThemeState();
-
-    // 使用宏创建d指针
-    class NThemePrivate;
-    N_DECLARE_PRIVATE(NTheme)
 
     static NTheme* s_instance;
 };

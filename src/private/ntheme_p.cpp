@@ -8,8 +8,8 @@
 #include <QtNativeUI/NFluentColors.h>
 
 // 初始化私有实现
-NTheme::NThemePrivate::NThemePrivate(NTheme* q)
-    : _themeMode(NThemeType::ThemeMode::System), _isDark(false), _accentColor(NColors::blue), q_ptr(q) {
+NThemePrivate::NThemePrivate(NTheme* q)
+    : q_ptr(q), _themeMode(NThemeType::ThemeMode::System), _isDark(false), _accentColor(NColors::blue) {
     // 初始化颜色和设计令牌
     initLightColors();
     initDarkColors();
@@ -19,10 +19,10 @@ NTheme::NThemePrivate::NThemePrivate(NTheme* q)
     _isDark = q->detectSystemTheme();
 }
 
-NTheme::NThemePrivate::~NThemePrivate() {}
+NThemePrivate::~NThemePrivate() {}
 
 // 初始化设计令牌 - 基于 Windows 11 Fluent UI 规范
-void NTheme::NThemePrivate::initDesignTokens() {
+void NThemePrivate::initDesignTokens() {
     // 圆角大小 (CornerRadius)
     _designTokens["cornerRadiusNone"]     = 0.0;
     _designTokens["cornerRadiusSmall"]    = 2.0;
@@ -77,7 +77,7 @@ void NTheme::NThemePrivate::initDesignTokens() {
 }
 
 // 初始化亮色主题颜色
-void NTheme::NThemePrivate::initLightColors() {
+void NThemePrivate::initLightColors() {
     // 直接使用自动生成的 Fluent 颜色映射
     _lightColors = LightThemeColors;
 
@@ -86,7 +86,7 @@ void NTheme::NThemePrivate::initLightColors() {
 }
 
 // 初始化暗色主题颜色
-void NTheme::NThemePrivate::initDarkColors() {
+void NThemePrivate::initDarkColors() {
     // 直接使用自动生成的 Fluent 颜色映射
     _darkColors = DarkThemeColors;
 
@@ -95,7 +95,7 @@ void NTheme::NThemePrivate::initDarkColors() {
 }
 
 // 解析颜色 - 考虑当前主题模式和自定义颜色
-QColor NTheme::NThemePrivate::resolveColor(NFluentColorKey::Key key) const {
+QColor NThemePrivate::resolveColor(NFluentColorKey::Key key) const {
     // 首先检查自定义颜色
     if (_customColors.contains(key)) {
         return _customColors[key];
@@ -112,7 +112,7 @@ QColor NTheme::NThemePrivate::resolveColor(NFluentColorKey::Key key) const {
 }
 
 // 解析设计令牌
-QVariant NTheme::NThemePrivate::resolveToken(const QString& key) const {
+QVariant NThemePrivate::resolveToken(const QString& key) const {
     // 首先检查自定义令牌
     if (_customTokens.contains(key)) {
         return _customTokens[key];
@@ -127,7 +127,7 @@ QVariant NTheme::NThemePrivate::resolveToken(const QString& key) const {
     return QVariant();
 }
 
-void NTheme::NThemePrivate::updateAccentDependentColors() {
+void NThemePrivate::updateAccentDependentColors() {
     // 定义一些关键的强调色相关颜色
     // const QColor accentColor = _accentColor.defaultBrushFor(_isDark);
 }

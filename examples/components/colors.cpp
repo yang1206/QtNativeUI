@@ -3,11 +3,10 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QtNativeUI/NFluentColors.h>
 #include <QtNativeUI/NTheme.h>
 
 // 颜色项实现
-ColorItem::ColorItem(NFluentColorKey::Key key, const QString& name, const QColor& color, QWidget* parent) 
+ColorItem::ColorItem(NFluentColorKey::Key key, const QString& name, const QColor& color, QWidget* parent)
     : QWidget(parent), m_key(key) {
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
@@ -145,7 +144,7 @@ void AccentColorItem::updateAccentColor(const NAccentColor& accentColor) {
 // 颜色展示组件实现
 ColorsExample::ColorsExample(QWidget* parent)
     : QWidget(parent), m_scrollArea(nullptr), m_colorContainer(nullptr), m_colorsLayout(nullptr), m_theme(nullptr) {
-    m_theme = NTheme::instance();
+    m_theme = NTheme::getInstance();
 
     initUI();
     populateColors();
@@ -262,19 +261,17 @@ void ColorsExample::populateColors() {
     m_colorsLayout->addWidget(textColorsLabel, row++, 0, 1, 3);
 
     // 定义文本颜色键数组
-    NFluentColorKey::Key textColors[] = {
-        NFluentColorKey::TextFillColorPrimary,
-        NFluentColorKey::TextFillColorSecondary,
-        NFluentColorKey::TextFillColorTertiary,
-        NFluentColorKey::TextFillColorDisabled,
-        NFluentColorKey::TextFillColorInverse
-    };
+    NFluentColorKey::Key textColors[] = {NFluentColorKey::TextFillColorPrimary,
+                                         NFluentColorKey::TextFillColorSecondary,
+                                         NFluentColorKey::TextFillColorTertiary,
+                                         NFluentColorKey::TextFillColorDisabled,
+                                         NFluentColorKey::TextFillColorInverse};
 
     for (NFluentColorKey::Key key : textColors) {
         // 获取颜色键的字符串表示
         QString keyName = fluentColorKeyToString(key);
         // 创建颜色项
-        ColorItem* item = new ColorItem(key, keyName, m_theme->getColor(key));
+        ColorItem* item   = new ColorItem(key, keyName, m_theme->getColor(key));
         m_colorItems[key] = item;
         m_colorsLayout->addWidget(item, row, col);
 
@@ -296,22 +293,20 @@ void ColorsExample::populateColors() {
     m_colorsLayout->addWidget(controlColorsLabel, row++, 0, 1, 3);
 
     // 定义控件颜色键数组
-    NFluentColorKey::Key controlColors[] = {
-        NFluentColorKey::ControlFillColorDefault,
-        NFluentColorKey::ControlFillColorSecondary,
-        NFluentColorKey::ControlFillColorTertiary,
-        NFluentColorKey::ControlFillColorDisabled,
-        NFluentColorKey::ControlFillColorTransparent,
-        NFluentColorKey::ControlFillColorInputActive,
-        NFluentColorKey::ControlStrongFillColorDefault,
-        NFluentColorKey::ControlStrongFillColorDisabled,
-        NFluentColorKey::ControlSolidFillColorDefault
-    };
+    NFluentColorKey::Key controlColors[] = {NFluentColorKey::ControlFillColorDefault,
+                                            NFluentColorKey::ControlFillColorSecondary,
+                                            NFluentColorKey::ControlFillColorTertiary,
+                                            NFluentColorKey::ControlFillColorDisabled,
+                                            NFluentColorKey::ControlFillColorTransparent,
+                                            NFluentColorKey::ControlFillColorInputActive,
+                                            NFluentColorKey::ControlStrongFillColorDefault,
+                                            NFluentColorKey::ControlStrongFillColorDisabled,
+                                            NFluentColorKey::ControlSolidFillColorDefault};
 
     for (NFluentColorKey::Key key : controlColors) {
-        QString keyName = fluentColorKeyToString(key);
-        ColorItem* item = new ColorItem(key, keyName, m_theme->getColor(key));
-        m_colorItems[key] = item;
+        QString    keyName = fluentColorKeyToString(key);
+        ColorItem* item    = new ColorItem(key, keyName, m_theme->getColor(key));
+        m_colorItems[key]  = item;
         m_colorsLayout->addWidget(item, row, col);
 
         col++;
@@ -332,18 +327,16 @@ void ColorsExample::populateColors() {
     m_colorsLayout->addWidget(bgColorsLabel, row++, 0, 1, 3);
 
     // 定义背景颜色键数组
-    NFluentColorKey::Key bgColors[] = {
-        NFluentColorKey::SolidBackgroundFillColorBase,
-        NFluentColorKey::SolidBackgroundFillColorBaseAlt,
-        NFluentColorKey::SolidBackgroundFillColorSecondary,
-        NFluentColorKey::SolidBackgroundFillColorTertiary,
-        NFluentColorKey::SolidBackgroundFillColorQuarternary
-    };
+    NFluentColorKey::Key bgColors[] = {NFluentColorKey::SolidBackgroundFillColorBase,
+                                       NFluentColorKey::SolidBackgroundFillColorBaseAlt,
+                                       NFluentColorKey::SolidBackgroundFillColorSecondary,
+                                       NFluentColorKey::SolidBackgroundFillColorTertiary,
+                                       NFluentColorKey::SolidBackgroundFillColorQuarternary};
 
     for (NFluentColorKey::Key key : bgColors) {
-        QString keyName = fluentColorKeyToString(key);
-        ColorItem* item = new ColorItem(key, keyName, m_theme->getColor(key));
-        m_colorItems[key] = item;
+        QString    keyName = fluentColorKeyToString(key);
+        ColorItem* item    = new ColorItem(key, keyName, m_theme->getColor(key));
+        m_colorItems[key]  = item;
         m_colorsLayout->addWidget(item, row, col);
 
         col++;
@@ -364,19 +357,17 @@ void ColorsExample::populateColors() {
     m_colorsLayout->addWidget(borderColorsLabel, row++, 0, 1, 3);
 
     // 定义边框颜色键数组
-    NFluentColorKey::Key borderColors[] = {
-        NFluentColorKey::ControlStrokeColorDefault,
-        NFluentColorKey::ControlStrokeColorSecondary,
-        NFluentColorKey::ControlStrokeColorOnAccentDefault,
-        NFluentColorKey::ControlStrokeColorOnAccentSecondary,
-        NFluentColorKey::ControlStrokeColorOnAccentTertiary,
-        NFluentColorKey::ControlStrokeColorOnAccentDisabled
-    };
+    NFluentColorKey::Key borderColors[] = {NFluentColorKey::ControlStrokeColorDefault,
+                                           NFluentColorKey::ControlStrokeColorSecondary,
+                                           NFluentColorKey::ControlStrokeColorOnAccentDefault,
+                                           NFluentColorKey::ControlStrokeColorOnAccentSecondary,
+                                           NFluentColorKey::ControlStrokeColorOnAccentTertiary,
+                                           NFluentColorKey::ControlStrokeColorOnAccentDisabled};
 
     for (NFluentColorKey::Key key : borderColors) {
-        QString keyName = fluentColorKeyToString(key);
-        ColorItem* item = new ColorItem(key, keyName, m_theme->getColor(key));
-        m_colorItems[key] = item;
+        QString    keyName = fluentColorKeyToString(key);
+        ColorItem* item    = new ColorItem(key, keyName, m_theme->getColor(key));
+        m_colorItems[key]  = item;
         m_colorsLayout->addWidget(item, row, col);
 
         col++;
