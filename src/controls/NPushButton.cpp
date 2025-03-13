@@ -32,6 +32,9 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
     d->_lightBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_darkBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
 
+    // 初始化强调色按钮颜色
+    updateAccentColors();
+
     setMouseTracking(true);
     setFixedHeight(38);
     QFont font = this->font();
@@ -39,10 +42,26 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
     setFont(font);
     setObjectName("NPushButton");
     setStyleSheet("#NPushButton{background-color:transparent;}");
-    connect(nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) {
+    connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
+        Q_D(NPushButton);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
+
+        // 更新强调色
+        if (d->_buttonType == NPushButtonPrivate::Accent) {
+            updateAccentColors();
+        }
+
         update();
+    });
+
+    // 添加强调色变更连接
+    connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
+        Q_D(NPushButton);
+        if (d->_buttonType == NPushButtonPrivate::Accent) {
+            updateAccentColors();
+            update();
+        }
     });
 }
 
@@ -72,15 +91,23 @@ QColor NPushButton::getDarkTextColor() const {
     return d->_darkTextColor;
 }
 
-void NPushButton::setShowBorder(bool show) {
+void NPushButton::setButtonType(ButtonType type) {
     Q_D(NPushButton);
-    d->_showBorder = show;
-    update();
+    if (static_cast<NPushButtonPrivate::ButtonType>(type) != d->_buttonType) {
+        d->_buttonType = static_cast<NPushButtonPrivate::ButtonType>(type);
+
+        // 更新强调色相关颜色
+        if (type == Accent) {
+            updateAccentColors();
+        }
+
+        update();
+    }
 }
 
-bool NPushButton::showBorder() const {
+NPushButton::ButtonType NPushButton::buttonType() const {
     Q_D(const NPushButton);
-    return d->_showBorder;
+    return static_cast<ButtonType>(d->_buttonType);
 }
 
 void NPushButton::enterEvent(QEnterEvent* event) {
@@ -111,7 +138,7 @@ void NPushButton::mouseReleaseEvent(QMouseEvent* event) {
     QPushButton::mouseReleaseEvent(event);
 }
 
-void NPushButton::paintEvent(QPaintEvent* event) {
+void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
     Q_D(NPushButton);
     QPainter painter(this);
     painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing | QPainter::TextAntialiasing);
@@ -138,27 +165,53 @@ void NPushButton::drawBackground(QPainter* painter) {
                          width() - 2 * (d->_shadowBorderWidth),
                          height() - 2 * d->_shadowBorderWidth);
 
-    // 根据当前状态和主题选择背景颜色
-    QColor bgColor;
-    if (!isEnabled()) {
-        bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
-    } else if (d->_isPressed) {
-        bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
-    } else if (d->_isHovered) {
-        bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
-    } else {
-        bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
-    }
+    // 根据按钮类型选择不同的绘制逻辑
+    if (d->_buttonType == NPushButtonPrivate::Accent) {
+        // 强调色按钮背景
+        QColor bgColor;
+        if (!isEnabled()) {
+            bgColor = d->_accentDisabledColor;
+        } else if (d->_isPressed) {
+            bgColor = d->_accentPressColor;
+        } else if (d->_isHovered) {
+            bgColor = d->_accentHoverColor;
+        } else {
+            bgColor = d->_accentDefaultColor;
+        }
 
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(bgColor);
-    painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(bgColor);
+        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+    } else {
+        // 标准按钮背景 - 现有逻辑
+        QColor bgColor;
+        if (!isEnabled()) {
+            bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+        } else if (d->_isPressed) {
+            bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+        } else if (d->_isHovered) {
+            bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+        } else {
+            bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+        }
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(bgColor);
+        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+    }
 
     painter->restore();
 }
 
 void NPushButton::drawBorder(QPainter* painter) {
     Q_D(NPushButton);
+
+    // 强调色按钮不需要绘制边框
+    if (d->_buttonType == NPushButtonPrivate::Accent) {
+        return;
+    }
+
+    // 标准按钮边框绘制 - 现有逻辑
     painter->save();
 
     QRect foregroundRect(d->_shadowBorderWidth,
@@ -193,14 +246,74 @@ void NPushButton::drawText(QPainter* painter) {
 
     // 设置文本颜色
     QColor textColor;
-    if (!isEnabled()) {
-        textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
+
+    if (d->_buttonType == NPushButtonPrivate::Accent) {
+        // 强调色按钮文本颜色
+        textColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
     } else {
-        textColor = d->_isDark ? d->_darkTextColor : d->_lightTextColor;
+        // 标准按钮文本颜色
+        if (!isEnabled()) {
+            textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
+        } else {
+            textColor = d->_isDark ? d->_darkTextColor : d->_lightTextColor;
+        }
     }
 
     painter->setPen(textColor);
     painter->drawText(foregroundRect, Qt::AlignCenter, text());
 
     painter->restore();
+}
+
+void NPushButton::updateAccentColors() {
+    Q_D(NPushButton);
+    
+    // 如果使用自定义强调色，则不响应全局强调色变化
+    if (d->_useCustomAccent) {
+        return;
+    }
+
+    // 使用全局主题的强调色
+    NAccentColor accentColor = nTheme->accentColor();
+    
+    d->_accentDefaultColor  = accentColor.normal();
+    d->_accentHoverColor    = accentColor.light();
+    d->_accentPressColor    = accentColor.dark();
+    d->_accentDisabledColor = NThemeColor(NFluentColorKey::AccentFillColorDisabled, d->_themeMode);
+
+    d->_accentTextColor = NThemeColor(NFluentColorKey::TextOnAccentFillColorPrimary, d->_themeMode);
+    d->_accentDisabledTextColor = NThemeColor(NFluentColorKey::TextOnAccentFillColorDisabled, d->_themeMode);
+}
+
+void NPushButton::setAccentColor(const NAccentColor& color) {
+    Q_D(NPushButton);
+    
+
+    d->_useCustomAccent = true;
+    d->_customAccentColor = color;
+    
+    if (d->_buttonType != NPushButtonPrivate::Accent) {
+        setButtonType(Accent);
+    }
+    
+    // 使用自定义强调色更新颜色
+    d->_accentDefaultColor  = color.normal();
+    d->_accentHoverColor    = color.light();
+    d->_accentPressColor    = color.dark();
+    d->_accentDisabledColor = NThemeColor(NFluentColorKey::AccentFillColorDisabled, d->_themeMode);
+
+    d->_accentTextColor = NThemeColor(NFluentColorKey::TextOnAccentFillColorPrimary, d->_themeMode);
+    d->_accentDisabledTextColor = NThemeColor(NFluentColorKey::TextOnAccentFillColorDisabled, d->_themeMode);
+
+    update();
+}
+
+void NPushButton::setAccentColor(const QColor& color) { setAccentColor(NColorUtils::toAccentColor(color)); }
+
+
+void NPushButton::resetAccentColor() {
+    Q_D(NPushButton);
+    d->_useCustomAccent = false;
+    updateAccentColors();  // 使用全局强调色更新
+    update();
 }

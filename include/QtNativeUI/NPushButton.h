@@ -4,6 +4,7 @@
 #include <QPropertyAnimation>
 #include <QPushButton>
 
+#include "NColor.h"
 #include "stdafx.h"
 
 class NPushButtonPrivate;
@@ -19,9 +20,18 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkPressColor)
 
   public:
+    enum ButtonType {
+        Standard, // 标准按钮
+        Accent    // 强调色按钮
+    };
+    Q_ENUM(ButtonType)
+
     explicit NPushButton(QWidget* parent = nullptr);
     explicit NPushButton(QString text, QWidget* parent = nullptr);
     ~NPushButton();
+
+    void       setButtonType(ButtonType type);
+    ButtonType buttonType() const;
 
     void   setLightTextColor(QColor color);
     QColor getLightTextColor() const;
@@ -29,8 +39,8 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     void   setDarkTextColor(QColor color);
     QColor getDarkTextColor() const;
 
-    void setShowBorder(bool show);
-    bool showBorder() const;
+    void setAccentColor(const NAccentColor& color);
+    void setAccentColor(const QColor& color);
 
   protected:
     virtual void enterEvent(QEnterEvent* event) override;
@@ -43,6 +53,10 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     void drawBackground(QPainter* painter);
     void drawBorder(QPainter* painter);
     void drawText(QPainter* painter);
+
+  private:
+    void updateAccentColors();
+    void resetAccentColor();
 };
 
 #endif // QTNATIVEUI_NPUSHBUTTON_H
