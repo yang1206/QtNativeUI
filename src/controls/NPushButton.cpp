@@ -16,7 +16,7 @@ Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkPressColor)
 NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPushButtonPrivate()) {
     Q_D(NPushButton);
     d->q_ptr               = this;
-    d->_pBorderRadius      = nTheme->getToken("cornerRadiusDefault").toInt();
+    d->_pBorderRadius      = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_themeMode          = nTheme->themeMode();
     d->_isDark             = nTheme->isDarkMode();
     d->_pLightDefaultColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);

@@ -5,6 +5,7 @@
 #include <QStyle>
 #include <QStyleHints>
 #include <QVariant>
+#include <QtCore/qeasingcurve.h>
 #include <QtNativeUI/NFluentColors.h>
 
 // 初始化私有实现
@@ -24,56 +25,65 @@ NThemePrivate::~NThemePrivate() {}
 // 初始化设计令牌 - 基于 Windows 11 Fluent UI 规范
 void NThemePrivate::initDesignTokens() {
     // 圆角大小 (CornerRadius)
-    _designTokens["cornerRadiusNone"]     = 0.0;
-    _designTokens["cornerRadiusSmall"]    = 2.0;
-    _designTokens["cornerRadiusDefault"]  = 4.0;
-    _designTokens["cornerRadiusMedium"]   = 8.0;
-    _designTokens["cornerRadiusLarge"]    = 12.0;
-    _designTokens["cornerRadiusCircular"] = 999.0; // 实际应用时需计算为宽度的50%
+    _designTokens[NDesignTokenKey::CornerRadiusNone]     = 0.0;
+    _designTokens[NDesignTokenKey::CornerRadiusSmall]    = 2.0;
+    _designTokens[NDesignTokenKey::CornerRadiusDefault]  = 4.0;
+    _designTokens[NDesignTokenKey::CornerRadiusMedium]   = 8.0;
+    _designTokens[NDesignTokenKey::CornerRadiusLarge]    = 12.0;
+    _designTokens[NDesignTokenKey::CornerRadiusCircular] = 999.0; // 实际应用时需计算为宽度的50%
 
     // 间距 (Spacing)
-    _designTokens["spacingNone"] = 0;
-    _designTokens["spacingXS"]   = 2;
-    _designTokens["spacingS"]    = 4;
-    _designTokens["spacingM"]    = 8;
-    _designTokens["spacingL"]    = 12;
-    _designTokens["spacingXL"]   = 16;
-    _designTokens["spacingXXL"]  = 20;
-    _designTokens["spacingXXXL"] = 24;
+    _designTokens[NDesignTokenKey::SpacingNone] = 0;
+    _designTokens[NDesignTokenKey::SpacingXS]   = 2;
+    _designTokens[NDesignTokenKey::SpacingS]    = 4;
+    _designTokens[NDesignTokenKey::SpacingM]    = 8;
+    _designTokens[NDesignTokenKey::SpacingL]    = 12;
+    _designTokens[NDesignTokenKey::SpacingXL]   = 16;
+    _designTokens[NDesignTokenKey::SpacingXXL]  = 20;
+    _designTokens[NDesignTokenKey::SpacingXXXL] = 24;
 
     // 字体大小 (FontSize)
-    _designTokens["fontSizeCaption"]     = 12;
-    _designTokens["fontSizeBody"]        = 14;
-    _designTokens["fontSizeBodyLarge"]   = 16;
-    _designTokens["fontSizeTitle"]       = 18;
-    _designTokens["fontSizeTitleLarge"]  = 20;
-    _designTokens["fontSizeHeader"]      = 24;
-    _designTokens["fontSizeHeaderLarge"] = 28;
+    _designTokens[NDesignTokenKey::FontSizeCaption]     = 12;
+    _designTokens[NDesignTokenKey::FontSizeBody]        = 14;
+    _designTokens[NDesignTokenKey::FontSizeBodyLarge]   = 16;
+    _designTokens[NDesignTokenKey::FontSizeTitle]       = 18;
+    _designTokens[NDesignTokenKey::FontSizeTitleLarge]  = 20;
+    _designTokens[NDesignTokenKey::FontSizeHeader]      = 24;
+    _designTokens[NDesignTokenKey::FontSizeHeaderLarge] = 28;
 
     // 字重 (FontWeight)
-    _designTokens["fontWeightRegular"]  = 400;
-    _designTokens["fontWeightMedium"]   = 500;
-    _designTokens["fontWeightSemibold"] = 600;
-    _designTokens["fontWeightBold"]     = 700;
+    _designTokens[NDesignTokenKey::FontWeightRegular]  = 400;
+    _designTokens[NDesignTokenKey::FontWeightMedium]   = 500;
+    _designTokens[NDesignTokenKey::FontWeightSemibold] = 600;
+    _designTokens[NDesignTokenKey::FontWeightBold]     = 700;
 
-    // 阴影层级 (Elevation) - 存储为CSS样式字符串，便于应用
-    _designTokens["elevationNone"]   = QString();
-    _designTokens["elevationRest"]   = QString("0 2px 4px rgba(0,0,0,0.12)");
-    _designTokens["elevationHover"]  = QString("0 4px 8px rgba(0,0,0,0.14)");
-    _designTokens["elevationFlyout"] = QString("0 8px 16px rgba(0,0,0,0.16)");
-    _designTokens["elevationDialog"] = QString("0 16px 32px rgba(0,0,0,0.20)");
+    // 阴影层级 - 存储为 QGraphicsEffect 参数或自定义结构
+    _designTokens[NDesignTokenKey::ElevationNone] =
+        QVariantMap({{"blurRadius", 0}, {"xOffset", 0}, {"yOffset", 0}, {"color", QColor(0, 0, 0, 0)}});
+
+    _designTokens[NDesignTokenKey::ElevationRest] =
+        QVariantMap({{"blurRadius", 4}, {"xOffset", 0}, {"yOffset", 2}, {"color", QColor(0, 0, 0, 30)}});
+
+    _designTokens[NDesignTokenKey::ElevationHover] =
+        QVariantMap({{"blurRadius", 8}, {"xOffset", 0}, {"yOffset", 4}, {"color", QColor(0, 0, 0, 36)}});
+
+    _designTokens[NDesignTokenKey::ElevationFlyout] =
+        QVariantMap({{"blurRadius", 16}, {"xOffset", 0}, {"yOffset", 8}, {"color", QColor(0, 0, 0, 41)}});
+
+    _designTokens[NDesignTokenKey::ElevationDialog] =
+        QVariantMap({{"blurRadius", 32}, {"xOffset", 0}, {"yOffset", 16}, {"color", QColor(0, 0, 0, 51)}});
 
     // 动效时长 (AnimationDuration)
-    _designTokens["animationFast"]     = 100;
-    _designTokens["animationNormal"]   = 200;
-    _designTokens["animationSlow"]     = 400;
-    _designTokens["animationVerySlow"] = 600;
+    _designTokens[NDesignTokenKey::AnimationFast]     = 100;
+    _designTokens[NDesignTokenKey::AnimationNormal]   = 200;
+    _designTokens[NDesignTokenKey::AnimationSlow]     = 400;
+    _designTokens[NDesignTokenKey::AnimationVerySlow] = 600;
 
     // 缓动曲线 (EasingCurve)
-    _designTokens["easingStandard"]   = QString("cubic-bezier(0.8, 0, 0.2, 1)"); // 标准
-    _designTokens["easingAccelerate"] = QString("cubic-bezier(0.9, 0, 0.1, 1)"); // 加速
-    _designTokens["easingDecelerate"] = QString("cubic-bezier(0.1, 0, 0.9, 1)"); // 减速
-    _designTokens["easingLinear"]     = QString("linear");                       // 线性
+    _designTokens[NDesignTokenKey::EasingStandard]   = QEasingCurve(QEasingCurve::OutCubic);
+    _designTokens[NDesignTokenKey::EasingAccelerate] = QEasingCurve(QEasingCurve::InCubic);
+    _designTokens[NDesignTokenKey::EasingDecelerate] = QEasingCurve(QEasingCurve::OutCubic);
+    _designTokens[NDesignTokenKey::EasingLinear]     = QEasingCurve(QEasingCurve::Linear);
 }
 
 // 初始化亮色主题颜色
@@ -112,7 +122,7 @@ QColor NThemePrivate::resolveColor(NFluentColorKey::Key key) const {
 }
 
 // 解析设计令牌
-QVariant NThemePrivate::resolveToken(const QString& key) const {
+QVariant NThemePrivate::resolveToken(NDesignTokenKey::Key key) const {
     // 首先检查自定义令牌
     if (_customTokens.contains(key)) {
         return _customTokens[key];

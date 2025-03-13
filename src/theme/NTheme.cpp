@@ -9,7 +9,6 @@ NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme) {
         updateThemeState();
-        qDebug() << "更新主题状态";
         if (d_ptr->_themeMode == NThemeType::ThemeMode::System) {
             emit themeModeChanged(d_ptr->_themeMode);
         }
@@ -193,12 +192,12 @@ QMap<NFluentColorKey::Key, QColor> NTheme::getAllColors() const {
     return result;
 }
 
-QVariant NTheme::getToken(const QString& key) const {
+QVariant NTheme::getToken(NDesignTokenKey::Key key) const {
     Q_D(const NTheme);
     return d->resolveToken(key);
 }
 
-void NTheme::setToken(const QString& key, const QVariant& value) {
+void NTheme::setToken(NDesignTokenKey::Key key, const QVariant& value) {
     Q_D(NTheme);
     d->_customTokens[key] = value;
 }

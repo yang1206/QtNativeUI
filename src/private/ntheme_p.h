@@ -27,8 +27,8 @@ class NThemePrivate {
     QMap<NFluentColorKey::Key, QColor> _customColors;
 
     // 设计令牌
-    QHash<QString, QVariant> _designTokens;
-    QHash<QString, QVariant> _customTokens;
+    QHash<NDesignTokenKey::Key, QVariant> _designTokens;
+    QHash<NDesignTokenKey::Key, QVariant> _customTokens;
 
     // 初始化方法
     void initLightColors();
@@ -39,7 +39,7 @@ class NThemePrivate {
     QColor resolveColor(NFluentColorKey::Key key) const;
 
     // 令牌解析
-    QVariant resolveToken(const QString& key) const;
+    QVariant resolveToken(NDesignTokenKey::Key key) const;
 
     // 更新依赖于强调色的颜色
     void updateAccentDependentColors();

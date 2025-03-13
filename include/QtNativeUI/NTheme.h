@@ -11,6 +11,7 @@
 #define nTheme NTheme::getInstance()
 #define NThemeColor(key, themeMode) nTheme->getColorForTheme(key, themeMode)
 #define NAccentColor(type) getAccentColor(type)
+#define NDesignToken(key) nTheme->getToken(key)
 // 使用宏创建d指针
 class NThemePrivate;
 /**
@@ -58,8 +59,8 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     QMap<NFluentColorKey::Key, QColor> getAllColors() const;
 
     // 设计令牌
-    QVariant getToken(const QString& key) const;
-    void     setToken(const QString& key, const QVariant& value);
+    QVariant getToken(NDesignTokenKey::Key key) const;
+    void     setToken(NDesignTokenKey::Key key, const QVariant& value);
 
     void drawEffectShadow(QPainter* painter, QRect widgetRect, int shadowBorderWidth, int borderRadius);
 
