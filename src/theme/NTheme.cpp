@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QPainterPath>
 #include <QStyleHints>
 #include <QtNativeUI/NTheme.h>
 #include "../private/ntheme_p.h"
@@ -197,6 +198,28 @@ QVariant NTheme::getToken(const QString& key) const {
 void NTheme::setToken(const QString& key, const QVariant& value) {
     Q_D(NTheme);
     d->_customTokens[key] = value;
+}
+
+void NTheme::drawEffectShadow(QPainter* painter, QRect widgetRect, int shadowBorderWidth, int borderRadius) {
+    Q_D(NTheme);
+    painter->save();
+    painter->setRenderHints(QPainter::Antialiasing);
+    QPainterPath path;
+    path.setFillRule(Qt::WindingFill);
+    QColor color = d->_themeMode == NThemeType::Light ? QColor(0x70, 0x70, 0x70) : QColor(0x9C, 0x9B, 0x9E);
+    for (int i = 0; i < shadowBorderWidth; i++) {
+        path.addRoundedRect(shadowBorderWidth - i,
+                            shadowBorderWidth - i,
+                            widgetRect.width() - (shadowBorderWidth - i) * 2,
+                            widgetRect.height() - (shadowBorderWidth - i) * 2,
+                            borderRadius + i,
+                            borderRadius + i);
+        int alpha = 1 * (shadowBorderWidth - i + 1);
+        color.setAlpha(alpha > 255 ? 255 : alpha);
+        painter->setPen(color);
+        painter->drawPath(path);
+    }
+    painter->restore();
 }
 
 void NTheme::resetToDefaults() {

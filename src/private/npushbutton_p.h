@@ -22,9 +22,14 @@ class NPushButtonPrivate : public QObject {
   private:
     QColor                _lightTextColor;
     QColor                _darkTextColor;
+    QColor                _lightBorderColor;
+    QColor                _darkBorderColor;
     bool                  _isPressed{false};
+    bool                  _isHovered{false};
+    bool                  _showBorder{true};
     int                   _shadowBorderWidth{3};
     NThemeType::ThemeMode _themeMode;
+    bool                  _isDark;
 };
 
 #endif // QTNATIVEUI_NPUSHBUTTON_P_H

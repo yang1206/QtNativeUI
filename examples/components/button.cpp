@@ -17,6 +17,7 @@ void ButtonExample::initUI() {
     QPushButton* btn = new NPushButton("Click Me");
 
     QPushButton* btn2 = new NPushButton("Click Me");
+    btn2->setDisabled(true);
 
     mainLayout->addWidget(btn, 0, 0);
     mainLayout->addWidget(btn2, 1, 0);

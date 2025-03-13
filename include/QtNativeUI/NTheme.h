@@ -1,6 +1,7 @@
 #ifndef QTNATIVEUI_NTHEME_H
 #define QTNATIVEUI_NTHEME_H
 
+#include <QPainter>
 #include "NColor.h"
 #include "NEnums.h"
 #include "NFluentColors.h"
@@ -59,6 +60,8 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     // 设计令牌
     QVariant getToken(const QString& key) const;
     void     setToken(const QString& key, const QVariant& value);
+
+    void drawEffectShadow(QPainter* painter, QRect widgetRect, int shadowBorderWidth, int borderRadius);
 
     // 重置为默认值
     void resetToDefaults();
