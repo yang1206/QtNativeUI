@@ -20,7 +20,7 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
 
   public:
     explicit NPushButton(QWidget* parent = nullptr);
-    explicit NPushButton(const QString& text, QWidget* parent = nullptr);
+    explicit NPushButton(QString text, QWidget* parent = nullptr);
     ~NPushButton();
 
     void   setLightTextColor(QColor color);
@@ -30,7 +30,9 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     QColor getDarkTextColor() const;
 
   protected:
-    void paintEvent(QPaintEvent* event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+    void         paintEvent(QPaintEvent* event) override;
 };
 
 #endif // QTNATIVEUI_NPUSHBUTTON_H

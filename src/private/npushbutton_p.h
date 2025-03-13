@@ -16,7 +16,7 @@ class NPushButtonPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, LightPressColor)
     Q_PROPERTY_CREATE_D(QColor, DarkPressColor)
   public:
-    NPushButtonPrivate(NPushButton* q);
+    explicit NPushButtonPrivate(QObject* parent = nullptr);
     ~NPushButtonPrivate();
 
   private:
