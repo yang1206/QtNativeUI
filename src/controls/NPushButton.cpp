@@ -186,7 +186,6 @@ void NPushButton::drawBorder(QPainter* painter) {
 void NPushButton::drawText(QPainter* painter) {
     Q_D(NPushButton);
     painter->save();
-
     QRect foregroundRect(d->_shadowBorderWidth,
                          d->_shadowBorderWidth,
                          width() - 2 * (d->_shadowBorderWidth),

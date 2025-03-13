@@ -8,14 +8,17 @@ Q_SINGLETON_CREATE_CPP(NTheme)
 NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme) {
+        updateThemeState();
+        qDebug() << "更新主题状态";
         if (d_ptr->_themeMode == NThemeType::ThemeMode::System) {
-            updateThemeState();
+            emit themeModeChanged(d_ptr->_themeMode);
         }
     });
 #else
     connect(qApp, &QApplication::paletteChanged, this, [this]() {
+        updateThemeState();
         if (d_ptr->_themeMode == ThemeMode::System) {
-            updateThemeState();
+            emit themeModeChanged(d_ptr->_themeMode);
         }
     });
 #endif
