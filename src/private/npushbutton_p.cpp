@@ -1,5 +1,5 @@
 #include "npushbutton_p.h"
-
-NPushButtonPrivate::NPushButtonPrivate(NPushButton* q) : q_ptr(q) {}
+#include "QtNativeUI/NPushButton.h"
+NPushButtonPrivate::NPushButtonPrivate(QObject* parent) : QObject(parent) {}
 
 NPushButtonPrivate::~NPushButtonPrivate() {}

@@ -9,7 +9,7 @@
 
 class NTheme;
 class NThemePrivate {
-    N_DECLARE_PUBLIC(NTheme)
+    Q_D_CREATE(NTheme)
   public:
     NThemePrivate(NTheme* q);
     ~NThemePrivate();
@@ -20,6 +20,8 @@ class NThemePrivate {
 
     // 强调色
     NAccentColor _accentColor;
+    bool         _useSystemAccentColor;
+    QColor       _systemAccentColor;
 
     // 颜色存储 - 使用枚举键
     QMap<NFluentColorKey::Key, QColor> _lightColors;
@@ -27,24 +29,24 @@ class NThemePrivate {
     QMap<NFluentColorKey::Key, QColor> _customColors;
 
     // 设计令牌
-    QHash<QString, QVariant> _designTokens;
-    QHash<QString, QVariant> _customTokens;
+    QHash<NDesignTokenKey::Key, QVariant> _designTokens;
+    QHash<NDesignTokenKey::Key, QVariant> _customTokens;
 
     // 初始化方法
     void initLightColors();
     void initDarkColors();
     void initDesignTokens();
 
+    // 系统主题检测
+    bool detectSystemTheme() const;
+
+    QColor detectSystemAccentColor() const;
+
     // 颜色解析
     QColor resolveColor(NFluentColorKey::Key key) const;
 
     // 令牌解析
-    QVariant resolveToken(const QString& key) const;
-
-    // 更新依赖于强调色的颜色
-    void updateAccentDependentColors();
-
-    // 使用宏声明公共类
+    QVariant resolveToken(NDesignTokenKey::Key key) const;
 };
 
 #endif // QTNATIVEUI_NTHEME_P_H

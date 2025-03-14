@@ -1,25 +1,47 @@
 #include <QApplication>
+#include <QPainterPath>
+#include <QPalette>
 #include <QStyleHints>
 #include <QtNativeUI/NTheme.h>
 #include "../private/ntheme_p.h"
-
-// 静态实例
 
 Q_SINGLETON_CREATE_CPP(NTheme)
 NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme) {
+        updateThemeState();
         if (d_ptr->_themeMode == NThemeType::ThemeMode::System) {
-            updateThemeState();
+            emit themeModeChanged(d_ptr->_themeMode);
+        }
+    });
+    connect(qApp, &QApplication::paletteChanged, this, [this]() {
+        if (d_ptr->_useSystemAccentColor) {
+            QColor newAccentColor = d_ptr->detectSystemAccentColor();
+            if (newAccentColor.isValid() && newAccentColor != d_ptr->_systemAccentColor) {
+                d_ptr->_systemAccentColor = newAccentColor;
+                setAccentColor(newAccentColor);
+                emit systemAccentColorChanged(newAccentColor);
+            }
         }
     });
 #else
     connect(qApp, &QApplication::paletteChanged, this, [this]() {
+        updateThemeState();
         if (d_ptr->_themeMode == ThemeMode::System) {
-            updateThemeState();
+            emit themeModeChanged(d_ptr->_themeMode);
+        }
+        if (d_ptr->_useSystemAccentColor) {
+            QColor newAccentColor = d->detectSystemAccentColor();
+            if (newAccentColor.isValid() && newAccentColor != d_ptr->_systemAccentColor) {
+                d_ptr->_systemAccentColor = newAccentColor;
+                setAccentColor(newAccentColor);
+                emit systemAccentColorChanged(newAccentColor);
+            }
         }
     });
 #endif
+
+    useSystemAccentColor();
 }
 
 NTheme::~NTheme() {}
@@ -41,7 +63,6 @@ void NTheme::setThemeMode(NThemeType::ThemeMode mode) {
 void NTheme::updateThemeState() {
     Q_D(NTheme);
 
-    // 根据当前主题模式更新暗色模式状态
     bool newIsDark = false;
     switch (d->_themeMode) {
         case NThemeType::ThemeMode::Light:
@@ -51,36 +72,32 @@ void NTheme::updateThemeState() {
             newIsDark = true;
             break;
         case NThemeType::ThemeMode::System:
-            newIsDark = detectSystemTheme();
+            newIsDark = d_ptr->detectSystemTheme();
             break;
     }
 
-    // 仅在状态变化时发出信号
     if (d->_isDark != newIsDark) {
         d->_isDark = newIsDark;
         emit darkModeChanged(newIsDark);
     }
 }
 
-bool NTheme::detectSystemTheme() const {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    return qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
-#else
-    QPalette pal         = QApplication::palette();
-    QColor   windowColor = pal.color(QPalette::Window);
-    QColor   textColor   = pal.color(QPalette::WindowText);
+QColor NTheme::getSystemAccentColor() const {
+    Q_D(const NTheme);
+    return d->detectSystemAccentColor();
+}
 
-    // 比较文本与背景的相对亮度
-    bool isDark = textColor.lightness() > windowColor.lightness();
+void NTheme::useSystemAccentColor() {
+    Q_D(NTheme);
+    d->_useSystemAccentColor = true;
 
-    // 备选方法
-    if (!isDark) {
-        int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
-        isDark         = brightness < 128;
+    // 获取当前系统强调色
+    QColor systemColor = d->detectSystemAccentColor();
+
+    if (systemColor.isValid() && d->_accentColor.normal() != systemColor) {
+        setAccentColor(systemColor);
+        emit systemAccentColorChanged(systemColor);
     }
-
-    return isDark;
-#endif
 }
 
 NThemeType::ThemeMode NTheme::themeMode() const {
@@ -97,9 +114,6 @@ void NTheme::setAccentColor(const NAccentColor& color) {
     Q_D(NTheme);
     if (d->_accentColor != color) {
         d->_accentColor = color;
-        // 我们不再调用updateAccentDependentColors，因为它现在是空的
-        // 或者可以保留调用，以备将来扩展
-        d->updateAccentDependentColors();
         emit accentColorChanged(color);
     }
 }
@@ -116,8 +130,55 @@ void NTheme::setColor(NFluentColorKey::Key key, const QColor& color) {
     d->_customColors[key] = color;
 }
 
+QColor NTheme::getColorForTheme(NFluentColorKey::Key key, NThemeType::ThemeMode mode) const {
+    Q_D(const NTheme);
+
+    NThemeType::ThemeMode originalMode   = d->_themeMode;
+    bool                  originalIsDark = d->_isDark;
+
+    const_cast<NThemePrivate*>(d)->_themeMode = mode;
+
+    bool isDarkForMode = false;
+    switch (mode) {
+        case NThemeType::ThemeMode::Light:
+            isDarkForMode = false;
+            break;
+        case NThemeType::ThemeMode::Dark:
+            isDarkForMode = true;
+            break;
+        case NThemeType::ThemeMode::System:
+            isDarkForMode = d_ptr->detectSystemTheme();
+            break;
+    }
+    const_cast<NThemePrivate*>(d)->_isDark = isDarkForMode;
+
+    QColor result = d->resolveColor(key);
+
+    const_cast<NThemePrivate*>(d)->_themeMode = originalMode;
+    const_cast<NThemePrivate*>(d)->_isDark    = originalIsDark;
+
+    return result;
+}
+
+NAccentColor NTheme::getAccentColor(NAccentColorType::Type type) const {
+    if (type == NAccentColorType::Custom) {
+        return accentColor();
+    }
+    return NColors::getAccentColor(type);
+}
+
+QColor NTheme::getThemedAccentColor(NAccentColorType::Type type) const {
+    Q_D(const NTheme);
+    NAccentColor color = getAccentColor(type);
+    return color.defaultBrushFor(d->_isDark);
+}
+
+QColor NTheme::getAccentColorVariant(NAccentColorType::Type type, const QString& variant) const {
+    NAccentColor color = getAccentColor(type);
+    return color[variant];
+}
+
 QList<NFluentColorKey::Key> NTheme::getAllColorKeys() const {
-    // 返回所有有效的颜色键（排除Count）
     QList<NFluentColorKey::Key> keys;
     for (int i = 0; i < NFluentColorKey::Count; i++) {
         keys.append(static_cast<NFluentColorKey::Key>(i));
@@ -129,7 +190,6 @@ QMap<NFluentColorKey::Key, QColor> NTheme::getAllColors() const {
     Q_D(const NTheme);
     QMap<NFluentColorKey::Key, QColor> result;
 
-    // 遍历所有颜色键
     for (int i = 0; i < NFluentColorKey::Count; i++) {
         NFluentColorKey::Key key = static_cast<NFluentColorKey::Key>(i);
         result[key]              = d->resolveColor(key);
@@ -138,14 +198,53 @@ QMap<NFluentColorKey::Key, QColor> NTheme::getAllColors() const {
     return result;
 }
 
-QVariant NTheme::getToken(const QString& key) const {
+QVariant NTheme::getToken(NDesignTokenKey::Key key) const {
     Q_D(const NTheme);
     return d->resolveToken(key);
 }
 
-void NTheme::setToken(const QString& key, const QVariant& value) {
+void NTheme::setToken(NDesignTokenKey::Key key, const QVariant& value) {
     Q_D(NTheme);
     d->_customTokens[key] = value;
+}
+
+void NTheme::drawEffectShadow(QPainter*            painter,
+                              QRect                widgetRect,
+                              int                  shadowBorderWidth,
+                              int                  borderRadius,
+                              NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest) {
+    Q_D(NTheme);
+    painter->save();
+    painter->setRenderHints(QPainter::Antialiasing);
+
+    // 获取阴影层级设置
+    QVariantMap elevation   = getToken(elevationKey).toMap();
+    int         yOffset     = elevation["yOffset"].toInt();
+    QColor      shadowColor = elevation["color"].value<QColor>();
+
+    // 根据 yOffset 调整阴影范围
+    int effectiveShadowWidth = qMax(shadowBorderWidth, yOffset);
+
+    QPainterPath path;
+    path.setFillRule(Qt::WindingFill);
+
+    // 调整阴影绘制范围以适应 yOffset
+    for (int i = 0; i < effectiveShadowWidth; i++) {
+        path.addRoundedRect(shadowBorderWidth - i,
+                            shadowBorderWidth - i + (yOffset / 4),
+                            widgetRect.width() - (shadowBorderWidth - i) * 2,
+                            widgetRect.height() - (shadowBorderWidth - i) * 2,
+                            borderRadius + i,
+                            borderRadius + i);
+
+        // 使用阴影颜色的 alpha 值作为基准，随距离渐变
+        int alpha = 1 * (shadowBorderWidth - i + 1);
+        shadowColor.setAlpha(alpha > 255 ? 255 : alpha);
+        painter->setPen(shadowColor);
+        painter->drawPath(path);
+    }
+
+    painter->restore();
 }
 
 void NTheme::resetToDefaults() {

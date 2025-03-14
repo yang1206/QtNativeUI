@@ -74,6 +74,23 @@ private:
 };
 
 /**
+ * @brief 预定义的强调色枚举
+ */
+namespace NAccentColorType {
+    enum Type {
+        Yellow,
+        Orange,
+        Red,
+        Magenta,
+        Purple,
+        Blue,
+        Teal,
+        Green,
+        Custom  // 用于表示自定义强调色
+    };
+}
+
+/**
  * @brief 预定义的颜色集合
  * 类似于 Flutter 的 Colors 类
  */
@@ -105,6 +122,9 @@ public:
     static const QColor successPrimaryColor;
     static const NAccentColor successSecondaryColor;
     
+    // 根据枚举获取强调色
+    static NAccentColor getAccentColor(NAccentColorType::Type type);
+    
     // 所有强调色列表
     static const QList<NAccentColor> accentColors;
 };
@@ -133,4 +153,4 @@ public:
     static QColor withOpacity(const QColor& color, double opacity);
 };
 
-#endif // QTNATIVEUI_NCOLOR_H 
+#endif // QTNATIVEUI_NCOLOR_H

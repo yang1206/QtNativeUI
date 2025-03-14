@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import sys
 import re
@@ -19,8 +20,12 @@ def parse_color(xaml_color):
         alpha_hex = xaml_color[1:3]
         rgb_hex = xaml_color[3:]
         alpha = int(alpha_hex, 16)
-        # 使用辅助函数创建带有alpha的颜色
-        return f'colorWithAlpha("#{rgb_hex}", {alpha})'
+        
+        # 将 alpha 值（0-255）转换为百分比（0-100）
+        alpha_percent = round(alpha / 255.0 * 100)
+        
+        # 使用辅助函数创建带有alpha百分比的颜色
+        return f'colorWithAlphaPercent("#{rgb_hex}", {alpha_percent})'
     
     return "QColor()"
 
@@ -61,7 +66,11 @@ def parse_xaml(xaml_file):
 
 def generate_header(dark_colors, light_colors, output_file):
     """生成C++头文件"""
-    with open(output_file, 'w') as f:
+    # 收集所有唯一的键，并排序以生成一致的枚举
+    all_keys = sorted(set(list(dark_colors.keys()) + list(light_colors.keys())))
+    
+    # 使用UTF-8编码打开文件
+    with open(output_file, 'w', encoding='utf-8') as f:
         f.write("// 自动生成的文件，请勿手动修改\n")
         f.write("// 从Microsoft Fluent Design颜色资源生成\n\n")
         f.write("#ifndef NFLUENTCOLORS_H\n")
@@ -72,29 +81,29 @@ def generate_header(dark_colors, light_colors, output_file):
         f.write("#include <QMetaEnum>\n\n")
         
         # 添加辅助函数
-        f.write("// 辅助函数：创建带有alpha值的颜色\n")
+        f.write("// 辅助函数：创建带有alpha值的颜色（alpha为0-255）\n")
         f.write("inline QColor colorWithAlpha(const QString& hex, int alpha) {\n")
         f.write("    QColor color(hex);\n")
         f.write("    color.setAlpha(alpha);\n")
         f.write("    return color;\n")
         f.write("}\n\n")
         
-        # 生成颜色枚举
+        # 添加新的百分比alpha函数
+        f.write("// 辅助函数：创建带有百分比alpha值的颜色（alphaPercent为0-100）\n")
+        f.write("inline QColor colorWithAlphaPercent(const QString& hex, int alphaPercent) {\n")
+        f.write("    QColor color(hex);\n")
+        f.write("    int alpha = static_cast<int>(255.0 * alphaPercent / 100.0);\n")
+        f.write("    color.setAlpha(alpha);\n")
+        f.write("    return color;\n")
+        f.write("}\n\n")
+        
+        # 生成枚举
         f.write("// Fluent Design 颜色枚举 - 自动生成\n")
         f.write("namespace NFluentColorKey {\n")
         f.write("    enum Key {\n")
-        
-        # 收集所有唯一的键，并排序以生成一致的枚举
-        all_keys = sorted(set(list(dark_colors.keys()) + list(light_colors.keys())))
-        
-        # 生成枚举项
-        for i, key in enumerate(all_keys):
-            if i < len(all_keys) - 1:
-                f.write(f"        {key},\n")
-            else:
-                f.write(f"        {key},\n")
-                f.write("        Count  // 用于计数和边界检查\n")
-        
+        for key in all_keys:
+            f.write(f"        {key},\n")
+        f.write("        Count  // 用于计数和边界检查\n")
         f.write("    };\n")
         f.write("}\n\n")
         
