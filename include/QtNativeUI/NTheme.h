@@ -37,7 +37,10 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     void         setAccentColor(const NAccentColor& color);
     void         setAccentColor(const QColor& color);
 
-    // 颜色获取与设置 - 类型安全版本
+    QColor getSystemAccentColor() const;
+
+    void useSystemAccentColor();
+
     QColor getColor(NFluentColorKey::Key key) const;
     void   setColor(NFluentColorKey::Key key, const QColor& color);
 
@@ -75,13 +78,11 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     void darkModeChanged(bool isDark);
     void themeModeChanged(NThemeType::ThemeMode mode);
     void accentColorChanged(const NAccentColor& color);
+    void systemAccentColorChanged(const QColor& color);
 
   private:
     NTheme(QObject* parent = nullptr);
     ~NTheme();
-
-    // 系统主题检测
-    bool detectSystemTheme() const;
 
     // 更新主题状态
     void updateThemeState();

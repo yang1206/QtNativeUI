@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QPainterPath>
+#include <QPalette>
 #include <QStyleHints>
 #include <QtNativeUI/NTheme.h>
 #include "../private/ntheme_p.h"
@@ -13,14 +14,34 @@ NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)
             emit themeModeChanged(d_ptr->_themeMode);
         }
     });
+    connect(qApp, &QApplication::paletteChanged, this, [this]() {
+        if (d_ptr->_useSystemAccentColor) {
+            QColor newAccentColor = d_ptr->detectSystemAccentColor();
+            if (newAccentColor.isValid() && newAccentColor != d_ptr->_systemAccentColor) {
+                d_ptr->_systemAccentColor = newAccentColor;
+                setAccentColor(newAccentColor);
+                emit systemAccentColorChanged(newAccentColor);
+            }
+        }
+    });
 #else
     connect(qApp, &QApplication::paletteChanged, this, [this]() {
         updateThemeState();
         if (d_ptr->_themeMode == ThemeMode::System) {
             emit themeModeChanged(d_ptr->_themeMode);
         }
+        if (d_ptr->_useSystemAccentColor) {
+            QColor newAccentColor = d->detectSystemAccentColor();
+            if (newAccentColor.isValid() && newAccentColor != d_ptr->_systemAccentColor) {
+                d_ptr->_systemAccentColor = newAccentColor;
+                setAccentColor(newAccentColor);
+                emit systemAccentColorChanged(newAccentColor);
+            }
+        }
     });
 #endif
+
+    useSystemAccentColor();
 }
 
 NTheme::~NTheme() {}
@@ -51,7 +72,7 @@ void NTheme::updateThemeState() {
             newIsDark = true;
             break;
         case NThemeType::ThemeMode::System:
-            newIsDark = detectSystemTheme();
+            newIsDark = d_ptr->detectSystemTheme();
             break;
     }
 
@@ -61,23 +82,22 @@ void NTheme::updateThemeState() {
     }
 }
 
-bool NTheme::detectSystemTheme() const {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    return qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
-#else
-    QPalette pal         = QApplication::palette();
-    QColor   windowColor = pal.color(QPalette::Window);
-    QColor   textColor   = pal.color(QPalette::WindowText);
+QColor NTheme::getSystemAccentColor() const {
+    Q_D(const NTheme);
+    return d->detectSystemAccentColor();
+}
 
-    bool isDark = textColor.lightness() > windowColor.lightness();
+void NTheme::useSystemAccentColor() {
+    Q_D(NTheme);
+    d->_useSystemAccentColor = true;
 
-    if (!isDark) {
-        int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
-        isDark         = brightness < 128;
+    // 获取当前系统强调色
+    QColor systemColor = d->detectSystemAccentColor();
+
+    if (systemColor.isValid() && d->_accentColor.normal() != systemColor) {
+        setAccentColor(systemColor);
+        emit systemAccentColorChanged(systemColor);
     }
-
-    return isDark;
-#endif
 }
 
 NThemeType::ThemeMode NTheme::themeMode() const {
@@ -127,7 +147,7 @@ QColor NTheme::getColorForTheme(NFluentColorKey::Key key, NThemeType::ThemeMode 
             isDarkForMode = true;
             break;
         case NThemeType::ThemeMode::System:
-            isDarkForMode = detectSystemTheme();
+            isDarkForMode = d_ptr->detectSystemTheme();
             break;
     }
     const_cast<NThemePrivate*>(d)->_isDark = isDarkForMode;

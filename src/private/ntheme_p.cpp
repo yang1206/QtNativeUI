@@ -10,14 +10,21 @@
 
 // 初始化私有实现
 NThemePrivate::NThemePrivate(NTheme* q)
-    : q_ptr(q), _themeMode(NThemeType::ThemeMode::System), _isDark(false), _accentColor(NColors::blue) {
+    : q_ptr(q),
+      _themeMode(NThemeType::ThemeMode::System),
+      _isDark(false),
+      _accentColor(NColors::blue),
+      _useSystemAccentColor(true),
+      _systemAccentColor(Qt::transparent) {
     // 初始化颜色和设计令牌
     initLightColors();
     initDarkColors();
     initDesignTokens();
 
     // 初始检测系统主题 - 由公共类负责
-    _isDark = q->detectSystemTheme();
+    _isDark = detectSystemTheme();
+
+    _systemAccentColor = detectSystemAccentColor();
 }
 
 NThemePrivate::~NThemePrivate() {}
@@ -95,6 +102,49 @@ void NThemePrivate::initLightColors() {
 void NThemePrivate::initDarkColors() {
     // 直接使用自动生成的 Fluent 颜色映射
     _darkColors = DarkThemeColors;
+}
+
+bool NThemePrivate::detectSystemTheme() const {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    return qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+    QPalette pal         = QApplication::palette();
+    QColor   windowColor = pal.color(QPalette::Window);
+    QColor   textColor   = pal.color(QPalette::WindowText);
+
+    bool isDark = textColor.lightness() > windowColor.lightness();
+
+    if (!isDark) {
+        int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
+        isDark         = brightness < 128;
+    }
+
+    return isDark;
+#endif
+}
+
+QColor NThemePrivate::detectSystemAccentColor() const {
+    QColor accentColor;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+    accentColor = QApplication::palette().color(QPalette::Active, QPalette::Accent);
+#else
+    // 在 Qt 6.6 之前，使用 QPalette::Highlight 作为替代
+    accentColor = QApplication::palette().color(QPalette::Active, QPalette::Highlight);
+
+    // 在某些平台上，Highlight 可能是一个不适合作为强调色的颜色
+    // 例如，在某些主题中它可能是纯黑色或纯白色
+    if (accentColor == Qt::black || accentColor == Qt::white) {
+        // 尝试使用链接颜色作为备选
+        accentColor = QApplication::palette().color(QPalette::Active, QPalette::Link);
+    }
+#endif
+
+    // 如果获取的颜色无效或是黑白色，使用默认的蓝色
+    if (!accentColor.isValid() || accentColor == Qt::black || accentColor == Qt::white) {
+        accentColor = QColor(0, 120, 215); // Windows 10/11 默认蓝色
+    }
+
+    return accentColor;
 }
 
 // 解析颜色 - 考虑当前主题模式和自定义颜色

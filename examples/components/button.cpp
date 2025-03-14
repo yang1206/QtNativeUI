@@ -3,8 +3,11 @@
 //
 
 #include "button.h"
+
+#include <QApplication>
 #include <QGridLayout>
 #include <QLabel>
+#include <QStyleHints>
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
 
@@ -31,10 +34,18 @@ void ButtonExample::initUI() {
     standardButtonLayout->setSpacing(16);
 
     // 添加标准按钮
+    NPushButton* themeBtn = new NPushButton("Change Theme");
+    themeBtn->setFixedSize(120, 40);
+    connect(themeBtn, &NPushButton::clicked, this, [this]() {
+        qApp->styleHints()->setColorScheme(qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark
+                                               ? Qt::ColorScheme::Light
+                                               : Qt::ColorScheme::Dark);
+    });
     NPushButton* normalBtn   = new NPushButton("Standard");
     NPushButton* disabledBtn = new NPushButton("Disabled");
     disabledBtn->setDisabled(true);
 
+    standardButtonLayout->addWidget(themeBtn);
     standardButtonLayout->addWidget(normalBtn);
     standardButtonLayout->addWidget(disabledBtn);
     standardButtonLayout->addStretch();
@@ -53,7 +64,7 @@ void ButtonExample::initUI() {
 
     // 使用流式布局展示强调色按钮
     QWidget*     flowWidget = new QWidget;
-    QHBoxLayout* flowLayout = new QHBoxLayout(flowWidget);
+    QGridLayout* flowLayout = new QGridLayout(flowWidget);
     flowLayout->setSpacing(16);
     flowLayout->setAlignment(Qt::AlignLeft);
 
@@ -75,6 +86,7 @@ void ButtonExample::initUI() {
     // 添加所有预定义的强调色按钮
     for (const auto& info : accentTypes) {
         NPushButton* btn = new NPushButton(info.name);
+        btn->setFixedWidth(120);
         btn->setButtonType(NPushButton::Accent);
         btn->setAccentColor(NColors::getAccentColor(info.type));
         flowLayout->addWidget(btn);
@@ -108,8 +120,6 @@ void ButtonExample::initUI() {
 
     customAccentBtn->setAccentColor(customAccent);
     flowLayout->addWidget(customAccentBtn);
-
-    flowLayout->addStretch();
     accentLayout->addWidget(flowWidget);
     mainLayout->addWidget(accentSection);
 

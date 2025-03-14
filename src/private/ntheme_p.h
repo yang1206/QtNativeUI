@@ -20,6 +20,8 @@ class NThemePrivate {
 
     // 强调色
     NAccentColor _accentColor;
+    bool         _useSystemAccentColor;
+    QColor       _systemAccentColor;
 
     // 颜色存储 - 使用枚举键
     QMap<NFluentColorKey::Key, QColor> _lightColors;
@@ -34,6 +36,11 @@ class NThemePrivate {
     void initLightColors();
     void initDarkColors();
     void initDesignTokens();
+
+    // 系统主题检测
+    bool detectSystemTheme() const;
+
+    QColor detectSystemAccentColor() const;
 
     // 颜色解析
     QColor resolveColor(NFluentColorKey::Key key) const;
