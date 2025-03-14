@@ -40,11 +40,6 @@ class NThemePrivate {
 
     // 令牌解析
     QVariant resolveToken(NDesignTokenKey::Key key) const;
-
-    // 更新依赖于强调色的颜色
-    void updateAccentDependentColors();
-
-    // 使用宏声明公共类
 };
 
 #endif // QTNATIVEUI_NTHEME_P_H

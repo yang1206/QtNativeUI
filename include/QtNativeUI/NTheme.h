@@ -62,7 +62,11 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     QVariant getToken(NDesignTokenKey::Key key) const;
     void     setToken(NDesignTokenKey::Key key, const QVariant& value);
 
-    void drawEffectShadow(QPainter* painter, QRect widgetRect, int shadowBorderWidth, int borderRadius);
+    void drawEffectShadow(QPainter*            painter,
+                          QRect                widgetRect,
+                          int                  shadowBorderWidth,
+                          int                  borderRadius,
+                          NDesignTokenKey::Key elevationKey);
 
     // 重置为默认值
     void resetToDefaults();

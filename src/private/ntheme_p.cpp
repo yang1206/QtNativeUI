@@ -22,7 +22,6 @@ NThemePrivate::NThemePrivate(NTheme* q)
 
 NThemePrivate::~NThemePrivate() {}
 
-// 初始化设计令牌 - 基于 Windows 11 Fluent UI 规范
 void NThemePrivate::initDesignTokens() {
     // 圆角大小 (CornerRadius)
     _designTokens[NDesignTokenKey::CornerRadiusNone]     = 0.0;
@@ -90,18 +89,12 @@ void NThemePrivate::initDesignTokens() {
 void NThemePrivate::initLightColors() {
     // 直接使用自动生成的 Fluent 颜色映射
     _lightColors = LightThemeColors;
-
-    // 添加强调色相关颜色
-    updateAccentDependentColors();
 }
 
 // 初始化暗色主题颜色
 void NThemePrivate::initDarkColors() {
     // 直接使用自动生成的 Fluent 颜色映射
     _darkColors = DarkThemeColors;
-
-    // 添加强调色相关颜色
-    updateAccentDependentColors();
 }
 
 // 解析颜色 - 考虑当前主题模式和自定义颜色
@@ -135,9 +128,4 @@ QVariant NThemePrivate::resolveToken(NDesignTokenKey::Key key) const {
 
     // 如果找不到令牌，返回空值
     return QVariant();
-}
-
-void NThemePrivate::updateAccentDependentColors() {
-    // 定义一些关键的强调色相关颜色
-    // const QColor accentColor = _accentColor.defaultBrushFor(_isDark);
 }

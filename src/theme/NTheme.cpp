@@ -42,7 +42,6 @@ void NTheme::setThemeMode(NThemeType::ThemeMode mode) {
 void NTheme::updateThemeState() {
     Q_D(NTheme);
 
-    // 根据当前主题模式更新暗色模式状态
     bool newIsDark = false;
     switch (d->_themeMode) {
         case NThemeType::ThemeMode::Light:
@@ -56,7 +55,6 @@ void NTheme::updateThemeState() {
             break;
     }
 
-    // 仅在状态变化时发出信号
     if (d->_isDark != newIsDark) {
         d->_isDark = newIsDark;
         emit darkModeChanged(newIsDark);
@@ -71,10 +69,8 @@ bool NTheme::detectSystemTheme() const {
     QColor   windowColor = pal.color(QPalette::Window);
     QColor   textColor   = pal.color(QPalette::WindowText);
 
-    // 比较文本与背景的相对亮度
     bool isDark = textColor.lightness() > windowColor.lightness();
 
-    // 备选方法
     if (!isDark) {
         int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
         isDark         = brightness < 128;
@@ -98,9 +94,6 @@ void NTheme::setAccentColor(const NAccentColor& color) {
     Q_D(NTheme);
     if (d->_accentColor != color) {
         d->_accentColor = color;
-        // 我们不再调用updateAccentDependentColors，因为它现在是空的
-        // 或者可以保留调用，以备将来扩展
-        d->updateAccentDependentColors();
         emit accentColorChanged(color);
     }
 }
@@ -120,14 +113,11 @@ void NTheme::setColor(NFluentColorKey::Key key, const QColor& color) {
 QColor NTheme::getColorForTheme(NFluentColorKey::Key key, NThemeType::ThemeMode mode) const {
     Q_D(const NTheme);
 
-    // 保存当前主题模式
     NThemeType::ThemeMode originalMode   = d->_themeMode;
     bool                  originalIsDark = d->_isDark;
 
-    // 临时修改内部状态以获取指定主题模式的颜色
     const_cast<NThemePrivate*>(d)->_themeMode = mode;
 
-    // 根据指定的主题模式设置暗色状态
     bool isDarkForMode = false;
     switch (mode) {
         case NThemeType::ThemeMode::Light:
@@ -142,10 +132,8 @@ QColor NTheme::getColorForTheme(NFluentColorKey::Key key, NThemeType::ThemeMode 
     }
     const_cast<NThemePrivate*>(d)->_isDark = isDarkForMode;
 
-    // 获取指定主题模式下的颜色
     QColor result = d->resolveColor(key);
 
-    // 恢复原始主题模式
     const_cast<NThemePrivate*>(d)->_themeMode = originalMode;
     const_cast<NThemePrivate*>(d)->_isDark    = originalIsDark;
 
@@ -171,7 +159,6 @@ QColor NTheme::getAccentColorVariant(NAccentColorType::Type type, const QString&
 }
 
 QList<NFluentColorKey::Key> NTheme::getAllColorKeys() const {
-    // 返回所有有效的颜色键（排除Count）
     QList<NFluentColorKey::Key> keys;
     for (int i = 0; i < NFluentColorKey::Count; i++) {
         keys.append(static_cast<NFluentColorKey::Key>(i));
@@ -183,7 +170,6 @@ QMap<NFluentColorKey::Key, QColor> NTheme::getAllColors() const {
     Q_D(const NTheme);
     QMap<NFluentColorKey::Key, QColor> result;
 
-    // 遍历所有颜色键
     for (int i = 0; i < NFluentColorKey::Count; i++) {
         NFluentColorKey::Key key = static_cast<NFluentColorKey::Key>(i);
         result[key]              = d->resolveColor(key);
@@ -202,25 +188,42 @@ void NTheme::setToken(NDesignTokenKey::Key key, const QVariant& value) {
     d->_customTokens[key] = value;
 }
 
-void NTheme::drawEffectShadow(QPainter* painter, QRect widgetRect, int shadowBorderWidth, int borderRadius) {
+void NTheme::drawEffectShadow(QPainter*            painter,
+                              QRect                widgetRect,
+                              int                  shadowBorderWidth,
+                              int                  borderRadius,
+                              NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest) {
     Q_D(NTheme);
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing);
+
+    // 获取阴影层级设置
+    QVariantMap elevation   = getToken(elevationKey).toMap();
+    int         yOffset     = elevation["yOffset"].toInt();
+    QColor      shadowColor = elevation["color"].value<QColor>();
+
+    // 根据 yOffset 调整阴影范围
+    int effectiveShadowWidth = qMax(shadowBorderWidth, yOffset);
+
     QPainterPath path;
     path.setFillRule(Qt::WindingFill);
-    QColor color = d->_themeMode == NThemeType::Light ? QColor(0x70, 0x70, 0x70) : QColor(0x9C, 0x9B, 0x9E);
-    for (int i = 0; i < shadowBorderWidth; i++) {
+
+    // 调整阴影绘制范围以适应 yOffset
+    for (int i = 0; i < effectiveShadowWidth; i++) {
         path.addRoundedRect(shadowBorderWidth - i,
-                            shadowBorderWidth - i,
+                            shadowBorderWidth - i + (yOffset / 4),
                             widgetRect.width() - (shadowBorderWidth - i) * 2,
                             widgetRect.height() - (shadowBorderWidth - i) * 2,
                             borderRadius + i,
                             borderRadius + i);
+
+        // 使用阴影颜色的 alpha 值作为基准，随距离渐变
         int alpha = 1 * (shadowBorderWidth - i + 1);
-        color.setAlpha(alpha > 255 ? 255 : alpha);
-        painter->setPen(color);
+        shadowColor.setAlpha(alpha > 255 ? 255 : alpha);
+        painter->setPen(shadowColor);
         painter->drawPath(path);
     }
+
     painter->restore();
 }
 

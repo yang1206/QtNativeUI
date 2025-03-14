@@ -47,9 +47,8 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     virtual void leaveEvent(QEvent* event) override;
     virtual void mousePressEvent(QMouseEvent* event) override;
     virtual void mouseReleaseEvent(QMouseEvent* event) override;
-    void         paintEvent(QPaintEvent* event) override;
+    virtual void paintEvent(QPaintEvent* event) override;
 
-    // 模块化绘制函数
     void drawBackground(QPainter* painter);
     void drawBorder(QPainter* painter);
     void drawText(QPainter* painter);
