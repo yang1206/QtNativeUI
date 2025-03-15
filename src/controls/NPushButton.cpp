@@ -3,6 +3,7 @@
 #include <QPainterPath>
 #include <QtNativeUI/NPushButton.h>
 #include "../private/npushbutton_p.h"
+#include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
 
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, int, BorderRadius)
@@ -139,6 +140,18 @@ void NPushButton::mouseReleaseEvent(QMouseEvent* event) {
     QPushButton::mouseReleaseEvent(event);
 }
 
+void NPushButton::changeEvent(QEvent* event) {
+    if (event->type() == QEvent::EnabledChange || event->type() == QEvent::PaletteChange ||
+        event->type() == QEvent::LanguageChange) {
+        update();
+    }
+    QPushButton::changeEvent(event);
+}
+
+void NPushButton::focusInEvent(QFocusEvent* event) { QPushButton::focusInEvent(event); }
+
+void NPushButton::focusOutEvent(QFocusEvent* event) { QPushButton::focusOutEvent(event); }
+
 void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
     Q_D(NPushButton);
     QPainter painter(this);
@@ -158,9 +171,8 @@ void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
     nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
 
     drawBackground(&painter);
-
     drawBorder(&painter);
-
+    drawIcon(&painter);
     drawText(&painter);
 }
 
@@ -223,23 +235,74 @@ void NPushButton::drawBorder(QPainter* painter) {
                          height() - 2 * d->_shadowBorderWidth);
 
     QColor borderColor = d->_isDark ? d->_darkBorderColor : d->_lightBorderColor;
+    if (hasFocus()) {
+        borderColor = nTheme->accentColor().normal();
+        painter->setPen(QPen(borderColor, 2)); // 稍微加粗焦点边框
+    } else {
+        painter->setPen(borderColor);
+        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
 
-    painter->setPen(borderColor);
-    painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
-
-    if (!d->_isPressed) {
-        painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
-        painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
-                          height() - d->_shadowBorderWidth,
-                          foregroundRect.width(),
-                          height() - d->_shadowBorderWidth);
+        if (!d->_isPressed) {
+            painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
+            painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
+                              height() - d->_shadowBorderWidth,
+                              foregroundRect.width(),
+                              height() - d->_shadowBorderWidth);
+        }
     }
+
+    painter->restore();
+}
+
+void NPushButton::drawIcon(QPainter* painter) {
+    Q_D(NPushButton);
+    if (icon().isNull())
+        return;
+
+    painter->save();
+
+    QRect foregroundRect(d->_shadowBorderWidth,
+                         d->_shadowBorderWidth,
+                         width() - 2 * (d->_shadowBorderWidth),
+                         height() - 2 * d->_shadowBorderWidth);
+
+    // 计算图标位置
+    QRect iconRect;
+    QSize iconSize = this->iconSize();
+
+    if (text().isEmpty()) {
+        iconRect = QRect(foregroundRect.x() + (foregroundRect.width() - iconSize.width()) / 2,
+                         foregroundRect.y() + (foregroundRect.height() - iconSize.height()) / 2,
+                         iconSize.width(),
+                         iconSize.height());
+    } else {
+        int spacing    = 4;
+        int textWidth  = painter->fontMetrics().horizontalAdvance(text());
+        int totalWidth = iconSize.width() + spacing + textWidth;
+
+        int startX = foregroundRect.x() + (foregroundRect.width() - totalWidth) / 2;
+        iconRect   = QRect(startX,
+                         foregroundRect.y() + (foregroundRect.height() - iconSize.height()) / 2,
+                         iconSize.width(),
+                         iconSize.height());
+    }
+
+    // 绘制图标
+    qreal dpr        = devicePixelRatio();
+    QSize pixmapSize = iconSize * dpr;
+
+    QPixmap pixmap = icon().pixmap(pixmapSize);
+    pixmap.setDevicePixelRatio(dpr);
+    painter->drawPixmap(iconRect, pixmap);
 
     painter->restore();
 }
 
 void NPushButton::drawText(QPainter* painter) {
     Q_D(NPushButton);
+    if (text().isEmpty())
+        return;
+
     painter->save();
     QRect foregroundRect(d->_shadowBorderWidth,
                          d->_shadowBorderWidth,
@@ -259,7 +322,22 @@ void NPushButton::drawText(QPainter* painter) {
     }
 
     painter->setPen(textColor);
-    painter->drawText(foregroundRect, Qt::AlignCenter, text());
+
+    if (!icon().isNull()) {
+        // 有图标时，文本需要右移
+        int   spacing    = 4; // 图标与文本间距
+        QSize iconSize   = this->iconSize();
+        int   textWidth  = painter->fontMetrics().horizontalAdvance(text());
+        int   totalWidth = iconSize.width() + spacing + textWidth;
+
+        int   startX = foregroundRect.x() + (foregroundRect.width() - totalWidth) / 2;
+        QRect textRect(startX + iconSize.width() + spacing, foregroundRect.y(), textWidth, foregroundRect.height());
+
+        painter->drawText(textRect, Qt::AlignCenter, text());
+    } else {
+        // 无图标时居中显示
+        painter->drawText(foregroundRect, Qt::AlignCenter, text());
+    }
 
     painter->restore();
 }
