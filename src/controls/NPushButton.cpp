@@ -235,20 +235,16 @@ void NPushButton::drawBorder(QPainter* painter) {
                          height() - 2 * d->_shadowBorderWidth);
 
     QColor borderColor = d->_isDark ? d->_darkBorderColor : d->_lightBorderColor;
-    if (hasFocus()) {
-        borderColor = nTheme->accentColor().normal();
-        painter->setPen(QPen(borderColor, 2)); // 稍微加粗焦点边框
-    } else {
-        painter->setPen(borderColor);
-        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
 
-        if (!d->_isPressed) {
-            painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
-            painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
-                              height() - d->_shadowBorderWidth,
-                              foregroundRect.width(),
-                              height() - d->_shadowBorderWidth);
-        }
+    painter->setPen(borderColor);
+    painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+
+    if (!d->_isPressed) {
+        painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
+        painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
+                          height() - d->_shadowBorderWidth,
+                          foregroundRect.width(),
+                          height() - d->_shadowBorderWidth);
     }
 
     painter->restore();

@@ -25,7 +25,7 @@ class QTNATIVEUI_EXPORT NIcon {
 
     // 通用的图标生成方法
     QIcon createIcon(const QString& fontFamily,
-                     unsigned int   unicode,
+                     uint32_t       unicode,
                      int            size   = 24,
                      const QColor&  color  = Qt::black,
                      int            width  = 0,

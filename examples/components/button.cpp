@@ -64,7 +64,7 @@ void ButtonExample::initUI() {
     // 1. 标准图标按钮
     NPushButton* settingsBtn = new NPushButton("Settings");
     settingsBtn->setFixedSize(120, 40);
-    settingsBtn->setIcon(nIcon->fromRegular(NRegularIconType::Settings24Regular, 30));
+    settingsBtn->setIcon(nIcon->fromRegular(NRegularIconType::SettingsChat16Regular, 30));
 
     // 2. 只有图标的按钮
     NPushButton* searchBtn = new NPushButton;

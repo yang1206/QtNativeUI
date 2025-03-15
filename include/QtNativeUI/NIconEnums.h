@@ -10,8 +10,31 @@
 #ifndef QTNATIVEUI_NICONENUMS_H
 #define QTNATIVEUI_NICONENUMS_H
 
-#include <QtNativeUI/NEnums.h>
+#include <QMetaEnum>
 #include "stdafx.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+#define Q_BEGIN_ENUM_CREATE(CLASS)                                                                                     \
+    namespace CLASS {                                                                                                  \
+    Q_NAMESPACE_EXPORT(QTNATIVEUI_EXPORT)
+
+#define Q_END_ENUM_CREATE(CLASS) }
+
+#define Q_ENUM_CREATE(CLASS) Q_ENUM_NS(CLASS)
+#else
+#define Q_BEGIN_ENUM_CREATE(CLASS)                                                                                     \
+    class QTNATIVEUI_EXPORT CLASS : public QObject {                                                                   \
+        Q_OBJECT                                                                                                       \
+      public:
+
+#define Q_END_ENUM_CREATE(CLASS)                                                                                       \
+  private:                                                                                                             \
+    Q_DISABLE_COPY(CLASS)                                                                                              \
+    }                                                                                                                  \
+    ;
+
+#define Q_ENUM_CREATE(CLASS) Q_ENUM(CLASS)
+#endif
 
 // Regular Icons
 Q_BEGIN_ENUM_CREATE(NRegularIconType)

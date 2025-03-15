@@ -34,7 +34,7 @@ void NIcon::initFontConfigs() {
 }
 
 QIcon NIcon::createIcon(const QString& fontFamily,
-                        unsigned int   unicode,
+                        uint32_t       unicode,
                         int            size,
                         const QColor&  color,
                         int            width,
@@ -49,7 +49,18 @@ QIcon NIcon::createIcon(const QString& fontFamily,
     painter.setPen(color);
     iconFont.setPixelSize(size);
     painter.setFont(iconFont);
-    painter.drawText(pix.rect(), Qt::AlignCenter, QChar(unicode));
+
+    QString iconText;
+    if (unicode <= 0xFFFF) {
+        // 传统方式处理BMP平面字符
+        iconText = QChar(unicode);
+    } else {
+        // 使用fromUcs4处理高位Unicode码点
+        uint ucs4Char = unicode;
+        iconText      = QString::fromUcs4(&ucs4Char, 1);
+    }
+
+    painter.drawText(pix.rect(), Qt::AlignCenter, iconText);
 
     return QIcon(pix);
 }

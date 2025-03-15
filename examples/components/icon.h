@@ -1,15 +1,18 @@
 #ifndef ICONEXAMPLE_H
 #define ICONEXAMPLE_H
 
+#include <QButtonGroup>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPushButton>
+#include <QRadioButton>
 #include <QScrollArea>
+#include <QTimer>
 #include <QWidget>
 #include "QtNativeUI/NIconEnums.h"
+#include "QtNativeUI/NPushButton.h"
 
-class IconButton : public QPushButton {
+class IconButton : public NPushButton {
     Q_OBJECT
   public:
     explicit IconButton(quint32 iconCode, const QString& name, bool isFilled, QWidget* parent = nullptr);
@@ -29,12 +32,14 @@ class IconExample : public QWidget {
     explicit IconExample(QWidget* parent = nullptr);
 
   private slots:
-    void onSearchTextChanged(const QString& text);
+    void onSearchTextChanged();
     void onIconClicked();
+    void applyFilter();
+    void onIconTypeChanged(int id);
 
   private:
     void initUI();
-    // void loadIcons();
+    void loadIcons();
     void loadIconsForPage(int page);
     void copyIconCode(IconButton* button);
 
@@ -44,22 +49,33 @@ class IconExample : public QWidget {
         bool    isFilled;
     };
 
+    enum IconFilterType { All = 0, RegularOnly = 1, FilledOnly = 2 };
+
     QLineEdit*   m_searchEdit;
     QScrollArea* m_scrollArea;
     QWidget*     m_contentWidget;
     QGridLayout* m_gridLayout;
     QLabel*      m_statusLabel;
-    QPushButton* m_prevButton;
-    QPushButton* m_nextButton;
+    NPushButton* m_prevButton;
+    NPushButton* m_nextButton;
     QLabel*      m_pageLabel;
+    QTimer*      m_searchTimer;
 
-    QList<IconInfo> m_allIcons;
-    QList<IconInfo> m_filteredIcons;
+    // 图标类型筛选
+    QButtonGroup* m_iconTypeGroup;
+    QRadioButton* m_allTypesRadio;
+    QRadioButton* m_regularRadio;
+    QRadioButton* m_filledRadio;
+
+    QList<IconInfo>        m_allIcons;
+    QList<IconInfo>        m_filteredIcons;
+    QMap<int, IconButton*> m_currentButtons; // 跟踪当前页面上的按钮
 
     QString          m_searchText;
-    int              m_currentPage  = 0;
-    static const int ICONS_PER_PAGE = 100;
-    static const int GRID_COLUMNS   = 8; // 每行显示的图标数量
+    int              m_currentPage    = 0;
+    IconFilterType   m_iconFilterType = All;
+    static const int ICONS_PER_PAGE   = 104; // 8行x13列 = 104个图标
+    static const int GRID_COLUMNS     = 8;   // 固定8列显示
 };
 
 #endif // ICONEXAMPLE_H
