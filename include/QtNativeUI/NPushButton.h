@@ -43,14 +43,18 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     void setAccentColor(const QColor& color);
 
   protected:
-    virtual void enterEvent(QEnterEvent* event) override;
-    virtual void leaveEvent(QEvent* event) override;
-    virtual void mousePressEvent(QMouseEvent* event) override;
-    virtual void mouseReleaseEvent(QMouseEvent* event) override;
-    virtual void paintEvent(QPaintEvent* event) override;
+    void enterEvent(QEnterEvent* event) override;
+    void leaveEvent(QEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
+    void changeEvent(QEvent* event) override;
+    void focusInEvent(QFocusEvent* event) override;
+    void focusOutEvent(QFocusEvent* event) override;
 
     void drawBackground(QPainter* painter);
     void drawBorder(QPainter* painter);
+    void drawIcon(QPainter* painter);
     void drawText(QPainter* painter);
 
   private:

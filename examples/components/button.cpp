@@ -11,6 +11,8 @@
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
 
+#include "QtNativeUI/NIcon.h"
+
 ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
 void ButtonExample::initUI() {
@@ -51,6 +53,43 @@ void ButtonExample::initUI() {
     standardButtonLayout->addStretch();
 
     standardLayout->addLayout(standardButtonLayout);
+
+    QLabel* iconButtonTitle = new QLabel("Icon Buttons");
+    iconButtonTitle->setFont(titleFont);
+    standardLayout->addWidget(iconButtonTitle);
+
+    QHBoxLayout* iconButtonLayout = new QHBoxLayout;
+    iconButtonLayout->setSpacing(16);
+
+    // 1. 标准图标按钮
+    NPushButton* settingsBtn = new NPushButton("Settings");
+    settingsBtn->setFixedSize(120, 40);
+    settingsBtn->setIcon(nIcon->fromRegular(NRegularIconType::SettingsChat16Regular, 30));
+
+    // 2. 只有图标的按钮
+    NPushButton* searchBtn = new NPushButton;
+    searchBtn->setFixedSize(40, 40);
+    searchBtn->setIcon(nIcon->fromFilled(NFilledIconType::Search20Filled, 30));
+
+    // 3. 带颜色的图标按钮
+    NPushButton* addBtn = new NPushButton("Add");
+    addBtn->setFixedSize(120, 40);
+    addBtn->setButtonType(NPushButton::Accent);
+    addBtn->setIcon(nIcon->fromFilled(NFilledIconType::Add20Filled, 30, Qt::white));
+
+    // 4. 自定义大小和颜色的图标按钮
+    NPushButton* customBtn = new NPushButton;
+    customBtn->setFixedSize(48, 48);
+    customBtn->setIcon(nIcon->fromRegular(NRegularIconType::Headphones24Regular, 48, Qt::red));
+
+    iconButtonLayout->addWidget(settingsBtn);
+    iconButtonLayout->addWidget(searchBtn);
+    iconButtonLayout->addWidget(addBtn);
+    iconButtonLayout->addWidget(customBtn);
+    iconButtonLayout->addStretch();
+
+    standardLayout->addLayout(iconButtonLayout);
+
     mainLayout->addWidget(standardSection);
 
     // 强调色按钮展示区

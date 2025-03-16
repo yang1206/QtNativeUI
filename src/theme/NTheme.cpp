@@ -213,7 +213,6 @@ void NTheme::drawEffectShadow(QPainter*            painter,
                               int                  shadowBorderWidth,
                               int                  borderRadius,
                               NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest) {
-    Q_D(NTheme);
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing);
 
