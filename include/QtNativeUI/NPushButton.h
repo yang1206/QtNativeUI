@@ -5,6 +5,7 @@
 #include <QPushButton>
 
 #include "NColor.h"
+#include "NIconEnums.h"
 #include "stdafx.h"
 
 class NPushButtonPrivate;
@@ -42,6 +43,9 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     void setAccentColor(const NAccentColor& color);
     void setAccentColor(const QColor& color);
 
+    void setFluentIcon(NRegularIconType::Icon icon, int size = 16, const QColor& color = QColor());
+    void setFluentIcon(NFilledIconType::Icon icon, int size = 16, const QColor& color = QColor());
+
   protected:
     void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
@@ -60,6 +64,7 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
   private:
     void updateAccentColors();
     void resetAccentColor();
+    void updateFluentIcon();
 };
 
 #endif // QTNATIVEUI_NPUSHBUTTON_H

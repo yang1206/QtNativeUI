@@ -16,9 +16,9 @@ IconButton::IconButton(quint32 iconCode, const QString& name, bool isFilled, QWi
     // 设置图标
     QIcon icon;
     if (isFilled) {
-        icon = nIcon->fromFilled(static_cast<NFilledIconType::Icon>(iconCode), 64);
+        icon = nIcon->fromFilled(static_cast<NFilledIconType::Icon>(iconCode), 32);
     } else {
-        icon = nIcon->fromRegular(static_cast<NRegularIconType::Icon>(iconCode), 64);
+        icon = nIcon->fromRegular(static_cast<NRegularIconType::Icon>(iconCode), 32);
     }
     setIcon(icon);
     setIconSize(QSize(32, 32));

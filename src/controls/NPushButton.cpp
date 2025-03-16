@@ -55,7 +55,7 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
         if (d->_buttonType == NPushButtonPrivate::Accent) {
             updateAccentColors();
         }
-
+        updateFluentIcon();
         update();
     });
 
@@ -217,6 +217,14 @@ void NPushButton::drawBackground(QPainter* painter) {
         painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
+    if (!d->_isPressed) {
+        painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
+        painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
+                          height() - d->_shadowBorderWidth,
+                          foregroundRect.width(),
+                          height() - d->_shadowBorderWidth);
+    }
+
     painter->restore();
 }
 
@@ -238,14 +246,6 @@ void NPushButton::drawBorder(QPainter* painter) {
 
     painter->setPen(borderColor);
     painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
-
-    if (!d->_isPressed) {
-        painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
-        painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
-                          height() - d->_shadowBorderWidth,
-                          foregroundRect.width(),
-                          height() - d->_shadowBorderWidth);
-    }
 
     painter->restore();
 }
@@ -384,4 +384,64 @@ void NPushButton::resetAccentColor() {
     d->_useCustomAccent = false;
     updateAccentColors();
     update();
+}
+
+void NPushButton::setFluentIcon(NRegularIconType::Icon icon, int size, const QColor& color) {
+    Q_D(NPushButton);
+    d->_fluentIcon.isRegular    = true;
+    d->_fluentIcon.iconCode     = static_cast<quint32>(icon);
+    d->_fluentIcon.size         = size;
+    d->_fluentIcon.customColor  = color;
+    d->_fluentIcon.isFluentIcon = true;
+
+    updateFluentIcon();
+}
+
+void NPushButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QColor& color) {
+    Q_D(NPushButton);
+    d->_fluentIcon.isRegular    = false;
+    d->_fluentIcon.iconCode     = static_cast<quint32>(icon);
+    d->_fluentIcon.size         = size;
+    d->_fluentIcon.customColor  = color;
+    d->_fluentIcon.isFluentIcon = true;
+    updateFluentIcon();
+}
+
+void NPushButton::updateFluentIcon() {
+    Q_D(NPushButton);
+    if (!d->_fluentIcon.isFluentIcon) {
+        return;
+    }
+    if (d->_fluentIcon.iconCode == 0) {
+        setIcon(QIcon());
+        return;
+    }
+
+    // 确定图标颜色
+    QColor iconColor;
+    if (!d->_fluentIcon.customColor.isValid()) {
+        // 如果没有自定义颜色，使用文本颜色
+        if (d->_buttonType == NPushButtonPrivate::Accent) {
+            iconColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
+        } else {
+            if (!isEnabled()) {
+                iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
+            } else {
+                iconColor = d->_isDark ? d->_darkTextColor : d->_lightTextColor;
+            }
+        }
+    } else {
+        iconColor = d->_fluentIcon.customColor;
+    }
+
+    // 设置图标
+    if (d->_fluentIcon.isRegular) {
+        setIcon(nIcon->fromRegular(
+            static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
+    } else {
+        setIcon(nIcon->fromFilled(
+            static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
+    }
+
+    setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
 }

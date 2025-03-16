@@ -64,23 +64,23 @@ void ButtonExample::initUI() {
     // 1. 标准图标按钮
     NPushButton* settingsBtn = new NPushButton("Settings");
     settingsBtn->setFixedSize(120, 40);
-    settingsBtn->setIcon(nIcon->fromRegular(NRegularIconType::SettingsChat16Regular, 30));
+    settingsBtn->setFluentIcon(NRegularIconType::SettingsChat16Regular, 24);
 
     // 2. 只有图标的按钮
     NPushButton* searchBtn = new NPushButton;
     searchBtn->setFixedSize(40, 40);
-    searchBtn->setIcon(nIcon->fromFilled(NFilledIconType::Search20Filled, 30));
+    searchBtn->setFluentIcon(NRegularIconType::Search24Regular, 24);
 
     // 3. 带颜色的图标按钮
     NPushButton* addBtn = new NPushButton("Add");
     addBtn->setFixedSize(120, 40);
     addBtn->setButtonType(NPushButton::Accent);
-    addBtn->setIcon(nIcon->fromFilled(NFilledIconType::Add20Filled, 30, Qt::white));
+    addBtn->setFluentIcon(NFilledIconType::Add20Filled, 24, Qt::white);
 
     // 4. 自定义大小和颜色的图标按钮
     NPushButton* customBtn = new NPushButton;
     customBtn->setFixedSize(48, 48);
-    customBtn->setIcon(nIcon->fromRegular(NRegularIconType::Headphones24Regular, 48, Qt::red));
+    customBtn->setFluentIcon(NRegularIconType::Headphones24Regular, 30, Qt::red);
 
     iconButtonLayout->addWidget(settingsBtn);
     iconButtonLayout->addWidget(searchBtn);

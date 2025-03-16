@@ -47,6 +47,17 @@ class NPushButtonPrivate : public QObject {
 
     bool         _useCustomAccent{false};
     NAccentColor _customAccentColor = NAccentColor::fromColor(QColor(0x00, 0x6B, 0xD4));
+
+    // 存储图标信息
+    struct FluentIconInfo {
+        bool    isRegular = true;
+        quint32 iconCode  = 0;
+        int     size      = 24;
+        QColor  customColor;
+        bool    isFluentIcon = false;  // 添加这个标志位来区分是否是 Fluent 图标
+    };
+
+    FluentIconInfo _fluentIcon;
 };
 
 #endif // QTNATIVEUI_NPUSHBUTTON_P_H

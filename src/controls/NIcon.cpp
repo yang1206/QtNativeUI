@@ -3,6 +3,7 @@
 #include <QFontDatabase>
 #include <QPainter>
 #include <QPixmap>
+#include <QtGui/qguiapplication.h>
 
 Q_SINGLETON_CREATE_CPP(NIcon)
 
@@ -39,8 +40,14 @@ QIcon NIcon::createIcon(const QString& fontFamily,
                         const QColor&  color,
                         int            width,
                         int            height) {
-    QFont   iconFont(fontFamily);
-    QPixmap pix(width > 0 ? width : size, height > 0 ? height : size);
+    QFont iconFont(fontFamily);
+
+    qreal dpr          = qApp->devicePixelRatio();
+    int   actualWidth  = (width > 0 ? width : size) * dpr;
+    int   actualHeight = (height > 0 ? height : size) * dpr;
+
+    QPixmap pix(actualWidth, actualHeight);
+    pix.setDevicePixelRatio(dpr);
     pix.fill(Qt::transparent);
 
     QPainter painter(&pix);
@@ -60,7 +67,7 @@ QIcon NIcon::createIcon(const QString& fontFamily,
         iconText      = QString::fromUcs4(&ucs4Char, 1);
     }
 
-    painter.drawText(pix.rect(), Qt::AlignCenter, iconText);
+    painter.drawText(0, 0, actualWidth / dpr, actualHeight / dpr, Qt::AlignCenter, iconText);
 
     return QIcon(pix);
 }
