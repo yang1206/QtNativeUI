@@ -10,7 +10,7 @@
 #include <QStyleHints>
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
-
+#include <QtNativeUI/NToggleButton.h>
 #include "QtNativeUI/NIcon.h"
 
 ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -53,6 +53,38 @@ void ButtonExample::initUI() {
     standardButtonLayout->addStretch();
 
     standardLayout->addLayout(standardButtonLayout);
+
+    QLabel* toggleButtonTitle = new QLabel("Toggle Buttons");
+    QFont   toggleTitleFont   = toggleButtonTitle->font();
+    toggleTitleFont.setPointSize(16);
+    toggleTitleFont.setBold(true);
+    toggleButtonTitle->setFont(toggleTitleFont);
+    standardLayout->addWidget(toggleButtonTitle);
+
+    QHBoxLayout* toggleButtonLayout = new QHBoxLayout;
+    toggleButtonLayout->setSpacing(16);
+
+    // 1. 标准图标按钮
+    NToggleButton* toggleBtn = new NToggleButton("Toggle");
+    toggleBtn->setFixedSize(120, 40);
+    toggleBtn->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+    toggleBtn->setChecked(true);
+
+    // 2. 只有图标的按钮
+    NToggleButton* toggleBtn2 = new NToggleButton;
+    toggleBtn2->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+
+    // 3. 禁用状态
+    NToggleButton* toggleBtn3 = new NToggleButton;
+    toggleBtn3->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+    toggleBtn3->setDisabled(true);
+
+    toggleButtonLayout->addWidget(toggleBtn);
+    toggleButtonLayout->addWidget(toggleBtn2);
+    toggleButtonLayout->addWidget(toggleBtn3);
+    toggleButtonLayout->addStretch();
+
+    standardLayout->addLayout(toggleButtonLayout);
 
     QLabel* iconButtonTitle = new QLabel("Icon Buttons");
     iconButtonTitle->setFont(titleFont);
