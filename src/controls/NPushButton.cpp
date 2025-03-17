@@ -13,21 +13,27 @@ Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightHoverColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkHoverColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightTextDefaultColor)
+Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkTextDefaultColor)
+Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightTextPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkTextPressColor)
 
 NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPushButtonPrivate()) {
     Q_D(NPushButton);
-    d->q_ptr               = this;
-    d->_pBorderRadius      = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
-    d->_themeMode          = nTheme->themeMode();
-    d->_isDark             = nTheme->isDarkMode();
-    d->_pLightDefaultColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkDefaultColor  = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
-    d->_pLightHoverColor   = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
-    d->_pDarkHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
-    d->_pLightPressColor   = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Light);
-    d->_pDarkPressColor    = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Dark);
-    d->_lightTextColor     = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-    d->_darkTextColor      = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->q_ptr                   = this;
+    d->_pBorderRadius          = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+    d->_themeMode              = nTheme->themeMode();
+    d->_isDark                 = nTheme->isDarkMode();
+    d->_pLightDefaultColor     = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
+    d->_pDarkDefaultColor      = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
+    d->_pLightHoverColor       = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
+    d->_pDarkHoverColor        = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
+    d->_pLightPressColor       = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Light);
+    d->_pDarkPressColor        = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Dark);
+    d->_pLightTextDefaultColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+    d->_pDarkTextDefaultColor  = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightTextPressColor   = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
+    d->_pDarkTextPressColor    = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
 
     d->_lightBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_darkBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
@@ -71,28 +77,6 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
 NPushButton::NPushButton(QString text, QWidget* parent) : NPushButton(parent) { setText(text); }
 
 NPushButton::~NPushButton() {}
-
-void NPushButton::setLightTextColor(QColor color) {
-    Q_D(NPushButton);
-    d->_lightTextColor = color;
-    update();
-}
-
-QColor NPushButton::getLightTextColor() const {
-    Q_D(const NPushButton);
-    return d->_lightTextColor;
-}
-
-void NPushButton::setDarkTextColor(QColor color) {
-    Q_D(NPushButton);
-    d->_darkTextColor = color;
-    update();
-}
-
-QColor NPushButton::getDarkTextColor() const {
-    Q_D(const NPushButton);
-    return d->_darkTextColor;
-}
 
 void NPushButton::setButtonType(ButtonType type) {
     Q_D(NPushButton);
@@ -174,6 +158,7 @@ void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
     drawBorder(&painter);
     drawIcon(&painter);
     drawText(&painter);
+    updateFluentIcon();
 }
 
 void NPushButton::drawBackground(QPainter* painter) {
@@ -217,7 +202,12 @@ void NPushButton::drawBackground(QPainter* painter) {
         painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
-    if (!d->_isPressed) {
+    if ((!d->_isPressed)) {
+        if (d->_buttonType == NPushButtonPrivate::Accent) {
+            painter->restore();
+            return;
+        }
+
         painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
         painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
                           height() - d->_shadowBorderWidth,
@@ -313,7 +303,11 @@ void NPushButton::drawText(QPainter* painter) {
         if (!isEnabled()) {
             textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
         } else {
-            textColor = d->_isDark ? d->_darkTextColor : d->_lightTextColor;
+            if (d->_isPressed) {
+                textColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
+            } else {
+                textColor = d->_isDark ? d->_pDarkTextDefaultColor : d->_pLightTextDefaultColor;
+            }
         }
     }
 
@@ -422,12 +416,24 @@ void NPushButton::updateFluentIcon() {
     if (!d->_fluentIcon.customColor.isValid()) {
         // 如果没有自定义颜色，使用文本颜色
         if (d->_buttonType == NPushButtonPrivate::Accent) {
-            iconColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
+            if (!isEnabled()) {
+                iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
+            } else {
+                if (d->_isPressed) {
+                    iconColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
+                } else {
+                    iconColor = d->_isDark ? d->_accentTextColor : d->_accentDisabledTextColor;
+                }
+            }
         } else {
             if (!isEnabled()) {
                 iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
             } else {
-                iconColor = d->_isDark ? d->_darkTextColor : d->_lightTextColor;
+                if (d->_isPressed) {
+                    iconColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
+                } else {
+                    iconColor = d->_isDark ? d->_pDarkTextDefaultColor : d->_pLightTextDefaultColor;
+                }
             }
         }
     } else {

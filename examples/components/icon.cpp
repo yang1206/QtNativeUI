@@ -1,7 +1,6 @@
 #include "icon.h"
 #include <QApplication>
 #include <QClipboard>
-#include <QHBoxLayout>
 #include <QMetaEnum>
 #include <QRegularExpression>
 #include <QToolTip>

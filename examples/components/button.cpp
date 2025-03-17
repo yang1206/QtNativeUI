@@ -10,7 +10,7 @@
 #include <QStyleHints>
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
-
+#include <QtNativeUI/NToggleButton.h>
 #include "QtNativeUI/NIcon.h"
 
 ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -53,6 +53,38 @@ void ButtonExample::initUI() {
     standardButtonLayout->addStretch();
 
     standardLayout->addLayout(standardButtonLayout);
+
+    QLabel* toggleButtonTitle = new QLabel("Toggle Buttons");
+    QFont   toggleTitleFont   = toggleButtonTitle->font();
+    toggleTitleFont.setPointSize(16);
+    toggleTitleFont.setBold(true);
+    toggleButtonTitle->setFont(toggleTitleFont);
+    standardLayout->addWidget(toggleButtonTitle);
+
+    QHBoxLayout* toggleButtonLayout = new QHBoxLayout;
+    toggleButtonLayout->setSpacing(16);
+
+    // 1. 标准图标按钮
+    NToggleButton* toggleBtn = new NToggleButton("Toggle");
+    toggleBtn->setFixedSize(120, 40);
+    toggleBtn->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+    toggleBtn->setChecked(true);
+
+    // 2. 只有图标的按钮
+    NToggleButton* toggleBtn2 = new NToggleButton;
+    toggleBtn2->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+
+    // 3. 禁用状态
+    NToggleButton* toggleBtn3 = new NToggleButton;
+    toggleBtn3->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+    toggleBtn3->setDisabled(true);
+
+    toggleButtonLayout->addWidget(toggleBtn);
+    toggleButtonLayout->addWidget(toggleBtn2);
+    toggleButtonLayout->addWidget(toggleBtn3);
+    toggleButtonLayout->addStretch();
+
+    standardLayout->addLayout(toggleButtonLayout);
 
     QLabel* iconButtonTitle = new QLabel("Icon Buttons");
     iconButtonTitle->setFont(titleFont);
@@ -103,9 +135,9 @@ void ButtonExample::initUI() {
 
     // 使用流式布局展示强调色按钮
     QWidget*     flowWidget = new QWidget;
-    QGridLayout* flowLayout = new QGridLayout(flowWidget);
-    flowLayout->setSpacing(16);
-    flowLayout->setAlignment(Qt::AlignLeft);
+    QGridLayout* gridLayout = new QGridLayout(flowWidget);
+    gridLayout->setSpacing(16);
+    gridLayout->setAlignment(Qt::AlignLeft);
 
     // 预定义的强调色类型
     struct AccentButtonInfo {
@@ -123,25 +155,31 @@ void ButtonExample::initUI() {
                                            {"Green", NAccentColorType::Green}};
 
     // 添加所有预定义的强调色按钮
-    for (const auto& info : accentTypes) {
-        NPushButton* btn = new NPushButton(info.name);
+    int columnCount = 4;
+    for (int i = 0; i < accentTypes.size(); ++i) {
+        const auto&                  info = accentTypes[i];
+        const QString&               name = info.name;
+        const NAccentColorType::Type type = info.type;
+        NPushButton*                 btn  = new NPushButton(name);
         btn->setFixedWidth(120);
         btn->setButtonType(NPushButton::Accent);
-        btn->setAccentColor(NColors::getAccentColor(info.type));
-        flowLayout->addWidget(btn);
+        btn->setAccentColor(NColors::getAccentColor(type));
+        gridLayout->addWidget(btn, i / columnCount, i % columnCount, Qt::AlignCenter);
     }
+
+    QHBoxLayout* otherButtons = new QHBoxLayout();
+    QWidget*     otherBtns    = new QWidget(flowWidget);
+    otherBtns->setLayout(otherButtons);
 
     NPushButton* accentBtn = new NPushButton("Accent");
     accentBtn->setButtonType(NPushButton::Accent);
-    flowLayout->addWidget(accentBtn);
-
+    otherButtons->addWidget(accentBtn);
     // 添加一个禁用状态的强调色按钮示例
     NPushButton* disabledAccentBtn = new NPushButton("Disabled Accent");
     disabledAccentBtn->setButtonType(NPushButton::Accent);
     disabledAccentBtn->setAccentColor(NColors::getAccentColor(NAccentColorType::Blue));
     disabledAccentBtn->setDisabled(true);
-    flowLayout->addWidget(disabledAccentBtn);
-
+    otherButtons->addWidget(disabledBtn);
     // 添加自定义强调色按钮
     NPushButton* customAccentBtn = new NPushButton("Custom Accent");
     customAccentBtn->setButtonType(NPushButton::Accent);
@@ -158,8 +196,10 @@ void ButtonExample::initUI() {
     );
 
     customAccentBtn->setAccentColor(customAccent);
-    flowLayout->addWidget(customAccentBtn);
+    otherButtons->addWidget(customAccentBtn);
+
     accentLayout->addWidget(flowWidget);
+    accentLayout->addWidget(otherBtns);
     mainLayout->addWidget(accentSection);
 
     // 添加底部间距

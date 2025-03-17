@@ -19,6 +19,10 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkHoverColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightPressColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkPressColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightTextDefaultColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkTextDefaultColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightTextPressColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkTextPressColor)
 
   public:
     enum ButtonType {
@@ -33,12 +37,6 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
 
     void       setButtonType(ButtonType type);
     ButtonType buttonType() const;
-
-    void   setLightTextColor(QColor color);
-    QColor getLightTextColor() const;
-
-    void   setDarkTextColor(QColor color);
-    QColor getDarkTextColor() const;
 
     void setAccentColor(const NAccentColor& color);
     void setAccentColor(const QColor& color);

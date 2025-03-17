@@ -1,9 +1,8 @@
 #ifndef QTNATIVEUI_NPUSHBUTTON_P_H
 #define QTNATIVEUI_NPUSHBUTTON_P_H
 
+#include <QtNativeUI/NEnums.h>
 #include <QtNativeUI/NPushButton.h>
-
-#include "QtNativeUI/NEnums.h"
 
 class NPushButtonPrivate : public QObject {
     Q_OBJECT
@@ -14,6 +13,11 @@ class NPushButtonPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, DarkHoverColor)
     Q_PROPERTY_CREATE_D(QColor, LightPressColor)
     Q_PROPERTY_CREATE_D(QColor, DarkPressColor)
+    Q_PROPERTY_CREATE_D(QColor, LightTextDefaultColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkTextDefaultColor)
+    Q_PROPERTY_CREATE_D(QColor, LightTextPressColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkTextPressColor)
+
   public:
     explicit NPushButtonPrivate(QObject* parent = nullptr);
     ~NPushButtonPrivate();
@@ -27,8 +31,6 @@ class NPushButtonPrivate : public QObject {
     Q_ENUM(ButtonType)
 
   private:
-    QColor                _lightTextColor;
-    QColor                _darkTextColor;
     QColor                _lightBorderColor;
     QColor                _darkBorderColor;
     bool                  _isPressed{false};
@@ -54,7 +56,7 @@ class NPushButtonPrivate : public QObject {
         quint32 iconCode  = 0;
         int     size      = 24;
         QColor  customColor;
-        bool    isFluentIcon = false;  // 添加这个标志位来区分是否是 Fluent 图标
+        bool    isFluentIcon = false; // 添加这个标志位来区分是否是 Fluent 图标
     };
 
     FluentIconInfo _fluentIcon;
