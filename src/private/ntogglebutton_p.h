@@ -13,10 +13,18 @@ class NToggleButtonPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, DarkHoverColor)
     Q_PROPERTY_CREATE_D(QColor, LightPressColor)
     Q_PROPERTY_CREATE_D(QColor, DarkPressColor)
-    Q_PROPERTY_CREATE_D(QColor, LightTextColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkTextColor)
+    Q_PROPERTY_CREATE_D(QColor, LightTextDefaultColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkTextDefaultColor)
+    Q_PROPERTY_CREATE_D(QColor, LightTextPressColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkTextPressColor)
     Q_PROPERTY_CREATE_D(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBorderColor)
+    Q_PROPERTY_CREATE_D(QColor, AccentDefaultColor)
+    Q_PROPERTY_CREATE_D(QColor, AccentHoverColor)
+    Q_PROPERTY_CREATE_D(QColor, AccentPressColor)
+    Q_PROPERTY_CREATE_D(QColor, AccentDisabledColor)
+    Q_PROPERTY_CREATE_D(QColor, AccentTextColor)
+    Q_PROPERTY_CREATE_D(QColor, AccentDisabledTextColor)
     Q_PROPERTY_CREATE_D(QString, Text)
 
   public:
@@ -32,13 +40,6 @@ class NToggleButtonPrivate : public QObject {
     int                   _shadowBorderWidth{3};
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
-
-    QColor _accentDefaultColor;
-    QColor _accentHoverColor;
-    QColor _accentPressColor;
-    QColor _accentDisabledColor;
-    QColor _accentTextColor;
-    QColor _accentDisabledTextColor;
 
     // 存储图标信息
     struct FluentIconInfo {

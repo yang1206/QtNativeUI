@@ -135,9 +135,9 @@ void ButtonExample::initUI() {
 
     // 使用流式布局展示强调色按钮
     QWidget*     flowWidget = new QWidget;
-    QGridLayout* flowLayout = new QGridLayout(flowWidget);
-    flowLayout->setSpacing(16);
-    flowLayout->setAlignment(Qt::AlignLeft);
+    QGridLayout* gridLayout = new QGridLayout(flowWidget);
+    gridLayout->setSpacing(16);
+    gridLayout->setAlignment(Qt::AlignLeft);
 
     // 预定义的强调色类型
     struct AccentButtonInfo {
@@ -155,25 +155,31 @@ void ButtonExample::initUI() {
                                            {"Green", NAccentColorType::Green}};
 
     // 添加所有预定义的强调色按钮
-    for (const auto& info : accentTypes) {
-        NPushButton* btn = new NPushButton(info.name);
+    int columnCount = 4;
+    for (int i = 0; i < accentTypes.size(); ++i) {
+        const auto&                  info = accentTypes[i];
+        const QString&               name = info.name;
+        const NAccentColorType::Type type = info.type;
+        NPushButton*                 btn  = new NPushButton(name);
         btn->setFixedWidth(120);
         btn->setButtonType(NPushButton::Accent);
-        btn->setAccentColor(NColors::getAccentColor(info.type));
-        flowLayout->addWidget(btn);
+        btn->setAccentColor(NColors::getAccentColor(type));
+        gridLayout->addWidget(btn, i / columnCount, i % columnCount, Qt::AlignCenter);
     }
+
+    QHBoxLayout* otherButtons = new QHBoxLayout();
+    QWidget*     otherBtns    = new QWidget(flowWidget);
+    otherBtns->setLayout(otherButtons);
 
     NPushButton* accentBtn = new NPushButton("Accent");
     accentBtn->setButtonType(NPushButton::Accent);
-    flowLayout->addWidget(accentBtn);
-
+    otherButtons->addWidget(accentBtn);
     // 添加一个禁用状态的强调色按钮示例
     NPushButton* disabledAccentBtn = new NPushButton("Disabled Accent");
     disabledAccentBtn->setButtonType(NPushButton::Accent);
     disabledAccentBtn->setAccentColor(NColors::getAccentColor(NAccentColorType::Blue));
     disabledAccentBtn->setDisabled(true);
-    flowLayout->addWidget(disabledAccentBtn);
-
+    otherButtons->addWidget(disabledBtn);
     // 添加自定义强调色按钮
     NPushButton* customAccentBtn = new NPushButton("Custom Accent");
     customAccentBtn->setButtonType(NPushButton::Accent);
@@ -190,8 +196,10 @@ void ButtonExample::initUI() {
     );
 
     customAccentBtn->setAccentColor(customAccent);
-    flowLayout->addWidget(customAccentBtn);
+    otherButtons->addWidget(customAccentBtn);
+
     accentLayout->addWidget(flowWidget);
+    accentLayout->addWidget(otherBtns);
     mainLayout->addWidget(accentSection);
 
     // 添加底部间距

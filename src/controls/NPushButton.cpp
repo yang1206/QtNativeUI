@@ -202,7 +202,12 @@ void NPushButton::drawBackground(QPainter* painter) {
         painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
-    if (!d->_isPressed) {
+    if ((!d->_isPressed)) {
+        if (d->_buttonType == NPushButtonPrivate::Accent) {
+            painter->restore();
+            return;
+        }
+
         painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
         painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
                           height() - d->_shadowBorderWidth,

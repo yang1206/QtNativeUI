@@ -14,10 +14,18 @@ Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, LightHoverColor)
 Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, DarkHoverColor)
 Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, LightPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, DarkPressColor)
-Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, LightTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, DarkTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, LightTextDefaultColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, DarkTextDefaultColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, LightTextPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, DarkTextPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, LightBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, DarkBorderColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, AccentDefaultColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, AccentHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, AccentPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, AccentDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, AccentTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QColor, AccentDisabledTextColor)
 Q_PROPERTY_CREATE_Q_CPP(NToggleButton, QString, Text)
 NToggleButton::NToggleButton(QWidget* parent) : QWidget(parent), d_ptr(new NToggleButtonPrivate()) { init(); }
 
@@ -37,10 +45,14 @@ void NToggleButton::init() {
     d->_pDarkHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
     d->_pLightPressColor   = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Light);
     d->_pDarkPressColor    = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Dark);
-    d->_pLightTextColor    = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-    d->_pDarkTextColor     = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
-    d->_pLightBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
-    d->_pDarkBorderColor   = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
+
+    d->_pLightTextDefaultColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+    d->_pDarkTextDefaultColor  = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightTextPressColor   = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
+    d->_pDarkTextPressColor    = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
+
+    d->_pLightBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
+    d->_pDarkBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
 
     updateAccentColors();
 
@@ -180,6 +192,7 @@ void NToggleButton::paintEvent(QPaintEvent* event) {
     drawBorder(&painter);
     drawIcon(&painter);
     drawText(&painter);
+    updateFluentIcon();
 }
 
 void NToggleButton::mousePressEvent(QMouseEvent* event) {
@@ -226,13 +239,13 @@ void NToggleButton::drawBackground(QPainter* painter) {
     if (d->_checked) {
         // 选中状态使用强调色
         if (!isEnabled()) {
-            bgColor = d->_accentDisabledColor;
+            bgColor = d->_pAccentDisabledColor;
         } else if (d->_isPressed) {
-            bgColor = d->_accentPressColor;
+            bgColor = d->_pAccentPressColor;
         } else if (underMouse()) {
-            bgColor = d->_accentHoverColor;
+            bgColor = d->_pAccentHoverColor;
         } else {
-            bgColor = d->_accentDefaultColor;
+            bgColor = d->_pAccentDefaultColor;
         }
     } else {
         // 未选中状态使用普通颜色
@@ -344,13 +357,17 @@ void NToggleButton::drawText(QPainter* painter) {
 
     if (d->_checked) {
         // 选中状态使用强调色文本颜色
-        textColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
+        textColor = isEnabled() ? d->_pAccentTextColor : d->_pAccentDisabledTextColor;
     } else {
         // 未选中状态使用普通文本颜色
         if (!isEnabled()) {
             textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
         } else {
-            textColor = d->_isDark ? d->_pDarkTextColor : d->_pLightTextColor;
+            if (d->_isPressed) {
+                textColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
+            } else {
+                textColor = d->_isDark ? d->_pDarkTextDefaultColor : d->_pLightTextDefaultColor;
+            }
         }
     }
 
@@ -379,13 +396,13 @@ void NToggleButton::updateAccentColors() {
 
     NAccentColor accentColor = nTheme->accentColor();
 
-    d->_accentDefaultColor  = accentColor.normal();
-    d->_accentHoverColor    = accentColor.light();
-    d->_accentPressColor    = accentColor.dark();
-    d->_accentDisabledColor = NThemeColor(NFluentColorKey::AccentFillColorDisabled, d->_themeMode);
+    d->_pAccentDefaultColor  = accentColor.normal();
+    d->_pAccentHoverColor    = accentColor.light();
+    d->_pAccentPressColor    = accentColor.dark();
+    d->_pAccentDisabledColor = NThemeColor(NFluentColorKey::AccentFillColorDisabled, d->_themeMode);
 
-    d->_accentTextColor         = NThemeColor(NFluentColorKey::TextOnAccentFillColorPrimary, d->_themeMode);
-    d->_accentDisabledTextColor = NThemeColor(NFluentColorKey::TextOnAccentFillColorDisabled, d->_themeMode);
+    d->_pAccentTextColor         = NThemeColor(NFluentColorKey::TextOnAccentFillColorPrimary, d->_themeMode);
+    d->_pAccentDisabledTextColor = NThemeColor(NFluentColorKey::TextOnAccentFillColorDisabled, d->_themeMode);
 }
 
 void NToggleButton::updateFluentIcon() {
@@ -396,12 +413,16 @@ void NToggleButton::updateFluentIcon() {
     if (!d->_fluentIcon.customColor.isValid()) {
         // 如果没有自定义颜色，使用文本颜色
         if (d->_checked) {
-            iconColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
+            iconColor = isEnabled() ? d->_pAccentTextColor : d->_pAccentDisabledTextColor;
         } else {
             if (!isEnabled()) {
                 iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
             } else {
-                iconColor = d->_isDark ? d->_pDarkTextColor : d->_pLightTextColor;
+                if (d->_isPressed) {
+                    iconColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
+                } else {
+                    iconColor = d->_isDark ? d->_pDarkTextDefaultColor : d->_pLightTextDefaultColor;
+                }
             }
         }
     } else {
