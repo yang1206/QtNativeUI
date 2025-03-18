@@ -7,10 +7,12 @@
 #include <QApplication>
 #include <QGridLayout>
 #include <QLabel>
+#include <QMenu>
 #include <QStyleHints>
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NToggleButton.h>
+#include "QtNativeUI/NDropDownButton.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -200,7 +202,70 @@ void ButtonExample::initUI() {
 
     accentLayout->addWidget(flowWidget);
     accentLayout->addWidget(otherBtns);
+
+    QWidget*     dropDownSection = new QWidget;
+    QVBoxLayout* dropDownLayout  = new QVBoxLayout(dropDownSection);
+    dropDownLayout->setSpacing(16);
+
+    // 添加标题
+    QLabel* dropDownTitle = new QLabel("Dropdown Buttons");
+    titleFont.setPointSize(16);
+    titleFont.setBold(true);
+    dropDownTitle->setFont(titleFont);
+    dropDownLayout->addWidget(dropDownTitle);
+
+    QHBoxLayout* dropDownButtonLayout = new QHBoxLayout;
+    dropDownButtonLayout->setSpacing(16);
+
+    // 1. 基本下拉按钮
+    NDropDownButton* basicDropDown = new NDropDownButton("Basic Dropdown");
+    basicDropDown->setFixedSize(120, 40);
+    QMenu* basicMenu = new QMenu(basicDropDown);
+    basicMenu->addAction("Option 1");
+    basicMenu->addAction("Option 2");
+    basicMenu->addAction("Option 3");
+    basicDropDown->setMenu(basicMenu);
+
+    // 2. 带图标的下拉按钮
+    NDropDownButton* iconDropDown = new NDropDownButton("Settings");
+    iconDropDown->setFixedSize(120, 40);
+    // iconDropDown->setFluentIcon(NRegularIconType::Settings16Regular, 16);
+    QMenu* settingsMenu = new QMenu(iconDropDown);
+    settingsMenu->addAction("General");
+    settingsMenu->addAction("Advanced");
+    settingsMenu->addSeparator();
+    settingsMenu->addAction("Help");
+    iconDropDown->setMenu(settingsMenu);
+
+    // 3. 强调色下拉按钮
+    NDropDownButton* accentDropDown = new NDropDownButton("More Actions");
+    accentDropDown->setFixedSize(120, 40);
+    // accentDropDown->setButtonType(NPushButton::Accent);
+    QMenu* actionMenu = new QMenu(accentDropDown);
+    actionMenu->addAction("Create New");
+    actionMenu->addAction("Import...");
+    actionMenu->addAction("Export...");
+    accentDropDown->setMenu(actionMenu);
+
+    // 4. 禁用状态的下拉按钮
+    NDropDownButton* disabledDropDown = new NDropDownButton("Disabled");
+    disabledDropDown->setFixedSize(120, 40);
+    disabledDropDown->setDisabled(true);
+    QMenu* disabledMenu = new QMenu(disabledDropDown);
+    disabledMenu->addAction("Not Available");
+    disabledDropDown->setMenu(disabledMenu);
+
+    // 添加按钮到布局
+    dropDownButtonLayout->addWidget(basicDropDown);
+    dropDownButtonLayout->addWidget(iconDropDown);
+    dropDownButtonLayout->addWidget(accentDropDown);
+    dropDownButtonLayout->addWidget(disabledDropDown);
+    dropDownButtonLayout->addStretch();
+
+    dropDownLayout->addLayout(dropDownButtonLayout);
+
     mainLayout->addWidget(accentSection);
+    mainLayout->addWidget(dropDownSection);
 
     // 添加底部间距
     mainLayout->addStretch();

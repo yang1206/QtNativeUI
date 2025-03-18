@@ -5,6 +5,7 @@
 #include "components/checkbox.h"
 #include "components/colors.h"
 #include "components/icon.h"
+#include "components/menu.h"
 #
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
@@ -13,6 +14,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
     auto btn = new ButtonExample(this);
     m_tabWidget->addTab(btn, "Button");
+
+    auto menu = new MenuExample(this);
+    m_tabWidget->addTab(menu, "Menu");
 
     auto checkBox = new CheckBoxExample(this);
     m_tabWidget->addTab(checkBox, "CheckBox");
