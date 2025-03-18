@@ -12,6 +12,7 @@
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NToggleButton.h>
 #include "QtNativeUI/NIcon.h"
+#include "QtNativeUI/NTheme.h"
 
 ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
@@ -39,9 +40,8 @@ void ButtonExample::initUI() {
     NPushButton* themeBtn = new NPushButton("Change Theme");
     themeBtn->setFixedSize(120, 40);
     connect(themeBtn, &NPushButton::clicked, this, [this]() {
-        qApp->styleHints()->setColorScheme(qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark
-                                               ? Qt::ColorScheme::Light
-                                               : Qt::ColorScheme::Dark);
+        nTheme->setThemeMode(qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark ? NThemeType::ThemeMode::Light
+                                                                                        : NThemeType::ThemeMode::Dark);
     });
     NPushButton* normalBtn   = new NPushButton("Standard");
     NPushButton* disabledBtn = new NPushButton("Disabled");
