@@ -75,10 +75,93 @@ void MenuExample::initUI() {
     basicButtonLayout->addStretch();
     basicLayout->addLayout(basicButtonLayout);
 
+    // 添加高级菜单示例
+    QWidget*     advancedSection = new QWidget;
+    QVBoxLayout* advancedLayout  = new QVBoxLayout(advancedSection);
+    advancedLayout->setSpacing(16);
+
+    QLabel* advancedTitle = new QLabel("Advanced Menus");
+    advancedTitle->setFont(titleFont);
+    advancedLayout->addWidget(advancedTitle);
+
+    QHBoxLayout* advancedButtonLayout = new QHBoxLayout;
+    advancedButtonLayout->setSpacing(16);
+
+    // 1. 带快捷键的菜单
+    NPushButton* shortcutBtn = new NPushButton("Menu with Shortcuts");
+    shortcutBtn->setFluentIcon(NRegularIconType::Keyboard16Regular);
+    NMenu* shortcutMenu = new NMenu(shortcutBtn);
+
+    shortcutMenu->addItem("New", NRegularIconType::Document16Regular, QKeySequence::New);
+    shortcutMenu->addItem("Open", NRegularIconType::FolderOpen16Regular, QKeySequence::Open);
+    shortcutMenu->addItem("Save", NRegularIconType::Save16Regular, QKeySequence::Save);
+    shortcutMenu->addSeparator();
+    shortcutMenu->addItem("Cut", NRegularIconType::Cut16Regular, QKeySequence::Cut);
+    shortcutMenu->addItem("Copy", NRegularIconType::Copy16Regular, QKeySequence::Copy);
+    shortcutMenu->addItem("Paste", NRegularIconType::ClipboardPaste16Regular, QKeySequence::Paste);
+
+    connect(shortcutBtn, &NPushButton::clicked, this, [shortcutBtn, shortcutMenu]() {
+        QPoint pos = shortcutBtn->mapToGlobal(QPoint(0, shortcutBtn->height()));
+        shortcutMenu->exec(pos);
+    });
+
+    // 2. 可勾选菜单
+    NPushButton* checkableBtn = new NPushButton("Checkable Menu");
+    checkableBtn->setFluentIcon(NRegularIconType::CheckboxChecked16Regular);
+    NMenu* checkableMenu = new NMenu(checkableBtn);
+
+    QAction* boldAction   = checkableMenu->addCheckableItem("Bold", NRegularIconType::TextBold16Regular, false);
+    QAction* italicAction = checkableMenu->addCheckableItem("Italic", NRegularIconType::TextItalic16Regular, true);
+    QAction* underlineAction =
+        checkableMenu->addCheckableItem("Underline", NRegularIconType::TextUnderline16Regular, false);
+
+    checkableMenu->addSeparator();
+
+    // 添加子菜单示例
+    NMenu*   viewMenu        = checkableMenu->addSubMenu("View Options", NRegularIconType::Eye16Regular);
+    QAction* statusBarAction = viewMenu->addCheckableItem("Status Bar", true);
+    QAction* toolbarAction   = viewMenu->addCheckableItem("Toolbar", true);
+    QAction* sidebarAction   = viewMenu->addCheckableItem("Sidebar", false);
+
+    // 设置工具提示
+    checkableMenu->setItemToolTip(boldAction, "Make text bold (Ctrl+B)");
+    checkableMenu->setItemToolTip(italicAction, "Make text italic (Ctrl+I)");
+    checkableMenu->setItemToolTip(underlineAction, "Make text underlined (Ctrl+U)");
+
+    // 连接信号
+    // checkableMenu->connectItem(boldAction, [this]() { qDebug() << "Bold toggled"; });
+
+    connect(checkableBtn, &NPushButton::clicked, this, [checkableBtn, checkableMenu]() {
+        QPoint pos = checkableBtn->mapToGlobal(QPoint(0, checkableBtn->height()));
+        checkableMenu->exec(pos);
+    });
+
+    // 3. 禁用项菜单示例
+    NPushButton* disabledItemBtn = new NPushButton("Menu with Disabled Items");
+    disabledItemBtn->setFluentIcon(NRegularIconType::Prohibited16Regular);
+    NMenu* disabledItemMenu = new NMenu(disabledItemBtn);
+
+    disabledItemMenu->addItem("Enabled Item 1");
+    QAction* disabledAction = disabledItemMenu->addItem("Disabled Item", NRegularIconType::Warning16Regular);
+    disabledItemMenu->setItemEnabled(disabledAction, false);
+    disabledItemMenu->addItem("Enabled Item 2");
+
+    connect(disabledItemBtn, &NPushButton::clicked, this, [disabledItemBtn, disabledItemMenu]() {
+        QPoint pos = disabledItemBtn->mapToGlobal(QPoint(0, disabledItemBtn->height()));
+        disabledItemMenu->exec(pos);
+    });
+
+    advancedButtonLayout->addWidget(shortcutBtn);
+    advancedButtonLayout->addWidget(checkableBtn);
+    advancedButtonLayout->addWidget(disabledItemBtn);
+    advancedButtonLayout->addStretch();
+    advancedLayout->addLayout(advancedButtonLayout);
+
     // 添加到主布局
     mainLayout->addWidget(basicSection);
+    mainLayout->addWidget(advancedSection);
     mainLayout->addStretch();
 
     // 设置最小宽度
-    setMinimumWidth(600);
+    setMinimumWidth(800);
 }
