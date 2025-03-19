@@ -208,7 +208,7 @@ void NPushButton::drawBackground(QPainter* painter) {
             return;
         }
 
-        painter->setPen(d->_isDark ? QColor(0x63, 0x63, 0x63) : QColor(0xD6, 0xD6, 0xD6));
+        painter->setPen(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, d->_themeMode));
         painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
                           height() - d->_shadowBorderWidth,
                           foregroundRect.width(),

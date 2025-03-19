@@ -34,8 +34,9 @@ void MenuExample::initUI() {
     basicButtonLayout->setSpacing(16);
 
     // 1. 简单菜单按钮
-    NPushButton* basicBtn  = new NPushButton("Show Menu");
-    NMenu*       basicMenu = new NMenu(basicBtn);
+    NPushButton* basicBtn = new NPushButton("Show Menu");
+    basicBtn->setFixedSize(120, 40);
+    NMenu* basicMenu = new NMenu(basicBtn);
     basicMenu->addItem("New File");
     basicMenu->addItem("Open...");
     basicMenu->addItem("Save");
@@ -49,6 +50,7 @@ void MenuExample::initUI() {
 
     // 2. 带图标的菜单
     NPushButton* iconBtn = new NPushButton("Menu with Icons");
+    iconBtn->setFixedSize(180, 40);
     iconBtn->setFluentIcon(NRegularIconType::Settings16Regular);
     NMenu* iconMenu = new NMenu(iconBtn);
 
@@ -89,6 +91,8 @@ void MenuExample::initUI() {
 
     // 1. 带快捷键的菜单
     NPushButton* shortcutBtn = new NPushButton("Menu with Shortcuts");
+    shortcutBtn->setFixedSize(180, 40);
+
     shortcutBtn->setFluentIcon(NRegularIconType::Keyboard16Regular);
     NMenu* shortcutMenu = new NMenu(shortcutBtn);
 
@@ -107,6 +111,8 @@ void MenuExample::initUI() {
 
     // 2. 可勾选菜单
     NPushButton* checkableBtn = new NPushButton("Checkable Menu");
+    checkableBtn->setFixedSize(180, 40);
+
     checkableBtn->setFluentIcon(NRegularIconType::CheckboxChecked16Regular);
     NMenu* checkableMenu = new NMenu(checkableBtn);
 
@@ -138,6 +144,8 @@ void MenuExample::initUI() {
 
     // 3. 禁用项菜单示例
     NPushButton* disabledItemBtn = new NPushButton("Menu with Disabled Items");
+    disabledItemBtn->setFixedSize(240, 40);
+
     disabledItemBtn->setFluentIcon(NRegularIconType::Prohibited16Regular);
     NMenu* disabledItemMenu = new NMenu(disabledItemBtn);
 
@@ -161,7 +169,4 @@ void MenuExample::initUI() {
     mainLayout->addWidget(basicSection);
     mainLayout->addWidget(advancedSection);
     mainLayout->addStretch();
-
-    // 设置最小宽度
-    setMinimumWidth(800);
 }

@@ -13,12 +13,6 @@ Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, LightBackgroundColor)
 Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, DarkBackgroundColor)
 Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, LightBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, DarkBorderColor)
-Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, LightItemTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, DarkItemTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, LightItemHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, DarkItemHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, LightItemSelectedColor)
-Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, DarkItemSelectedColor)
 Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, LightSeparatorColor)
 Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, DarkSeparatorColor)
 NMenu::NMenu(QWidget* parent) : QMenu(parent), d_ptr(new NMenuPrivate()) { init(); }
@@ -35,24 +29,29 @@ void NMenu::init() {
     d->_isDark    = nTheme->isDarkMode();
 
     // 初始化样式属性
-    d->_pBorderRadius           = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
-    d->_pLightBackgroundColor   = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkBackgroundColor    = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
-    d->_pLightBorderColor       = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
-    d->_pDarkBorderColor        = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
-    d->_pLightItemTextColor     = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-    d->_pDarkItemTextColor      = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
-    d->_pLightItemHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
-    d->_pDarkItemHoverColor     = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
-    d->_pLightItemSelectedColor = NThemeColor(NFluentColorKey::ControlFillColorInputActive, NThemeType::Light);
-    d->_pDarkItemSelectedColor  = NThemeColor(NFluentColorKey::ControlFillColorInputActive, NThemeType::Dark);
-    d->_pLightSeparatorColor    = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
-    d->_pDarkSeparatorColor     = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Dark);
+    d->_pBorderRadius         = NDesignToken(NDesignTokenKey::CornerRadiusMedium).toInt();
+    d->_pLightBackgroundColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
+    d->_pDarkBackgroundColor  = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
+    d->_pLightBorderColor     = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
+    d->_pDarkBorderColor      = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
+    d->_pLightSeparatorColor  = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
+    d->_pDarkSeparatorColor   = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Dark);
 
     // 设置自定义样式
     d->_menuStyle = new NMenuPrivate::Style(d, style());
     setStyle(d->_menuStyle);
+#ifdef Q_OS_MAC
+    QMenu::setNoReplayFor(this);
+    QMenu::setAsDockMenu();
+    menuAction()->setIconVisibleInMenu(true);
+    menuAction()->setShortcutVisibleInContextMenu(true);
 
+    // 对所有菜单项启用图标
+    for (QAction* action : actions()) {
+        action->setIconVisibleInMenu(true);
+        action->setShortcutVisibleInContextMenu(true);
+    }
+#endif
     // 连接主题变化信号
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NMenu);
@@ -156,6 +155,10 @@ void NMenu::addSeparator() { QMenu::addSeparator(); }
 QAction* NMenu::createAction(const QString& text, const QIcon& icon) {
     QAction* action = new QAction(text, this);
     if (!icon.isNull()) {
+#ifdef Q_OS_MAC
+        action->setIconVisibleInMenu(true);
+        action->setShortcutVisibleInContextMenu(true);
+#endif
         action->setIcon(icon);
     }
     addAction(action);
@@ -177,19 +180,4 @@ void NMenu::showEvent(QShowEvent* event) {
 void NMenu::hideEvent(QHideEvent* event) {
     // 菜单隐藏时的处理
     QMenu::hideEvent(event);
-}
-
-void NMenu::changeEvent(QEvent* event) {
-    if (event->type() == QEvent::StyleChange || event->type() == QEvent::FontChange) {
-        updateStyle();
-    }
-    QMenu::changeEvent(event);
-}
-
-void NMenu::updateStyle() {
-    // Q_D(NMenu);
-    // // 更新样式相关设置
-    // if (d->_menuStyle) {
-    //     setStyle(d->_menuStyle);
-    // }
 }

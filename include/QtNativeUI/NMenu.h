@@ -14,12 +14,6 @@ class QTNATIVEUI_EXPORT NMenu : public QMenu {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, LightItemTextColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, DarkItemTextColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, LightItemHoverColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, DarkItemHoverColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, LightItemSelectedColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, DarkItemSelectedColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightSeparatorColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkSeparatorColor)
 
@@ -60,12 +54,40 @@ class QTNATIVEUI_EXPORT NMenu : public QMenu {
     bool event(QEvent* event) override;
     void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;
-    void changeEvent(QEvent* event) override;
 
   private:
     void     init();
     QAction* createAction(const QString& text, const QIcon& icon = QIcon());
-    void     updateStyle();
+
+    bool isHasChildMenu() const {
+        QList<QAction*> actionList = this->actions();
+        for (auto action : actionList) {
+            if (action->isSeparator()) {
+                continue;
+            }
+            if (action->menu()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool isHasIcon() const {
+        QList<QAction*> actionList = this->actions();
+        for (auto action : actionList) {
+            if (action->isSeparator()) {
+                continue;
+            }
+            QMenu* menu = action->menu();
+            if (menu && (!menu->icon().isNull() || !menu->property("NFilledIconType").toString().isEmpty())) {
+                return true;
+            }
+            if (!action->icon().isNull() || !action->property("NFilledIconType").toString().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 #endif // QTNATIVEUI_NMENU_H
