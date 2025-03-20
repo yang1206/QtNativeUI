@@ -133,7 +133,7 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
         if (checkState() == Qt::PartiallyChecked) {
             iconType = NFilledIconType::Subtract12Filled;
         } else {
-            iconType = NFilledIconType::Checkmark12Filled;
+            iconType = NFilledIconType::Checkmark24Filled;
         }
 
         QIcon icon = nIcon->fromFilled(iconType, d->_checkIcon.size, iconColor);

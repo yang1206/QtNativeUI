@@ -5,6 +5,8 @@
 #include <QPixmap>
 #include <QtGui/qguiapplication.h>
 
+#include "QtNativeUI/NTheme.h"
+
 Q_SINGLETON_CREATE_CPP(NIcon)
 
 NIcon::NIcon() { initFontConfigs(); }
@@ -34,6 +36,17 @@ void NIcon::initFontConfigs() {
     }
 }
 
+QColor NIcon::getThemeBasedColor() const {
+    bool isDark = nTheme->isDarkMode();
+    if (isDark) {
+        // 暗色主题返回白色
+        return NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::ThemeMode::Dark);
+    } else {
+        // 亮色主题返回黑色
+        return NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::ThemeMode::Light);
+    }
+}
+
 QIcon NIcon::createIcon(const QString& fontFamily,
                         uint32_t       unicode,
                         int            size,
@@ -53,7 +66,8 @@ QIcon NIcon::createIcon(const QString& fontFamily,
     QPainter painter(&pix);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
-    painter.setPen(color);
+    QColor iconColor = !color.isValid() ? getThemeBasedColor() : color;
+    painter.setPen(iconColor);
     iconFont.setPixelSize(size);
     painter.setFont(iconFont);
 
