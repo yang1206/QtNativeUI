@@ -11,21 +11,9 @@ def parse_color(xaml_color):
     if not xaml_color:
         return "QColor()"
     
-    # 处理 #RRGGBB 格式
-    if len(xaml_color) == 7 and xaml_color[0] == '#':
+    # 直接返回颜色字符串，Qt 6 支持 #AARRGGBB 格式
+    if xaml_color[0] == '#':
         return f'QColor("{xaml_color}")'
-    
-    # 处理 #AARRGGBB 格式
-    if len(xaml_color) == 9 and xaml_color[0] == '#':
-        alpha_hex = xaml_color[1:3]
-        rgb_hex = xaml_color[3:]
-        alpha = int(alpha_hex, 16)
-        
-        # 将 alpha 值（0-255）转换为百分比（0-100）
-        alpha_percent = round(alpha / 255.0 * 100)
-        
-        # 使用辅助函数创建带有alpha百分比的颜色
-        return f'colorWithAlphaPercent("#{rgb_hex}", {alpha_percent})'
     
     return "QColor()"
 
@@ -201,4 +189,4 @@ def main():
     print(f"Light colors: {len(light_colors)}")
 
 if __name__ == "__main__":
-    main() 
+    main()

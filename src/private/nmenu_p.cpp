@@ -1,5 +1,6 @@
 #include "nmenu_p.h"
 
+#include <QPainterPath>
 #include <qstyleoption.h>
 
 #include "QtNativeUI/NIcon.h"
@@ -20,9 +21,9 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
             QRect menuRect = mopt->rect;
 
             // 使用设计令牌获取间距
-            int hPadding         = NDesignToken(NDesignTokenKey::SpacingM).toInt();
+            int hPadding         = d->_itemPadding;
             int iconSize         = d->_itemIconSize;
-            int iconTextSpacing  = NDesignToken(NDesignTokenKey::SpacingS).toInt();
+            int iconTextSpacing  = d->_iconTextSpacing;
             int menuBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusSmall).toInt();
 
             // 分隔线
@@ -30,25 +31,21 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                 // 使用 Fluent 分隔线颜色
                 QColor sepColor = d->_isDark ? d->_pDarkSeparatorColor : d->_pLightSeparatorColor;
 
-                // 分隔线边距
-                int margin = hPadding;
-
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(sepColor);
-                painter->drawRoundedRect(
-                    menuRect.x() + margin, menuRect.center().y(), menuRect.width() - 2 * margin, 1, 0.5, 0.5);
+                painter->drawRoundedRect(menuRect.x(), menuRect.center().y(), menuRect.width(), 1, 0, 0);
 
                 painter->restore();
                 return;
             }
 
             // 悬停/选中状态背景
-            if (mopt->state.testFlag(QStyle::State_Enabled) &&
-                (mopt->state.testFlag(QStyle::State_Selected) || mopt->state.testFlag(QStyle::State_MouseOver))) {
+            if (mopt->state.testFlag(State_Enabled) &&
+                (mopt->state.testFlag(State_Selected) || mopt->state.testFlag(State_MouseOver) || mopt->checked)) {
                 // 使用 Fluent 悬停颜色
                 QColor hoverColor = NThemeColor(mopt->state.testFlag(QStyle::State_Selected)
-                                                    ? NFluentColorKey::ControlFillColorInputActive
-                                                    : NFluentColorKey::ControlFillColorSecondary,
+                                                    ? NFluentColorKey::SubtleFillColorTertiary
+                                                    : NFluentColorKey::ControlAltFillColorTertiary,
                                                 d->_themeMode);
 
                 painter->setPen(Qt::NoPen);
@@ -62,9 +59,17 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                                                                         : NFluentColorKey::TextFillColorDisabled,
                             d->_themeMode);
             painter->setPen(textColor);
+            // 绘制图标或勾选标记
+            if (!mopt->icon.isNull()) {
+                // 如果有图标，始终绘制图标
+                int   iconY = menuRect.y() + (menuRect.height() - iconSize) / 2;
+                QRect iconRect(menuRect.x() + hPadding, iconY, iconSize, iconSize);
 
+                QIcon::Mode iconMode = mopt->state.testFlag(QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled;
+                mopt->icon.paint(painter, iconRect, Qt::AlignCenter, iconMode);
+            }
             // 检查是否是可勾选项
-            if (mopt->checked) {
+            else if (mopt->checked) {
                 // 绘制勾选图标
                 int   checkSize = iconSize;
                 QRect checkRect(
@@ -73,14 +78,6 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                 // 使用 Fluent 图标
                 QIcon checkIcon = nIcon->fromFilled(NFilledIconType::Checkmark16Filled, checkSize, textColor);
                 checkIcon.paint(painter, checkRect, Qt::AlignCenter);
-            }
-            // 绘制普通图标
-            else if (!mopt->icon.isNull()) {
-                int   iconY = menuRect.y() + (menuRect.height() - iconSize) / 2;
-                QRect iconRect(menuRect.x() + hPadding, iconY, iconSize, iconSize);
-
-                QIcon::Mode iconMode = mopt->state.testFlag(QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled;
-                mopt->icon.paint(painter, iconRect, Qt::AlignCenter, iconMode);
             }
 
             // 文本绘制
@@ -101,21 +98,26 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
 
                 // 如果有图标或是可选择的项，增加偏移
                 if (!mopt->icon.isNull() || mopt->checked) {
-                    textX += iconSize + iconTextSpacing;
+                    textX += d->_checkmarkWidth;
+                }
+
+                // 在绘制文本之前，先计算快捷键文本需要的宽度
+                int shortcutWidth = 0;
+                if (!shortcutText.isEmpty()) {
+                    shortcutWidth = painter->fontMetrics().horizontalAdvance(shortcutText) + 2 * d->_itemPadding;
                 }
 
                 // 文本矩形
-                QRect textRect(textX,
-                               menuRect.y(),
-                               menuRect.width() - textX - hPadding - (shortcutText.isEmpty() ? 0 : 20),
-                               menuRect.height());
+                QRect textRect(
+                    textX, menuRect.y(), menuRect.width() - textX - hPadding - shortcutWidth, menuRect.height());
 
                 // 绘制主文本
                 painter->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft | Qt::TextSingleLine, itemText);
 
                 // 绘制快捷键文本
                 if (!shortcutText.isEmpty()) {
-                    QRect shortcutRect(menuRect.right() - 20 - hPadding, menuRect.y(), 20, menuRect.height());
+                    QRect shortcutRect(
+                        menuRect.right() - shortcutWidth - hPadding, menuRect.y(), shortcutWidth, menuRect.height());
 
                     // 使用次要文本颜色
                     QColor shortcutColor = NThemeColor(mopt->state.testFlag(QStyle::State_Enabled)
@@ -170,18 +172,17 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
     if (element == PE_PanelMenu) {
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
-        nTheme->drawEffectShadow(
-            painter, option->rect, d->_shadowBorderWidth, d->_pBorderRadius, NDesignTokenKey::ElevationRest);
-        // 背景绘制
-        QRect  foregroundRect(d->_shadowBorderWidth,
-                             d->_shadowBorderWidth,
-                             option->rect.width() - 2 * d->_shadowBorderWidth,
-                             option->rect.height() - 2 * d->_shadowBorderWidth);
-        QColor bgColor = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
 
-        painter->setPen(d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor);
+        QColor bgColor     = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
+        QColor borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
+
+        QPainterPath path;
+        path.addRoundedRect(option->rect, d->_pBorderRadius, d->_pBorderRadius);
+
+        painter->setPen(QPen(borderColor, 1));
         painter->setBrush(bgColor);
-        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+        painter->drawPath(path);
+
         painter->restore();
         return;
     } else if (element == PE_IndicatorMenuCheckMark) {
@@ -232,16 +233,8 @@ QSize NMenuPrivate::Style::sizeFromContents(ContentsType        type,
                 if (mopt->menuItemType == QStyleOptionMenuItem::Separator) {
                     break;
                 }
-                QSize        menuItemSize = QProxyStyle::sizeFromContents(type, option, size, widget);
-                const NMenu* menu         = dynamic_cast<const NMenu*>(widget);
-                if (menu->isHasIcon() || mopt->menuHasCheckableItems) {
-                    d->_isAnyoneItemHasIcon = true;
-                }
-                if (menu->isHasChildMenu()) {
-                    return QSize(menuItemSize.width() + 20, d->_itemHeight);
-                } else {
-                    return QSize(menuItemSize.width(), d->_itemHeight);
-                }
+                QSize menuItemSize = QProxyStyle::sizeFromContents(type, option, size, widget);
+                return QSize(menuItemSize.width(), d->_itemHeight);
             }
         }
         default: {

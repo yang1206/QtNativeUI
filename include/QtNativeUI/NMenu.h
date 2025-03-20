@@ -51,43 +51,11 @@ class QTNATIVEUI_EXPORT NMenu : public QMenu {
 
   protected:
     void paintEvent(QPaintEvent* event) override;
-    bool event(QEvent* event) override;
     void showEvent(QShowEvent* event) override;
-    void hideEvent(QHideEvent* event) override;
 
   private:
     void     init();
     QAction* createAction(const QString& text, const QIcon& icon = QIcon());
-
-    bool isHasChildMenu() const {
-        QList<QAction*> actionList = this->actions();
-        for (auto action : actionList) {
-            if (action->isSeparator()) {
-                continue;
-            }
-            if (action->menu()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool isHasIcon() const {
-        QList<QAction*> actionList = this->actions();
-        for (auto action : actionList) {
-            if (action->isSeparator()) {
-                continue;
-            }
-            QMenu* menu = action->menu();
-            if (menu && (!menu->icon().isNull() || !menu->property("NFilledIconType").toString().isEmpty())) {
-                return true;
-            }
-            if (!action->icon().isNull() || !action->property("NFilledIconType").toString().isEmpty()) {
-                return true;
-            }
-        }
-        return false;
-    }
 };
 
 #endif // QTNATIVEUI_NMENU_H

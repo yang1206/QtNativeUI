@@ -3,6 +3,7 @@
 #include <QEvent>
 #include <QPainter>
 #include <QPainterPath>
+#include <QPropertyAnimation>
 
 #include "../private/nmenu_p.h"
 #include "QtNativeUI/NIcon.h"
@@ -30,8 +31,8 @@ void NMenu::init() {
 
     // 初始化样式属性
     d->_pBorderRadius         = NDesignToken(NDesignTokenKey::CornerRadiusMedium).toInt();
-    d->_pLightBackgroundColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkBackgroundColor  = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
+    d->_pLightBackgroundColor = QColor(0xFA, 0xFA, 0xFA);
+    d->_pDarkBackgroundColor  = QColor(0x2C, 0x2C, 0x2C);
     d->_pLightBorderColor     = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_pDarkBorderColor      = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
     d->_pLightSeparatorColor  = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
@@ -39,7 +40,18 @@ void NMenu::init() {
 
     // 设置自定义样式
     d->_menuStyle = new NMenuPrivate::Style(d, style());
+
+    // 设置属性
+    setAttribute(Qt::WA_TranslucentBackground);
+    setAttribute(Qt::WA_NoSystemBackground);
+    setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
+
+    setObjectName("NMenu");
+
     setStyle(d->_menuStyle);
+
+    d->_pAnimationImagePosY = 0;
+
 #ifdef Q_OS_MAC
     QMenu::setNoReplayFor(this);
     QMenu::setAsDockMenu();
@@ -59,10 +71,6 @@ void NMenu::init() {
         d->_isDark    = nTheme->isDarkMode();
         update();
     });
-
-    // 设置属性
-    setAttribute(Qt::WA_TranslucentBackground);
-    setWindowFlags(windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
 }
 
 QAction* NMenu::addItem(const QString& text) { return createAction(text); }
@@ -165,19 +173,50 @@ QAction* NMenu::createAction(const QString& text, const QIcon& icon) {
     return action;
 }
 
-void NMenu::paintEvent(QPaintEvent* event) { QMenu::paintEvent(event); }
-
-bool NMenu::event(QEvent* event) {
-    // 处理特定事件
-    return QMenu::event(event);
+void NMenu::paintEvent(QPaintEvent* event) {
+    Q_D(NMenu);
+    QPainter painter(this);
+    painter.setRenderHints(QPainter::Antialiasing);
+    if (!d->_animationPix.isNull()) {
+        painter.drawPixmap(QRect(0, d->_pAnimationImagePosY, width(), height()), d->_animationPix);
+    } else {
+        QMenu::paintEvent(event);
+    }
 }
 
 void NMenu::showEvent(QShowEvent* event) {
-    // 菜单显示时的处理
-    QMenu::showEvent(event);
-}
+    Q_D(NMenu);
+    // 消除阴影偏移
+    move(this->pos().x() - 6, this->pos().y());
+    if (!d->_animationPix.isNull()) {
+        d->_animationPix = QPixmap();
+    }
+    d->_animationPix                 = this->grab(this->rect());
+    QPropertyAnimation* posAnimation = new QPropertyAnimation(d, "pAnimationImagePosY");
+    connect(posAnimation, &QPropertyAnimation::finished, this, [=]() {
+        d->_animationPix = QPixmap();
+        update();
+    });
+    connect(posAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) { update(); });
+    posAnimation->setEasingCurve(NDesignToken(NDesignTokenKey::EasingStandard).value<QEasingCurve>());
+    posAnimation->setDuration(NDesignToken(NDesignTokenKey::AnimationSlow).toInt());
 
-void NMenu::hideEvent(QHideEvent* event) {
-    // 菜单隐藏时的处理
-    QMenu::hideEvent(event);
+    int targetPosY = height();
+    if (targetPosY > 160) {
+        if (targetPosY < 320) {
+            targetPosY = 160;
+        } else {
+            targetPosY /= 2;
+        }
+    }
+
+    if (pos().y() + 28 + 9 >= QCursor::pos().y()) {
+        posAnimation->setStartValue(-targetPosY);
+    } else {
+        posAnimation->setStartValue(targetPosY);
+    }
+
+    posAnimation->setEndValue(0);
+    posAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+    QMenu::showEvent(event);
 }

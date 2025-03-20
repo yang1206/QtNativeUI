@@ -9,6 +9,8 @@
 class NMenuPrivate;
 class NMenuPrivate : public QObject {
     Q_OBJECT
+    Q_D_CREATE(NMenu)
+    Q_PROPERTY_CREATE(int, AnimationImagePosY)
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(QColor, LightBackgroundColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBackgroundColor)
@@ -45,17 +47,20 @@ class NMenuPrivate : public QObject {
 
     explicit NMenuPrivate(QObject* parent = nullptr);
     ~NMenuPrivate();
-    Q_D_CREATE(NMenu)
 
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
-    int                   _shadowBorderWidth{5};
+    int                   _shadowBorderWidth{1};
     int                   _itemHeight{28};
-    int                   _itemIconSize{12};
+    int                   _itemIconSize{16};
     mutable bool          _isAnyoneItemHasIcon{false};
-    int                   _itemPadding{12};
+    int                   _itemPadding{8};
     int                   _iconTextSpacing{8};
-    int                   _checkmarkWidth{20};
+    int                   _checkmarkWidth{28};
+
+    QPixmap _animationPix;
+    bool    _isCloseAnimation{false};
+    bool    _isMenuExpanded{false};
 
     Style* _menuStyle{nullptr};
 
