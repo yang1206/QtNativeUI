@@ -44,8 +44,8 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                 (mopt->state.testFlag(State_Selected) || mopt->state.testFlag(State_MouseOver) || mopt->checked)) {
                 // 使用 Fluent 悬停颜色
                 QColor hoverColor = NThemeColor(mopt->state.testFlag(QStyle::State_Selected)
-                                                    ? NFluentColorKey::SubtleFillColorTertiary
-                                                    : NFluentColorKey::ControlAltFillColorTertiary,
+                                                    ? NFluentColorKey::ControlAltFillColorTertiary
+                                                    : NFluentColorKey::SubtleFillColorTertiary,
                                                 d->_themeMode);
 
                 painter->setPen(Qt::NoPen);
