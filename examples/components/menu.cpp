@@ -51,7 +51,7 @@ void MenuExample::initUI() {
     // 2. 带图标的菜单
     NPushButton* iconBtn = new NPushButton("Menu with Icons");
     iconBtn->setFixedSize(180, 40);
-    iconBtn->setFluentIcon(NRegularIconType::Settings16Regular);
+    iconBtn->setFluentIcon(NRegularIconType::Settings16Regular, 24);
     NMenu* iconMenu = new NMenu(iconBtn);
 
     iconMenu->addItem("New", NRegularIconType::Document16Regular);
@@ -93,7 +93,7 @@ void MenuExample::initUI() {
     NPushButton* shortcutBtn = new NPushButton("Menu with Shortcuts");
     shortcutBtn->setFixedSize(180, 40);
 
-    shortcutBtn->setFluentIcon(NRegularIconType::Keyboard16Regular);
+    shortcutBtn->setFluentIcon(NRegularIconType::Keyboard16Regular, 24);
     NMenu* shortcutMenu = new NMenu(shortcutBtn);
 
     shortcutMenu->addItem("New", NRegularIconType::Document16Regular, QKeySequence::New);
@@ -113,7 +113,7 @@ void MenuExample::initUI() {
     NPushButton* checkableBtn = new NPushButton("Checkable Menu");
     checkableBtn->setFixedSize(180, 40);
 
-    checkableBtn->setFluentIcon(NRegularIconType::CheckboxChecked16Regular);
+    checkableBtn->setFluentIcon(NRegularIconType::CheckboxChecked16Regular, 24);
     NMenu* checkableMenu = new NMenu(checkableBtn);
 
     QAction* boldAction   = checkableMenu->addCheckableItem("Bold", NRegularIconType::TextBold16Regular, false);
@@ -146,7 +146,7 @@ void MenuExample::initUI() {
     NPushButton* disabledItemBtn = new NPushButton("Menu with Disabled Items");
     disabledItemBtn->setFixedSize(240, 40);
 
-    disabledItemBtn->setFluentIcon(NRegularIconType::Prohibited16Regular);
+    disabledItemBtn->setFluentIcon(NRegularIconType::Prohibited16Regular, 24);
     NMenu* disabledItemMenu = new NMenu(disabledItemBtn);
 
     disabledItemMenu->addItem("Enabled Item 1");

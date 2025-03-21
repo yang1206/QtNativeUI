@@ -21,10 +21,10 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
             QRect menuRect = mopt->rect;
 
             // 使用设计令牌获取间距
-            int hPadding         = d->_itemPadding;
-            int iconSize         = d->_itemIconSize;
-            int iconTextSpacing  = d->_iconTextSpacing;
-            int menuBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusSmall).toInt();
+            int hPadding = d->_itemPadding;
+            int iconSize = d->_itemIconSize;
+            // int iconTextSpacing  = d->_iconTextSpacing;
+            int menuBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
 
             // 分隔线
             if (mopt->menuItemType == QStyleOptionMenuItem::Separator) {
@@ -76,7 +76,7 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                     menuRect.x() + hPadding, menuRect.y() + (menuRect.height() - checkSize) / 2, checkSize, checkSize);
 
                 // 使用 Fluent 图标
-                QIcon checkIcon = nIcon->fromFilled(NFilledIconType::Checkmark16Filled, checkSize, textColor);
+                QIcon checkIcon = nIcon->fromRegular(NRegularIconType::Checkmark20Regular, checkSize, textColor);
                 checkIcon.paint(painter, checkRect, Qt::AlignCenter);
             }
 

@@ -52,7 +52,7 @@ class NMenuPrivate : public QObject {
     bool                  _isDark;
     int                   _shadowBorderWidth{1};
     int                   _itemHeight{28};
-    int                   _itemIconSize{16};
+    int                   _itemIconSize{18};
     mutable bool          _isAnyoneItemHasIcon{false};
     int                   _itemPadding{8};
     int                   _iconTextSpacing{8};
