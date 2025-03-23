@@ -1,7 +1,7 @@
 #ifndef QTNATIVEUI_NDROPDOWNBUTTON_H
 #define QTNATIVEUI_NDROPDOWNBUTTON_H
 
-#include <QMenu>
+#include "NMenu.h"
 #include "NPushButton.h"
 #include "stdafx.h"
 
@@ -15,19 +15,22 @@ class QTNATIVEUI_EXPORT NDropDownButton : public NPushButton {
     explicit NDropDownButton(const QString& text, QWidget* parent = nullptr);
     ~NDropDownButton();
 
-    void   setMenu(QMenu* menu);
+    void   setMenu(NMenu* menu);
     QMenu* menu() const;
+
+    void setShowArrow(bool show);
+    bool showArrow() const;
+
+  public slots:
+    void showMenu();
 
   protected:
     void paintEvent(QPaintEvent* event) override;
     void changeEvent(QEvent* event) override;
-
-    // void drawDropDownArrow(QPainter* painter);
+    void drawDropDownArrow();
 
   private:
     void init();
-    // void showDropDownMenu();
-    // void updateAccentColors();
 };
 
 #endif // QTNATIVEUI_NDROPDOWNBUTTON_H

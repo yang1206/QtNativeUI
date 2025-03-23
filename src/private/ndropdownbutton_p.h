@@ -2,7 +2,6 @@
 #define QTNATIVEUI_NDROPDOWNBUTTON_P_H
 
 #include <QtNativeUI/NDropDownButton.h>
-#include "QtNativeUI/NEnums.h"
 
 class NDropDownButtonPrivate : public QObject {
     Q_OBJECT
@@ -13,10 +12,13 @@ class NDropDownButtonPrivate : public QObject {
     Q_D_CREATE(NDropDownButton)
 
   private:
-    QMenu* _menu{nullptr};
+    NMenu* _menu{nullptr};
     bool   _menuVisible{false};
-    int    _arrowSize{8};    // 下拉箭头大小
-    int    _arrowSpacing{4}; // 箭头和文本之间的间距
+    bool   _showArrow{true};    // 是否显示下拉箭头
+    int    _arrowSize{18};      // 下拉箭头大小
+    int    _horizontalPadding;  // 按钮左右两侧的内边距
+    int    _contentArrowSpacing{8}; // 文本/图标内容与下拉箭头之间的间距
+    int    _iconTextSpacing{4}; // 图标和文本之间的间距
 };
 
 #endif // QTNATIVEUI_NDROPDOWNBUTTON_P_H

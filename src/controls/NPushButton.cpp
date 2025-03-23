@@ -251,10 +251,20 @@ void NPushButton::drawIcon(QPainter* painter) {
                          d->_shadowBorderWidth,
                          width() - 2 * (d->_shadowBorderWidth),
                          height() - 2 * d->_shadowBorderWidth);
+    
+    // 检查是否有自定义内容区域
+    QVariant customRectVar = property("_nContentRect");
+    if (customRectVar.isValid()) {
+        foregroundRect = customRectVar.toRect();
+    }
 
     // 计算图标位置
     QRect iconRect;
     QSize iconSize = this->iconSize();
+    
+    // 自定义文本间距
+    int iconTextSpacing = property("_nIconTextSpacing").isValid() ? 
+                         property("_nIconTextSpacing").toInt() : 4;
 
     if (text().isEmpty()) {
         iconRect = QRect(foregroundRect.x() + (foregroundRect.width() - iconSize.width()) / 2,
@@ -262,9 +272,8 @@ void NPushButton::drawIcon(QPainter* painter) {
                          iconSize.width(),
                          iconSize.height());
     } else {
-        int spacing    = 4;
         int textWidth  = painter->fontMetrics().horizontalAdvance(text());
-        int totalWidth = iconSize.width() + spacing + textWidth;
+        int totalWidth = iconSize.width() + iconTextSpacing + textWidth;
 
         int startX = foregroundRect.x() + (foregroundRect.width() - totalWidth) / 2;
         iconRect   = QRect(startX,
@@ -295,6 +304,12 @@ void NPushButton::drawText(QPainter* painter) {
                          width() - 2 * (d->_shadowBorderWidth),
                          height() - 2 * d->_shadowBorderWidth);
 
+    // 检查是否有自定义内容区域
+    QVariant customRectVar = property("_nContentRect");
+    if (customRectVar.isValid()) {
+        foregroundRect = customRectVar.toRect();
+    }
+
     QColor textColor;
 
     if (d->_buttonType == NPushButtonPrivate::Accent) {
@@ -313,15 +328,18 @@ void NPushButton::drawText(QPainter* painter) {
 
     painter->setPen(textColor);
 
+    // 自定义文本间距
+    int iconTextSpacing = property("_nIconTextSpacing").isValid() ? 
+                         property("_nIconTextSpacing").toInt() : 4;
+
     if (!icon().isNull()) {
         // 有图标时，文本需要右移
-        int   spacing    = 4; // 图标与文本间距
         QSize iconSize   = this->iconSize();
         int   textWidth  = painter->fontMetrics().horizontalAdvance(text());
-        int   totalWidth = iconSize.width() + spacing + textWidth;
+        int   totalWidth = iconSize.width() + iconTextSpacing + textWidth;
 
         int   startX = foregroundRect.x() + (foregroundRect.width() - totalWidth) / 2;
-        QRect textRect(startX + iconSize.width() + spacing, foregroundRect.y(), textWidth, foregroundRect.height());
+        QRect textRect(startX + iconSize.width() + iconTextSpacing, foregroundRect.y(), textWidth, foregroundRect.height());
 
         painter->drawText(textRect, Qt::AlignCenter, text());
     } else {

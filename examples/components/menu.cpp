@@ -168,5 +168,86 @@ void MenuExample::initUI() {
     // 添加到主布局
     mainLayout->addWidget(basicSection);
     mainLayout->addWidget(advancedSection);
+
+    // 添加下拉按钮示例区域
+    QWidget*     dropdownSection = new QWidget;
+    QVBoxLayout* dropdownLayout  = new QVBoxLayout(dropdownSection);
+    dropdownLayout->setSpacing(16);
+
+    QLabel* dropdownTitle = new QLabel("下拉按钮示例");
+    dropdownTitle->setFont(titleFont);
+    dropdownLayout->addWidget(dropdownTitle);
+
+    QHBoxLayout* dropdownButtonLayout = new QHBoxLayout;
+    dropdownButtonLayout->setSpacing(16);
+
+    // 1. 基本下拉按钮
+    NDropDownButton* basicDropdown = new NDropDownButton("基本下拉按钮");
+    basicDropdown->setFixedSize(140, 40);
+
+    NMenu* basicDropdownMenu = new NMenu(basicDropdown);
+    basicDropdownMenu->addItem("选项 1");
+    basicDropdownMenu->addItem("选项 2");
+    basicDropdownMenu->addItem("选项 3");
+    basicDropdownMenu->addSeparator();
+    basicDropdownMenu->addItem("更多选项");
+
+    basicDropdown->setMenu(basicDropdownMenu);
+
+    // 2. 带图标的下拉按钮
+    NDropDownButton* iconDropdown = new NDropDownButton();
+    iconDropdown->setFixedSize(70, 40);
+    iconDropdown->setFluentIcon(NRegularIconType::Settings16Regular, 24);
+
+    NMenu* iconDropdownMenu = new NMenu(iconDropdown);
+    iconDropdownMenu->addItem("新建", NRegularIconType::Document16Regular);
+    iconDropdownMenu->addItem("打开", NRegularIconType::FolderOpen16Regular);
+    iconDropdownMenu->addItem("保存", NRegularIconType::Save16Regular);
+    iconDropdownMenu->addSeparator();
+    iconDropdownMenu->addItem("设置", NRegularIconType::Settings16Regular);
+
+    iconDropdown->setMenu(iconDropdownMenu);
+
+    // 3. 带子菜单的下拉按钮
+    NDropDownButton* submenuDropdown = new NDropDownButton("带子菜单的下拉按钮");
+    submenuDropdown->setFixedSize(180, 40);
+
+    NMenu* submenuDropdownMenu = new NMenu(submenuDropdown);
+    submenuDropdownMenu->addItem("主选项 1");
+    submenuDropdownMenu->addItem("主选项 2");
+
+    NMenu* subMenu = submenuDropdownMenu->addSubMenu("子菜单", NRegularIconType::FolderOpen16Regular);
+    subMenu->addItem("子选项 1");
+    subMenu->addItem("子选项 2");
+    subMenu->addItem("子选项 3");
+
+    submenuDropdownMenu->addSeparator();
+    submenuDropdownMenu->addCheckableItem("启用选项", true);
+
+    submenuDropdown->setMenu(submenuDropdownMenu);
+
+    // 4. 不显示箭头的下拉按钮
+    NDropDownButton* noArrowDropdown = new NDropDownButton("无箭头下拉按钮");
+    noArrowDropdown->setFixedSize(150, 40);
+    noArrowDropdown->setShowArrow(false);
+
+    NMenu* noArrowMenu = new NMenu(noArrowDropdown);
+    noArrowMenu->addItem("项目 1");
+    noArrowMenu->addItem("项目 2");
+    noArrowMenu->addItem("项目 3");
+
+    noArrowDropdown->setMenu(noArrowMenu);
+
+    // 添加到布局
+    dropdownButtonLayout->addWidget(basicDropdown);
+    dropdownButtonLayout->addWidget(iconDropdown);
+    dropdownButtonLayout->addWidget(submenuDropdown);
+    dropdownButtonLayout->addWidget(noArrowDropdown);
+    dropdownButtonLayout->addStretch();
+
+    dropdownLayout->addLayout(dropdownButtonLayout);
+
+    // 添加到主布局
+    mainLayout->addWidget(dropdownSection);
     mainLayout->addStretch();
 }
