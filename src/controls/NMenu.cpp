@@ -31,8 +31,8 @@ void NMenu::init() {
 
     // 初始化样式属性
     d->_pBorderRadius         = NDesignToken(NDesignTokenKey::CornerRadiusMedium).toInt();
-    d->_pLightBackgroundColor = QColor(0xFA, 0xFA, 0xFA);
-    d->_pDarkBackgroundColor  = QColor(0x2C, 0x2C, 0x2C);
+    d->_pLightBackgroundColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Light);
+    d->_pDarkBackgroundColor  = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Dark);
     d->_pLightBorderColor     = NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Light);
     d->_pDarkBorderColor      = NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Dark);
     d->_pLightSeparatorColor  = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
