@@ -6,7 +6,7 @@
 #include "components/colors.h"
 #include "components/icon.h"
 #include "components/menu.h"
-#
+#include "components/toggleswitch.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     m_tabWidget = new QTabWidget(this);
@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
     auto menu = new MenuExample(this);
     m_tabWidget->addTab(menu, "Menu");
+
+    auto toggleSwitch = new ToggleSwitchExample(this);
+    m_tabWidget->addTab(toggleSwitch, "ToggleSwitch");
 
     auto checkBox = new CheckBoxExample(this);
     m_tabWidget->addTab(checkBox, "CheckBox");
