@@ -11,9 +11,9 @@
 #define NFLUENTCOLORS_H
 
 #include <QColor>
-#include <QString>
 #include <QMap>
 #include <QMetaEnum>
+#include <QString>
 
 // 辅助函数：创建带有alpha值的颜色（alpha为0-255）
 inline QColor colorWithAlpha(const QString& hex, int alpha) {
@@ -25,95 +25,95 @@ inline QColor colorWithAlpha(const QString& hex, int alpha) {
 // 辅助函数：创建带有百分比alpha值的颜色（alphaPercent为0-100）
 inline QColor colorWithAlphaPercent(const QString& hex, int alphaPercent) {
     QColor color(hex);
-    int alpha = static_cast<int>(255.0 * alphaPercent / 100.0);
+    int    alpha = static_cast<int>(255.0 * alphaPercent / 100.0);
     color.setAlpha(alpha);
     return color;
 }
 
 // Fluent Design 颜色枚举 - 自动生成
 namespace NFluentColorKey {
-    enum Key {
-        AccentFillColorDisabled,
-        AccentTextFillColorDisabled,
-        CardBackgroundFillColorDefault,
-        CardBackgroundFillColorSecondary,
-        CardStrokeColorDefault,
-        CardStrokeColorDefaultSolid,
-        ControlAltFillColorDisabled,
-        ControlAltFillColorQuarternary,
-        ControlAltFillColorSecondary,
-        ControlAltFillColorTertiary,
-        ControlAltFillColorTransparent,
-        ControlFillColorDefault,
-        ControlFillColorDisabled,
-        ControlFillColorInputActive,
-        ControlFillColorSecondary,
-        ControlFillColorTertiary,
-        ControlFillColorTransparent,
-        ControlOnImageFillColorDefault,
-        ControlOnImageFillColorDisabled,
-        ControlOnImageFillColorSecondary,
-        ControlOnImageFillColorTertiary,
-        ControlSolidFillColorDefault,
-        ControlStrokeColorDefault,
-        ControlStrokeColorForStrongFillWhenOnImage,
-        ControlStrokeColorOnAccentDefault,
-        ControlStrokeColorOnAccentDisabled,
-        ControlStrokeColorOnAccentSecondary,
-        ControlStrokeColorOnAccentTertiary,
-        ControlStrokeColorSecondary,
-        ControlStrongFillColorDefault,
-        ControlStrongFillColorDisabled,
-        ControlStrongStrokeColorDefault,
-        ControlStrongStrokeColorDisabled,
-        DividerStrokeColorDefault,
-        FocusStrokeColorInner,
-        FocusStrokeColorOuter,
-        LayerFillColorAlt,
-        LayerFillColorDefault,
-        LayerOnAccentAcrylicFillColorDefault,
-        LayerOnAcrylicFillColorDefault,
-        LayerOnMicaBaseAltFillColorDefault,
-        LayerOnMicaBaseAltFillColorSecondary,
-        LayerOnMicaBaseAltFillColorTertiary,
-        LayerOnMicaBaseAltFillColorTransparent,
-        SmokeFillColorDefault,
-        SolidBackgroundFillColorBase,
-        SolidBackgroundFillColorBaseAlt,
-        SolidBackgroundFillColorQuarternary,
-        SolidBackgroundFillColorSecondary,
-        SolidBackgroundFillColorTertiary,
-        SolidBackgroundFillColorTransparent,
-        SubtleFillColorDisabled,
-        SubtleFillColorSecondary,
-        SubtleFillColorTertiary,
-        SubtleFillColorTransparent,
-        SurfaceStrokeColorDefault,
-        SurfaceStrokeColorFlyout,
-        SurfaceStrokeColorInverse,
-        SystemFillColorAttentionBackground,
-        SystemFillColorCaution,
-        SystemFillColorCautionBackground,
-        SystemFillColorCritical,
-        SystemFillColorCriticalBackground,
-        SystemFillColorNeutral,
-        SystemFillColorNeutralBackground,
-        SystemFillColorSolidAttentionBackground,
-        SystemFillColorSolidNeutral,
-        SystemFillColorSolidNeutralBackground,
-        SystemFillColorSuccess,
-        SystemFillColorSuccessBackground,
-        TextFillColorDisabled,
-        TextFillColorInverse,
-        TextFillColorPrimary,
-        TextFillColorSecondary,
-        TextFillColorTertiary,
-        TextOnAccentFillColorDisabled,
-        TextOnAccentFillColorPrimary,
-        TextOnAccentFillColorSecondary,
-        TextOnAccentFillColorSelectedText,
-        Count  // 用于计数和边界检查
-    };
+enum Key {
+    AccentFillColorDisabled,
+    AccentTextFillColorDisabled,
+    CardBackgroundFillColorDefault,
+    CardBackgroundFillColorSecondary,
+    CardStrokeColorDefault,
+    CardStrokeColorDefaultSolid,
+    ControlAltFillColorDisabled,
+    ControlAltFillColorQuarternary,
+    ControlAltFillColorSecondary,
+    ControlAltFillColorTertiary,
+    ControlAltFillColorTransparent,
+    ControlFillColorDefault,
+    ControlFillColorDisabled,
+    ControlFillColorInputActive,
+    ControlFillColorSecondary,
+    ControlFillColorTertiary,
+    ControlFillColorTransparent,
+    ControlOnImageFillColorDefault,
+    ControlOnImageFillColorDisabled,
+    ControlOnImageFillColorSecondary,
+    ControlOnImageFillColorTertiary,
+    ControlSolidFillColorDefault,
+    ControlStrokeColorDefault,
+    ControlStrokeColorForStrongFillWhenOnImage,
+    ControlStrokeColorOnAccentDefault,
+    ControlStrokeColorOnAccentDisabled,
+    ControlStrokeColorOnAccentSecondary,
+    ControlStrokeColorOnAccentTertiary,
+    ControlStrokeColorSecondary,
+    ControlStrongFillColorDefault,
+    ControlStrongFillColorDisabled,
+    ControlStrongStrokeColorDefault,
+    ControlStrongStrokeColorDisabled,
+    DividerStrokeColorDefault,
+    FocusStrokeColorInner,
+    FocusStrokeColorOuter,
+    LayerFillColorAlt,
+    LayerFillColorDefault,
+    LayerOnAccentAcrylicFillColorDefault,
+    LayerOnAcrylicFillColorDefault,
+    LayerOnMicaBaseAltFillColorDefault,
+    LayerOnMicaBaseAltFillColorSecondary,
+    LayerOnMicaBaseAltFillColorTertiary,
+    LayerOnMicaBaseAltFillColorTransparent,
+    SmokeFillColorDefault,
+    SolidBackgroundFillColorBase,
+    SolidBackgroundFillColorBaseAlt,
+    SolidBackgroundFillColorQuarternary,
+    SolidBackgroundFillColorSecondary,
+    SolidBackgroundFillColorTertiary,
+    SolidBackgroundFillColorTransparent,
+    SubtleFillColorDisabled,
+    SubtleFillColorSecondary,
+    SubtleFillColorTertiary,
+    SubtleFillColorTransparent,
+    SurfaceStrokeColorDefault,
+    SurfaceStrokeColorFlyout,
+    SurfaceStrokeColorInverse,
+    SystemFillColorAttentionBackground,
+    SystemFillColorCaution,
+    SystemFillColorCautionBackground,
+    SystemFillColorCritical,
+    SystemFillColorCriticalBackground,
+    SystemFillColorNeutral,
+    SystemFillColorNeutralBackground,
+    SystemFillColorSolidAttentionBackground,
+    SystemFillColorSolidNeutral,
+    SystemFillColorSolidNeutralBackground,
+    SystemFillColorSuccess,
+    SystemFillColorSuccessBackground,
+    TextFillColorDisabled,
+    TextFillColorInverse,
+    TextFillColorPrimary,
+    TextFillColorSecondary,
+    TextFillColorTertiary,
+    TextOnAccentFillColorDisabled,
+    TextOnAccentFillColorPrimary,
+    TextOnAccentFillColorSecondary,
+    TextOnAccentFillColorSelectedText,
+    Count // 用于计数和边界检查
+};
 }
 
 // 枚举到字符串的转换函数
@@ -285,250 +285,329 @@ inline QString fluentColorKeyToString(NFluentColorKey::Key key) {
 
 // 字符串到枚举的转换函数
 inline NFluentColorKey::Key stringToFluentColorKey(const QString& keyString) {
-    if (keyString == "AccentFillColorDisabled") return NFluentColorKey::AccentFillColorDisabled;
-    if (keyString == "AccentTextFillColorDisabled") return NFluentColorKey::AccentTextFillColorDisabled;
-    if (keyString == "CardBackgroundFillColorDefault") return NFluentColorKey::CardBackgroundFillColorDefault;
-    if (keyString == "CardBackgroundFillColorSecondary") return NFluentColorKey::CardBackgroundFillColorSecondary;
-    if (keyString == "CardStrokeColorDefault") return NFluentColorKey::CardStrokeColorDefault;
-    if (keyString == "CardStrokeColorDefaultSolid") return NFluentColorKey::CardStrokeColorDefaultSolid;
-    if (keyString == "ControlAltFillColorDisabled") return NFluentColorKey::ControlAltFillColorDisabled;
-    if (keyString == "ControlAltFillColorQuarternary") return NFluentColorKey::ControlAltFillColorQuarternary;
-    if (keyString == "ControlAltFillColorSecondary") return NFluentColorKey::ControlAltFillColorSecondary;
-    if (keyString == "ControlAltFillColorTertiary") return NFluentColorKey::ControlAltFillColorTertiary;
-    if (keyString == "ControlAltFillColorTransparent") return NFluentColorKey::ControlAltFillColorTransparent;
-    if (keyString == "ControlFillColorDefault") return NFluentColorKey::ControlFillColorDefault;
-    if (keyString == "ControlFillColorDisabled") return NFluentColorKey::ControlFillColorDisabled;
-    if (keyString == "ControlFillColorInputActive") return NFluentColorKey::ControlFillColorInputActive;
-    if (keyString == "ControlFillColorSecondary") return NFluentColorKey::ControlFillColorSecondary;
-    if (keyString == "ControlFillColorTertiary") return NFluentColorKey::ControlFillColorTertiary;
-    if (keyString == "ControlFillColorTransparent") return NFluentColorKey::ControlFillColorTransparent;
-    if (keyString == "ControlOnImageFillColorDefault") return NFluentColorKey::ControlOnImageFillColorDefault;
-    if (keyString == "ControlOnImageFillColorDisabled") return NFluentColorKey::ControlOnImageFillColorDisabled;
-    if (keyString == "ControlOnImageFillColorSecondary") return NFluentColorKey::ControlOnImageFillColorSecondary;
-    if (keyString == "ControlOnImageFillColorTertiary") return NFluentColorKey::ControlOnImageFillColorTertiary;
-    if (keyString == "ControlSolidFillColorDefault") return NFluentColorKey::ControlSolidFillColorDefault;
-    if (keyString == "ControlStrokeColorDefault") return NFluentColorKey::ControlStrokeColorDefault;
-    if (keyString == "ControlStrokeColorForStrongFillWhenOnImage") return NFluentColorKey::ControlStrokeColorForStrongFillWhenOnImage;
-    if (keyString == "ControlStrokeColorOnAccentDefault") return NFluentColorKey::ControlStrokeColorOnAccentDefault;
-    if (keyString == "ControlStrokeColorOnAccentDisabled") return NFluentColorKey::ControlStrokeColorOnAccentDisabled;
-    if (keyString == "ControlStrokeColorOnAccentSecondary") return NFluentColorKey::ControlStrokeColorOnAccentSecondary;
-    if (keyString == "ControlStrokeColorOnAccentTertiary") return NFluentColorKey::ControlStrokeColorOnAccentTertiary;
-    if (keyString == "ControlStrokeColorSecondary") return NFluentColorKey::ControlStrokeColorSecondary;
-    if (keyString == "ControlStrongFillColorDefault") return NFluentColorKey::ControlStrongFillColorDefault;
-    if (keyString == "ControlStrongFillColorDisabled") return NFluentColorKey::ControlStrongFillColorDisabled;
-    if (keyString == "ControlStrongStrokeColorDefault") return NFluentColorKey::ControlStrongStrokeColorDefault;
-    if (keyString == "ControlStrongStrokeColorDisabled") return NFluentColorKey::ControlStrongStrokeColorDisabled;
-    if (keyString == "DividerStrokeColorDefault") return NFluentColorKey::DividerStrokeColorDefault;
-    if (keyString == "FocusStrokeColorInner") return NFluentColorKey::FocusStrokeColorInner;
-    if (keyString == "FocusStrokeColorOuter") return NFluentColorKey::FocusStrokeColorOuter;
-    if (keyString == "LayerFillColorAlt") return NFluentColorKey::LayerFillColorAlt;
-    if (keyString == "LayerFillColorDefault") return NFluentColorKey::LayerFillColorDefault;
-    if (keyString == "LayerOnAccentAcrylicFillColorDefault") return NFluentColorKey::LayerOnAccentAcrylicFillColorDefault;
-    if (keyString == "LayerOnAcrylicFillColorDefault") return NFluentColorKey::LayerOnAcrylicFillColorDefault;
-    if (keyString == "LayerOnMicaBaseAltFillColorDefault") return NFluentColorKey::LayerOnMicaBaseAltFillColorDefault;
-    if (keyString == "LayerOnMicaBaseAltFillColorSecondary") return NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary;
-    if (keyString == "LayerOnMicaBaseAltFillColorTertiary") return NFluentColorKey::LayerOnMicaBaseAltFillColorTertiary;
-    if (keyString == "LayerOnMicaBaseAltFillColorTransparent") return NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent;
-    if (keyString == "SmokeFillColorDefault") return NFluentColorKey::SmokeFillColorDefault;
-    if (keyString == "SolidBackgroundFillColorBase") return NFluentColorKey::SolidBackgroundFillColorBase;
-    if (keyString == "SolidBackgroundFillColorBaseAlt") return NFluentColorKey::SolidBackgroundFillColorBaseAlt;
-    if (keyString == "SolidBackgroundFillColorQuarternary") return NFluentColorKey::SolidBackgroundFillColorQuarternary;
-    if (keyString == "SolidBackgroundFillColorSecondary") return NFluentColorKey::SolidBackgroundFillColorSecondary;
-    if (keyString == "SolidBackgroundFillColorTertiary") return NFluentColorKey::SolidBackgroundFillColorTertiary;
-    if (keyString == "SolidBackgroundFillColorTransparent") return NFluentColorKey::SolidBackgroundFillColorTransparent;
-    if (keyString == "SubtleFillColorDisabled") return NFluentColorKey::SubtleFillColorDisabled;
-    if (keyString == "SubtleFillColorSecondary") return NFluentColorKey::SubtleFillColorSecondary;
-    if (keyString == "SubtleFillColorTertiary") return NFluentColorKey::SubtleFillColorTertiary;
-    if (keyString == "SubtleFillColorTransparent") return NFluentColorKey::SubtleFillColorTransparent;
-    if (keyString == "SurfaceStrokeColorDefault") return NFluentColorKey::SurfaceStrokeColorDefault;
-    if (keyString == "SurfaceStrokeColorFlyout") return NFluentColorKey::SurfaceStrokeColorFlyout;
-    if (keyString == "SurfaceStrokeColorInverse") return NFluentColorKey::SurfaceStrokeColorInverse;
-    if (keyString == "SystemFillColorAttentionBackground") return NFluentColorKey::SystemFillColorAttentionBackground;
-    if (keyString == "SystemFillColorCaution") return NFluentColorKey::SystemFillColorCaution;
-    if (keyString == "SystemFillColorCautionBackground") return NFluentColorKey::SystemFillColorCautionBackground;
-    if (keyString == "SystemFillColorCritical") return NFluentColorKey::SystemFillColorCritical;
-    if (keyString == "SystemFillColorCriticalBackground") return NFluentColorKey::SystemFillColorCriticalBackground;
-    if (keyString == "SystemFillColorNeutral") return NFluentColorKey::SystemFillColorNeutral;
-    if (keyString == "SystemFillColorNeutralBackground") return NFluentColorKey::SystemFillColorNeutralBackground;
-    if (keyString == "SystemFillColorSolidAttentionBackground") return NFluentColorKey::SystemFillColorSolidAttentionBackground;
-    if (keyString == "SystemFillColorSolidNeutral") return NFluentColorKey::SystemFillColorSolidNeutral;
-    if (keyString == "SystemFillColorSolidNeutralBackground") return NFluentColorKey::SystemFillColorSolidNeutralBackground;
-    if (keyString == "SystemFillColorSuccess") return NFluentColorKey::SystemFillColorSuccess;
-    if (keyString == "SystemFillColorSuccessBackground") return NFluentColorKey::SystemFillColorSuccessBackground;
-    if (keyString == "TextFillColorDisabled") return NFluentColorKey::TextFillColorDisabled;
-    if (keyString == "TextFillColorInverse") return NFluentColorKey::TextFillColorInverse;
-    if (keyString == "TextFillColorPrimary") return NFluentColorKey::TextFillColorPrimary;
-    if (keyString == "TextFillColorSecondary") return NFluentColorKey::TextFillColorSecondary;
-    if (keyString == "TextFillColorTertiary") return NFluentColorKey::TextFillColorTertiary;
-    if (keyString == "TextOnAccentFillColorDisabled") return NFluentColorKey::TextOnAccentFillColorDisabled;
-    if (keyString == "TextOnAccentFillColorPrimary") return NFluentColorKey::TextOnAccentFillColorPrimary;
-    if (keyString == "TextOnAccentFillColorSecondary") return NFluentColorKey::TextOnAccentFillColorSecondary;
-    if (keyString == "TextOnAccentFillColorSelectedText") return NFluentColorKey::TextOnAccentFillColorSelectedText;
+    if (keyString == "AccentFillColorDisabled")
+        return NFluentColorKey::AccentFillColorDisabled;
+    if (keyString == "AccentTextFillColorDisabled")
+        return NFluentColorKey::AccentTextFillColorDisabled;
+    if (keyString == "CardBackgroundFillColorDefault")
+        return NFluentColorKey::CardBackgroundFillColorDefault;
+    if (keyString == "CardBackgroundFillColorSecondary")
+        return NFluentColorKey::CardBackgroundFillColorSecondary;
+    if (keyString == "CardStrokeColorDefault")
+        return NFluentColorKey::CardStrokeColorDefault;
+    if (keyString == "CardStrokeColorDefaultSolid")
+        return NFluentColorKey::CardStrokeColorDefaultSolid;
+    if (keyString == "ControlAltFillColorDisabled")
+        return NFluentColorKey::ControlAltFillColorDisabled;
+    if (keyString == "ControlAltFillColorQuarternary")
+        return NFluentColorKey::ControlAltFillColorQuarternary;
+    if (keyString == "ControlAltFillColorSecondary")
+        return NFluentColorKey::ControlAltFillColorSecondary;
+    if (keyString == "ControlAltFillColorTertiary")
+        return NFluentColorKey::ControlAltFillColorTertiary;
+    if (keyString == "ControlAltFillColorTransparent")
+        return NFluentColorKey::ControlAltFillColorTransparent;
+    if (keyString == "ControlFillColorDefault")
+        return NFluentColorKey::ControlFillColorDefault;
+    if (keyString == "ControlFillColorDisabled")
+        return NFluentColorKey::ControlFillColorDisabled;
+    if (keyString == "ControlFillColorInputActive")
+        return NFluentColorKey::ControlFillColorInputActive;
+    if (keyString == "ControlFillColorSecondary")
+        return NFluentColorKey::ControlFillColorSecondary;
+    if (keyString == "ControlFillColorTertiary")
+        return NFluentColorKey::ControlFillColorTertiary;
+    if (keyString == "ControlFillColorTransparent")
+        return NFluentColorKey::ControlFillColorTransparent;
+    if (keyString == "ControlOnImageFillColorDefault")
+        return NFluentColorKey::ControlOnImageFillColorDefault;
+    if (keyString == "ControlOnImageFillColorDisabled")
+        return NFluentColorKey::ControlOnImageFillColorDisabled;
+    if (keyString == "ControlOnImageFillColorSecondary")
+        return NFluentColorKey::ControlOnImageFillColorSecondary;
+    if (keyString == "ControlOnImageFillColorTertiary")
+        return NFluentColorKey::ControlOnImageFillColorTertiary;
+    if (keyString == "ControlSolidFillColorDefault")
+        return NFluentColorKey::ControlSolidFillColorDefault;
+    if (keyString == "ControlStrokeColorDefault")
+        return NFluentColorKey::ControlStrokeColorDefault;
+    if (keyString == "ControlStrokeColorForStrongFillWhenOnImage")
+        return NFluentColorKey::ControlStrokeColorForStrongFillWhenOnImage;
+    if (keyString == "ControlStrokeColorOnAccentDefault")
+        return NFluentColorKey::ControlStrokeColorOnAccentDefault;
+    if (keyString == "ControlStrokeColorOnAccentDisabled")
+        return NFluentColorKey::ControlStrokeColorOnAccentDisabled;
+    if (keyString == "ControlStrokeColorOnAccentSecondary")
+        return NFluentColorKey::ControlStrokeColorOnAccentSecondary;
+    if (keyString == "ControlStrokeColorOnAccentTertiary")
+        return NFluentColorKey::ControlStrokeColorOnAccentTertiary;
+    if (keyString == "ControlStrokeColorSecondary")
+        return NFluentColorKey::ControlStrokeColorSecondary;
+    if (keyString == "ControlStrongFillColorDefault")
+        return NFluentColorKey::ControlStrongFillColorDefault;
+    if (keyString == "ControlStrongFillColorDisabled")
+        return NFluentColorKey::ControlStrongFillColorDisabled;
+    if (keyString == "ControlStrongStrokeColorDefault")
+        return NFluentColorKey::ControlStrongStrokeColorDefault;
+    if (keyString == "ControlStrongStrokeColorDisabled")
+        return NFluentColorKey::ControlStrongStrokeColorDisabled;
+    if (keyString == "DividerStrokeColorDefault")
+        return NFluentColorKey::DividerStrokeColorDefault;
+    if (keyString == "FocusStrokeColorInner")
+        return NFluentColorKey::FocusStrokeColorInner;
+    if (keyString == "FocusStrokeColorOuter")
+        return NFluentColorKey::FocusStrokeColorOuter;
+    if (keyString == "LayerFillColorAlt")
+        return NFluentColorKey::LayerFillColorAlt;
+    if (keyString == "LayerFillColorDefault")
+        return NFluentColorKey::LayerFillColorDefault;
+    if (keyString == "LayerOnAccentAcrylicFillColorDefault")
+        return NFluentColorKey::LayerOnAccentAcrylicFillColorDefault;
+    if (keyString == "LayerOnAcrylicFillColorDefault")
+        return NFluentColorKey::LayerOnAcrylicFillColorDefault;
+    if (keyString == "LayerOnMicaBaseAltFillColorDefault")
+        return NFluentColorKey::LayerOnMicaBaseAltFillColorDefault;
+    if (keyString == "LayerOnMicaBaseAltFillColorSecondary")
+        return NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary;
+    if (keyString == "LayerOnMicaBaseAltFillColorTertiary")
+        return NFluentColorKey::LayerOnMicaBaseAltFillColorTertiary;
+    if (keyString == "LayerOnMicaBaseAltFillColorTransparent")
+        return NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent;
+    if (keyString == "SmokeFillColorDefault")
+        return NFluentColorKey::SmokeFillColorDefault;
+    if (keyString == "SolidBackgroundFillColorBase")
+        return NFluentColorKey::SolidBackgroundFillColorBase;
+    if (keyString == "SolidBackgroundFillColorBaseAlt")
+        return NFluentColorKey::SolidBackgroundFillColorBaseAlt;
+    if (keyString == "SolidBackgroundFillColorQuarternary")
+        return NFluentColorKey::SolidBackgroundFillColorQuarternary;
+    if (keyString == "SolidBackgroundFillColorSecondary")
+        return NFluentColorKey::SolidBackgroundFillColorSecondary;
+    if (keyString == "SolidBackgroundFillColorTertiary")
+        return NFluentColorKey::SolidBackgroundFillColorTertiary;
+    if (keyString == "SolidBackgroundFillColorTransparent")
+        return NFluentColorKey::SolidBackgroundFillColorTransparent;
+    if (keyString == "SubtleFillColorDisabled")
+        return NFluentColorKey::SubtleFillColorDisabled;
+    if (keyString == "SubtleFillColorSecondary")
+        return NFluentColorKey::SubtleFillColorSecondary;
+    if (keyString == "SubtleFillColorTertiary")
+        return NFluentColorKey::SubtleFillColorTertiary;
+    if (keyString == "SubtleFillColorTransparent")
+        return NFluentColorKey::SubtleFillColorTransparent;
+    if (keyString == "SurfaceStrokeColorDefault")
+        return NFluentColorKey::SurfaceStrokeColorDefault;
+    if (keyString == "SurfaceStrokeColorFlyout")
+        return NFluentColorKey::SurfaceStrokeColorFlyout;
+    if (keyString == "SurfaceStrokeColorInverse")
+        return NFluentColorKey::SurfaceStrokeColorInverse;
+    if (keyString == "SystemFillColorAttentionBackground")
+        return NFluentColorKey::SystemFillColorAttentionBackground;
+    if (keyString == "SystemFillColorCaution")
+        return NFluentColorKey::SystemFillColorCaution;
+    if (keyString == "SystemFillColorCautionBackground")
+        return NFluentColorKey::SystemFillColorCautionBackground;
+    if (keyString == "SystemFillColorCritical")
+        return NFluentColorKey::SystemFillColorCritical;
+    if (keyString == "SystemFillColorCriticalBackground")
+        return NFluentColorKey::SystemFillColorCriticalBackground;
+    if (keyString == "SystemFillColorNeutral")
+        return NFluentColorKey::SystemFillColorNeutral;
+    if (keyString == "SystemFillColorNeutralBackground")
+        return NFluentColorKey::SystemFillColorNeutralBackground;
+    if (keyString == "SystemFillColorSolidAttentionBackground")
+        return NFluentColorKey::SystemFillColorSolidAttentionBackground;
+    if (keyString == "SystemFillColorSolidNeutral")
+        return NFluentColorKey::SystemFillColorSolidNeutral;
+    if (keyString == "SystemFillColorSolidNeutralBackground")
+        return NFluentColorKey::SystemFillColorSolidNeutralBackground;
+    if (keyString == "SystemFillColorSuccess")
+        return NFluentColorKey::SystemFillColorSuccess;
+    if (keyString == "SystemFillColorSuccessBackground")
+        return NFluentColorKey::SystemFillColorSuccessBackground;
+    if (keyString == "TextFillColorDisabled")
+        return NFluentColorKey::TextFillColorDisabled;
+    if (keyString == "TextFillColorInverse")
+        return NFluentColorKey::TextFillColorInverse;
+    if (keyString == "TextFillColorPrimary")
+        return NFluentColorKey::TextFillColorPrimary;
+    if (keyString == "TextFillColorSecondary")
+        return NFluentColorKey::TextFillColorSecondary;
+    if (keyString == "TextFillColorTertiary")
+        return NFluentColorKey::TextFillColorTertiary;
+    if (keyString == "TextOnAccentFillColorDisabled")
+        return NFluentColorKey::TextOnAccentFillColorDisabled;
+    if (keyString == "TextOnAccentFillColorPrimary")
+        return NFluentColorKey::TextOnAccentFillColorPrimary;
+    if (keyString == "TextOnAccentFillColorSecondary")
+        return NFluentColorKey::TextOnAccentFillColorSecondary;
+    if (keyString == "TextOnAccentFillColorSelectedText")
+        return NFluentColorKey::TextOnAccentFillColorSelectedText;
     return NFluentColorKey::Count; // 无效的键
 }
 
 // 暗色主题颜色
 static const QMap<NFluentColorKey::Key, QColor> DarkThemeColors = {
     {NFluentColorKey::TextFillColorPrimary, QColor("#FFFFFF")},
-    {NFluentColorKey::TextFillColorSecondary, colorWithAlphaPercent("#FFFFFF", 77)},
-    {NFluentColorKey::TextFillColorTertiary, colorWithAlphaPercent("#FFFFFF", 53)},
-    {NFluentColorKey::TextFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 36)},
-    {NFluentColorKey::TextFillColorInverse, colorWithAlphaPercent("#000000", 89)},
-    {NFluentColorKey::AccentTextFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 36)},
+    {NFluentColorKey::TextFillColorSecondary, QColor("#C5FFFFFF")},
+    {NFluentColorKey::TextFillColorTertiary, QColor("#87FFFFFF")},
+    {NFluentColorKey::TextFillColorDisabled, QColor("#5DFFFFFF")},
+    {NFluentColorKey::TextFillColorInverse, QColor("#E4000000")},
+    {NFluentColorKey::AccentTextFillColorDisabled, QColor("#5DFFFFFF")},
     {NFluentColorKey::TextOnAccentFillColorSelectedText, QColor("#FFFFFF")},
     {NFluentColorKey::TextOnAccentFillColorPrimary, QColor("#000000")},
-    {NFluentColorKey::TextOnAccentFillColorSecondary, colorWithAlphaPercent("#000000", 50)},
-    {NFluentColorKey::TextOnAccentFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 53)},
-    {NFluentColorKey::ControlFillColorDefault, colorWithAlphaPercent("#FFFFFF", 6)},
-    {NFluentColorKey::ControlFillColorSecondary, colorWithAlphaPercent("#FFFFFF", 8)},
-    {NFluentColorKey::ControlFillColorTertiary, colorWithAlphaPercent("#FFFFFF", 3)},
-    {NFluentColorKey::ControlFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 4)},
-    {NFluentColorKey::ControlFillColorTransparent, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::ControlFillColorInputActive, colorWithAlphaPercent("#1E1E1E", 70)},
-    {NFluentColorKey::ControlStrongFillColorDefault, colorWithAlphaPercent("#FFFFFF", 55)},
-    {NFluentColorKey::ControlStrongFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 25)},
+    {NFluentColorKey::TextOnAccentFillColorSecondary, QColor("#80000000")},
+    {NFluentColorKey::TextOnAccentFillColorDisabled, QColor("#87FFFFFF")},
+    {NFluentColorKey::ControlFillColorDefault, QColor("#0FFFFFFF")},
+    {NFluentColorKey::ControlFillColorSecondary, QColor("#15FFFFFF")},
+    {NFluentColorKey::ControlFillColorTertiary, QColor("#08FFFFFF")},
+    {NFluentColorKey::ControlFillColorDisabled, QColor("#0BFFFFFF")},
+    {NFluentColorKey::ControlFillColorTransparent, QColor("#00FFFFFF")},
+    {NFluentColorKey::ControlFillColorInputActive, QColor("#B31E1E1E")},
+    {NFluentColorKey::ControlStrongFillColorDefault, QColor("#8BFFFFFF")},
+    {NFluentColorKey::ControlStrongFillColorDisabled, QColor("#3FFFFFFF")},
     {NFluentColorKey::ControlSolidFillColorDefault, QColor("#454545")},
-    {NFluentColorKey::SubtleFillColorTransparent, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::SubtleFillColorSecondary, colorWithAlphaPercent("#FFFFFF", 6)},
-    {NFluentColorKey::SubtleFillColorTertiary, colorWithAlphaPercent("#FFFFFF", 4)},
-    {NFluentColorKey::SubtleFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::ControlAltFillColorTransparent, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::ControlAltFillColorSecondary, colorWithAlphaPercent("#000000", 10)},
-    {NFluentColorKey::ControlAltFillColorTertiary, colorWithAlphaPercent("#FFFFFF", 4)},
-    {NFluentColorKey::ControlAltFillColorQuarternary, colorWithAlphaPercent("#FFFFFF", 7)},
-    {NFluentColorKey::ControlAltFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::ControlOnImageFillColorDefault, colorWithAlphaPercent("#1C1C1C", 70)},
+    {NFluentColorKey::SubtleFillColorTransparent, QColor("#00FFFFFF")},
+    {NFluentColorKey::SubtleFillColorSecondary, QColor("#0FFFFFFF")},
+    {NFluentColorKey::SubtleFillColorTertiary, QColor("#0AFFFFFF")},
+    {NFluentColorKey::SubtleFillColorDisabled, QColor("#00FFFFFF")},
+    {NFluentColorKey::ControlAltFillColorTransparent, QColor("#00FFFFFF")},
+    {NFluentColorKey::ControlAltFillColorSecondary, QColor("#19000000")},
+    {NFluentColorKey::ControlAltFillColorTertiary, QColor("#0BFFFFFF")},
+    {NFluentColorKey::ControlAltFillColorQuarternary, QColor("#12FFFFFF")},
+    {NFluentColorKey::ControlAltFillColorDisabled, QColor("#00FFFFFF")},
+    {NFluentColorKey::ControlOnImageFillColorDefault, QColor("#B31C1C1C")},
     {NFluentColorKey::ControlOnImageFillColorSecondary, QColor("#1A1A1A")},
     {NFluentColorKey::ControlOnImageFillColorTertiary, QColor("#131313")},
     {NFluentColorKey::ControlOnImageFillColorDisabled, QColor("#1E1E1E")},
-    {NFluentColorKey::AccentFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 16)},
-    {NFluentColorKey::ControlStrokeColorDefault, colorWithAlphaPercent("#FFFFFF", 7)},
-    {NFluentColorKey::ControlStrokeColorSecondary, colorWithAlphaPercent("#FFFFFF", 9)},
-    {NFluentColorKey::ControlStrokeColorOnAccentDefault, colorWithAlphaPercent("#FFFFFF", 8)},
-    {NFluentColorKey::ControlStrokeColorOnAccentSecondary, colorWithAlphaPercent("#000000", 14)},
-    {NFluentColorKey::ControlStrokeColorOnAccentTertiary, colorWithAlphaPercent("#000000", 22)},
-    {NFluentColorKey::ControlStrokeColorOnAccentDisabled, colorWithAlphaPercent("#000000", 20)},
-    {NFluentColorKey::ControlStrokeColorForStrongFillWhenOnImage, colorWithAlphaPercent("#000000", 42)},
-    {NFluentColorKey::CardStrokeColorDefault, colorWithAlphaPercent("#000000", 10)},
+    {NFluentColorKey::AccentFillColorDisabled, QColor("#28FFFFFF")},
+    {NFluentColorKey::ControlStrokeColorDefault, QColor("#12FFFFFF")},
+    {NFluentColorKey::ControlStrokeColorSecondary, QColor("#18FFFFFF")},
+    {NFluentColorKey::ControlStrokeColorOnAccentDefault, QColor("#14FFFFFF")},
+    {NFluentColorKey::ControlStrokeColorOnAccentSecondary, QColor("#23000000")},
+    {NFluentColorKey::ControlStrokeColorOnAccentTertiary, QColor("#37000000")},
+    {NFluentColorKey::ControlStrokeColorOnAccentDisabled, QColor("#33000000")},
+    {NFluentColorKey::ControlStrokeColorForStrongFillWhenOnImage, QColor("#6B000000")},
+    {NFluentColorKey::CardStrokeColorDefault, QColor("#19000000")},
     {NFluentColorKey::CardStrokeColorDefaultSolid, QColor("#1C1C1C")},
-    {NFluentColorKey::ControlStrongStrokeColorDefault, colorWithAlphaPercent("#FFFFFF", 55)},
-    {NFluentColorKey::ControlStrongStrokeColorDisabled, colorWithAlphaPercent("#FFFFFF", 16)},
-    {NFluentColorKey::SurfaceStrokeColorDefault, colorWithAlphaPercent("#757575", 40)},
-    {NFluentColorKey::SurfaceStrokeColorFlyout, colorWithAlphaPercent("#000000", 20)},
-    {NFluentColorKey::SurfaceStrokeColorInverse, colorWithAlphaPercent("#000000", 6)},
-    {NFluentColorKey::DividerStrokeColorDefault, colorWithAlphaPercent("#FFFFFF", 8)},
+    {NFluentColorKey::ControlStrongStrokeColorDefault, QColor("#8BFFFFFF")},
+    {NFluentColorKey::ControlStrongStrokeColorDisabled, QColor("#28FFFFFF")},
+    {NFluentColorKey::SurfaceStrokeColorDefault, QColor("#66757575")},
+    {NFluentColorKey::SurfaceStrokeColorFlyout, QColor("#33000000")},
+    {NFluentColorKey::SurfaceStrokeColorInverse, QColor("#0F000000")},
+    {NFluentColorKey::DividerStrokeColorDefault, QColor("#15FFFFFF")},
     {NFluentColorKey::FocusStrokeColorOuter, QColor("#FFFFFF")},
-    {NFluentColorKey::FocusStrokeColorInner, colorWithAlphaPercent("#000000", 70)},
-    {NFluentColorKey::CardBackgroundFillColorDefault, colorWithAlphaPercent("#FFFFFF", 5)},
-    {NFluentColorKey::CardBackgroundFillColorSecondary, colorWithAlphaPercent("#FFFFFF", 3)},
-    {NFluentColorKey::SmokeFillColorDefault, colorWithAlphaPercent("#000000", 30)},
-    {NFluentColorKey::LayerFillColorDefault, colorWithAlphaPercent("#3A3A3A", 30)},
-    {NFluentColorKey::LayerFillColorAlt, colorWithAlphaPercent("#FFFFFF", 5)},
-    {NFluentColorKey::LayerOnAcrylicFillColorDefault, colorWithAlphaPercent("#FFFFFF", 4)},
-    {NFluentColorKey::LayerOnAccentAcrylicFillColorDefault, colorWithAlphaPercent("#FFFFFF", 4)},
-    {NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, colorWithAlphaPercent("#3A3A3A", 45)},
-    {NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, colorWithAlphaPercent("#FFFFFF", 6)},
+    {NFluentColorKey::FocusStrokeColorInner, QColor("#B3000000")},
+    {NFluentColorKey::CardBackgroundFillColorDefault, QColor("#0DFFFFFF")},
+    {NFluentColorKey::CardBackgroundFillColorSecondary, QColor("#08FFFFFF")},
+    {NFluentColorKey::SmokeFillColorDefault, QColor("#4D000000")},
+    {NFluentColorKey::LayerFillColorDefault, QColor("#4C3A3A3A")},
+    {NFluentColorKey::LayerFillColorAlt, QColor("#0DFFFFFF")},
+    {NFluentColorKey::LayerOnAcrylicFillColorDefault, QColor("#09FFFFFF")},
+    {NFluentColorKey::LayerOnAccentAcrylicFillColorDefault, QColor("#09FFFFFF")},
+    {NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, QColor("#733A3A3A")},
+    {NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, QColor("#0FFFFFFF")},
     {NFluentColorKey::LayerOnMicaBaseAltFillColorTertiary, QColor("#2C2C2C")},
-    {NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, colorWithAlphaPercent("#FFFFFF", 0)},
+    {NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, QColor("#00FFFFFF")},
     {NFluentColorKey::SolidBackgroundFillColorBase, QColor("#202020")},
     {NFluentColorKey::SolidBackgroundFillColorSecondary, QColor("#1C1C1C")},
     {NFluentColorKey::SolidBackgroundFillColorTertiary, QColor("#282828")},
     {NFluentColorKey::SolidBackgroundFillColorQuarternary, QColor("#2C2C2C")},
-    {NFluentColorKey::SolidBackgroundFillColorTransparent, colorWithAlphaPercent("#202020", 0)},
+    {NFluentColorKey::SolidBackgroundFillColorTransparent, QColor("#00202020")},
     {NFluentColorKey::SolidBackgroundFillColorBaseAlt, QColor("#0A0A0A")},
     {NFluentColorKey::SystemFillColorSuccess, QColor("#6CCB5F")},
     {NFluentColorKey::SystemFillColorCaution, QColor("#FCE100")},
     {NFluentColorKey::SystemFillColorCritical, QColor("#FF99A4")},
-    {NFluentColorKey::SystemFillColorNeutral, colorWithAlphaPercent("#FFFFFF", 55)},
+    {NFluentColorKey::SystemFillColorNeutral, QColor("#8BFFFFFF")},
     {NFluentColorKey::SystemFillColorSolidNeutral, QColor("#9D9D9D")},
-    {NFluentColorKey::SystemFillColorAttentionBackground, colorWithAlphaPercent("#FFFFFF", 3)},
+    {NFluentColorKey::SystemFillColorAttentionBackground, QColor("#08FFFFFF")},
     {NFluentColorKey::SystemFillColorSuccessBackground, QColor("#393D1B")},
     {NFluentColorKey::SystemFillColorCautionBackground, QColor("#433519")},
     {NFluentColorKey::SystemFillColorCriticalBackground, QColor("#442726")},
-    {NFluentColorKey::SystemFillColorNeutralBackground, colorWithAlphaPercent("#FFFFFF", 3)},
+    {NFluentColorKey::SystemFillColorNeutralBackground, QColor("#08FFFFFF")},
     {NFluentColorKey::SystemFillColorSolidAttentionBackground, QColor("#2E2E2E")},
     {NFluentColorKey::SystemFillColorSolidNeutralBackground, QColor("#2E2E2E")},
 };
 
 // 亮色主题颜色
 static const QMap<NFluentColorKey::Key, QColor> LightThemeColors = {
-    {NFluentColorKey::TextFillColorPrimary, colorWithAlphaPercent("#000000", 89)},
-    {NFluentColorKey::TextFillColorSecondary, colorWithAlphaPercent("#000000", 62)},
-    {NFluentColorKey::TextFillColorTertiary, colorWithAlphaPercent("#000000", 45)},
-    {NFluentColorKey::TextFillColorDisabled, colorWithAlphaPercent("#000000", 36)},
+    {NFluentColorKey::TextFillColorPrimary, QColor("#E4000000")},
+    {NFluentColorKey::TextFillColorSecondary, QColor("#9E000000")},
+    {NFluentColorKey::TextFillColorTertiary, QColor("#72000000")},
+    {NFluentColorKey::TextFillColorDisabled, QColor("#5C000000")},
     {NFluentColorKey::TextFillColorInverse, QColor("#FFFFFF")},
-    {NFluentColorKey::AccentTextFillColorDisabled, colorWithAlphaPercent("#000000", 36)},
+    {NFluentColorKey::AccentTextFillColorDisabled, QColor("#5C000000")},
     {NFluentColorKey::TextOnAccentFillColorSelectedText, QColor("#FFFFFF")},
     {NFluentColorKey::TextOnAccentFillColorPrimary, QColor("#FFFFFF")},
-    {NFluentColorKey::TextOnAccentFillColorSecondary, colorWithAlphaPercent("#FFFFFF", 70)},
+    {NFluentColorKey::TextOnAccentFillColorSecondary, QColor("#B3FFFFFF")},
     {NFluentColorKey::TextOnAccentFillColorDisabled, QColor("#FFFFFF")},
-    {NFluentColorKey::ControlFillColorDefault, colorWithAlphaPercent("#FFFFFF", 70)},
-    {NFluentColorKey::ControlFillColorSecondary, colorWithAlphaPercent("#F9F9F9", 50)},
-    {NFluentColorKey::ControlFillColorTertiary, colorWithAlphaPercent("#F9F9F9", 30)},
-    {NFluentColorKey::ControlFillColorDisabled, colorWithAlphaPercent("#F9F9F9", 30)},
-    {NFluentColorKey::ControlFillColorTransparent, colorWithAlphaPercent("#FFFFFF", 0)},
+    {NFluentColorKey::ControlFillColorDefault, QColor("#B3FFFFFF")},
+    {NFluentColorKey::ControlFillColorSecondary, QColor("#80F9F9F9")},
+    {NFluentColorKey::ControlFillColorTertiary, QColor("#4DF9F9F9")},
+    {NFluentColorKey::ControlFillColorDisabled, QColor("#4DF9F9F9")},
+    {NFluentColorKey::ControlFillColorTransparent, QColor("#00FFFFFF")},
     {NFluentColorKey::ControlFillColorInputActive, QColor("#FFFFFF")},
-    {NFluentColorKey::ControlStrongFillColorDefault, colorWithAlphaPercent("#000000", 45)},
-    {NFluentColorKey::ControlStrongFillColorDisabled, colorWithAlphaPercent("#000000", 32)},
+    {NFluentColorKey::ControlStrongFillColorDefault, QColor("#72000000")},
+    {NFluentColorKey::ControlStrongFillColorDisabled, QColor("#51000000")},
     {NFluentColorKey::ControlSolidFillColorDefault, QColor("#FFFFFF")},
-    {NFluentColorKey::SubtleFillColorTransparent, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::SubtleFillColorSecondary, colorWithAlphaPercent("#000000", 4)},
-    {NFluentColorKey::SubtleFillColorTertiary, colorWithAlphaPercent("#000000", 2)},
-    {NFluentColorKey::SubtleFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::ControlAltFillColorTransparent, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::ControlAltFillColorSecondary, colorWithAlphaPercent("#000000", 2)},
-    {NFluentColorKey::ControlAltFillColorTertiary, colorWithAlphaPercent("#000000", 6)},
-    {NFluentColorKey::ControlAltFillColorQuarternary, colorWithAlphaPercent("#000000", 9)},
-    {NFluentColorKey::ControlAltFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::ControlOnImageFillColorDefault, colorWithAlphaPercent("#FFFFFF", 79)},
+    {NFluentColorKey::SubtleFillColorTransparent, QColor("#00FFFFFF")},
+    {NFluentColorKey::SubtleFillColorSecondary, QColor("#09000000")},
+    {NFluentColorKey::SubtleFillColorTertiary, QColor("#06000000")},
+    {NFluentColorKey::SubtleFillColorDisabled, QColor("#00FFFFFF")},
+    {NFluentColorKey::ControlAltFillColorTransparent, QColor("#00FFFFFF")},
+    {NFluentColorKey::ControlAltFillColorSecondary, QColor("#06000000")},
+    {NFluentColorKey::ControlAltFillColorTertiary, QColor("#0F000000")},
+    {NFluentColorKey::ControlAltFillColorQuarternary, QColor("#18000000")},
+    {NFluentColorKey::ControlAltFillColorDisabled, QColor("#00FFFFFF")},
+    {NFluentColorKey::ControlOnImageFillColorDefault, QColor("#C9FFFFFF")},
     {NFluentColorKey::ControlOnImageFillColorSecondary, QColor("#F3F3F3")},
     {NFluentColorKey::ControlOnImageFillColorTertiary, QColor("#EBEBEB")},
-    {NFluentColorKey::ControlOnImageFillColorDisabled, colorWithAlphaPercent("#FFFFFF", 0)},
-    {NFluentColorKey::AccentFillColorDisabled, colorWithAlphaPercent("#000000", 22)},
-    {NFluentColorKey::ControlStrokeColorDefault, colorWithAlphaPercent("#000000", 6)},
-    {NFluentColorKey::ControlStrokeColorSecondary, colorWithAlphaPercent("#000000", 16)},
-    {NFluentColorKey::ControlStrokeColorOnAccentDefault, colorWithAlphaPercent("#FFFFFF", 8)},
-    {NFluentColorKey::ControlStrokeColorOnAccentSecondary, colorWithAlphaPercent("#000000", 40)},
-    {NFluentColorKey::ControlStrokeColorOnAccentTertiary, colorWithAlphaPercent("#000000", 22)},
-    {NFluentColorKey::ControlStrokeColorOnAccentDisabled, colorWithAlphaPercent("#000000", 6)},
-    {NFluentColorKey::ControlStrokeColorForStrongFillWhenOnImage, colorWithAlphaPercent("#FFFFFF", 35)},
-    {NFluentColorKey::CardStrokeColorDefault, colorWithAlphaPercent("#000000", 6)},
+    {NFluentColorKey::ControlOnImageFillColorDisabled, QColor("#00FFFFFF")},
+    {NFluentColorKey::AccentFillColorDisabled, QColor("#37000000")},
+    {NFluentColorKey::ControlStrokeColorDefault, QColor("#0F000000")},
+    {NFluentColorKey::ControlStrokeColorSecondary, QColor("#29000000")},
+    {NFluentColorKey::ControlStrokeColorOnAccentDefault, QColor("#14FFFFFF")},
+    {NFluentColorKey::ControlStrokeColorOnAccentSecondary, QColor("#66000000")},
+    {NFluentColorKey::ControlStrokeColorOnAccentTertiary, QColor("#37000000")},
+    {NFluentColorKey::ControlStrokeColorOnAccentDisabled, QColor("#0F000000")},
+    {NFluentColorKey::ControlStrokeColorForStrongFillWhenOnImage, QColor("#59FFFFFF")},
+    {NFluentColorKey::CardStrokeColorDefault, QColor("#0F000000")},
     {NFluentColorKey::CardStrokeColorDefaultSolid, QColor("#EBEBEB")},
-    {NFluentColorKey::ControlStrongStrokeColorDefault, colorWithAlphaPercent("#000000", 45)},
-    {NFluentColorKey::ControlStrongStrokeColorDisabled, colorWithAlphaPercent("#000000", 22)},
-    {NFluentColorKey::SurfaceStrokeColorDefault, colorWithAlphaPercent("#757575", 40)},
-    {NFluentColorKey::SurfaceStrokeColorFlyout, colorWithAlphaPercent("#000000", 6)},
-    {NFluentColorKey::SurfaceStrokeColorInverse, colorWithAlphaPercent("#FFFFFF", 8)},
-    {NFluentColorKey::DividerStrokeColorDefault, colorWithAlphaPercent("#000000", 6)},
-    {NFluentColorKey::FocusStrokeColorOuter, colorWithAlphaPercent("#000000", 89)},
-    {NFluentColorKey::FocusStrokeColorInner, colorWithAlphaPercent("#FFFFFF", 70)},
-    {NFluentColorKey::CardBackgroundFillColorDefault, colorWithAlphaPercent("#FFFFFF", 70)},
-    {NFluentColorKey::CardBackgroundFillColorSecondary, colorWithAlphaPercent("#F6F6F6", 50)},
-    {NFluentColorKey::SmokeFillColorDefault, colorWithAlphaPercent("#000000", 30)},
-    {NFluentColorKey::LayerFillColorDefault, colorWithAlphaPercent("#FFFFFF", 50)},
+    {NFluentColorKey::ControlStrongStrokeColorDefault, QColor("#72000000")},
+    {NFluentColorKey::ControlStrongStrokeColorDisabled, QColor("#37000000")},
+    {NFluentColorKey::SurfaceStrokeColorDefault, QColor("#66757575")},
+    {NFluentColorKey::SurfaceStrokeColorFlyout, QColor("#0F000000")},
+    {NFluentColorKey::SurfaceStrokeColorInverse, QColor("#15FFFFFF")},
+    {NFluentColorKey::DividerStrokeColorDefault, QColor("#0F000000")},
+    {NFluentColorKey::FocusStrokeColorOuter, QColor("#E4000000")},
+    {NFluentColorKey::FocusStrokeColorInner, QColor("#B3FFFFFF")},
+    {NFluentColorKey::CardBackgroundFillColorDefault, QColor("#B3FFFFFF")},
+    {NFluentColorKey::CardBackgroundFillColorSecondary, QColor("#80F6F6F6")},
+    {NFluentColorKey::SmokeFillColorDefault, QColor("#4D000000")},
+    {NFluentColorKey::LayerFillColorDefault, QColor("#80FFFFFF")},
     {NFluentColorKey::LayerFillColorAlt, QColor("#FFFFFF")},
-    {NFluentColorKey::LayerOnAcrylicFillColorDefault, colorWithAlphaPercent("#FFFFFF", 25)},
-    {NFluentColorKey::LayerOnAccentAcrylicFillColorDefault, colorWithAlphaPercent("#FFFFFF", 25)},
-    {NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, colorWithAlphaPercent("#FFFFFF", 70)},
-    {NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, colorWithAlphaPercent("#000000", 4)},
+    {NFluentColorKey::LayerOnAcrylicFillColorDefault, QColor("#40FFFFFF")},
+    {NFluentColorKey::LayerOnAccentAcrylicFillColorDefault, QColor("#40FFFFFF")},
+    {NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, QColor("#B3FFFFFF")},
+    {NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, QColor("#0A000000")},
     {NFluentColorKey::LayerOnMicaBaseAltFillColorTertiary, QColor("#F9F9F9")},
-    {NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, colorWithAlphaPercent("#000000", 0)},
+    {NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, QColor("#00000000")},
     {NFluentColorKey::SolidBackgroundFillColorBase, QColor("#F3F3F3")},
     {NFluentColorKey::SolidBackgroundFillColorSecondary, QColor("#EEEEEE")},
     {NFluentColorKey::SolidBackgroundFillColorTertiary, QColor("#F9F9F9")},
     {NFluentColorKey::SolidBackgroundFillColorQuarternary, QColor("#FFFFFF")},
-    {NFluentColorKey::SolidBackgroundFillColorTransparent, colorWithAlphaPercent("#F3F3F3", 0)},
+    {NFluentColorKey::SolidBackgroundFillColorTransparent, QColor("#00F3F3F3")},
     {NFluentColorKey::SolidBackgroundFillColorBaseAlt, QColor("#DADADA")},
     {NFluentColorKey::SystemFillColorSuccess, QColor("#0F7B0F")},
     {NFluentColorKey::SystemFillColorCaution, QColor("#9D5D00")},
     {NFluentColorKey::SystemFillColorCritical, QColor("#C42B1C")},
-    {NFluentColorKey::SystemFillColorNeutral, colorWithAlphaPercent("#000000", 45)},
+    {NFluentColorKey::SystemFillColorNeutral, QColor("#72000000")},
     {NFluentColorKey::SystemFillColorSolidNeutral, QColor("#8A8A8A")},
-    {NFluentColorKey::SystemFillColorAttentionBackground, colorWithAlphaPercent("#F6F6F6", 50)},
+    {NFluentColorKey::SystemFillColorAttentionBackground, QColor("#80F6F6F6")},
     {NFluentColorKey::SystemFillColorSuccessBackground, QColor("#DFF6DD")},
     {NFluentColorKey::SystemFillColorCautionBackground, QColor("#FFF4CE")},
     {NFluentColorKey::SystemFillColorCriticalBackground, QColor("#FDE7E9")},
-    {NFluentColorKey::SystemFillColorNeutralBackground, colorWithAlphaPercent("#000000", 2)},
+    {NFluentColorKey::SystemFillColorNeutralBackground, QColor("#06000000")},
     {NFluentColorKey::SystemFillColorSolidAttentionBackground, QColor("#F7F7F7")},
     {NFluentColorKey::SystemFillColorSolidNeutralBackground, QColor("#F3F3F3")},
 };

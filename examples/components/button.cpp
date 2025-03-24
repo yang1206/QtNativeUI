@@ -7,10 +7,12 @@
 #include <QApplication>
 #include <QGridLayout>
 #include <QLabel>
+#include <QMenu>
 #include <QStyleHints>
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NToggleButton.h>
+#include "QtNativeUI/NDropDownButton.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -200,8 +202,8 @@ void ButtonExample::initUI() {
 
     accentLayout->addWidget(flowWidget);
     accentLayout->addWidget(otherBtns);
-    mainLayout->addWidget(accentSection);
 
+    mainLayout->addWidget(accentSection);
     // 添加底部间距
     mainLayout->addStretch();
 

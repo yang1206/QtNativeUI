@@ -31,16 +31,16 @@ void NCheckBox::init() {
     d->_themeMode     = nTheme->themeMode();
     d->_isDark        = nTheme->isDarkMode();
 
-    d->_pLightDefaultColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkDefaultColor  = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
-    d->_pLightHoverColor   = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
-    d->_pDarkHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
-    d->_pLightPressColor   = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Light);
-    d->_pDarkPressColor    = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Dark);
+    d->_pLightDefaultColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Light);
+    d->_pDarkDefaultColor  = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Dark);
+    d->_pLightHoverColor   = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Light);
+    d->_pDarkHoverColor    = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Dark);
+    d->_pLightPressColor   = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, NThemeType::Light);
+    d->_pDarkPressColor    = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, NThemeType::Dark);
     d->_pLightTextColor    = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
     d->_pDarkTextColor     = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
-    d->_pLightBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
-    d->_pDarkBorderColor   = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
+    d->_pLightBorderColor  = NThemeColor(NFluentColorKey::SubtleFillColorTransparent, NThemeType::Light);
+    d->_pDarkBorderColor   = NThemeColor(NFluentColorKey::SubtleFillColorTransparent, NThemeType::Dark);
 
     updateAccentColors();
 
@@ -105,7 +105,7 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
         }
     } else {
         if (!isEnabled()) {
-            bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+            bgColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, d->_themeMode);
         } else if (d->_isPressed) {
             bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
         } else if (d->_isHovered) {

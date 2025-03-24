@@ -8,7 +8,6 @@
 #include <QtCore/qeasingcurve.h>
 #include <QtNativeUI/NFluentColors.h>
 
-// 初始化私有实现
 NThemePrivate::NThemePrivate(NTheme* q)
     : q_ptr(q),
       _themeMode(NThemeType::ThemeMode::System),
@@ -16,12 +15,10 @@ NThemePrivate::NThemePrivate(NTheme* q)
       _accentColor(NColors::blue),
       _useSystemAccentColor(true),
       _systemAccentColor(Qt::transparent) {
-    // 初始化颜色和设计令牌
     initLightColors();
     initDarkColors();
     initDesignTokens();
 
-    // 初始检测系统主题 - 由公共类负责
     _isDark = detectSystemTheme();
 
     _systemAccentColor = detectSystemAccentColor();
@@ -161,7 +158,7 @@ QColor NThemePrivate::resolveColor(NFluentColorKey::Key key) const {
     }
 
     // 返回安全的默认颜色
-    return QColor(128, 128, 128); // 返回中性灰色作为默认值
+    return QColor(128, 128, 128);
 }
 
 // 解析设计令牌
