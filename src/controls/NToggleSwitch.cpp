@@ -1,5 +1,7 @@
+#include <QEnterEvent>
 #include <QEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <QtNativeUI/NToggleSwitch.h>
 #include "../private/ntoggleswitch_p.h"
 #include "QtNativeUI/NIcon.h"
@@ -36,9 +38,8 @@ void NToggleSwitch::init() {
     Q_D(NToggleSwitch);
     d->q_ptr = this;
 
-    // 设置轨道圆角，使用圆形轨道（与高度相匹配）
     d->_pTrackBorderRadius = d->_trackHeight / 2;
-    d->_pTrackBorderWidth  = 1.5;
+    d->_pTrackBorderWidth  = 2;
     d->_themeMode          = nTheme->themeMode();
     d->_isDark             = nTheme->isDarkMode();
 
@@ -67,13 +68,18 @@ void NToggleSwitch::init() {
     d->_pLightTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
     d->_pDarkTextColor  = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
 
+    // 初始化滑块位置和大小
+    d->_thumbCenterX = d->_trackHeight / 2; // 初始位置在左侧
+    d->_thumbRadius  = d->_thumbSize / 2;   // 初始半径
+
     updateAccentColors();
 
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
     setObjectName("NToggleSwitch");
     setCheckable(true);
-    setMinimumHeight(d->_trackHeight);
+    setMinimumSize(d->_trackWidth, d->_trackHeight);
+    setFixedHeight(d->_trackHeight);
 
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NToggleSwitch);
@@ -88,10 +94,18 @@ void NToggleSwitch::init() {
         update();
     });
 
-    // 当checked状态改变时更新
+    // 当checked状态改变时更新滑块位置
     connect(this, &QAbstractButton::toggled, this, [this](bool checked) {
         Q_D(NToggleSwitch);
-        d->_thumbPosition = checked ? 1.0 : 0.0;
+        if (checked) {
+            if (d->_thumbPosAnimation->state() != QPropertyAnimation::Running) {
+                d->_thumbCenterX = d->_trackWidth - d->_trackHeight / 2;
+            }
+        } else {
+            if (d->_thumbPosAnimation->state() != QPropertyAnimation::Running) {
+                d->_thumbCenterX = d->_trackHeight / 2;
+            }
+        }
         update();
     });
 }
@@ -99,19 +113,59 @@ void NToggleSwitch::init() {
 void NToggleSwitch::setChecked(bool checked) {
     QAbstractButton::setChecked(checked);
     Q_D(NToggleSwitch);
-    d->_thumbPosition = checked ? 1.0 : 0.0;
-    update();
+
+    // 避免重复设置
+    if (checked == isChecked()) {
+        return;
+    }
+
+    int startX = d->_thumbCenterX;
+    int endX   = checked ? d->_trackWidth - d->_trackHeight / 2 : d->_trackHeight / 2;
+    d->startThumbPosAnimation(startX, endX, checked);
 }
 
 bool NToggleSwitch::isChecked() const { return QAbstractButton::isChecked(); }
 
+bool NToggleSwitch::event(QEvent* event) {
+    Q_D(NToggleSwitch);
+
+    switch (event->type()) {
+        case QEvent::Enter:
+            if (isEnabled()) {
+                d->_isHovered = true;
+                // 滑块变大一点
+                d->startThumbRadiusAnimation(d->_thumbRadius, d->_trackHeight * 0.35);
+            }
+            break;
+
+        case QEvent::Leave:
+            if (isEnabled()) {
+                d->_isHovered = false;
+                // 滑块恢复正常大小
+                d->startThumbRadiusAnimation(d->_thumbRadius, d->_thumbSize / 2);
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return QAbstractButton::event(event);
+}
+
 void NToggleSwitch::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event);
+
     QPainter painter(this);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
+    // 轨道绘制
     drawTrack(&painter);
+
+    // 滑块绘制
     drawThumb(&painter);
+
+    // 文本绘制
     drawText(&painter);
 }
 
@@ -119,51 +173,55 @@ void NToggleSwitch::drawTrack(QPainter* painter) {
     Q_D(NToggleSwitch);
     painter->save();
 
-    // 计算轨道位置（垂直居中）
-    QRect trackRect(0, (height() - d->_trackHeight) / 2, d->_trackWidth, d->_trackHeight);
+    // 创建圆角轨道路径
+    QPainterPath path;
+    int          margin = d->_trackMargin;
 
-    // 根据状态选择颜色
+    // 创建圆形两端的轨道路径
+    qreal radius = (d->_trackHeight - 2 * margin) / 2;
+
+    // 右半圆
+    path.moveTo(d->_trackWidth - radius - margin, d->_trackHeight - margin);
+    path.arcTo(QRectF(d->_trackWidth - 2 * radius - margin, margin, 2 * radius, 2 * radius), -90, 180);
+
+    // 左半圆
+    path.lineTo(radius + margin, margin);
+    path.arcTo(QRectF(margin, margin, 2 * radius, 2 * radius), 90, 180);
+
+    path.closeSubpath();
+
+    // 轨道填充色和边框色
     QColor trackColor;
     QColor borderColor;
 
-    // 根据选中状态和禁用状态选择不同的颜色
     if (isChecked()) {
         if (!isEnabled()) {
             trackColor  = d->_accentDisabledColor;
-            borderColor = Qt::transparent; // 选中状态不显示边框
+            borderColor = Qt::transparent;
         } else {
-            // 选中状态使用强调色
             trackColor  = d->_accentDefaultColor;
-            borderColor = Qt::transparent; // 选中状态不显示边框
+            borderColor = Qt::transparent;
         }
     } else {
-        // 未选中状态下，轨道是白色/深色背景，带边框
         if (!isEnabled()) {
             trackColor  = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
-            borderColor = NThemeColor(NFluentColorKey::ControlStrokeColorSecondary, d->_themeMode);
+            borderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, d->_themeMode);
         } else {
-            // 未选中状态使用背景色+边框
             trackColor  = d->_isDark ? d->_pDarkTrackDefaultColor : d->_pLightTrackDefaultColor;
             borderColor = d->_isDark ? d->_pDarkTrackBorderColor : d->_pLightTrackBorderColor;
         }
     }
 
-    // 先绘制背景
+    // 填充轨道
     painter->setPen(Qt::NoPen);
     painter->setBrush(trackColor);
-    painter->drawRoundedRect(trackRect, d->_pTrackBorderRadius, d->_pTrackBorderRadius);
+    painter->drawPath(path);
 
-    // 再绘制边框（如果需要）
+    // 绘制边框
     if (borderColor != Qt::transparent) {
-        QPen pen(borderColor);
-        pen.setWidth(2);
-        painter->setPen(pen);
+        painter->setPen(QPen(borderColor, d->_pTrackBorderWidth));
         painter->setBrush(Qt::NoBrush);
-        QRect borderRect = trackRect.adjusted(d->_pTrackBorderWidth / 2,
-                                              d->_pTrackBorderWidth / 2,
-                                              -d->_pTrackBorderWidth / 2,
-                                              -d->_pTrackBorderWidth / 2);
-        painter->drawRoundedRect(borderRect, d->_pTrackBorderRadius, d->_pTrackBorderRadius);
+        painter->drawPath(path);
     }
 
     painter->restore();
@@ -173,39 +231,37 @@ void NToggleSwitch::drawThumb(QPainter* painter) {
     Q_D(NToggleSwitch);
     painter->save();
 
-    // 计算滑块移动范围
-    int trackPadding = (d->_trackHeight - d->_thumbSize) / 2;
-    int minX         = trackPadding;
-    int maxX         = d->_trackWidth - d->_thumbSize - trackPadding;
-    int x            = minX + d->_thumbPosition * (maxX - minX);
-    int y            = (height() - d->_thumbSize) / 2;
+    // 如果滑块半径未初始化
+    if (d->_thumbRadius <= 0) {
+        d->_thumbRadius = d->_thumbSize / 2;
+    }
 
-    QRect thumbRect(x, y, d->_thumbSize, d->_thumbSize);
+    // 如果滑块中心位置未初始化
+    if (d->_thumbCenterX <= 0) {
+        d->_thumbCenterX = isChecked() ? d->_trackWidth - d->_trackHeight / 2 : d->_trackHeight / 2;
+    }
 
-    // 选择滑块颜色，根据状态选择不同的颜色
+    // 选择滑块颜色
     QColor thumbColor;
     if (!isEnabled()) {
-        // 禁用状态
         thumbColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
     } else if (isChecked()) {
-        // 选中状态
         thumbColor = d->_isDark ? d->_pDarkThumbCheckedColor : d->_pLightThumbCheckedColor;
     } else {
-        // 未选中状态
         thumbColor = d->_isDark ? d->_pDarkThumbDefaultColor : d->_pLightThumbDefaultColor;
     }
 
-    // 绘制滑块阴影效果（悬停状态或按下状态）
+    // 绘制滑块阴影（悬停或按下状态）
     if (d->_isHovered || d->_isPressed) {
         painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor(0, 0, 0, 10)); // 半透明阴影
-        painter->drawEllipse(thumbRect.adjusted(-2, -2, 2, 2));
+        painter->setBrush(QColor(0, 0, 0, 20));
+        painter->drawEllipse(QPointF(d->_thumbCenterX, d->_trackHeight / 2), d->_thumbRadius + 2, d->_thumbRadius + 2);
     }
 
     // 绘制滑块
     painter->setPen(Qt::NoPen);
     painter->setBrush(thumbColor);
-    painter->drawEllipse(thumbRect);
+    painter->drawEllipse(QPointF(d->_thumbCenterX, d->_trackHeight / 2), d->_thumbRadius, d->_thumbRadius);
 
     painter->restore();
 }
@@ -232,39 +288,76 @@ void NToggleSwitch::drawText(QPainter* painter) {
     painter->restore();
 }
 
-void NToggleSwitch::enterEvent(QEnterEvent* event) {
-    Q_D(NToggleSwitch);
-    d->_isHovered = true;
-    update();
-    QAbstractButton::enterEvent(event);
-}
-
-void NToggleSwitch::leaveEvent(QEvent* event) {
-    Q_D(NToggleSwitch);
-    d->_isHovered = false;
-    update();
-    QAbstractButton::leaveEvent(event);
-}
-
 void NToggleSwitch::mousePressEvent(QMouseEvent* event) {
     Q_D(NToggleSwitch);
-    d->_isPressed = true;
-    update();
+
+    if (event->button() == Qt::LeftButton) {
+        d->_isPressed  = true;
+        d->_isDragging = false;
+        d->_lastMouseX = event->pos().x();
+
+        // 调整滑块位置（以防之前位置不准确）
+        d->adjustThumbCenterX();
+
+        // 滑块按下时变小
+        d->startThumbRadiusAnimation(d->_thumbRadius, d->_trackHeight * 0.25);
+    }
+
     QAbstractButton::mousePressEvent(event);
 }
 
 void NToggleSwitch::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NToggleSwitch);
-    d->_isPressed = false;
-    update();
+
+    if (event->button() == Qt::LeftButton) {
+        d->_isPressed = false;
+
+        // 如果是拖动状态结束
+        if (d->_isDragging) {
+            d->_isDragging = false;
+
+            // 根据滑块位置判断状态
+            if (d->_thumbCenterX > d->_trackWidth / 2) {
+                d->startThumbPosAnimation(d->_thumbCenterX, d->_trackWidth - d->_trackHeight / 2, true);
+            } else {
+                d->startThumbPosAnimation(d->_thumbCenterX, d->_trackHeight / 2, false);
+            }
+        }
+        // 普通点击
+        else {
+            // 切换状态
+            if (isChecked()) {
+                d->startThumbPosAnimation(d->_thumbCenterX, d->_trackHeight / 2, false);
+            } else {
+                d->startThumbPosAnimation(d->_thumbCenterX, d->_trackWidth - d->_trackHeight / 2, true);
+            }
+        }
+
+        // 滑块恢复悬浮大小
+        d->startThumbRadiusAnimation(d->_thumbRadius, d->_trackHeight * 0.35);
+    }
+
     QAbstractButton::mouseReleaseEvent(event);
 }
 
-void NToggleSwitch::changeEvent(QEvent* event) {
-    if (event->type() == QEvent::EnabledChange) {
+void NToggleSwitch::mouseMoveEvent(QMouseEvent* event) {
+    Q_D(NToggleSwitch);
+
+    // 如果鼠标左键按下，实现拖动效果
+    if (d->_isPressed) {
+        d->_isDragging = true;
+
+        // 计算鼠标移动距离
+        int moveX      = event->pos().x() - d->_lastMouseX;
+        d->_lastMouseX = event->pos().x();
+
+        // 更新滑块位置
+        d->_thumbCenterX += moveX;
+        d->adjustThumbCenterX();
         update();
     }
-    QAbstractButton::changeEvent(event);
+
+    QAbstractButton::mouseMoveEvent(event);
 }
 
 QSize NToggleSwitch::sizeHint() const {

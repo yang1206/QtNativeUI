@@ -41,11 +41,10 @@ class QTNATIVEUI_EXPORT NToggleSwitch : public QAbstractButton {
 
   protected:
     void  paintEvent(QPaintEvent* event) override;
-    void  enterEvent(QEnterEvent* event) override;
-    void  leaveEvent(QEvent* event) override;
     void  mousePressEvent(QMouseEvent* event) override;
     void  mouseReleaseEvent(QMouseEvent* event) override;
-    void  changeEvent(QEvent* event) override;
+    void  mouseMoveEvent(QMouseEvent* event) override;
+    bool  event(QEvent* event) override;
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
