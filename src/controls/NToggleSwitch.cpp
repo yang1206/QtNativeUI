@@ -39,19 +39,19 @@ void NToggleSwitch::init() {
     d->q_ptr = this;
 
     d->_pTrackBorderRadius = d->_trackHeight / 2;
-    d->_pTrackBorderWidth  = 2;
+    d->_pTrackBorderWidth  = 1;
     d->_themeMode          = nTheme->themeMode();
     d->_isDark             = nTheme->isDarkMode();
 
     // 基于FluentAvalonia的设计规范设置颜色
 
     // 轨道未选中状态颜色（背景）
-    d->_pLightTrackDefaultColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkTrackDefaultColor  = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
+    d->_pLightTrackDefaultColor = NThemeColor(NFluentColorKey::ControlAltFillColorTransparent, NThemeType::Light);
+    d->_pDarkTrackDefaultColor  = NThemeColor(NFluentColorKey::ControlAltFillColorTransparent, NThemeType::Dark);
 
     // 轨道边框颜色
-    d->_pLightTrackBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
-    d->_pDarkTrackBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
+    d->_pLightTrackBorderColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Light);
+    d->_pDarkTrackBorderColor  = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Dark);
 
     // 轨道选中状态颜色 - 使用强调色
     // 强调色会通过 updateAccentColors() 设置
@@ -202,10 +202,14 @@ void NToggleSwitch::drawTrack(QPainter* painter) {
             trackColor  = d->_accentDefaultColor;
             borderColor = Qt::transparent;
         }
+    } else if (d->_isHovered) {
+        trackColor = NThemeColor(NFluentColorKey::ControlAltFillColorTertiary, d->_themeMode);
+    } else if (d->_isPressed) {
+        trackColor = NThemeColor(NFluentColorKey::ControlAltFillColorQuarternary, d->_themeMode);
     } else {
         if (!isEnabled()) {
-            trackColor  = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
-            borderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, d->_themeMode);
+            trackColor  = NThemeColor(NFluentColorKey::ControlAltFillColorDisabled, d->_themeMode);
+            borderColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, d->_themeMode);
         } else {
             trackColor  = d->_isDark ? d->_pDarkTrackDefaultColor : d->_pLightTrackDefaultColor;
             borderColor = d->_isDark ? d->_pDarkTrackBorderColor : d->_pLightTrackBorderColor;
@@ -249,13 +253,6 @@ void NToggleSwitch::drawThumb(QPainter* painter) {
         thumbColor = d->_isDark ? d->_pDarkThumbCheckedColor : d->_pLightThumbCheckedColor;
     } else {
         thumbColor = d->_isDark ? d->_pDarkThumbDefaultColor : d->_pLightThumbDefaultColor;
-    }
-
-    // 绘制滑块阴影（悬停或按下状态）
-    if (d->_isHovered || d->_isPressed) {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor(0, 0, 0, 20));
-        painter->drawEllipse(QPointF(d->_thumbCenterX, d->_trackHeight / 2), d->_thumbRadius + 2, d->_thumbRadius + 2);
     }
 
     // 绘制滑块
