@@ -32,23 +32,46 @@ def parse_xaml(xaml_file):
     light_colors = {}
     
     # 使用XPath查找带有特定x:Key属性的ResourceDictionary
-    # 由于ElementTree的XPath支持有限，我们使用循环查找
     for resource_dict in root.findall(".//{http://schemas.microsoft.com/winfx/2006/xaml/presentation}ResourceDictionary"):
         key_attr = resource_dict.get("{http://schemas.microsoft.com/winfx/2006/xaml}Key")
         
         if key_attr == "Default":
             # 解析暗色主题颜色
+            # 1. 处理 Color 标签
             for color_elem in resource_dict.findall(".//{http://schemas.microsoft.com/winfx/2006/xaml/presentation}Color"):
                 color_key = color_elem.get("{http://schemas.microsoft.com/winfx/2006/xaml}Key")
                 color_value = color_elem.text.strip() if color_elem.text else ""
                 dark_colors[color_key] = parse_color(color_value)
+            
+            # 2. 处理 SolidColorBrush 标签
+            for brush_elem in resource_dict.findall(".//{http://schemas.microsoft.com/winfx/2006/xaml/presentation}SolidColorBrush"):
+                brush_key = brush_elem.get("{http://schemas.microsoft.com/winfx/2006/xaml}Key")
+                if brush_key and brush_key.startswith("SystemColor") and brush_key.endswith("ColorBrush"):
+                    # 提取颜色值
+                    color_value = brush_elem.get("Color")
+                    if color_value:
+                        # 移除 "Brush" 后缀，只保留颜色键名
+                        color_key = brush_key[:-5]  # 去掉 "Brush" 后缀
+                        dark_colors[color_key] = parse_color(color_value)
         
         elif key_attr == "Light":
             # 解析亮色主题颜色
+            # 1. 处理 Color 标签
             for color_elem in resource_dict.findall(".//{http://schemas.microsoft.com/winfx/2006/xaml/presentation}Color"):
                 color_key = color_elem.get("{http://schemas.microsoft.com/winfx/2006/xaml}Key")
                 color_value = color_elem.text.strip() if color_elem.text else ""
                 light_colors[color_key] = parse_color(color_value)
+            
+            # 2. 处理 SolidColorBrush 标签
+            for brush_elem in resource_dict.findall(".//{http://schemas.microsoft.com/winfx/2006/xaml/presentation}SolidColorBrush"):
+                brush_key = brush_elem.get("{http://schemas.microsoft.com/winfx/2006/xaml}Key")
+                if brush_key and brush_key.startswith("SystemColor") and brush_key.endswith("ColorBrush"):
+                    # 提取颜色值
+                    color_value = brush_elem.get("Color")
+                    if color_value:
+                        # 移除 "Brush" 后缀，只保留颜色键名
+                        color_key = brush_key[:-5]  # 去掉 "Brush" 后缀
+                        light_colors[color_key] = parse_color(color_value)
     
     return dark_colors, light_colors
 

@@ -16,6 +16,10 @@ Q_PROPERTY_CREATE_Q_CPP(NCheckBox, QColor, LightTextColor)
 Q_PROPERTY_CREATE_Q_CPP(NCheckBox, QColor, DarkTextColor)
 Q_PROPERTY_CREATE_Q_CPP(NCheckBox, QColor, LightBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NCheckBox, QColor, DarkBorderColor)
+Q_PROPERTY_CREATE_Q_CPP(NCheckBox, QColor, LightBorderHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NCheckBox, QColor, DarkBorderHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NCheckBox, QColor, LightBorderPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NCheckBox, QColor, DarkBorderPressColor)
 
 NCheckBox::NCheckBox(QWidget* parent) : QCheckBox(parent), d_ptr(new NCheckBoxPrivate()) { init(); }
 
@@ -31,16 +35,20 @@ void NCheckBox::init() {
     d->_themeMode     = nTheme->themeMode();
     d->_isDark        = nTheme->isDarkMode();
 
-    d->_pLightDefaultColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Light);
-    d->_pDarkDefaultColor  = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Dark);
-    d->_pLightHoverColor   = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Light);
-    d->_pDarkHoverColor    = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Dark);
-    d->_pLightPressColor   = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, NThemeType::Light);
-    d->_pDarkPressColor    = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, NThemeType::Dark);
-    d->_pLightTextColor    = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-    d->_pDarkTextColor     = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
-    d->_pLightBorderColor  = NThemeColor(NFluentColorKey::SubtleFillColorTransparent, NThemeType::Light);
-    d->_pDarkBorderColor   = NThemeColor(NFluentColorKey::SubtleFillColorTransparent, NThemeType::Dark);
+    d->_pLightDefaultColor     = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
+    d->_pDarkDefaultColor      = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
+    d->_pLightHoverColor       = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
+    d->_pDarkHoverColor        = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
+    d->_pLightPressColor       = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Light);
+    d->_pDarkPressColor        = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Dark);
+    d->_pLightTextColor        = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+    d->_pDarkTextColor         = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightBorderColor      = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Light);
+    d->_pDarkBorderColor       = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Dark);
+    d->_pLightBorderHoverColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Light);
+    d->_pDarkBorderHoverColor  = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Dark);
+    d->_pLightBorderPressColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Light);
+    d->_pDarkBorderPressColor  = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDefault, NThemeType::Dark);
 
     updateAccentColors();
 
@@ -89,66 +97,92 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
     Q_D(NCheckBox);
     painter->save();
 
-    // 计算复选框的位置
     QRect checkBoxRect(0, (height() - d->_checkBoxSize) / 2, d->_checkBoxSize, d->_checkBoxSize);
 
+    QRect innerRect = checkBoxRect.adjusted(1, 1, -1, -1);
+
     QColor bgColor;
+    QColor borderColor;
+
     if (isChecked() || checkState() == Qt::PartiallyChecked) {
         if (!isEnabled()) {
-            bgColor = d->_accentDisabledColor;
+            bgColor     = d->_accentDisabledColor;
+            borderColor = Qt::transparent;
         } else if (d->_isPressed) {
-            bgColor = d->_accentPressColor;
+            bgColor     = d->_accentPressColor;
+            borderColor = Qt::transparent;
         } else if (d->_isHovered) {
-            bgColor = d->_accentHoverColor;
+            bgColor     = d->_accentHoverColor;
+            borderColor = Qt::transparent;
         } else {
-            bgColor = d->_accentDefaultColor;
+            bgColor     = d->_accentDefaultColor;
+            borderColor = Qt::transparent;
         }
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(bgColor);
+        painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
     } else {
         if (!isEnabled()) {
-            bgColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, d->_themeMode);
+            bgColor     = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+            borderColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, d->_themeMode);
         } else if (d->_isPressed) {
-            bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+            bgColor     = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+            borderColor = d->_isDark ? d->_pDarkBorderPressColor : d->_pLightBorderPressColor;
         } else if (d->_isHovered) {
-            bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+            bgColor     = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+            borderColor = d->_isDark ? d->_pDarkBorderHoverColor : d->_pLightBorderHoverColor;
         } else {
-            bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            bgColor     = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
         }
-    }
 
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(bgColor);
-    painter->drawRoundedRect(checkBoxRect, d->_pBorderRadius, d->_pBorderRadius);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(bgColor);
+        painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
 
-    if (!isChecked() && checkState() != Qt::PartiallyChecked && isEnabled()) {
-        QColor borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-        painter->setPen(borderColor);
+        QPen pen(borderColor);
+        pen.setWidth(1);
+        painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
-        painter->drawRoundedRect(checkBoxRect, d->_pBorderRadius, d->_pBorderRadius);
+        painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
     if (isChecked() || checkState() == Qt::PartiallyChecked) {
-        QColor iconColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
-
-        NFilledIconType::Icon iconType;
-        if (checkState() == Qt::PartiallyChecked) {
-            iconType = NFilledIconType::Subtract12Filled;
+        QColor iconColor;
+        if (!isEnabled()) {
+            iconColor = d->_accentDisabledTextColor;
         } else {
-            iconType = NFilledIconType::Checkmark24Filled;
+            iconColor = d->_accentTextColor;
         }
 
-        QIcon icon = nIcon->fromFilled(iconType, d->_checkIcon.size, iconColor);
+        // 使用像素大小相对于复选框大小的图标
+        int iconSize       = d->_checkBoxSize * 0.75;
+        d->_checkIcon.size = iconSize;
 
-        QSize iconSize(d->_checkIcon.size, d->_checkIcon.size);
-        QRect iconRect(checkBoxRect.x() + (checkBoxRect.width() - iconSize.width()) / 2,
-                       checkBoxRect.y() + (checkBoxRect.height() - iconSize.height()) / 2,
-                       iconSize.width(),
-                       iconSize.height());
+        if (checkState() == Qt::PartiallyChecked) {
+            // 半选状态绘制减号
+            painter->setPen(QPen(iconColor, 2));
+            painter->drawLine(innerRect.x() + innerRect.width() * 0.25,
+                              innerRect.center().y(),
+                              innerRect.right() - innerRect.width() * 0.25,
+                              innerRect.center().y());
+        } else {
+            // 选中状态绘制勾选图标
+            NFilledIconType::Icon iconType = NFilledIconType::Checkmark24Filled;
+            QIcon                 icon     = nIcon->fromFilled(iconType, d->_checkIcon.size, iconColor);
 
-        qreal   dpr        = devicePixelRatio();
-        QSize   pixmapSize = iconSize * dpr;
-        QPixmap pixmap     = icon.pixmap(pixmapSize);
-        pixmap.setDevicePixelRatio(dpr);
-        painter->drawPixmap(iconRect, pixmap);
+            QRect iconRect(innerRect.x() + (innerRect.width() - d->_checkIcon.size) / 2,
+                           innerRect.y() + (innerRect.height() - d->_checkIcon.size) / 2,
+                           d->_checkIcon.size,
+                           d->_checkIcon.size);
+
+            qreal   dpr        = devicePixelRatio();
+            QSize   pixmapSize = QSize(d->_checkIcon.size, d->_checkIcon.size) * dpr;
+            QPixmap pixmap     = icon.pixmap(pixmapSize);
+            pixmap.setDevicePixelRatio(dpr);
+            painter->drawPixmap(iconRect, pixmap);
+        }
     }
 
     painter->restore();

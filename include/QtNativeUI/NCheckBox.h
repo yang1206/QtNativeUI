@@ -20,6 +20,10 @@ class QTNATIVEUI_EXPORT NCheckBox : public QCheckBox {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkTextColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightBorderHoverColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderHoverColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightBorderPressColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderPressColor)
 
   public:
     explicit NCheckBox(QWidget* parent = nullptr);

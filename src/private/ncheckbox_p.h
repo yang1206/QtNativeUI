@@ -17,6 +17,10 @@ class NCheckBoxPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, DarkTextColor)
     Q_PROPERTY_CREATE_D(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBorderColor)
+    Q_PROPERTY_CREATE_D(QColor, LightBorderHoverColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkBorderHoverColor)
+    Q_PROPERTY_CREATE_D(QColor, LightBorderPressColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkBorderPressColor)
 
   public:
     explicit NCheckBoxPrivate(QObject* parent = nullptr);
@@ -29,7 +33,7 @@ class NCheckBoxPrivate : public QObject {
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
 
-    int _checkBoxSize{20};
+    int _checkBoxSize{21};
     int _spacing{8};
 
     QColor _accentDefaultColor;
