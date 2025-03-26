@@ -30,6 +30,9 @@ class QTNATIVEUI_EXPORT NCheckBox : public QCheckBox {
     explicit NCheckBox(const QString& text, QWidget* parent = nullptr);
     ~NCheckBox();
 
+    virtual void setChecked(bool checked);
+    virtual void nextCheckState() override;
+
   protected:
     void paintEvent(QPaintEvent* event) override;
     void enterEvent(QEnterEvent* event) override;
