@@ -1,6 +1,7 @@
 #ifndef QTNATIVEUI_NCHECKBOX_P_H
 #define QTNATIVEUI_NCHECKBOX_P_H
 
+#include <QPropertyAnimation>
 #include <QtNativeUI/NCheckBox.h>
 #include "QtNativeUI/NEnums.h"
 
@@ -21,15 +22,20 @@ class NCheckBoxPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, DarkBorderHoverColor)
     Q_PROPERTY_CREATE_D(QColor, LightBorderPressColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBorderPressColor)
+    Q_PROPERTY_CREATE(int, CheckAlpha)
 
   public:
     explicit NCheckBoxPrivate(QObject* parent = nullptr);
     ~NCheckBoxPrivate();
     Q_D_CREATE(NCheckBox)
 
+    // 启动透明度动画
+    void startAlphaAnimation(bool checked);
+
   private:
     bool                  _isPressed{false};
     bool                  _isHovered{false};
+    bool                  _isAnimationFinished{true};
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
 
@@ -50,6 +56,8 @@ class NCheckBoxPrivate : public QObject {
     };
 
     CheckIconInfo _checkIcon;
+
+    QPropertyAnimation* _alphaAnimation{nullptr};
 };
 
 #endif // QTNATIVEUI_NCHECKBOX_P_H

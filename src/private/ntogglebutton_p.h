@@ -4,6 +4,7 @@
 #include <QtNativeUI/NToggleButton.h>
 #include "QtNativeUI/NEnums.h"
 
+class QPropertyAnimation;
 class NToggleButtonPrivate : public QObject {
     Q_OBJECT
     Q_PROPERTY_CREATE_D(int, BorderRadius)
@@ -26,22 +27,27 @@ class NToggleButtonPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, AccentTextColor)
     Q_PROPERTY_CREATE_D(QColor, AccentDisabledTextColor)
     Q_PROPERTY_CREATE_D(QString, Text)
+    Q_PROPERTY_CREATE(int, CheckAlpha)
 
   public:
     explicit NToggleButtonPrivate(QObject* parent = nullptr);
     ~NToggleButtonPrivate();
     Q_D_CREATE(NToggleButton)
 
+    void startAlphaAnimation(bool checked);
+
   private:
     QIcon                 _icon;
     QSize                 _iconSize{16, 16};
     bool                  _checked{false};
     bool                  _isPressed{false};
+    bool                  _isAnimationFinished{true};
     int                   _shadowBorderWidth{3};
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
 
-    // 存储图标信息
+    QPropertyAnimation* _alphaAnimation{nullptr};
+
     struct FluentIconInfo {
         bool    isRegular = true;
         quint32 iconCode  = 0;
