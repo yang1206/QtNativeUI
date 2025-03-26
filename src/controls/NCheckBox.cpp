@@ -81,7 +81,7 @@ void NCheckBox::init() {
         update();
     });
     d->_checkIcon.size = 12;
-    d->_spacing        = 8;
+    d->_spacing        = NDesignToken(NDesignTokenKey::SpacingM).toInt();
     setTristate(false);
 }
 

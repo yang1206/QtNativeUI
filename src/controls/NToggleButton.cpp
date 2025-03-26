@@ -90,8 +90,8 @@ void NToggleButton::setChecked(bool checked) {
     Q_D(NToggleButton);
     if (d->_checked != checked) {
         d->_checked = checked;
+        d->startAlphaAnimation(checked);
         updateFluentIcon();
-        update();
         emit toggled(checked);
     }
 }
@@ -109,12 +109,10 @@ QSize NToggleButton::sizeHint() const {
     int          width  = 0;
     int          height = 32;
 
-    // 计算文本宽度
     if (!d->_pText.isEmpty()) {
         width += fm.horizontalAdvance(d->_pText);
     }
 
-    // 添加图标宽度
     if (!d->_icon.isNull()) {
         width += d->_iconSize.width();
         if (!d->_pText.isEmpty()) {
@@ -122,7 +120,6 @@ QSize NToggleButton::sizeHint() const {
         }
     }
 
-    // 添加内边距
     QMargins margins = contentsMargins();
     width += margins.left() + margins.right();
     height += margins.top() + margins.bottom();
@@ -130,9 +127,7 @@ QSize NToggleButton::sizeHint() const {
     return QSize(width, height);
 }
 
-QSize NToggleButton::minimumSizeHint() const {
-    return QSize(32, 32); // 最小尺寸
-}
+QSize NToggleButton::minimumSizeHint() const { return QSize(32, 32); }
 
 void NToggleButton::setFluentIcon(NRegularIconType::Icon icon, int size, const QColor& color) {
     Q_D(NToggleButton);
@@ -175,7 +170,6 @@ void NToggleButton::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing | QPainter::TextAntialiasing);
 
-    // 根据按钮状态选择阴影层级
     NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
     if (!isEnabled()) {
         elevationKey = NDesignTokenKey::ElevationNone;
@@ -185,7 +179,6 @@ void NToggleButton::paintEvent(QPaintEvent* event) {
         elevationKey = NDesignTokenKey::ElevationHover;
     }
 
-    // 绘制阴影
     nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
 
     drawBackground(&painter);
@@ -206,10 +199,16 @@ void NToggleButton::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NToggleButton);
     d->_isPressed = false;
     if (rect().contains(event->pos())) {
+        bool wasChecked = d->_pCheckAlpha > 127;
         toggle();
+        bool isNowChecked = d->_checked;
+
+        if (isNowChecked != wasChecked) {
+            d->startAlphaAnimation(isNowChecked);
+        }
         emit clicked(d->_checked);
     }
-    QWidget::mouseReleaseEvent(event);
+    update();
 }
 
 bool NToggleButton::event(QEvent* event) {
@@ -235,41 +234,64 @@ void NToggleButton::drawBackground(QPainter* painter) {
                          width() - 2 * (d->_shadowBorderWidth),
                          height() - 2 * d->_shadowBorderWidth);
 
-    QColor bgColor;
-    if (d->_checked) {
-        // 选中状态使用强调色
-        if (!isEnabled()) {
-            bgColor = d->_pAccentDisabledColor;
-        } else if (d->_isPressed) {
-            bgColor = d->_pAccentPressColor;
-        } else if (underMouse()) {
-            bgColor = d->_pAccentHoverColor;
+    if (d->_isAnimationFinished) {
+        QColor bgColor;
+        if (d->_checked) {
+            if (!isEnabled()) {
+                bgColor = d->_pAccentDisabledColor;
+            } else if (d->_isPressed) {
+                bgColor = d->_pAccentPressColor;
+            } else if (underMouse()) {
+                bgColor = d->_pAccentHoverColor;
+            } else {
+                bgColor = d->_pAccentDefaultColor;
+            }
         } else {
-            bgColor = d->_pAccentDefaultColor;
+            if (!isEnabled()) {
+                bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+            } else if (d->_isPressed) {
+                bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+            } else if (underMouse()) {
+                bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+            } else {
+                bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            }
         }
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(bgColor);
+        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     } else {
-        // 未选中状态使用普通颜色
+        QColor uncheckedBgColor;
         if (!isEnabled()) {
-            bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+            uncheckedBgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
         } else if (d->_isPressed) {
-            bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+            uncheckedBgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
         } else if (underMouse()) {
-            bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+            uncheckedBgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
         } else {
-            bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            uncheckedBgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
         }
-    }
 
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(bgColor);
-    painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+        QColor checkedBgColor;
+        if (!isEnabled()) {
+            checkedBgColor = d->_pAccentDisabledColor;
+        } else if (d->_isPressed) {
+            checkedBgColor = d->_pAccentPressColor;
+        } else if (underMouse()) {
+            checkedBgColor = d->_pAccentHoverColor;
+        } else {
+            checkedBgColor = d->_pAccentDefaultColor;
+        }
 
-    if (!d->_isPressed && !d->_checked) {
-        painter->setPen(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, d->_themeMode));
-        painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
-                          height() - d->_shadowBorderWidth,
-                          foregroundRect.width(),
-                          height() - d->_shadowBorderWidth);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(uncheckedBgColor);
+        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+
+        QColor accentColor = checkedBgColor;
+        accentColor.setAlpha(d->_pCheckAlpha);
+        painter->setBrush(accentColor);
+        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
     painter->restore();
@@ -278,7 +300,6 @@ void NToggleButton::drawBackground(QPainter* painter) {
 void NToggleButton::drawBorder(QPainter* painter) {
     Q_D(NToggleButton);
 
-    // 选中状态不绘制边框
     if (d->_checked) {
         return;
     }
@@ -310,7 +331,6 @@ void NToggleButton::drawIcon(QPainter* painter) {
                          width() - 2 * (d->_shadowBorderWidth),
                          height() - 2 * d->_shadowBorderWidth);
 
-    // 计算图标位置
     QRect iconRect;
     QSize iconSize = d->_iconSize;
 
@@ -331,7 +351,6 @@ void NToggleButton::drawIcon(QPainter* painter) {
                          iconSize.height());
     }
 
-    // 绘制图标
     qreal dpr        = devicePixelRatio();
     QSize pixmapSize = iconSize * dpr;
 
@@ -356,10 +375,8 @@ void NToggleButton::drawText(QPainter* painter) {
     QColor textColor;
 
     if (d->_checked) {
-        // 选中状态使用强调色文本颜色
         textColor = isEnabled() ? d->_pAccentTextColor : d->_pAccentDisabledTextColor;
     } else {
-        // 未选中状态使用普通文本颜色
         if (!isEnabled()) {
             textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
         } else {
@@ -384,7 +401,6 @@ void NToggleButton::drawText(QPainter* painter) {
 
         painter->drawText(textRect, Qt::AlignCenter, d->_pText);
     } else {
-        // 无图标时居中显示
         painter->drawText(foregroundRect, Qt::AlignCenter, d->_pText);
     }
 
@@ -408,10 +424,8 @@ void NToggleButton::updateAccentColors() {
 void NToggleButton::updateFluentIcon() {
     Q_D(NToggleButton);
 
-    // 确定图标颜色
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
-        // 如果没有自定义颜色，使用文本颜色
         if (d->_checked) {
             iconColor = isEnabled() ? d->_pAccentTextColor : d->_pAccentDisabledTextColor;
         } else {
@@ -429,7 +443,6 @@ void NToggleButton::updateFluentIcon() {
         iconColor = d->_fluentIcon.customColor;
     }
 
-    // 设置图标
     if (d->_fluentIcon.isRegular) {
         d->_icon = (nIcon->fromRegular(
             static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
