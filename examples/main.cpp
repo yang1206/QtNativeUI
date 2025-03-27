@@ -5,9 +5,6 @@
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
     nConfig->initialize(&a);
-    nConfig->useDefaultStyleOnPlatform(NConfig::MacOS, true);
-
-    // a.setStyle("Fusion");
 
     MainWindow window;
     window.show();
