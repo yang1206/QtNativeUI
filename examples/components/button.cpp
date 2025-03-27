@@ -12,7 +12,7 @@
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NToggleButton.h>
-#include "QtNativeUI/NDropDownButton.h"
+#include "QtNativeUI/NHyperlinkButton.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -202,11 +202,38 @@ void ButtonExample::initUI() {
 
     accentLayout->addWidget(flowWidget);
     accentLayout->addWidget(otherBtns);
-
     mainLayout->addWidget(accentSection);
-    // 添加底部间距
+
+    QWidget*     hyperlinkSection = new QWidget;
+    QVBoxLayout* hyperlinkLayout  = new QVBoxLayout(hyperlinkSection);
+    hyperlinkLayout->setSpacing(16);
+
+    QLabel* hyperlinkTitle     = new QLabel("Hyperlink Buttons");
+    QFont   hyperlinkTitleFont = hyperlinkTitle->font();
+    hyperlinkTitleFont.setPointSize(16);
+    hyperlinkTitleFont.setBold(true);
+    hyperlinkTitle->setFont(hyperlinkTitleFont);
+    hyperlinkLayout->addWidget(hyperlinkTitle);
+
+    QHBoxLayout* hyperlinkButtonLayout = new QHBoxLayout;
+    hyperlinkButtonLayout->setSpacing(16);
+
+    NHyperlinkButton* hyperlinkBtn = new NHyperlinkButton("Visit Website");
+    hyperlinkBtn->setUrl("https://www.qt.io/");
+
+    hyperlinkButtonLayout->addWidget(hyperlinkBtn);
+
+    NHyperlinkButton* hyperlinkBtn2 = new NHyperlinkButton("disabled");
+    hyperlinkBtn2->setDisabled(true);
+    hyperlinkButtonLayout->addWidget(hyperlinkBtn2);
+
+    hyperlinkButtonLayout->addStretch();
+
+    hyperlinkLayout->addLayout(hyperlinkButtonLayout);
+
+    mainLayout->addWidget(hyperlinkSection);
+
     mainLayout->addStretch();
 
-    // 设置最小宽度以确保有足够空间进行换行
     setMinimumWidth(600);
 }
