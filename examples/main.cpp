@@ -1,11 +1,10 @@
 #include <QApplication>
+#include <QtNativeUI/NConfig.h>
 #include "mainwindow.h"
-
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
-
-    // a.setStyle("Fusion");
+    nConfig->initialize(&a);
 
     MainWindow window;
     window.show();
