@@ -110,8 +110,7 @@ bool NToggleSwitch::event(QEvent* event) {
         case QEvent::Enter:
             if (isEnabled()) {
                 d->_isHovered = true;
-                // hover时放大到1.5倍，使用动画
-                d->startThumbRadiusAnimation(d->_thumbRadius, d->_thumbSize * 0.65);
+                d->startThumbRadiusAnimation(d->_thumbRadius, d->_thumbSize * 0.60);
             }
             break;
 
@@ -210,7 +209,6 @@ void NToggleSwitch::drawThumb(QPainter* painter) {
     if (d->_thumbRadius <= 0) {
         d->_thumbRadius = d->_thumbSize / 2;
     }
-
     if (d->_thumbCenterX <= 0) {
         d->_thumbCenterX = isChecked() ? d->_trackWidth - d->_trackHeight / 2 : d->_trackHeight / 2;
     }
@@ -223,16 +221,31 @@ void NToggleSwitch::drawThumb(QPainter* painter) {
     } else {
         thumbColor = d->_isDark ? d->_pDarkThumbDefaultColor : d->_pLightThumbDefaultColor;
     }
-
     painter->setPen(Qt::NoPen);
     painter->setBrush(thumbColor);
 
-    // 使用变换矩阵实现椭圆效果
-    painter->save();
-    painter->translate(d->_thumbCenterX, d->_trackHeight / 2);
-    painter->scale(d->_thumbStretchFactor, 1.0);
-    painter->drawEllipse(QPointF(0, 0), d->_thumbRadius, d->_thumbRadius);
-    painter->restore();
+    qreal thumbCenterX = qBound(d->_trackHeight / 2.0, d->_thumbCenterX, d->_trackWidth - d->_trackHeight / 2.0);
+
+    if (d->_isPressed && d->_thumbStretchFactor > 1.0) {
+        qreal radius     = d->_thumbRadius;
+        qreal extraWidth = radius * (d->_thumbStretchFactor - 1.0);
+
+        qreal rectX, rectWidth;
+
+        if (isChecked()) {
+            rectX     = thumbCenterX - radius - extraWidth;
+            rectWidth = radius * 2 + extraWidth;
+        } else {
+            rectX     = thumbCenterX - radius;
+            rectWidth = radius * 2 + extraWidth;
+        }
+
+        QPainterPath path;
+        path.addRoundedRect(rectX, d->_trackHeight / 2 - radius, rectWidth, radius * 2, radius, radius);
+        painter->drawPath(path);
+    } else {
+        painter->drawEllipse(QPointF(thumbCenterX, d->_trackHeight / 2), d->_thumbRadius, d->_thumbRadius);
+    }
 
     painter->restore();
 }
@@ -310,7 +323,7 @@ void NToggleSwitch::mouseMoveEvent(QMouseEvent* event) {
         d->_isDragging = true;
 
         int moveX      = event->pos().x() - d->_lastMouseX;
-        d->_lastMouseX = event->pos().x();
+        d->_lastMouseX = qBound(0, event->pos().x(), width());
 
         d->_thumbCenterX += moveX;
         d->adjustThumbCenterX();

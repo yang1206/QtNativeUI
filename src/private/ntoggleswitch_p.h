@@ -53,9 +53,9 @@ class NToggleSwitchPrivate : public QObject {
     int _thumbSize{14};
     int _spacing{8};
 
-    qreal _thumbCenterX{0}; // 滑块中心X坐标
-    qreal _thumbRadius{0};  // 滑块半径
-    int   _lastMouseX{0};   // 上次鼠标X坐标
+    qreal _thumbCenterX{0};
+    qreal _thumbRadius{0};
+    int   _lastMouseX{0};
 
     QPropertyAnimation* _thumbPosAnimation{nullptr};
     QPropertyAnimation* _thumbRadiusAnimation{nullptr};
@@ -67,7 +67,7 @@ class NToggleSwitchPrivate : public QObject {
     QColor _accentTextColor;
     QColor _accentDisabledTextColor;
 
-    qreal _thumbStretchFactor{1.0}; // 控制椭圆形变
+    qreal _thumbStretchFactor{1.0};
     QPropertyAnimation* _thumbStretchAnimation{nullptr};
 
     void startThumbPosAnimation(qreal startX, qreal endX, bool isChecked);
