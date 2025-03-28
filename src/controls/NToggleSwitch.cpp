@@ -48,8 +48,8 @@ void NToggleSwitch::init() {
     d->_pLightTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
     d->_pDarkTextColor  = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
 
-    d->_thumbCenterX = d->_trackHeight / 2;
-    d->_thumbRadius  = d->_thumbSize / 2;
+    d->_thumbSize   = 12; // 默认大小稍微调小一点
+    d->_thumbRadius = d->_thumbSize / 2;
 
     updateAccentColors();
 
@@ -110,13 +110,15 @@ bool NToggleSwitch::event(QEvent* event) {
         case QEvent::Enter:
             if (isEnabled()) {
                 d->_isHovered = true;
-                d->startThumbRadiusAnimation(d->_thumbRadius, d->_trackHeight * 0.35);
+                // hover时放大到1.5倍，使用动画
+                d->startThumbRadiusAnimation(d->_thumbRadius, d->_thumbSize * 0.65);
             }
             break;
 
         case QEvent::Leave:
             if (isEnabled()) {
                 d->_isHovered = false;
+                // 离开时使用动画恢复原始大小
                 d->startThumbRadiusAnimation(d->_thumbRadius, d->_thumbSize / 2);
             }
             break;
@@ -224,7 +226,13 @@ void NToggleSwitch::drawThumb(QPainter* painter) {
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(thumbColor);
-    painter->drawEllipse(QPointF(d->_thumbCenterX, d->_trackHeight / 2), d->_thumbRadius, d->_thumbRadius);
+
+    // 使用变换矩阵实现椭圆效果
+    painter->save();
+    painter->translate(d->_thumbCenterX, d->_trackHeight / 2);
+    painter->scale(d->_thumbStretchFactor, 1.0);
+    painter->drawEllipse(QPointF(0, 0), d->_thumbRadius, d->_thumbRadius);
+    painter->restore();
 
     painter->restore();
 }
@@ -261,7 +269,8 @@ void NToggleSwitch::mousePressEvent(QMouseEvent* event) {
 
         d->adjustThumbCenterX();
 
-        d->startThumbRadiusAnimation(d->_thumbRadius, d->_trackHeight * 0.25);
+        // 按下时变成横向椭圆
+        d->startThumbStretchAnimation(true);
     }
 }
 
@@ -270,6 +279,9 @@ void NToggleSwitch::mouseReleaseEvent(QMouseEvent* event) {
 
     if (event->button() == Qt::LeftButton) {
         d->_isPressed = false;
+
+        // 释放时恢复圆形
+        d->startThumbStretchAnimation(false);
 
         if (d->_isDragging) {
             d->_isDragging = false;

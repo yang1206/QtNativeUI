@@ -9,11 +9,16 @@ NToggleSwitchPrivate::NToggleSwitchPrivate(QObject* parent) : QObject(parent) {
     _thumbRadiusAnimation = new QPropertyAnimation(this, "thumbRadius");
     _thumbRadiusAnimation->setEasingCurve(QEasingCurve::OutQuad);
     _thumbRadiusAnimation->setDuration(150);
+
+    _thumbStretchAnimation = new QPropertyAnimation(this, "thumbStretchFactor");
+    _thumbStretchAnimation->setEasingCurve(QEasingCurve::OutQuad);
+    _thumbStretchAnimation->setDuration(150);
 }
 
 NToggleSwitchPrivate::~NToggleSwitchPrivate() {
     delete _thumbPosAnimation;
     delete _thumbRadiusAnimation;
+    delete _thumbStretchAnimation;
 }
 
 void NToggleSwitchPrivate::startThumbPosAnimation(qreal startX, qreal endX, bool isChecked) {
@@ -62,4 +67,21 @@ void NToggleSwitchPrivate::adjustThumbCenterX() {
     } else if (_thumbCenterX > maxX) {
         _thumbCenterX = maxX;
     }
+}
+
+void NToggleSwitchPrivate::startThumbStretchAnimation(bool pressed) {
+    _thumbStretchAnimation->stop();
+    _thumbStretchAnimation->setStartValue(_thumbStretchFactor);
+    _thumbStretchAnimation->setEndValue(pressed ? 2.0 : 1.0);
+    
+    QObject::connect(_thumbStretchAnimation, &QPropertyAnimation::valueChanged, q_ptr, [this](const QVariant& value) {
+        _thumbStretchFactor = value.toReal();
+        q_ptr->update();
+    });
+
+    QObject::connect(_thumbStretchAnimation, &QPropertyAnimation::finished, q_ptr, [this]() {
+        QObject::disconnect(_thumbStretchAnimation, nullptr, q_ptr, nullptr);
+    });
+
+    _thumbStretchAnimation->start();
 }
