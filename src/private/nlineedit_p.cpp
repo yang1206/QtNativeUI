@@ -71,12 +71,14 @@ void NLineEditPrivate::Style::drawPrimitive(PrimitiveElement    element,
                     bottomLineColor = d->_isDark ? d->_pDarkBottomLineColor : d->_pLightBottomLineColor;
                     bottomLineWidth = 1;
                 }
+                int          bottomRectHeight = bottomLineWidth + d->_pBorderRadius / 2;
+                QRect        bottomRect       = foregroundRect;
+                QPainterPath clipPath;
+                clipPath.addRect(
+                    QRect(0, foregroundRect.bottom() - bottomRectHeight + 3, widget->width(), bottomRectHeight * 2));
+                painter->setClipPath(clipPath);
                 painter->setPen(QPen(bottomLineColor, bottomLineWidth));
-                int cornerOffset = d->_pBorderRadius / 2;
-                int left         = foregroundRect.left() + cornerOffset;
-                int right        = foregroundRect.right() - cornerOffset / 2;
-                int bottom       = foregroundRect.bottom();
-                painter->drawLine(left, bottom, right, bottom);
+                painter->drawRoundedRect(bottomRect, d->_pBorderRadius, d->_pBorderRadius);
                 painter->restore();
             }
             return;
