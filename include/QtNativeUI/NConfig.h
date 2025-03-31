@@ -3,7 +3,6 @@
 #define QTNATIVEUI_NCONFIG_H
 
 #include <QApplication>
-#include <QPointer>
 #include "singleton.h"
 #include "stdafx.h"
 

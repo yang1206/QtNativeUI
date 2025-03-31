@@ -5,9 +5,9 @@
 #include "components/checkbox.h"
 #include "components/colors.h"
 #include "components/icon.h"
+#include "components/lineedit.h"
 #include "components/menu.h"
 #include "components/toggleswitch.h"
-#include "components/lineedit.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     m_tabWidget = new QTabWidget(this);
@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     // 添加图标展示页面
     auto icons = new IconExample(this);
     m_tabWidget->addTab(icons, "Icons");
-    
+
     // 添加输入框展示页面
     auto lineEdit = new LineEditExample(this);
     m_tabWidget->addTab(lineEdit, "LineEdit");

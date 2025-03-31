@@ -7,12 +7,7 @@
 
 NLineEditPrivate::NLineEditPrivate(QObject* parent) : QObject(parent) {}
 
-NLineEditPrivate::~NLineEditPrivate() {
-    if (_lineEditStyle) {
-        delete _lineEditStyle;
-        _lineEditStyle = nullptr;
-    }
-}
+NLineEditPrivate::~NLineEditPrivate() {}
 
 NLineEditPrivate::Style::Style(NLineEditPrivate* d, QStyle* style) : QProxyStyle(style), d(d) {}
 

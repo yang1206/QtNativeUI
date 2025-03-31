@@ -13,5 +13,4 @@ void NConfig::initialize() {
 #ifdef Q_OS_WIN
     qApp->setStyle("Fusion");
 #endif
-    qApp->setStyle("Fusion");
 }

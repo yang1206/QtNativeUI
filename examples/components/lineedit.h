@@ -9,11 +9,12 @@ class NLineEdit;
 class LineEditExample : public QWidget {
     Q_OBJECT
 
-public:
+  public:
     explicit LineEditExample(QWidget* parent = nullptr);
+    ~LineEditExample();
 
-private:
+  private:
     void initUI();
 };
 
-#endif // LINEEDIT_EXAMPLE_H 
+#endif // LINEEDIT_EXAMPLE_H
