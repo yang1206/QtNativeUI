@@ -1,9 +1,11 @@
+#include <QClipboard>
 #include <QEnterEvent>
 #include <QFocusEvent>
 #include <QPainter>
 #include <QStyle>
 #include <QtNativeUI/NLineEdit.h>
 #include "../private/nlineedit_p.h"
+#include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NTheme.h"
 
 Q_PROPERTY_CREATE_Q_CPP(NLineEdit, QColor, LightBackgroundColor)
@@ -103,4 +105,56 @@ void NLineEdit::focusInEvent(QFocusEvent* event) {
 void NLineEdit::focusOutEvent(QFocusEvent* event) {
     Q_EMIT focusOut(text());
     QLineEdit::focusOutEvent(event);
+}
+
+void NLineEdit::contextMenuEvent(QContextMenuEvent* event) {
+    NMenu* menu = new NMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    QAction* action = nullptr;
+    if (!isReadOnly()) {
+        action = menu->addItem(tr("撤销"), NRegularIconType::ArrowUndo16Regular, QKeySequence::Undo);
+        action->setEnabled(isUndoAvailable());
+        connect(action, &QAction::triggered, this, &NLineEdit::undo);
+
+        action = menu->addItem(tr("恢复"), NRegularIconType::ArrowRedo16Regular, QKeySequence::Redo);
+        action->setEnabled(isRedoAvailable());
+        connect(action, &QAction::triggered, this, &NLineEdit::redo);
+        menu->addSeparator();
+    }
+#ifndef QT_NO_CLIPBOARD
+    if (!isReadOnly()) {
+        action = menu->addItem(tr("剪切"), NRegularIconType::Cut16Regular, QKeySequence::Cut);
+        action->setEnabled(!isReadOnly() && hasSelectedText() && echoMode() == QLineEdit::Normal);
+        connect(action, &QAction::triggered, this, &NLineEdit::cut);
+    }
+
+    action = menu->addItem(tr("复制"), NRegularIconType::Copy16Regular, QKeySequence::Copy);
+    action->setEnabled(hasSelectedText() && echoMode() == QLineEdit::Normal);
+    connect(action, &QAction::triggered, this, &NLineEdit::copy);
+
+    if (!isReadOnly()) {
+        action = menu->addItem(tr("粘贴"), NRegularIconType::ClipboardPaste16Regular, QKeySequence::Paste);
+        action->setEnabled(!isReadOnly() && !QGuiApplication::clipboard()->text().isEmpty());
+        connect(action, &QAction::triggered, this, &NLineEdit::paste);
+    }
+#endif
+    if (!isReadOnly()) {
+        action = menu->addItem(tr("删除"), NRegularIconType::Delete16Regular);
+        action->setEnabled(!isReadOnly() && !text().isEmpty() && hasSelectedText());
+        connect(action, &QAction::triggered, this, [=](bool checked) {
+            if (hasSelectedText()) {
+                int startIndex = selectionStart();
+                int endIndex   = selectionEnd();
+                setText(text().remove(startIndex, endIndex - startIndex));
+            }
+        });
+    }
+    if (!menu->isEmpty()) {
+        menu->addSeparator();
+    }
+    action = menu->addAction(tr("全选"));
+    action->setShortcut(QKeySequence::SelectAll);
+    action->setEnabled(!text().isEmpty() && !(selectedText() == text()));
+    connect(action, &QAction::triggered, this, &NLineEdit::selectAll);
+    menu->popup(event->globalPos());
 }

@@ -42,6 +42,7 @@ class QTNATIVEUI_EXPORT NLineEdit : public QLineEdit {
   protected:
     void focusInEvent(QFocusEvent* event) override;
     void focusOutEvent(QFocusEvent* event) override;
+    void contextMenuEvent(QContextMenuEvent* event) override;
 
   private:
     void init();
