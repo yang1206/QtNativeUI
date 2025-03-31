@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QStyle>
 #include <QVBoxLayout>
 #include <QtGui/qvalidator.h>
 #include <QtNativeUI/NLineEdit.h>

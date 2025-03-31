@@ -75,7 +75,7 @@ void NLineEditPrivate::Style::drawPrimitive(PrimitiveElement    element,
                 QRect        bottomRect       = foregroundRect;
                 QPainterPath clipPath;
                 clipPath.addRect(
-                    QRect(0, foregroundRect.bottom() - bottomRectHeight + 3, widget->width(), bottomRectHeight * 2));
+                    QRect(0, foregroundRect.bottom() - bottomRectHeight + 4, widget->width(), bottomRectHeight * 2));
                 painter->setClipPath(clipPath);
                 painter->setPen(QPen(bottomLineColor, bottomLineWidth));
                 painter->drawRoundedRect(bottomRect, d->_pBorderRadius, d->_pBorderRadius);

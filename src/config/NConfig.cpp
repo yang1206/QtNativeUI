@@ -1,16 +1,17 @@
 #include "QtNativeUI/NConfig.h"
 
 #include <QStyle>
-#include <QStyleFactory>
-#include <QSysInfo>
 Q_SINGLETON_CREATE_CPP(NConfig)
 
 NConfig::NConfig(QObject* parent) : QObject(parent) {}
 
-NConfig::~NConfig() = default;
+NConfig::~NConfig() {
 
-void NConfig::initialize(QApplication* app) {
+};
+
+void NConfig::initialize() {
 #ifdef Q_OS_WIN
-    app->setStyle("Fusion");
+    qApp->setStyle("Fusion");
 #endif
+    qApp->setStyle("Fusion");
 }
