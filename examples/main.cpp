@@ -4,10 +4,9 @@
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
-    nConfig->initialize(&a);
+    nConfig->initialize();
 
     MainWindow window;
     window.show();
-
-    return QApplication::exec();
+    return a.exec();
 }
