@@ -5,6 +5,7 @@
 #include <QStyle>
 #include <QtNativeUI/NLineEdit.h>
 #include "../private/nlineedit_p.h"
+#include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -97,6 +98,22 @@ void NLineEdit::init() {
     });
 }
 
+void NLineEdit::addAction(QAction* action, ActionPosition position) { QLineEdit::addAction(action, position); }
+
+QAction* NLineEdit::addAction(NFilledIconType::Icon icon, ActionPosition position) {
+    QAction* action = new QAction(this);
+    action->setIcon(nIcon->fromFilled(icon));
+    addAction(action, position);
+    return action;
+}
+
+QAction* NLineEdit::addAction(NRegularIconType::Icon icon, ActionPosition position) {
+    QAction* action = new QAction(this);
+    action->setIcon(nIcon->fromRegular(icon));
+    addAction(action, position);
+    return action;
+}
+
 void NLineEdit::focusInEvent(QFocusEvent* event) {
     Q_EMIT focusIn(text());
     QLineEdit::focusInEvent(event);
@@ -141,7 +158,7 @@ void NLineEdit::contextMenuEvent(QContextMenuEvent* event) {
     if (!isReadOnly()) {
         action = menu->addItem(tr("删除"), NRegularIconType::Delete16Regular);
         action->setEnabled(!isReadOnly() && !text().isEmpty() && hasSelectedText());
-        connect(action, &QAction::triggered, this, [=](bool checked) {
+        connect(action, &QAction::triggered, this, [this]() {
             if (hasSelectedText()) {
                 int startIndex = selectionStart();
                 int endIndex   = selectionEnd();

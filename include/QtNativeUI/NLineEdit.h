@@ -2,6 +2,8 @@
 #define QTNATIVEUI_NLINEEDIT_H
 
 #include <QLineEdit>
+
+#include "NIconEnums.h"
 #include "stdafx.h"
 
 class NLineEditPrivate;
@@ -34,6 +36,10 @@ class QTNATIVEUI_EXPORT NLineEdit : public QLineEdit {
     explicit NLineEdit(QWidget* parent = nullptr);
     explicit NLineEdit(const QString& text, QWidget* parent = nullptr);
     ~NLineEdit();
+
+    void     addAction(QAction* action, ActionPosition position);
+    QAction* addAction(NRegularIconType::Icon icon, ActionPosition position);
+    QAction* addAction(NFilledIconType::Icon icon, ActionPosition position);
 
   Q_SIGNALS:
     void focusIn(QString text);

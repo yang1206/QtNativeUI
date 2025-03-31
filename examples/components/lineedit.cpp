@@ -68,12 +68,17 @@ void LineEditExample::initUI() {
     // 带前缀的输入框 - 设置父对象
     NLineEdit* prefixLineEdit = new NLineEdit(QString(), standardSection);
     prefixLineEdit->setPlaceholderText("With prefix");
+    prefixLineEdit->addAction(NFilledIconType::Server16Filled, NLineEdit::ActionPosition::LeadingPosition);
     prefixLineEdit->setMinimumWidth(200);
     prefixLineEdit->setText("10.0.0.1");
 
     // 带后缀的输入框 - 设置父对象
     NLineEdit* suffixLineEdit = new NLineEdit(QString(), standardSection);
     suffixLineEdit->setPlaceholderText("With suffix");
+    QAction* suffixAction =
+        suffixLineEdit->addAction(NFilledIconType::Search16Filled, NLineEdit::ActionPosition::TrailingPosition);
+    connect(suffixAction, &QAction::triggered, []() { qDebug() << "Search button clicked"; });
+
     suffixLineEdit->setMinimumWidth(200);
     suffixLineEdit->setText("example");
 
@@ -81,6 +86,7 @@ void LineEditExample::initUI() {
     NLineEdit* clearableLineEdit = new NLineEdit(QString(), standardSection);
     clearableLineEdit->setPlaceholderText("With clear button");
     clearableLineEdit->setClearButtonEnabled(true);
+    clearableLineEdit->addAction(NFilledIconType::Accessibility16Filled, NLineEdit::ActionPosition::TrailingPosition);
     clearableLineEdit->setMinimumWidth(200);
 
     affixLayout->addWidget(prefixLineEdit);
