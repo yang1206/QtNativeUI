@@ -37,8 +37,11 @@ void IconExample::initUI() {
     // 顶部搜索栏
     QHBoxLayout* searchLayout = new QHBoxLayout();
     QLabel*      searchLabel  = new QLabel("搜索:", this);
-    m_searchEdit              = new QLineEdit(this);
+    m_searchEdit              = new NLineEdit(this);
     m_searchEdit->setPlaceholderText("输入图标名称搜索");
+    m_searchEdit->setClearButtonEnabled(true);
+    auto searchAction =
+        m_searchEdit->addAction(NFilledIconType::Search16Filled, NLineEdit::ActionPosition::TrailingPosition);
 
     // 使用计时器延迟搜索，减少输入时的卡顿
     m_searchTimer = new QTimer(this);
@@ -46,6 +49,7 @@ void IconExample::initUI() {
     m_searchTimer->setInterval(300); // 300ms延迟
 
     connect(m_searchEdit, &QLineEdit::textChanged, this, &IconExample::onSearchTextChanged);
+    connect(searchAction, &QAction::triggered, this, &IconExample::onSearchTextChanged);
     connect(m_searchTimer, &QTimer::timeout, this, &IconExample::applyFilter);
 
     searchLayout->addWidget(searchLabel);

@@ -4,12 +4,17 @@
 #include <QtNativeUI/NCheckBox.h>
 #include <QtNativeUI/NLineEdit.h>
 #include <QtNativeUI/NToggleSwitch.h>
+
+#include "QtNativeUI/NTextEdit.h"
 #include "widgets/ExampleSection.h"
 
-ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) {
-    initUI();
-}
+// 在头文件包含部分添加
+#include <QtNativeUI/NSpinBox.h>
+#include <QtNativeUI/NSlider.h>
 
+ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) { initUI(); }
+
+// 在 initUI() 函数中添加 SpinBox 部分
 void ControlsExample::initUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -22,7 +27,7 @@ void ControlsExample::initUI() {
     m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     // 创建内容容器
-    QWidget* contentWidget = new QWidget(m_scrollArea);
+    QWidget*     contentWidget = new QWidget(m_scrollArea);
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
     contentLayout->setContentsMargins(32, 32, 32, 32);
     contentLayout->setSpacing(24);
@@ -31,6 +36,9 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("CheckBox", createCheckBoxes()));
     contentLayout->addWidget(new ExampleSection("ToggleSwitch", createToggleSwitches()));
     contentLayout->addWidget(new ExampleSection("LineEdit", createLineEdits()));
+    contentLayout->addWidget(new ExampleSection("TextEdit", createTextEdits()));
+    contentLayout->addWidget(new ExampleSection("SpinBox", createSpinBoxes()));  // 新增
+    contentLayout->addWidget(new ExampleSection("Slider", createSliders()));  // 新增
 
     contentLayout->addStretch();
 
@@ -40,8 +48,8 @@ void ControlsExample::initUI() {
 }
 
 QWidget* ControlsExample::createCheckBoxes() {
-    QWidget* container = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(container);
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
     layout->setSpacing(16);
 
     // 基本复选框
@@ -73,8 +81,8 @@ QWidget* ControlsExample::createCheckBoxes() {
 }
 
 QWidget* ControlsExample::createToggleSwitches() {
-    QWidget* container = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(container);
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
     layout->setSpacing(16);
 
     // 基本开关
@@ -105,8 +113,8 @@ QWidget* ControlsExample::createToggleSwitches() {
 }
 
 QWidget* ControlsExample::createLineEdits() {
-    QWidget* container = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(container);
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
     layout->setSpacing(16);
 
     // 基本输入框
@@ -148,6 +156,112 @@ QWidget* ControlsExample::createLineEdits() {
     clearableLineEdit->setClearButtonEnabled(true);
     clearableLineEdit->setMinimumWidth(200);
     layout->addWidget(clearableLineEdit);
+
+    return container;
+}
+
+QWidget* ControlsExample::createTextEdits() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本输入框
+    NTextEdit* normalTextEdit = new NTextEdit(container);
+    normalTextEdit->setPlaceholderText("基本输入框");
+    normalTextEdit->setMinimumWidth(200);
+    layout->addWidget(normalTextEdit);
+
+    // 禁用状态
+    NTextEdit* disabledTextEdit = new NTextEdit(container);
+    disabledTextEdit->setPlaceholderText("禁用状态");
+    disabledTextEdit->setEnabled(false);
+    disabledTextEdit->setMinimumWidth(200);
+    layout->addWidget(disabledTextEdit);
+
+    return container;
+}
+
+// 添加 createSpinBoxes 函数实现
+QWidget* ControlsExample::createSpinBoxes() {
+    QWidget* container = new QWidget;
+    QVBoxLayout* layout = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本数字输入框
+    NSpinBox* normalSpinBox = new NSpinBox(container);
+    normalSpinBox->setMinimumWidth(200);
+    layout->addWidget(normalSpinBox);
+
+    // 设置范围的数字输入框
+    NSpinBox* rangeSpinBox = new NSpinBox(container);
+    rangeSpinBox->setRange(0, 100);
+    rangeSpinBox->setValue(50);
+    rangeSpinBox->setMinimumWidth(200);
+    layout->addWidget(rangeSpinBox);
+
+    // 设置步长的数字输入框
+    NSpinBox* stepSpinBox = new NSpinBox(container);
+    stepSpinBox->setRange(0, 100);
+    stepSpinBox->setSingleStep(5);
+    stepSpinBox->setValue(25);
+    stepSpinBox->setMinimumWidth(200);
+    layout->addWidget(stepSpinBox);
+
+    // 前缀后缀的数字输入框
+    NSpinBox* prefixSuffixSpinBox = new NSpinBox(container);
+    prefixSuffixSpinBox->setPrefix("$");
+    prefixSuffixSpinBox->setSuffix(".00");
+    prefixSuffixSpinBox->setRange(0, 1000);
+    prefixSuffixSpinBox->setValue(100);
+    prefixSuffixSpinBox->setMinimumWidth(200);
+    layout->addWidget(prefixSuffixSpinBox);
+
+    // 禁用状态的数字输入框
+    NSpinBox* disabledSpinBox = new NSpinBox(container);
+    disabledSpinBox->setValue(50);
+    disabledSpinBox->setEnabled(false);
+    disabledSpinBox->setMinimumWidth(200);
+    layout->addWidget(disabledSpinBox);
+
+    return container;
+}
+
+// 添加 createSliders 函数实现
+QWidget* ControlsExample::createSliders() {
+    QWidget* container = new QWidget;
+    QVBoxLayout* layout = new QVBoxLayout(container);
+    layout->setSpacing(32);
+
+    // 水平滑块
+    NSlider* horizontalSlider = new NSlider(Qt::Horizontal, container);
+    horizontalSlider->setRange(0, 100);
+    horizontalSlider->setValue(50);
+    horizontalSlider->setMinimumWidth(200);
+    layout->addWidget(horizontalSlider);
+
+    // 垂直滑块
+    NSlider* verticalSlider = new NSlider(Qt::Vertical, container);
+    verticalSlider->setRange(0, 100);
+    verticalSlider->setValue(50);
+    verticalSlider->setMinimumHeight(200);
+    layout->addWidget(verticalSlider);
+
+    // 禁用状态的滑块
+    NSlider* disabledSlider = new NSlider(Qt::Horizontal, container);
+    disabledSlider->setRange(0, 100);
+    disabledSlider->setValue(30);
+    disabledSlider->setEnabled(false);
+    disabledSlider->setMinimumWidth(200);
+    layout->addWidget(disabledSlider);
+
+    // 带刻度的滑块
+    NSlider* tickSlider = new NSlider(Qt::Horizontal, container);
+    tickSlider->setRange(0, 100);
+    tickSlider->setValue(40);
+    tickSlider->setTickPosition(QSlider::TicksBelow);
+    tickSlider->setTickInterval(10);
+    tickSlider->setMinimumWidth(200);
+    layout->addWidget(tickSlider);
 
     return container;
 }

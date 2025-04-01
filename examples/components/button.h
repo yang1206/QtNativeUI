@@ -18,6 +18,7 @@ class ButtonExample : public QWidget {
     QWidget* createToggleButtons();
     QWidget* createHyperlinkButtons();
     QWidget* createRadioButtons();
+    QWidget* createToolButtons();
 
     QScrollArea* m_scrollArea;
 };

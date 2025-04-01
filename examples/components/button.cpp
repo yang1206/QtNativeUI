@@ -17,6 +17,7 @@
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NRadioButton.h"
 #include "QtNativeUI/NTheme.h"
+#include "QtNativeUI/NToolButton.h"
 #include "widgets/ExampleSection.h"
 
 ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -41,6 +42,7 @@ void ButtonExample::initUI() {
     // 添加各个示例区域
     contentLayout->addWidget(new ExampleSection("PushButton", createPushButtons()));
     contentLayout->addWidget(new ExampleSection("ToggleButton", createToggleButtons()));
+    contentLayout->addWidget(new ExampleSection("ToolButton", createToolButtons()));
     contentLayout->addWidget(new ExampleSection("HyperlinkButton", createHyperlinkButtons()));
     contentLayout->addWidget(new ExampleSection("RadioButton", createRadioButtons()));
 
@@ -125,6 +127,20 @@ QWidget* ButtonExample::createToggleButtons() {
     layout->addWidget(toggleBtn);
     layout->addWidget(toggleBtn2);
     layout->addWidget(toggleBtn3);
+    layout->addStretch();
+    return container;
+}
+
+QWidget* ButtonExample::createToolButtons() {
+    QWidget*     container = new QWidget;
+    QHBoxLayout* layout    = new QHBoxLayout(container);
+    layout->setSpacing(16);
+    NToolButton* toolBtn = new NToolButton();
+    toolBtn->setFixedSize(40, 40);
+    toolBtn->setText("Tool");
+    // toolBtn->setFluentIcon(NRegularIconType::SettingsChat16Regular, 24);
+
+    layout->addWidget(toolBtn);
     layout->addStretch();
     return container;
 }

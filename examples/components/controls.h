@@ -7,14 +7,17 @@ class QScrollArea;
 
 class ControlsExample : public QWidget {
     Q_OBJECT
-public:
+  public:
     explicit ControlsExample(QWidget* parent = nullptr);
 
-private:
-    void initUI();
+  private:
+    void     initUI();
     QWidget* createCheckBoxes();
     QWidget* createToggleSwitches();
     QWidget* createLineEdits();
+    QWidget* createTextEdits();
+    QWidget* createSpinBoxes();
+    QWidget* createSliders();  // 新增
 
     QScrollArea* m_scrollArea;
 };
