@@ -5,6 +5,7 @@
 #include "button.h"
 
 #include <QApplication>
+#include <QButtonGroup>
 #include <QGridLayout>
 #include <QLabel>
 #include <QMenu>
@@ -14,6 +15,7 @@
 #include <QtNativeUI/NToggleButton.h>
 #include "QtNativeUI/NHyperlinkButton.h"
 #include "QtNativeUI/NIcon.h"
+#include "QtNativeUI/NRadioButton.h"
 #include "QtNativeUI/NTheme.h"
 
 ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -230,6 +232,34 @@ void ButtonExample::initUI() {
     hyperlinkButtonLayout->addStretch();
 
     hyperlinkLayout->addLayout(hyperlinkButtonLayout);
+
+    QLabel* radioButtonsTitle = new QLabel("Radio Buttons");
+    QFont   radioButtonsFont  = radioButtonsTitle->font();
+    radioButtonsFont.setPointSize(16);
+    radioButtonsFont.setBold(true);
+    radioButtonsTitle->setFont(radioButtonsFont);
+    standardLayout->addWidget(radioButtonsTitle);
+
+    QHBoxLayout* radioButtonLayout = new QHBoxLayout;
+    radioButtonLayout->setSpacing(16);
+
+    // 1. 单选按钮组
+    QButtonGroup* radioGroup = new QButtonGroup(this);
+
+    NRadioButton* radioBtn1 = new NRadioButton("Option 1");
+    NRadioButton* radioBtn2 = new NRadioButton("Option 2");
+    NRadioButton* radioBtn3 = new NRadioButton("Option 3");
+
+    radioGroup->addButton(radioBtn1);
+    radioGroup->addButton(radioBtn2);
+    radioGroup->addButton(radioBtn3);
+
+    radioButtonLayout->addWidget(radioBtn1);
+    radioButtonLayout->addWidget(radioBtn2);
+    radioButtonLayout->addWidget(radioBtn3);
+    radioButtonLayout->addStretch();
+
+    standardLayout->addLayout(radioButtonLayout);
 
     mainLayout->addWidget(hyperlinkSection);
 
