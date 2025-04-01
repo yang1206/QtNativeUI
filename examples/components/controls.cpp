@@ -9,8 +9,10 @@
 #include "widgets/ExampleSection.h"
 
 // 在头文件包含部分添加
-#include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NSlider.h>
+#include <QtNativeUI/NSpinBox.h>
+
+#include "QtNativeUI/NPlainTextEdit.h"
 
 ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
@@ -37,8 +39,9 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("ToggleSwitch", createToggleSwitches()));
     contentLayout->addWidget(new ExampleSection("LineEdit", createLineEdits()));
     contentLayout->addWidget(new ExampleSection("TextEdit", createTextEdits()));
-    contentLayout->addWidget(new ExampleSection("SpinBox", createSpinBoxes()));  // 新增
-    contentLayout->addWidget(new ExampleSection("Slider", createSliders()));  // 新增
+    contentLayout->addWidget(new ExampleSection("PlainTextEdit", createPlainTextEdits()));
+    contentLayout->addWidget(new ExampleSection("SpinBox", createSpinBoxes()));
+    contentLayout->addWidget(new ExampleSection("Slider", createSliders()));
 
     contentLayout->addStretch();
 
@@ -181,10 +184,31 @@ QWidget* ControlsExample::createTextEdits() {
     return container;
 }
 
+QWidget* ControlsExample::createPlainTextEdits() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本输入框
+    NPlainTextEdit* normalTextEdit = new NPlainTextEdit(container);
+    normalTextEdit->setPlaceholderText("基本输入框");
+    normalTextEdit->setMinimumWidth(200);
+    layout->addWidget(normalTextEdit);
+
+    // 禁用状态
+    NPlainTextEdit* disabledTextEdit = new NPlainTextEdit(container);
+    disabledTextEdit->setPlaceholderText("禁用状态");
+    disabledTextEdit->setEnabled(false);
+    disabledTextEdit->setMinimumWidth(200);
+    layout->addWidget(disabledTextEdit);
+
+    return container;
+}
+
 // 添加 createSpinBoxes 函数实现
 QWidget* ControlsExample::createSpinBoxes() {
-    QWidget* container = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(container);
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
     layout->setSpacing(16);
 
     // 基本数字输入框
@@ -228,8 +252,8 @@ QWidget* ControlsExample::createSpinBoxes() {
 
 // 添加 createSliders 函数实现
 QWidget* ControlsExample::createSliders() {
-    QWidget* container = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout(container);
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
     layout->setSpacing(32);
 
     // 水平滑块

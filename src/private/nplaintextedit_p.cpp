@@ -1,17 +1,12 @@
-#include "nlineedit_p.h"
-#include <QLineEdit>
-#include <QPainter>
-#include <QPainterPath>
-#include <QStyleOptionFrame>
+#include "nplaintextedit_p.h"
 #include "QtNativeUI/NTheme.h"
 
-NLineEditPrivate::NLineEditPrivate(QObject* parent) : QObject(parent) {}
+NPlainTextEditPrivate::NPlainTextEditPrivate(QObject* parent) : QObject(parent) {}
 
-NLineEditPrivate::~NLineEditPrivate() {
-
+NPlainTextEditPrivate::~NPlainTextEditPrivate() {
 }
 
-QColor NLineEditPrivate::backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const {
+QColor NPlainTextEditPrivate::backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const {
     if (!isEnabled) {
         return isDark ? _pDarkBackgroundDisabledColor : _pLightBackgroundDisabledColor;
     } else if (hasFocus) {
@@ -23,7 +18,7 @@ QColor NLineEditPrivate::backgroundColorForState(bool isDark, bool isEnabled, bo
     }
 }
 
-QColor NLineEditPrivate::borderColorForState(bool isDark, bool isEnabled) const {
+QColor NPlainTextEditPrivate::borderColorForState(bool isDark, bool isEnabled) const {
     if (!isEnabled) {
         return isDark ? _pDarkBorderDisabledColor : _pLightBorderDisabledColor;
     } else {
@@ -31,7 +26,7 @@ QColor NLineEditPrivate::borderColorForState(bool isDark, bool isEnabled) const 
     }
 }
 
-QColor NLineEditPrivate::bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const {
+QColor NPlainTextEditPrivate::bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const {
     if (hasFocus && isEnabled) {
         return nTheme->accentColor().normal();
     } else {
@@ -39,22 +34,22 @@ QColor NLineEditPrivate::bottomLineColorForState(bool isDark, bool isEnabled, bo
     }
 }
 
-int NLineEditPrivate::borderRadius() const {
+int NPlainTextEditPrivate::borderRadius() const {
     return _pBorderRadius;
 }
 
-int NLineEditPrivate::borderWidth() const {
+int NPlainTextEditPrivate::borderWidth() const {
     return _pBorderWidth;
 }
 
-int NLineEditPrivate::bottomLineWidth(bool hasFocus) const {
+int NPlainTextEditPrivate::bottomLineWidth(bool hasFocus) const {
     return hasFocus ? 2 : 1;
 }
 
-bool NLineEditPrivate::isDarkMode() const {
+bool NPlainTextEditPrivate::isDarkMode() const {
     return _isDark;
 }
 
-int NLineEditPrivate::shadowBorderWidth() const {
+int NPlainTextEditPrivate::shadowBorderWidth() const {
     return _shadowBorderWidth;
-}
+} 

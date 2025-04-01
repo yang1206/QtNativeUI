@@ -16,8 +16,9 @@ class ControlsExample : public QWidget {
     QWidget* createToggleSwitches();
     QWidget* createLineEdits();
     QWidget* createTextEdits();
+    QWidget* createPlainTextEdits();
     QWidget* createSpinBoxes();
-    QWidget* createSliders();  // 新增
+    QWidget* createSliders();
 
     QScrollArea* m_scrollArea;
 };

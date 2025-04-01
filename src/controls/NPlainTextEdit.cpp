@@ -1,45 +1,42 @@
-//
-// Created by Yang1206 on 2025/4/1.
-//
 #include <QClipboard>
 #include <QEnterEvent>
-#include <QtNativeUI/NTextEdit.h>
-#include "../private/ntextedit_p.h"
+#include <QtNativeUI/NPlainTextEdit.h>
+#include "../private/nplaintextedit_p.h"
 #include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NTheme.h"
 
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightBackgroundHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkBackgroundHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightBackgroundFocusColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkBackgroundFocusColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightBackgroundDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkBackgroundDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightBackgroundColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkBackgroundColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightBackgroundHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkBackgroundHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightBackgroundFocusColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkBackgroundFocusColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightBackgroundDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkBackgroundDisabledColor)
 
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightBorderColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkBorderColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightBorderDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkBorderDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightBorderColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkBorderColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightBorderDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkBorderDisabledColor)
 
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightBottomLineColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkBottomLineColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightBottomLineColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkBottomLineColor)
 
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightTextDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkTextDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, int, BorderRadius)
-Q_PROPERTY_CREATE_Q_CPP(NTextEdit, int, BorderWidth)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, LightTextDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, QColor, DarkTextDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, int, BorderRadius)
+Q_PROPERTY_CREATE_Q_CPP(NPlainTextEdit, int, BorderWidth)
 
-NTextEdit::NTextEdit(QWidget* parent) : QTextEdit(parent), d_ptr(new NTextEditPrivate()) { init(); }
+NPlainTextEdit::NPlainTextEdit(QWidget* parent) : QPlainTextEdit(parent), d_ptr(new NPlainTextEditPrivate()) { init(); }
 
-NTextEdit::NTextEdit(const QString& text, QWidget* parent) : NTextEdit(parent) { setText(text); }
+NPlainTextEdit::NPlainTextEdit(const QString& text, QWidget* parent) : NPlainTextEdit(parent) { setPlainText(text); }
 
-NTextEdit::~NTextEdit() {}
+NPlainTextEdit::~NPlainTextEdit() {}
 
-void NTextEdit::init() {
-    Q_D(NTextEdit);
+void NPlainTextEdit::init() {
+    Q_D(NPlainTextEdit);
     d->q_ptr      = this;
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
@@ -68,11 +65,12 @@ void NTextEdit::init() {
 
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
-    setObjectName("NTextEdit");
-    setStyleSheet("#QTextEdit{border: none;}");
-    setStyleSheet("#NTextEdit{background-color:transparent;}");
-    d->_textEditStyle = new NEditStyle(d, style());
-    setStyle(d->_textEditStyle);
+
+    setObjectName("NPlainTextEdit");
+    setStyleSheet("#NPlainTextEdit{background-color:transparent;}");
+
+    d->_plainTextEditStyle = new NEditStyle(d, style());
+    setStyle(d->_plainTextEditStyle);
 
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
@@ -87,14 +85,14 @@ void NTextEdit::init() {
     setFont(font);
 
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
-        Q_D(NTextEdit);
+        Q_D(NPlainTextEdit);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
         update();
     });
 }
 
-void NTextEdit::contextMenuEvent(QContextMenuEvent* event) {
+void NPlainTextEdit::contextMenuEvent(QContextMenuEvent* event) {
     NMenu* menu = new NMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     QAction* action = nullptr;
@@ -102,11 +100,11 @@ void NTextEdit::contextMenuEvent(QContextMenuEvent* event) {
     if (!isReadOnly()) {
         action = menu->addItem(tr("撤销"), NRegularIconType::ArrowUndo16Regular, QKeySequence::Undo);
         action->setEnabled(document()->isUndoAvailable());
-        connect(action, &QAction::triggered, this, &NTextEdit::undo);
+        connect(action, &QAction::triggered, this, &NPlainTextEdit::undo);
 
         action = menu->addItem(tr("恢复"), NRegularIconType::ArrowRedo16Regular, QKeySequence::Redo);
         action->setEnabled(document()->isRedoAvailable());
-        connect(action, &QAction::triggered, this, &NTextEdit::redo);
+        connect(action, &QAction::triggered, this, &NPlainTextEdit::redo);
         menu->addSeparator();
     }
 
@@ -114,17 +112,17 @@ void NTextEdit::contextMenuEvent(QContextMenuEvent* event) {
     if (!isReadOnly()) {
         action = menu->addItem(tr("剪切"), NRegularIconType::Cut16Regular, QKeySequence::Cut);
         action->setEnabled(!isReadOnly() && textCursor().hasSelection());
-        connect(action, &QAction::triggered, this, &NTextEdit::cut);
+        connect(action, &QAction::triggered, this, &NPlainTextEdit::cut);
     }
 
     action = menu->addItem(tr("复制"), NRegularIconType::Copy16Regular, QKeySequence::Copy);
     action->setEnabled(textCursor().hasSelection());
-    connect(action, &QAction::triggered, this, &NTextEdit::copy);
+    connect(action, &QAction::triggered, this, &NPlainTextEdit::copy);
 
     if (!isReadOnly()) {
         action = menu->addItem(tr("粘贴"), NRegularIconType::ClipboardPaste16Regular, QKeySequence::Paste);
         action->setEnabled(!isReadOnly() && !QGuiApplication::clipboard()->text().isEmpty());
-        connect(action, &QAction::triggered, this, &NTextEdit::paste);
+        connect(action, &QAction::triggered, this, &NPlainTextEdit::paste);
     }
 #endif
 
@@ -148,7 +146,7 @@ void NTextEdit::contextMenuEvent(QContextMenuEvent* event) {
     bool isAllSelected =
         hasText && textCursor().hasSelection() && textCursor().selectedText().length() == toPlainText().length();
     action->setEnabled(hasText && !isAllSelected);
-    connect(action, &QAction::triggered, this, &NTextEdit::selectAll);
+    connect(action, &QAction::triggered, this, &NPlainTextEdit::selectAll);
 
     menu->popup(event->globalPos());
 }
