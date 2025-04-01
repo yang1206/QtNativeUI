@@ -17,6 +17,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 file(GLOB_RECURSE EXAMPLE_SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/components/*.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/components/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/widgets/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/widgets/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
 )

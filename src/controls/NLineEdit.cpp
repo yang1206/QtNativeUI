@@ -1,7 +1,6 @@
 #include <QClipboard>
 #include <QEnterEvent>
 #include <QFocusEvent>
-#include <QPainter>
 #include <QStyle>
 #include <QtNativeUI/NLineEdit.h>
 #include "../private/nlineedit_p.h"
@@ -72,8 +71,11 @@ void NLineEdit::init() {
 
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
+    setObjectName("NLineEdit");
+    setStyleSheet("#QLineEdit{border: none;}");
+    setStyleSheet("#NLineEdit{background-color:transparent;}");
 
-    d->_lineEditStyle = new NLineEditPrivate::Style(d, style());
+    d->_lineEditStyle = new NEditStyle(d, style());
     setStyle(d->_lineEditStyle);
 
     setMouseTracking(true);
@@ -86,9 +88,6 @@ void NLineEdit::init() {
     QFont font = this->font();
     font.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeBody).toInt());
     setFont(font);
-
-    setObjectName("NLineEdit");
-    setStyleSheet("#QLineEdit{border: none;}");
 
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NLineEdit);

@@ -1,12 +1,14 @@
-#ifndef QTNATIVEUI_NLINEEDIT_P_H
-#define QTNATIVEUI_NLINEEDIT_P_H
+//
+// Created by Yang1206 on 2025/4/1.
+//
 
-#include <QProxyStyle>
-#include <QtNativeUI/NLineEdit.h>
+#ifndef NTEXTEDIT_P_H
+#define NTEXTEDIT_P_H
+#include <QtNativeUI/NTextEdit.h>
 #include "QtNativeUI/NEnums.h"
 #include "neditstyle.h"
 
-class NLineEditPrivate : public QObject, public NEditStyleInterface {
+class NTextEditPrivate : public QObject, public NEditStyleInterface {
     Q_OBJECT
     Q_PROPERTY_CREATE_D(QColor, LightBackgroundColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBackgroundColor)
@@ -28,19 +30,17 @@ class NLineEditPrivate : public QObject, public NEditStyleInterface {
     Q_PROPERTY_CREATE_D(QColor, DarkTextDisabledColor)
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
-
   public:
-    explicit NLineEditPrivate(QObject* parent = nullptr);
-    ~NLineEditPrivate();
-    Q_D_CREATE(NLineEdit)
+    explicit NTextEditPrivate(QObject* parent = nullptr);
+    ~NTextEditPrivate();
+    Q_D_CREATE(NTextEdit)
 
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark{false};
     int                   _shadowBorderWidth{3};
 
-    NEditStyle* _lineEditStyle{nullptr};
+    NEditStyle* _textEditStyle{nullptr};
 
-    // NTextInputStyleInterface 实现
     QColor backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const override;
     QColor borderColorForState(bool isDark, bool isEnabled) const override;
     QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const override;
@@ -51,4 +51,4 @@ class NLineEditPrivate : public QObject, public NEditStyleInterface {
     int    shadowBorderWidth() const override;
 };
 
-#endif // QTNATIVEUI_NLINEEDIT_P_H
+#endif // NTEXTEDIT_P_H
