@@ -1,421 +1,245 @@
 #include "colors.h"
-#include <QComboBox>
-#include <QHBoxLayout>
-#include <QPushButton>
+
+#include <QLabel>
+#include <QPainter>
 #include <QVBoxLayout>
 #include <QtNativeUI/NTheme.h>
 
-// 颜色项实现
-ColorItem::ColorItem(NFluentColorKey::Key key, const QString& name, const QColor& color, QWidget* parent)
-    : QWidget(parent), m_key(key) {
-    QHBoxLayout* layout = new QHBoxLayout(this);
-    layout->setContentsMargins(5, 5, 5, 5);
-
-    // 颜色预览
-    m_colorPreview = new QLabel(this);
-    m_colorPreview->setFixedSize(40, 40);
-    m_colorPreview->setAutoFillBackground(true);
-
-    // 名称标签
-    m_nameLabel = new QLabel(name, this);
-    m_nameLabel->setMinimumWidth(200);
-
-    // 值标签
-    m_valueLabel = new QLabel(this);
-
-    layout->addWidget(m_colorPreview);
-    layout->addWidget(m_nameLabel);
-    layout->addWidget(m_valueLabel);
-    layout->addStretch();
-
-    updateColor(color);
+ColorBlock::ColorBlock(const QString& name, const QColor& color, QWidget* parent)
+    : QWidget(parent), m_name(name), m_color(color) {
+    setMinimumSize(180, 60);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
 
-void ColorItem::updateColor(const QColor& color) {
-    // 更新颜色预览
-    QPalette pal = m_colorPreview->palette();
-    pal.setColor(QPalette::Window, color);
-    m_colorPreview->setPalette(pal);
-
-    // 更新值标签
-    QString colorText;
-    if (color.alpha() < 255) {
-        colorText =
-            QString("RGBA(%1, %2, %3, %4)").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha());
-    } else {
-        colorText = QString("RGB(%1, %2, %3)").arg(color.red()).arg(color.green()).arg(color.blue());
-    }
-    m_valueLabel->setText(colorText);
+void ColorBlock::updateColor(const QColor& color) {
+    m_color = color;
+    update();
 }
 
-// 强调色项实现
-AccentColorItem::AccentColorItem(const QString& name, const NAccentColor& accentColor, QWidget* parent)
-    : QWidget(parent) {
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(5, 10, 5, 10);
+void ColorBlock::paintEvent(QPaintEvent*) {
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
-    // 名称标签
-    m_nameLabel    = new QLabel(name, this);
-    QFont nameFont = m_nameLabel->font();
-    nameFont.setBold(true);
-    m_nameLabel->setFont(nameFont);
-    mainLayout->addWidget(m_nameLabel);
+    // 绘制圆角矩形
+    QRect colorRect = rect().adjusted(4, 4, -4, -4);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(m_color);
+    painter.drawRoundedRect(colorRect, 8, 8);
 
-    // 色调预览
-    QGridLayout* swatchLayout = new QGridLayout();
-    swatchLayout->setSpacing(8);
-    mainLayout->addLayout(swatchLayout);
+    // 根据背景色亮度选择文字颜色
+    int    brightness = (m_color.red() * 299 + m_color.green() * 587 + m_color.blue() * 114) / 1000;
+    QColor textColor  = brightness > 128 ? Qt::black : Qt::white;
 
-    // 添加各个色调
-    QStringList shades = {"darkest", "darker", "dark", "normal", "light", "lighter", "lightest"};
-    int         col    = 0;
+    // 绘制文字
+    painter.setPen(textColor);
+    QFont font = painter.font();
+    font.setPointSize(9);
+    painter.setFont(font);
+    painter.drawText(colorRect, Qt::AlignCenter, m_name);
+}
 
-    for (const QString& shade : shades) {
-        QColor color;
-        if (shade == "darkest")
-            color = accentColor.darkest();
-        else if (shade == "darker")
-            color = accentColor.darker();
-        else if (shade == "dark")
-            color = accentColor.dark();
-        else if (shade == "normal")
-            color = accentColor.normal();
-        else if (shade == "light")
-            color = accentColor.light();
-        else if (shade == "lighter")
-            color = accentColor.lighter();
-        else if (shade == "lightest")
-            color = accentColor.lightest();
+AccentColorBlock::AccentColorBlock(const QString& name, const NAccentColor& color, QWidget* parent)
+    : QWidget(parent), m_name(name), m_color(color) {
+    setMinimumSize(180, 120);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+}
 
-        // 颜色预览
-        QLabel* colorPreview = new QLabel(this);
-        colorPreview->setFixedSize(30, 30);
-        colorPreview->setAutoFillBackground(true);
+void AccentColorBlock::updateColor(const NAccentColor& color) {
+    m_color = color;
+    update();
+}
 
-        QPalette pal = colorPreview->palette();
-        pal.setColor(QPalette::Window, color);
-        colorPreview->setPalette(pal);
+void AccentColorBlock::paintEvent(QPaintEvent*) {
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
-        // 颜色值标签
-        QLabel* valueLabel =
-            new QLabel(QString("RGB(%1,%2,%3)").arg(color.red()).arg(color.green()).arg(color.blue()), this);
-        valueLabel->setFixedWidth(100);
+    QRect contentRect = rect().adjusted(4, 4, -4, -4);
 
-        swatchLayout->addWidget(colorPreview, 0, col);
-        swatchLayout->addWidget(new QLabel(shade, this), 1, col);
-        swatchLayout->addWidget(valueLabel, 2, col);
+    // 绘制标题
+    QFont font = painter.font();
+    font.setPointSize(10);
+    font.setBold(true);
+    painter.setFont(font);
+    painter.setPen(nTheme->getColor(NFluentColorKey::TextFillColorPrimary));
+    painter.drawText(
+        QRect(contentRect.x(), contentRect.y(), contentRect.width(), 20), Qt::AlignLeft | Qt::AlignVCenter, m_name);
 
-        m_colorPreviews[shade] = colorPreview;
-        m_valueLabels[shade]   = valueLabel;
+    // 计算色块大小和间距
+    int blockHeight = 30;
+    int spacing     = 4;
+    int y           = contentRect.y() + 30;
+    int blockWidth  = (contentRect.width() - spacing * 6) / 7;
 
-        col++;
+    // 绘制色调块
+    QList<QPair<QString, QColor>> shades = {{"Darkest", m_color.darkest()},
+                                            {"Darker", m_color.darker()},
+                                            {"Dark", m_color.dark()},
+                                            {"Normal", m_color.normal()},
+                                            {"Light", m_color.light()},
+                                            {"Lighter", m_color.lighter()},
+                                            {"Lightest", m_color.lightest()}};
+
+    int x = contentRect.x();
+    for (const auto& shade : shades) {
+        QRect blockRect(x, y, blockWidth, blockHeight);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(shade.second);
+        painter.drawRoundedRect(blockRect, 4, 4);
+        x += blockWidth + spacing;
     }
 }
 
-void AccentColorItem::updateAccentColor(const NAccentColor& accentColor) {
-    // 更新各个色调预览
-    QStringList shades = {"darkest", "darker", "dark", "normal", "light", "lighter", "lightest"};
-
-    for (const QString& shade : shades) {
-        QColor color;
-        if (shade == "darkest")
-            color = accentColor.darkest();
-        else if (shade == "darker")
-            color = accentColor.darker();
-        else if (shade == "dark")
-            color = accentColor.dark();
-        else if (shade == "normal")
-            color = accentColor.normal();
-        else if (shade == "light")
-            color = accentColor.light();
-        else if (shade == "lighter")
-            color = accentColor.lighter();
-        else if (shade == "lightest")
-            color = accentColor.lightest();
-
-        QPalette pal = m_colorPreviews[shade]->palette();
-        pal.setColor(QPalette::Window, color);
-        m_colorPreviews[shade]->setPalette(pal);
-
-        m_valueLabels[shade]->setText(QString("RGB(%1,%2,%3)").arg(color.red()).arg(color.green()).arg(color.blue()));
-    }
-}
-
-// 颜色展示组件实现
-ColorsExample::ColorsExample(QWidget* parent)
-    : QWidget(parent), m_scrollArea(nullptr), m_colorContainer(nullptr), m_colorsLayout(nullptr), m_theme(nullptr) {
-    m_theme = NTheme::getInstance();
-
+ColorsExample::ColorsExample(QWidget* parent) : QWidget(parent) {
     initUI();
-    populateColors();
-    populateAccentColors();
 
     // 连接主题变化信号
-    connect(m_theme, &NTheme::darkModeChanged, this, &ColorsExample::onThemeChanged);
-    connect(m_theme, &NTheme::themeModeChanged, this, [this]() {
-        // 主题模式变化时更新所有颜色
-        for (auto it = m_colorItems.begin(); it != m_colorItems.end(); ++it) {
-            it.value()->updateColor(m_theme->getColor(it.key()));
+    connect(nTheme, &NTheme::darkModeChanged, this, &ColorsExample::onThemeChanged);
+    connect(nTheme, &NTheme::themeModeChanged, this, [this]() {
+        for (auto it = m_colorBlocks.begin(); it != m_colorBlocks.end(); ++it) {
+            it.value()->updateColor(nTheme->getColor(it.key()));
         }
     });
-    connect(m_theme, &NTheme::accentColorChanged, this, &ColorsExample::onAccentColorChanged);
 }
-
-ColorsExample::~ColorsExample() {}
 
 void ColorsExample::initUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(10, 10, 10, 10);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    // 主题控制区域
-    QHBoxLayout* controlLayout = new QHBoxLayout();
-
-    QLabel*    themeLabel = new QLabel("主题模式:", this);
-    QComboBox* themeCombo = new QComboBox(this);
-    themeCombo->addItem("亮色", static_cast<int>(NThemeType::ThemeMode::Light));
-    themeCombo->addItem("暗色", static_cast<int>(NThemeType::ThemeMode::Dark));
-    themeCombo->addItem("系统", static_cast<int>(NThemeType::ThemeMode::System));
-
-    themeCombo->setCurrentIndex(static_cast<int>(m_theme->themeMode()));
-
-    connect(themeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
-        m_theme->setThemeMode(static_cast<NThemeType::ThemeMode>(index));
-    });
-
-    QLabel*    accentLabel = new QLabel("强调色:", this);
-    QComboBox* accentCombo = new QComboBox(this);
-
-    // 添加预定义的强调色
-    accentCombo->addItem("蓝色", "blue");
-    accentCombo->addItem("红色", "red");
-    accentCombo->addItem("绿色", "green");
-    accentCombo->addItem("黄色", "yellow");
-    accentCombo->addItem("橙色", "orange");
-    accentCombo->addItem("紫色", "purple");
-    accentCombo->addItem("品红", "magenta");
-    accentCombo->addItem("青色", "teal");
-
-    // 设置当前强调色
-    accentCombo->setCurrentIndex(0); // 默认蓝色
-
-    connect(accentCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, accentCombo](int index) {
-        QString colorName = accentCombo->itemData(index).toString();
-        if (colorName == "blue")
-            m_theme->setAccentColor(NColors::blue);
-        else if (colorName == "red")
-            m_theme->setAccentColor(NColors::red);
-        else if (colorName == "green")
-            m_theme->setAccentColor(NColors::green);
-        else if (colorName == "yellow")
-            m_theme->setAccentColor(NColors::yellow);
-        else if (colorName == "orange")
-            m_theme->setAccentColor(NColors::orange);
-        else if (colorName == "purple")
-            m_theme->setAccentColor(NColors::purple);
-        else if (colorName == "magenta")
-            m_theme->setAccentColor(NColors::magenta);
-        else if (colorName == "teal")
-            m_theme->setAccentColor(NColors::teal);
-    });
-
-    controlLayout->addWidget(themeLabel);
-    controlLayout->addWidget(themeCombo);
-    controlLayout->addSpacing(20);
-    controlLayout->addWidget(accentLabel);
-    controlLayout->addWidget(accentCombo);
-    controlLayout->addStretch();
-
-    mainLayout->addLayout(controlLayout);
-
-    // 确保创建滚动区域
+    // 创建滚动区域
     m_scrollArea = new QScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
+    m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    m_colorContainer = new QWidget(m_scrollArea);
-    m_colorsLayout   = new QGridLayout(m_colorContainer);
+    QWidget* contentWidget = new QWidget(m_scrollArea);
+    QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
+    contentLayout->setContentsMargins(32, 32, 32, 32);
+    contentLayout->setSpacing(32);
 
-    m_scrollArea->setWidget(m_colorContainer);
+    // 添加 Fluent 颜色部分
+    QWidget* fluentSection = createSection("Fluent UI Colors");
+    fluentSection->setObjectName("FluentUIColors"); // 设置对象名
+    setupFluentColors(fluentSection); // 直接传递部件
+    contentLayout->addWidget(fluentSection);
+
+    // 添加强调色部分
+    QWidget* accentSection = createSection("Accent Colors");
+    accentSection->setObjectName("AccentColors"); // 设置对象名
+    setupAccentColors(accentSection); // 直接传递部件
+    contentLayout->addWidget(accentSection);
+
+    contentLayout->addStretch();
+    m_scrollArea->setWidget(contentWidget);
     mainLayout->addWidget(m_scrollArea);
 }
 
-void ColorsExample::populateColors() {
+// 修改函数签名，直接接收部件参数
+// 修改 setupFluentColors 方法
+void ColorsExample::setupFluentColors(QWidget* section) {
+    // 删除现有布局中的所有项目
+    QLayout* oldLayout = section->layout();
+    QVBoxLayout* sectionLayout = qobject_cast<QVBoxLayout*>(oldLayout);
+    
+    // 创建网格布局
+    QGridLayout* grid = new QGridLayout();
+    grid->setSpacing(8);
+    grid->setContentsMargins(0, 16, 0, 0);
+
     int row = 0;
     int col = 0;
+    int maxCols = 3;
 
-    // 添加标题
-    QLabel* titleLabel = new QLabel("Fluent UI 颜色系统", this);
-    QFont   titleFont;
+    // 创建所有 Fluent 颜色块
+    for (int i = 0; i < NFluentColorKey::Count; ++i) {
+        auto key = static_cast<NFluentColorKey::Key>(i);
+        QString name = fluentColorKeyToString(key);
+        QColor color = nTheme->getColor(key);
+
+        ColorBlock* block = new ColorBlock(name, color, section);
+        m_colorBlocks[key] = block;
+        grid->addWidget(block, row, col);
+
+        col++;
+        if (col >= maxCols) {
+            col = 0;
+            row++;
+        }
+    }
+
+    // 将网格布局添加到部分布局中
+    sectionLayout->addLayout(grid);
+}
+
+// 修改 setupAccentColors 方法
+void ColorsExample::setupAccentColors(QWidget* section) {
+    // 删除现有布局中的所有项目
+    QLayout* oldLayout = section->layout();
+    QVBoxLayout* sectionLayout = qobject_cast<QVBoxLayout*>(oldLayout);
+    
+    // 创建网格布局
+    QGridLayout* grid = new QGridLayout();
+    grid->setSpacing(16);
+    grid->setContentsMargins(0, 16, 0, 0);
+
+    QList<QPair<QString, NAccentColorType::Type>> accentColors = {
+        {"Yellow", NAccentColorType::Yellow},
+        {"Orange", NAccentColorType::Orange},
+        {"Red", NAccentColorType::Red},
+        {"Magenta", NAccentColorType::Magenta},
+        {"Purple", NAccentColorType::Purple},
+        {"Blue", NAccentColorType::Blue},
+        {"Teal", NAccentColorType::Teal},
+        {"Green", NAccentColorType::Green}
+    };
+
+    int row = 0;
+    int col = 0;
+    int maxCols = 2;
+
+    for (const auto& pair : accentColors) {
+        AccentColorBlock* block = new AccentColorBlock(
+            pair.first, 
+            nTheme->getAccentColor(pair.second),
+            section
+        );
+        m_accentBlocks.append(block);
+        grid->addWidget(block, row, col);
+
+        col++;
+        if (col >= maxCols) {
+            col = 0;
+            row++;
+        }
+    }
+
+    // 将网格布局添加到部分布局中
+    sectionLayout->addLayout(grid);
+}
+
+QWidget* ColorsExample::createSection(const QString& title) {
+    QWidget*     section = new QWidget;
+    QVBoxLayout* layout  = new QVBoxLayout(section);
+    layout->setSpacing(16);
+
+    QLabel* titleLabel = new QLabel(title, section);
+    QFont   titleFont  = titleLabel->font();
     titleFont.setPointSize(16);
     titleFont.setBold(true);
     titleLabel->setFont(titleFont);
-    m_colorsLayout->addWidget(titleLabel, row++, 0, 1, 3);
+    layout->addWidget(titleLabel);
 
-    // 添加文本颜色
-    QFont sectionFont;
-    sectionFont.setPointSize(12);
-    sectionFont.setBold(true);
-
-    QLabel* textColorsLabel = new QLabel("文本颜色", this);
-    textColorsLabel->setFont(sectionFont);
-    m_colorsLayout->addWidget(textColorsLabel, row++, 0, 1, 3);
-
-    // 定义文本颜色键数组
-    NFluentColorKey::Key textColors[] = {NFluentColorKey::TextFillColorPrimary,
-                                         NFluentColorKey::TextFillColorSecondary,
-                                         NFluentColorKey::TextFillColorTertiary,
-                                         NFluentColorKey::TextFillColorDisabled,
-                                         NFluentColorKey::TextFillColorInverse};
-
-    for (NFluentColorKey::Key key : textColors) {
-        // 获取颜色键的字符串表示
-        QString keyName = fluentColorKeyToString(key);
-        // 创建颜色项
-        ColorItem* item   = new ColorItem(key, keyName, m_theme->getColor(key));
-        m_colorItems[key] = item;
-        m_colorsLayout->addWidget(item, row, col);
-
-        col++;
-        if (col >= 3) {
-            col = 0;
-            row++;
-        }
-    }
-
-    // 添加控件颜色
-    if (col != 0) {
-        row++;
-        col = 0;
-    }
-
-    QLabel* controlColorsLabel = new QLabel("控件颜色", this);
-    controlColorsLabel->setFont(sectionFont);
-    m_colorsLayout->addWidget(controlColorsLabel, row++, 0, 1, 3);
-
-    // 定义控件颜色键数组
-    NFluentColorKey::Key controlColors[] = {NFluentColorKey::ControlFillColorDefault,
-                                            NFluentColorKey::ControlFillColorSecondary,
-                                            NFluentColorKey::ControlFillColorTertiary,
-                                            NFluentColorKey::ControlFillColorDisabled,
-                                            NFluentColorKey::ControlFillColorTransparent,
-                                            NFluentColorKey::ControlFillColorInputActive,
-                                            NFluentColorKey::ControlStrongFillColorDefault,
-                                            NFluentColorKey::ControlStrongFillColorDisabled,
-                                            NFluentColorKey::ControlSolidFillColorDefault};
-
-    for (NFluentColorKey::Key key : controlColors) {
-        QString    keyName = fluentColorKeyToString(key);
-        ColorItem* item    = new ColorItem(key, keyName, m_theme->getColor(key));
-        m_colorItems[key]  = item;
-        m_colorsLayout->addWidget(item, row, col);
-
-        col++;
-        if (col >= 3) {
-            col = 0;
-            row++;
-        }
-    }
-
-    // 添加背景颜色
-    if (col != 0) {
-        row++;
-        col = 0;
-    }
-
-    QLabel* bgColorsLabel = new QLabel("背景颜色", this);
-    bgColorsLabel->setFont(sectionFont);
-    m_colorsLayout->addWidget(bgColorsLabel, row++, 0, 1, 3);
-
-    // 定义背景颜色键数组
-    NFluentColorKey::Key bgColors[] = {NFluentColorKey::SolidBackgroundFillColorBase,
-                                       NFluentColorKey::SolidBackgroundFillColorBaseAlt,
-                                       NFluentColorKey::SolidBackgroundFillColorSecondary,
-                                       NFluentColorKey::SolidBackgroundFillColorTertiary,
-                                       NFluentColorKey::SolidBackgroundFillColorQuarternary};
-
-    for (NFluentColorKey::Key key : bgColors) {
-        QString    keyName = fluentColorKeyToString(key);
-        ColorItem* item    = new ColorItem(key, keyName, m_theme->getColor(key));
-        m_colorItems[key]  = item;
-        m_colorsLayout->addWidget(item, row, col);
-
-        col++;
-        if (col >= 3) {
-            col = 0;
-            row++;
-        }
-    }
-
-    // 添加边框颜色
-    if (col != 0) {
-        row++;
-        col = 0;
-    }
-
-    QLabel* borderColorsLabel = new QLabel("边框颜色", this);
-    borderColorsLabel->setFont(sectionFont);
-    m_colorsLayout->addWidget(borderColorsLabel, row++, 0, 1, 3);
-
-    // 定义边框颜色键数组
-    NFluentColorKey::Key borderColors[] = {NFluentColorKey::ControlStrokeColorDefault,
-                                           NFluentColorKey::ControlStrokeColorSecondary,
-                                           NFluentColorKey::ControlStrokeColorOnAccentDefault,
-                                           NFluentColorKey::ControlStrokeColorOnAccentSecondary,
-                                           NFluentColorKey::ControlStrokeColorOnAccentTertiary,
-                                           NFluentColorKey::ControlStrokeColorOnAccentDisabled};
-
-    for (NFluentColorKey::Key key : borderColors) {
-        QString    keyName = fluentColorKeyToString(key);
-        ColorItem* item    = new ColorItem(key, keyName, m_theme->getColor(key));
-        m_colorItems[key]  = item;
-        m_colorsLayout->addWidget(item, row, col);
-
-        col++;
-        if (col >= 3) {
-            col = 0;
-            row++;
-        }
-    }
-}
-
-void ColorsExample::populateAccentColors() {
-    // 添加当前强调色
-    QWidget*     accentSection = new QWidget(m_colorContainer);
-    QVBoxLayout* accentLayout  = new QVBoxLayout(accentSection);
-
-    QLabel* sectionTitle = new QLabel(tr("当前强调色"), accentSection);
-    QFont   titleFont    = sectionTitle->font();
-    titleFont.setBold(true);
-    titleFont.setPointSize(titleFont.pointSize() + 2);
-    sectionTitle->setFont(titleFont);
-
-    accentLayout->addWidget(sectionTitle);
-
-    // 添加当前强调色预览
-    AccentColorItem* currentAccentItem = new AccentColorItem("Current Accent", m_theme->accentColor(), accentSection);
-    accentLayout->addWidget(currentAccentItem);
-    m_accentColorItems["current"] = currentAccentItem;
-
-    // 添加到主布局
-    m_colorsLayout->addWidget(accentSection, m_colorsLayout->rowCount(), 0, 1, 2);
+    return section;
 }
 
 void ColorsExample::onThemeChanged(bool isDark) {
-    qDebug() << isDark;
-    // 主题变化时，所有颜色都会通过单独更新
-    // 这里可以添加额外的主题相关逻辑
-}
-
-void ColorsExample::onColorChanged(NFluentColorKey::Key key, const QColor& color) {
-    // 更新对应的颜色项
-    if (m_colorItems.contains(key)) {
-        m_colorItems[key]->updateColor(color);
+    for (auto it = m_colorBlocks.begin(); it != m_colorBlocks.end(); ++it) {
+        it.value()->updateColor(nTheme->getColor(it.key()));
     }
 }
 
-void ColorsExample::onAccentColorChanged(const NAccentColor& color) {
-    // 更新当前强调色
-    if (m_accentColorItems.contains("current")) {
-        m_accentColorItems["current"]->updateAccentColor(color);
+void ColorsExample::onColorChanged(NFluentColorKey::Key key, const QColor& color) {
+    if (m_colorBlocks.contains(key)) {
+        m_colorBlocks[key]->updateColor(color);
     }
 }

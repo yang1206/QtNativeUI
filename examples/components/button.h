@@ -6,16 +6,20 @@
 #define BUTTON_H
 #include <QWidget>
 
-
+class QScrollArea;
 class ButtonExample : public QWidget {
     Q_OBJECT
-public:
-    explicit ButtonExample(QWidget *parent = nullptr);
+  public:
+    explicit ButtonExample(QWidget* parent = nullptr);
 
-private:
-    void initUI();
+  private:
+    void     initUI();
+    QWidget* createPushButtons();
+    QWidget* createToggleButtons();
+    QWidget* createHyperlinkButtons();
+    QWidget* createRadioButtons();
+
+    QScrollArea* m_scrollArea;
 };
 
-
-
-#endif //BUTTON_H
+#endif // BUTTON_H

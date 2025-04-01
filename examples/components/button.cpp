@@ -7,8 +7,8 @@
 #include <QApplication>
 #include <QButtonGroup>
 #include <QGridLayout>
-#include <QLabel>
 #include <QMenu>
+#include <QScrollArea>
 #include <QStyleHints>
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
@@ -17,28 +17,44 @@
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NRadioButton.h"
 #include "QtNativeUI/NTheme.h"
+#include "widgets/ExampleSection.h"
 
 ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
 void ButtonExample::initUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(32, 32, 32, 32);
-    mainLayout->setSpacing(24);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    // 标准按钮展示区
-    QWidget*     standardSection = new QWidget;
-    QVBoxLayout* standardLayout  = new QVBoxLayout(standardSection);
-    standardLayout->setSpacing(16);
+    // 创建滚动区域
+    m_scrollArea = new QScrollArea(this);
+    m_scrollArea->setWidgetResizable(true);
+    m_scrollArea->setFrameShape(QFrame::NoFrame);
+    m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    QLabel* standardTitle = new QLabel("Standard Buttons");
-    QFont   titleFont     = standardTitle->font();
-    titleFont.setPointSize(16);
-    titleFont.setBold(true);
-    standardTitle->setFont(titleFont);
-    standardLayout->addWidget(standardTitle);
+    // 创建内容容器
+    QWidget*     contentWidget = new QWidget(m_scrollArea);
+    QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
+    contentLayout->setContentsMargins(32, 32, 32, 32);
+    contentLayout->setSpacing(24);
 
-    QHBoxLayout* standardButtonLayout = new QHBoxLayout;
-    standardButtonLayout->setSpacing(16);
+    // 添加各个示例区域
+    contentLayout->addWidget(new ExampleSection("PushButton", createPushButtons()));
+    contentLayout->addWidget(new ExampleSection("ToggleButton", createToggleButtons()));
+    contentLayout->addWidget(new ExampleSection("HyperlinkButton", createHyperlinkButtons()));
+    contentLayout->addWidget(new ExampleSection("RadioButton", createRadioButtons()));
+
+    contentLayout->addStretch();
+
+    m_scrollArea->setWidget(contentWidget);
+    mainLayout->addWidget(m_scrollArea);
+    setMinimumWidth(600);
+}
+
+QWidget* ButtonExample::createPushButtons() {
+    QWidget*     container = new QWidget;
+    QHBoxLayout* layout    = new QHBoxLayout(container);
+    layout->setSpacing(16);
 
     // 添加标准按钮
     NPushButton* themeBtn = new NPushButton("Change Theme");
@@ -47,55 +63,10 @@ void ButtonExample::initUI() {
         nTheme->setThemeMode(qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark ? NThemeType::ThemeMode::Light
                                                                                         : NThemeType::ThemeMode::Dark);
     });
+
     NPushButton* normalBtn   = new NPushButton("Standard");
     NPushButton* disabledBtn = new NPushButton("Disabled");
     disabledBtn->setDisabled(true);
-
-    standardButtonLayout->addWidget(themeBtn);
-    standardButtonLayout->addWidget(normalBtn);
-    standardButtonLayout->addWidget(disabledBtn);
-    standardButtonLayout->addStretch();
-
-    standardLayout->addLayout(standardButtonLayout);
-
-    QLabel* toggleButtonTitle = new QLabel("Toggle Buttons");
-    QFont   toggleTitleFont   = toggleButtonTitle->font();
-    toggleTitleFont.setPointSize(16);
-    toggleTitleFont.setBold(true);
-    toggleButtonTitle->setFont(toggleTitleFont);
-    standardLayout->addWidget(toggleButtonTitle);
-
-    QHBoxLayout* toggleButtonLayout = new QHBoxLayout;
-    toggleButtonLayout->setSpacing(16);
-
-    // 1. 标准图标按钮
-    NToggleButton* toggleBtn = new NToggleButton("Toggle");
-    toggleBtn->setFixedSize(120, 40);
-    toggleBtn->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
-    toggleBtn->setChecked(true);
-
-    // 2. 只有图标的按钮
-    NToggleButton* toggleBtn2 = new NToggleButton;
-    toggleBtn2->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
-
-    // 3. 禁用状态
-    NToggleButton* toggleBtn3 = new NToggleButton;
-    toggleBtn3->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
-    toggleBtn3->setDisabled(true);
-
-    toggleButtonLayout->addWidget(toggleBtn);
-    toggleButtonLayout->addWidget(toggleBtn2);
-    toggleButtonLayout->addWidget(toggleBtn3);
-    toggleButtonLayout->addStretch();
-
-    standardLayout->addLayout(toggleButtonLayout);
-
-    QLabel* iconButtonTitle = new QLabel("Icon Buttons");
-    iconButtonTitle->setFont(titleFont);
-    standardLayout->addWidget(iconButtonTitle);
-
-    QHBoxLayout* iconButtonLayout = new QHBoxLayout;
-    iconButtonLayout->setSpacing(16);
 
     // 1. 标准图标按钮
     NPushButton* settingsBtn = new NPushButton("Settings");
@@ -118,134 +89,70 @@ void ButtonExample::initUI() {
     customBtn->setFixedSize(48, 48);
     customBtn->setFluentIcon(NRegularIconType::Headphones24Regular, 30, Qt::red);
 
-    iconButtonLayout->addWidget(settingsBtn);
-    iconButtonLayout->addWidget(searchBtn);
-    iconButtonLayout->addWidget(addBtn);
-    iconButtonLayout->addWidget(customBtn);
-    iconButtonLayout->addStretch();
+    layout->addWidget(themeBtn);
+    layout->addWidget(normalBtn);
+    layout->addWidget(disabledBtn);
+    layout->addWidget(settingsBtn);
+    layout->addWidget(searchBtn);
+    layout->addWidget(addBtn);
+    layout->addWidget(customBtn);
+    layout->addStretch();
 
-    standardLayout->addLayout(iconButtonLayout);
+    return container;
+}
 
-    mainLayout->addWidget(standardSection);
+QWidget* ButtonExample::createToggleButtons() {
+    QWidget*     container = new QWidget;
+    QHBoxLayout* layout    = new QHBoxLayout(container);
+    layout->setSpacing(16);
+    // 1. 标准图标按钮
+    NToggleButton* toggleBtn = new NToggleButton("Toggle");
+    toggleBtn->setFixedSize(120, 40);
+    toggleBtn->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+    toggleBtn->setChecked(true);
 
-    // 强调色按钮展示区
-    QWidget*     accentSection = new QWidget;
-    QVBoxLayout* accentLayout  = new QVBoxLayout(accentSection);
-    accentLayout->setSpacing(16);
+    // 2. 只有图标的按钮
+    NToggleButton* toggleBtn2 = new NToggleButton;
+    toggleBtn2->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+    toggleBtn2->setFixedSize(40, 40);
 
-    QLabel* accentTitle = new QLabel("Accent Buttons");
-    accentTitle->setFont(titleFont);
-    accentLayout->addWidget(accentTitle);
+    // 3. 禁用状态
+    NToggleButton* toggleBtn3 = new NToggleButton;
+    toggleBtn3->setFluentIcon(NRegularIconType::Checkbox124Regular, 24);
+    toggleBtn3->setFixedSize(40, 40);
+    toggleBtn3->setDisabled(true);
 
-    // 使用流式布局展示强调色按钮
-    QWidget*     flowWidget = new QWidget;
-    QGridLayout* gridLayout = new QGridLayout(flowWidget);
-    gridLayout->setSpacing(16);
-    gridLayout->setAlignment(Qt::AlignLeft);
+    layout->addWidget(toggleBtn);
+    layout->addWidget(toggleBtn2);
+    layout->addWidget(toggleBtn3);
+    layout->addStretch();
+    return container;
+}
 
-    // 预定义的强调色类型
-    struct AccentButtonInfo {
-        QString                name;
-        NAccentColorType::Type type;
-    };
-
-    QList<AccentButtonInfo> accentTypes = {{"Yellow", NAccentColorType::Yellow},
-                                           {"Orange", NAccentColorType::Orange},
-                                           {"Red", NAccentColorType::Red},
-                                           {"Magenta", NAccentColorType::Magenta},
-                                           {"Purple", NAccentColorType::Purple},
-                                           {"Blue", NAccentColorType::Blue},
-                                           {"Teal", NAccentColorType::Teal},
-                                           {"Green", NAccentColorType::Green}};
-
-    // 添加所有预定义的强调色按钮
-    int columnCount = 4;
-    for (int i = 0; i < accentTypes.size(); ++i) {
-        const auto&                  info = accentTypes[i];
-        const QString&               name = info.name;
-        const NAccentColorType::Type type = info.type;
-        NPushButton*                 btn  = new NPushButton(name);
-        btn->setFixedWidth(120);
-        btn->setButtonType(NPushButton::Accent);
-        btn->setAccentColor(NColors::getAccentColor(type));
-        gridLayout->addWidget(btn, i / columnCount, i % columnCount, Qt::AlignCenter);
-    }
-
-    QHBoxLayout* otherButtons = new QHBoxLayout();
-    QWidget*     otherBtns    = new QWidget(flowWidget);
-    otherBtns->setLayout(otherButtons);
-
-    NPushButton* accentBtn = new NPushButton("Accent");
-    accentBtn->setButtonType(NPushButton::Accent);
-    otherButtons->addWidget(accentBtn);
-    // 添加一个禁用状态的强调色按钮示例
-    NPushButton* disabledAccentBtn = new NPushButton("Disabled Accent");
-    disabledAccentBtn->setButtonType(NPushButton::Accent);
-    disabledAccentBtn->setAccentColor(NColors::getAccentColor(NAccentColorType::Blue));
-    disabledAccentBtn->setDisabled(true);
-    otherButtons->addWidget(disabledBtn);
-    // 添加自定义强调色按钮
-    NPushButton* customAccentBtn = new NPushButton("Custom Accent");
-    customAccentBtn->setButtonType(NPushButton::Accent);
-
-    // 创建自定义强调色
-    QColor       customColor(82, 196, 26); // 一个自定义的绿色
-    NAccentColor customAccent = NAccentColor::fromColor(customColor,
-                                                        0.38, // darkest
-                                                        0.30, // darker
-                                                        0.15, // dark
-                                                        0.15, // light
-                                                        0.30, // lighter
-                                                        0.38  // lightest
-    );
-
-    customAccentBtn->setAccentColor(customAccent);
-    otherButtons->addWidget(customAccentBtn);
-
-    accentLayout->addWidget(flowWidget);
-    accentLayout->addWidget(otherBtns);
-    mainLayout->addWidget(accentSection);
-
-    QWidget*     hyperlinkSection = new QWidget;
-    QVBoxLayout* hyperlinkLayout  = new QVBoxLayout(hyperlinkSection);
-    hyperlinkLayout->setSpacing(16);
-
-    QLabel* hyperlinkTitle     = new QLabel("Hyperlink Buttons");
-    QFont   hyperlinkTitleFont = hyperlinkTitle->font();
-    hyperlinkTitleFont.setPointSize(16);
-    hyperlinkTitleFont.setBold(true);
-    hyperlinkTitle->setFont(hyperlinkTitleFont);
-    hyperlinkLayout->addWidget(hyperlinkTitle);
-
-    QHBoxLayout* hyperlinkButtonLayout = new QHBoxLayout;
-    hyperlinkButtonLayout->setSpacing(16);
-
+QWidget* ButtonExample::createHyperlinkButtons() {
+    QWidget*     container = new QWidget;
+    QHBoxLayout* layout    = new QHBoxLayout(container);
+    layout->setSpacing(16);
     NHyperlinkButton* hyperlinkBtn = new NHyperlinkButton("Visit Website");
     hyperlinkBtn->setUrl("https://www.qt.io/");
 
-    hyperlinkButtonLayout->addWidget(hyperlinkBtn);
-
     NHyperlinkButton* hyperlinkBtn2 = new NHyperlinkButton("disabled");
     hyperlinkBtn2->setDisabled(true);
-    hyperlinkButtonLayout->addWidget(hyperlinkBtn2);
 
-    hyperlinkButtonLayout->addStretch();
+    layout->addWidget(hyperlinkBtn);
+    layout->addWidget(hyperlinkBtn2);
+    layout->addStretch();
+    return container;
+}
 
-    hyperlinkLayout->addLayout(hyperlinkButtonLayout);
-
-    QLabel* radioButtonsTitle = new QLabel("Radio Buttons");
-    QFont   radioButtonsFont  = radioButtonsTitle->font();
-    radioButtonsFont.setPointSize(16);
-    radioButtonsFont.setBold(true);
-    radioButtonsTitle->setFont(radioButtonsFont);
-    standardLayout->addWidget(radioButtonsTitle);
-
-    QHBoxLayout* radioButtonLayout = new QHBoxLayout;
-    radioButtonLayout->setSpacing(16);
+QWidget* ButtonExample::createRadioButtons() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
 
     // 1. 单选按钮组
     QButtonGroup* radioGroup = new QButtonGroup(this);
-
+    radioGroup->setExclusive(true);
     NRadioButton* radioBtn1 = new NRadioButton("Option 1");
     NRadioButton* radioBtn2 = new NRadioButton("Option 2");
     NRadioButton* radioBtn3 = new NRadioButton("Option 3");
@@ -254,16 +161,8 @@ void ButtonExample::initUI() {
     radioGroup->addButton(radioBtn2);
     radioGroup->addButton(radioBtn3);
 
-    radioButtonLayout->addWidget(radioBtn1);
-    radioButtonLayout->addWidget(radioBtn2);
-    radioButtonLayout->addWidget(radioBtn3);
-    radioButtonLayout->addStretch();
-
-    standardLayout->addLayout(radioButtonLayout);
-
-    mainLayout->addWidget(hyperlinkSection);
-
-    mainLayout->addStretch();
-
-    setMinimumWidth(600);
+    layout->addWidget(radioBtn1);
+    layout->addWidget(radioBtn2);
+    layout->addWidget(radioBtn3);
+    return container;
 }
