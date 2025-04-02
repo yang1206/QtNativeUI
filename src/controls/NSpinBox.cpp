@@ -67,8 +67,8 @@ void NSpinBox::init() {
     d->_pDarkBottomLineColor  = QColor(0x9A, 0x9A, 0x9A);
 
     // 按钮颜色
-    d->_pLightButtonBgColor       = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);
-    d->_pDarkButtonBgColor        = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark);
+    d->_pLightButtonBgColor       = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);
+    d->_pDarkButtonBgColor        = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark);
     d->_pLightButtonHoverColor    = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light);
     d->_pDarkButtonHoverColor     = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Dark);
     d->_pLightButtonPressColor    = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);

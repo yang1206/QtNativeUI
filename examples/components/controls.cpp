@@ -208,19 +208,17 @@ QWidget* ControlsExample::createPlainTextEdits() {
 // 添加 createSpinBoxes 函数实现
 QWidget* ControlsExample::createSpinBoxes() {
     QWidget*     container = new QWidget;
-    QVBoxLayout* layout    = new QVBoxLayout(container);
+    QHBoxLayout* layout    = new QHBoxLayout(container);
     layout->setSpacing(16);
 
     // 基本数字输入框
     NSpinBox* normalSpinBox = new NSpinBox(container);
-    normalSpinBox->setMinimumWidth(200);
     layout->addWidget(normalSpinBox);
 
     // 设置范围的数字输入框
     NSpinBox* rangeSpinBox = new NSpinBox(container);
     rangeSpinBox->setRange(0, 100);
     rangeSpinBox->setValue(50);
-    rangeSpinBox->setMinimumWidth(200);
     layout->addWidget(rangeSpinBox);
 
     // 设置步长的数字输入框
@@ -228,7 +226,6 @@ QWidget* ControlsExample::createSpinBoxes() {
     stepSpinBox->setRange(0, 100);
     stepSpinBox->setSingleStep(5);
     stepSpinBox->setValue(25);
-    stepSpinBox->setMinimumWidth(200);
     layout->addWidget(stepSpinBox);
 
     // 前缀后缀的数字输入框
@@ -237,14 +234,12 @@ QWidget* ControlsExample::createSpinBoxes() {
     prefixSuffixSpinBox->setSuffix(".00");
     prefixSuffixSpinBox->setRange(0, 1000);
     prefixSuffixSpinBox->setValue(100);
-    prefixSuffixSpinBox->setMinimumWidth(200);
     layout->addWidget(prefixSuffixSpinBox);
 
     // 禁用状态的数字输入框
     NSpinBox* disabledSpinBox = new NSpinBox(container);
     disabledSpinBox->setValue(50);
     disabledSpinBox->setEnabled(false);
-    disabledSpinBox->setMinimumWidth(200);
     layout->addWidget(disabledSpinBox);
 
     return container;

@@ -1,5 +1,5 @@
 //
-// Created by Yang1206 on 2025/4/10.
+// Created by Yang1206 on 2025/4/2.
 //
 
 #include "nspinbox_p.h"
@@ -50,22 +50,12 @@ QColor NSpinBoxPrivate::buttonBackgroundColor(bool isDark, bool isEnabled, bool 
     }
 }
 
-int NSpinBoxPrivate::borderRadius() const {
-    return _pBorderRadius;
-}
+int NSpinBoxPrivate::borderRadius() const { return _pBorderRadius; }
 
-int NSpinBoxPrivate::borderWidth() const {
-    return _pBorderWidth;
-}
+int NSpinBoxPrivate::borderWidth() const { return _pBorderWidth; }
 
-int NSpinBoxPrivate::bottomLineWidth(bool hasFocus) const {
-    return hasFocus ? 2 : 1;
-}
+int NSpinBoxPrivate::bottomLineWidth(bool hasFocus) const { return hasFocus ? 2 : 1; }
 
-bool NSpinBoxPrivate::isDarkMode() const {
-    return _isDark;
-}
+bool NSpinBoxPrivate::isDarkMode() const { return _isDark; }
 
-int NSpinBoxPrivate::shadowBorderWidth() const {
-    return _shadowBorderWidth;
-}
+int NSpinBoxPrivate::shadowBorderWidth() const { return _shadowBorderWidth; }

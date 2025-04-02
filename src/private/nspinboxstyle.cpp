@@ -1,7 +1,8 @@
 #include "nspinboxstyle.h"
-#include <QPainter>
 #include <QPainterPath>
 #include <QStyleOptionSpinBox>
+
+#include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
 
 NSpinBoxStyle::NSpinBoxStyle(const NSpinBoxStyleInterface* styleInterface, QStyle* style)
@@ -17,14 +18,14 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
             QProxyStyle::drawComplexControl(control, option, painter, widget);
             return;
         }
-        // 获取编辑区域
-        QRect editRect = subControlRect(control, spinOpt, SC_SpinBoxEditField, widget);
-
+        QRect frameRect = subControlRect(control, spinOpt, SC_SpinBoxFrame, widget);
+        QRect upRect    = subControlRect(control, spinOpt, SC_SpinBoxUp, widget);
+        QRect downRect  = subControlRect(control, spinOpt, SC_SpinBoxDown, widget);
         // 添加阴影边距
-        QRect foregroundRect(editRect.x() + m_styleInterface->shadowBorderWidth(),
-                             editRect.y() + m_styleInterface->shadowBorderWidth(),
-                             editRect.width() - 2 * m_styleInterface->shadowBorderWidth(),
-                             editRect.height() - 2 * m_styleInterface->shadowBorderWidth());
+        QRect foregroundRect(frameRect.x() + m_styleInterface->shadowBorderWidth(),
+                             frameRect.y() + m_styleInterface->shadowBorderWidth(),
+                             frameRect.width() - 2 * m_styleInterface->shadowBorderWidth(),
+                             frameRect.height() - 2 * m_styleInterface->shadowBorderWidth());
 
         painter->save();
         painter->setRenderHints(QPainter::Antialiasing);
@@ -62,12 +63,42 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
 
         painter->restore();
 
-        // 使用默认方式绘制按钮部分
-        // QStyleOptionSpinBox buttonOption = *spinOpt;
-        // buttonOption.rect = option->rect;
-        // QProxyStyle::drawPrimitive(PE_IndicatorSpinUp, &buttonOption, painter, widget);
-        // QProxyStyle::drawPrimitive(PE_IndicatorSpinDown, &buttonOption, painter, widget);
-        //
+        if (spinOpt->subControls & SC_SpinBoxUp) {
+            bool upEnabled = isEnabled && (spinOpt->stepEnabled & QAbstractSpinBox::StepUpEnabled);
+            bool upHover   = upEnabled && (spinOpt->state & QStyle::State_MouseOver) &&
+                           upRect.contains(static_cast<const QWidget*>(widget)->mapFromGlobal(QCursor::pos()));
+            bool upPressed = upEnabled && (spinOpt->state & QStyle::State_Sunken) &&
+                             upRect.contains(static_cast<const QWidget*>(widget)->mapFromGlobal(QCursor::pos()));
+
+            QColor upBgColor = m_styleInterface->buttonBackgroundColor(isDark, upEnabled, upHover, upPressed);
+            painter->save();
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(upBgColor);
+            painter->drawRoundedRect(upRect, 4, 4);
+            QIcon upIcon = nIcon->fromRegular(NRegularIconType::ChevronUp20Regular, 8);
+            upIcon.paint(painter, upRect, Qt::AlignCenter, upEnabled ? QIcon::Normal : QIcon::Disabled);
+            painter->restore();
+        }
+
+        if (spinOpt->subControls & SC_SpinBoxDown) {
+            bool downEnabled = isEnabled && (spinOpt->stepEnabled & QAbstractSpinBox::StepDownEnabled);
+            bool downHover   = downEnabled && (spinOpt->state & QStyle::State_MouseOver) &&
+                             downRect.contains(static_cast<const QWidget*>(widget)->mapFromGlobal(QCursor::pos()));
+            bool downPressed = downEnabled && (spinOpt->state & QStyle::State_Sunken) &&
+                               downRect.contains(static_cast<const QWidget*>(widget)->mapFromGlobal(QCursor::pos()));
+
+            QColor downBgColor = m_styleInterface->buttonBackgroundColor(isDark, downEnabled, downHover, downPressed);
+
+            // 绘制减号按钮背景
+            painter->save();
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(downBgColor);
+            painter->drawRoundedRect(downRect, 4, 4);
+            QIcon downIcon = nIcon->fromRegular(NRegularIconType::ChevronDown20Regular, 8);
+            downIcon.paint(painter, downRect, Qt::AlignCenter, downEnabled ? QIcon::Normal : QIcon::Disabled);
+
+            painter->restore();
+        }
         return;
     }
 
@@ -84,19 +115,34 @@ QRect NSpinBoxStyle::subControlRect(ComplexControl             cc,
             return QProxyStyle::subControlRect(cc, opt, sc, widget);
         }
 
-        QRect spinBoxRect = opt->rect;
-        int   buttonWidth = spinBoxRect.height() / 2;
+        QRect spinBoxRect      = opt->rect;
+        int   margin           = 5;
+        int   buttonHeight     = (spinBoxRect.height() - 2 * margin) / 1.2;
+        int   buttonWidth      = buttonHeight;
+        int   spacing          = 8;
+        int   totalButtonWidth = 2 * buttonWidth + spacing;
 
         switch (sc) {
             case SC_SpinBoxUp:
-                return QRect(spinBoxRect.right() - buttonWidth, 0, buttonWidth, spinBoxRect.height() / 2);
+                return QRect(spinBoxRect.right() - buttonWidth - margin * 2,
+                             spinBoxRect.top() + (spinBoxRect.height() - buttonHeight) / 2,
+                             buttonWidth,
+                             buttonHeight);
 
             case SC_SpinBoxDown:
-                return QRect(
-                    spinBoxRect.right() - buttonWidth, spinBoxRect.height() / 2, buttonWidth, spinBoxRect.height() / 2);
+                return QRect(spinBoxRect.right() - 2 * buttonWidth - spacing - margin,
+                             spinBoxRect.top() + (spinBoxRect.height() - buttonHeight) / 2,
+                             buttonWidth,
+                             buttonHeight);
 
             case SC_SpinBoxEditField:
-                return QRect(0, 0, spinBoxRect.width() - buttonWidth, spinBoxRect.height());
+                return QRect(spinBoxRect.left(),
+                             spinBoxRect.top(),
+                             spinBoxRect.width() - totalButtonWidth - spacing,
+                             spinBoxRect.height());
+
+            case SC_SpinBoxFrame:
+                return spinBoxRect;
 
             default:
                 break;
