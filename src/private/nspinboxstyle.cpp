@@ -2,7 +2,9 @@
 #include <QPainterPath>
 #include <QStyleOptionSpinBox>
 
+#include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NIcon.h"
+#include "QtNativeUI/NSpinBox.h"
 #include "QtNativeUI/NTheme.h"
 
 NSpinBoxStyle::NSpinBoxStyle(const NSpinBoxStyleInterface* styleInterface, QStyle* style)
@@ -12,7 +14,8 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
                                        const QStyleOptionComplex* option,
                                        QPainter*                  painter,
                                        const QWidget*             widget) const {
-    if (control == CC_SpinBox) {
+    if (control == CC_SpinBox &&
+        (qobject_cast<const NSpinBox*>(widget) || qobject_cast<const NDoubleSpinBox*>(widget))) {
         const QStyleOptionSpinBox* spinOpt = qstyleoption_cast<const QStyleOptionSpinBox*>(option);
         if (!spinOpt) {
             QProxyStyle::drawComplexControl(control, option, painter, widget);
@@ -65,10 +68,8 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
 
         if (spinOpt->subControls & SC_SpinBoxUp) {
             bool upEnabled = isEnabled && (spinOpt->stepEnabled & QAbstractSpinBox::StepUpEnabled);
-            bool upHover   = upEnabled && (spinOpt->state & QStyle::State_MouseOver) &&
-                           upRect.contains(static_cast<const QWidget*>(widget)->mapFromGlobal(QCursor::pos()));
-            bool upPressed = upEnabled && (spinOpt->state & QStyle::State_Sunken) &&
-                             upRect.contains(static_cast<const QWidget*>(widget)->mapFromGlobal(QCursor::pos()));
+            bool upHover   = (spinOpt->activeSubControls & SC_SpinBoxUp) && (spinOpt->state & QStyle::State_MouseOver);
+            bool upPressed = upHover && (spinOpt->state & QStyle::State_Sunken);
 
             QColor upBgColor = m_styleInterface->buttonBackgroundColor(isDark, upEnabled, upHover, upPressed);
             painter->save();
@@ -82,10 +83,9 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
 
         if (spinOpt->subControls & SC_SpinBoxDown) {
             bool downEnabled = isEnabled && (spinOpt->stepEnabled & QAbstractSpinBox::StepDownEnabled);
-            bool downHover   = downEnabled && (spinOpt->state & QStyle::State_MouseOver) &&
-                             downRect.contains(static_cast<const QWidget*>(widget)->mapFromGlobal(QCursor::pos()));
-            bool downPressed = downEnabled && (spinOpt->state & QStyle::State_Sunken) &&
-                               downRect.contains(static_cast<const QWidget*>(widget)->mapFromGlobal(QCursor::pos()));
+            bool downHover =
+                (spinOpt->activeSubControls & SC_SpinBoxDown) && (spinOpt->state & QStyle::State_MouseOver);
+            bool downPressed = downHover && (spinOpt->state & QStyle::State_Sunken);
 
             QColor downBgColor = m_styleInterface->buttonBackgroundColor(isDark, downEnabled, downHover, downPressed);
 
@@ -109,7 +109,7 @@ QRect NSpinBoxStyle::subControlRect(ComplexControl             cc,
                                     const QStyleOptionComplex* opt,
                                     SubControl                 sc,
                                     const QWidget*             widget) const {
-    if (cc == CC_SpinBox) {
+    if (cc == CC_SpinBox && (qobject_cast<const NSpinBox*>(widget) || qobject_cast<const NDoubleSpinBox*>(widget))) {
         const QStyleOptionSpinBox* spinOpt = qstyleoption_cast<const QStyleOptionSpinBox*>(opt);
         if (!spinOpt) {
             return QProxyStyle::subControlRect(cc, opt, sc, widget);

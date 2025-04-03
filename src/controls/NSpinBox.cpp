@@ -2,12 +2,15 @@
 // Created by Yang1206 on 2025/4/10.
 //
 
+#include <QClipboard>
+#include <QtGui/qevent.h>
+#include <QtGui/qguiapplication.h>
 #include <QtNativeUI/NSpinBox.h>
 #include "../private/nspinbox_p.h"
 #include "QtNativeUI/NLineEdit.h"
+#include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NTheme.h"
 
-// 属性创建
 Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBackgroundColor)
 Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBackgroundColor)
 Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBackgroundHoverColor)
@@ -47,7 +50,6 @@ void NSpinBox::init() {
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
-    // 初始化颜色
     d->_pLightBackgroundColor         = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
     d->_pDarkBackgroundColor          = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
     d->_pLightBackgroundHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
@@ -66,7 +68,6 @@ void NSpinBox::init() {
     d->_pLightBottomLineColor = QColor(0x86, 0x86, 0x86);
     d->_pDarkBottomLineColor  = QColor(0x9A, 0x9A, 0x9A);
 
-    // 按钮颜色
     d->_pLightButtonBgColor       = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);
     d->_pDarkButtonBgColor        = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark);
     d->_pLightButtonHoverColor    = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light);
@@ -99,4 +100,91 @@ void NSpinBox::init() {
         d->_isDark    = nTheme->isDarkMode();
         update();
     });
+}
+
+void NSpinBox::contextMenuEvent(QContextMenuEvent* event) {
+    NMenu* menu = new NMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    QAction* action = nullptr;
+
+    if (!isReadOnly()) {
+        action = menu->addItem(tr("撤销"), NRegularIconType::ArrowUndo16Regular, QKeySequence::Undo);
+        action->setEnabled(lineEdit()->isUndoAvailable());
+        connect(action, &QAction::triggered, lineEdit(), &NLineEdit::undo);
+
+        action = menu->addItem(tr("恢复"), NRegularIconType::ArrowRedo16Regular, QKeySequence::Redo);
+        action->setEnabled(lineEdit()->isRedoAvailable());
+        connect(action, &QAction::triggered, lineEdit(), &NLineEdit::redo);
+        menu->addSeparator();
+    }
+
+#ifndef QT_NO_CLIPBOARD
+    if (!isReadOnly()) {
+        action = menu->addItem(tr("剪切"), NRegularIconType::Cut16Regular, QKeySequence::Cut);
+        action->setEnabled(!isReadOnly() && lineEdit()->hasSelectedText() &&
+                           lineEdit()->echoMode() == QLineEdit::Normal);
+        connect(action, &QAction::triggered, lineEdit(), &NLineEdit::cut);
+    }
+
+    action = menu->addItem(tr("复制"), NRegularIconType::Copy16Regular, QKeySequence::Copy);
+    action->setEnabled(lineEdit()->hasSelectedText() && lineEdit()->echoMode() == QLineEdit::Normal);
+    connect(action, &QAction::triggered, lineEdit(), &NLineEdit::copy);
+
+    if (!isReadOnly()) {
+        action = menu->addItem(tr("粘贴"), NRegularIconType::ClipboardPaste16Regular, QKeySequence::Paste);
+        action->setEnabled(!isReadOnly() && !QGuiApplication::clipboard()->text().isEmpty());
+        connect(action, &QAction::triggered, lineEdit(), &NLineEdit::paste);
+    }
+#endif
+
+    if (!isReadOnly()) {
+        action = menu->addItem(tr("删除"), NRegularIconType::Delete16Regular);
+        action->setEnabled(!isReadOnly() && !lineEdit()->text().isEmpty() && lineEdit()->hasSelectedText());
+        connect(action, &QAction::triggered, this, [this]() {
+            if (lineEdit()->hasSelectedText()) {
+                int     startIndex = lineEdit()->selectionStart();
+                int     endIndex   = startIndex + lineEdit()->selectedText().length();
+                QString text       = lineEdit()->text();
+                text.remove(startIndex, endIndex - startIndex);
+                lineEdit()->setText(text);
+            }
+        });
+    }
+
+    if (!menu->isEmpty()) {
+        menu->addSeparator();
+    }
+
+    action = menu->addItem(tr("增加"), NRegularIconType::ChevronUp20Regular);
+    action->setEnabled(isEnabled() && value() < maximum());
+    connect(action, &QAction::triggered, this, &NSpinBox::stepUp);
+
+    action = menu->addItem(tr("减少"), NRegularIconType::ChevronDown20Regular);
+    action->setEnabled(isEnabled() && value() > minimum());
+    connect(action, &QAction::triggered, this, &NSpinBox::stepDown);
+
+    if (singleStep() != 1) {
+        menu->addSeparator();
+
+        QString  stepInfo       = tr("步长: %1").arg(singleStep());
+        QAction* stepInfoAction = menu->addAction(stepInfo);
+        stepInfoAction->setEnabled(false);
+    }
+
+    menu->addSeparator();
+
+    action = menu->addAction(tr("全选"));
+    action->setShortcut(QKeySequence::SelectAll);
+    action->setEnabled(!lineEdit()->text().isEmpty() && !(lineEdit()->selectedText() == lineEdit()->text()));
+    connect(action, &QAction::triggered, lineEdit(), &QLineEdit::selectAll);
+
+    connect(menu, &QMenu::aboutToHide, this, [this]() {
+        update();
+        QMetaObject::invokeMethod(this, [this]() {
+            setFocus();
+            clearFocus();
+        }, Qt::QueuedConnection);
+    });
+
+    menu->popup(event->globalPos());
 }
