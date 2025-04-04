@@ -10,6 +10,19 @@
 NSpinBoxStyle::NSpinBoxStyle(const NSpinBoxStyleInterface* styleInterface, QStyle* style)
     : QProxyStyle(style), m_styleInterface(styleInterface) {}
 
+void NSpinBoxStyle::drawPrimitive(PrimitiveElement    element,
+                                  const QStyleOption* option,
+                                  QPainter*           painter,
+                                  const QWidget*      widget) const {
+    // 完全阻止绘制焦点框
+    if (element == PE_FrameFocusRect &&
+        (qobject_cast<const NSpinBox*>(widget) || qobject_cast<const NDoubleSpinBox*>(widget))) {
+        return; // 不绘制任何内容
+    }
+
+    QProxyStyle::drawPrimitive(element, option, painter, widget);
+}
+
 void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
                                        const QStyleOptionComplex* option,
                                        QPainter*                  painter,

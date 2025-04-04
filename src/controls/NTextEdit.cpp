@@ -150,5 +150,5 @@ void NTextEdit::contextMenuEvent(QContextMenuEvent* event) {
     action->setEnabled(hasText && !isAllSelected);
     connect(action, &QAction::triggered, this, &NTextEdit::selectAll);
 
-    menu->popup(event->globalPos());
+    menu->exec(event->globalPos());
 }

@@ -90,7 +90,7 @@ void NSpinBox::init() {
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
     setFocusPolicy(Qt::StrongFocus);
-
+    setAttribute(Qt::WA_MacShowFocusRect, false);
     setButtonSymbols(QAbstractSpinBox::UpDownArrows);
 
     setMinimumHeight(35);

@@ -28,6 +28,11 @@ class NSpinBoxStyle : public QProxyStyle {
     NSpinBoxStyle(const NSpinBoxStyleInterface* styleInterface, QStyle* style = nullptr);
     ~NSpinBoxStyle() {}
 
+    void drawPrimitive(PrimitiveElement    element,
+                       const QStyleOption* option,
+                       QPainter*           painter,
+                       const QWidget*      widget = nullptr) const override;
+
     void drawComplexControl(ComplexControl             control,
                             const QStyleOptionComplex* option,
                             QPainter*                  painter,
@@ -46,10 +51,6 @@ class NSpinBoxStyle : public QProxyStyle {
     int pixelMetric(PixelMetric         metric,
                     const QStyleOption* option = nullptr,
                     const QWidget*      widget = nullptr) const override;
-
-    void resetSubControlState() {
-        // 这里不需要实际实现什么，只是提供一个方法让样式刷新
-    }
 
   private:
     const NSpinBoxStyleInterface* m_styleInterface;

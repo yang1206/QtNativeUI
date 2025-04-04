@@ -77,7 +77,6 @@ void NDoubleSpinBox::init() {
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
 
-    // 设置小数精度和显示格式
     setDecimals(2);
 
     // 设置样式
@@ -92,6 +91,7 @@ void NDoubleSpinBox::init() {
     setFocusPolicy(Qt::StrongFocus);
 
     setButtonSymbols(QAbstractSpinBox::UpDownArrows);
+    setAttribute(Qt::WA_MacShowFocusRect, false);
 
     setMinimumHeight(35);
 
