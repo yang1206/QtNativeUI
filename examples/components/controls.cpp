@@ -12,6 +12,7 @@
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
 
+#include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 
 ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -41,6 +42,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("TextEdit", createTextEdits()));
     contentLayout->addWidget(new ExampleSection("PlainTextEdit", createPlainTextEdits()));
     contentLayout->addWidget(new ExampleSection("SpinBox", createSpinBoxes()));
+    contentLayout->addWidget(new ExampleSection("DoubleSpinBox", createDoubleSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("Slider", createSliders()));
 
     contentLayout->addStretch();
@@ -149,7 +151,9 @@ QWidget* ControlsExample::createLineEdits() {
     // 带后缀的输入框
     NLineEdit* suffixLineEdit = new NLineEdit(container);
     suffixLineEdit->setPlaceholderText("带后缀图标的输入框");
-    suffixLineEdit->addAction(NFilledIconType::Search16Filled, NLineEdit::ActionPosition::TrailingPosition);
+    auto searchAction =
+        suffixLineEdit->addAction(NFilledIconType::Search16Filled, NLineEdit::ActionPosition::TrailingPosition);
+    connect(searchAction, &QAction::triggered, this, [=]() { qDebug() << "搜索"; });
     suffixLineEdit->setMinimumWidth(200);
     layout->addWidget(suffixLineEdit);
 
@@ -208,19 +212,17 @@ QWidget* ControlsExample::createPlainTextEdits() {
 // 添加 createSpinBoxes 函数实现
 QWidget* ControlsExample::createSpinBoxes() {
     QWidget*     container = new QWidget;
-    QVBoxLayout* layout    = new QVBoxLayout(container);
+    QHBoxLayout* layout    = new QHBoxLayout(container);
     layout->setSpacing(16);
 
     // 基本数字输入框
     NSpinBox* normalSpinBox = new NSpinBox(container);
-    normalSpinBox->setMinimumWidth(200);
     layout->addWidget(normalSpinBox);
 
     // 设置范围的数字输入框
     NSpinBox* rangeSpinBox = new NSpinBox(container);
     rangeSpinBox->setRange(0, 100);
     rangeSpinBox->setValue(50);
-    rangeSpinBox->setMinimumWidth(200);
     layout->addWidget(rangeSpinBox);
 
     // 设置步长的数字输入框
@@ -228,7 +230,6 @@ QWidget* ControlsExample::createSpinBoxes() {
     stepSpinBox->setRange(0, 100);
     stepSpinBox->setSingleStep(5);
     stepSpinBox->setValue(25);
-    stepSpinBox->setMinimumWidth(200);
     layout->addWidget(stepSpinBox);
 
     // 前缀后缀的数字输入框
@@ -237,15 +238,53 @@ QWidget* ControlsExample::createSpinBoxes() {
     prefixSuffixSpinBox->setSuffix(".00");
     prefixSuffixSpinBox->setRange(0, 1000);
     prefixSuffixSpinBox->setValue(100);
-    prefixSuffixSpinBox->setMinimumWidth(200);
     layout->addWidget(prefixSuffixSpinBox);
 
     // 禁用状态的数字输入框
     NSpinBox* disabledSpinBox = new NSpinBox(container);
     disabledSpinBox->setValue(50);
     disabledSpinBox->setEnabled(false);
-    disabledSpinBox->setMinimumWidth(200);
     layout->addWidget(disabledSpinBox);
+
+    return container;
+}
+
+// 添加 createDoubleSpinBoxes 函数实现
+QWidget* ControlsExample::createDoubleSpinBoxes() {
+    QWidget*     container = new QWidget;
+    QHBoxLayout* layout    = new QHBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本数字输入框
+    NDoubleSpinBox* normalDoubleSpinBox = new NDoubleSpinBox(container);
+    layout->addWidget(normalDoubleSpinBox);
+
+    // 设置范围的数字输入框
+    NDoubleSpinBox* rangeDoubleSpinBox = new NDoubleSpinBox(container);
+    rangeDoubleSpinBox->setRange(0, 100);
+    rangeDoubleSpinBox->setValue(50);
+    layout->addWidget(rangeDoubleSpinBox);
+
+    // 设置步长的数字输入框
+    NDoubleSpinBox* stepDoubleSpinBox = new NDoubleSpinBox(container);
+    stepDoubleSpinBox->setRange(0, 100);
+    stepDoubleSpinBox->setSingleStep(5);
+    stepDoubleSpinBox->setValue(25);
+    layout->addWidget(stepDoubleSpinBox);
+
+    // 前缀后缀的数字输入框
+    NDoubleSpinBox* prefixSuffixDoubleSpinBox = new NDoubleSpinBox(container);
+    prefixSuffixDoubleSpinBox->setPrefix("$");
+    prefixSuffixDoubleSpinBox->setSuffix(".00");
+    prefixSuffixDoubleSpinBox->setRange(0, 1000);
+    prefixSuffixDoubleSpinBox->setValue(100);
+    layout->addWidget(prefixSuffixDoubleSpinBox);
+
+    // 禁用状态的数字输入框
+    NDoubleSpinBox* disabledDoubleSpinBox = new NDoubleSpinBox(container);
+    disabledDoubleSpinBox->setValue(50);
+    disabledDoubleSpinBox->setEnabled(false);
+    layout->addWidget(disabledDoubleSpinBox);
 
     return container;
 }

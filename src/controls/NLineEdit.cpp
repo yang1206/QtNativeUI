@@ -172,5 +172,5 @@ void NLineEdit::contextMenuEvent(QContextMenuEvent* event) {
     action->setShortcut(QKeySequence::SelectAll);
     action->setEnabled(!text().isEmpty() && !(selectedText() == text()));
     connect(action, &QAction::triggered, this, &NLineEdit::selectAll);
-    menu->popup(event->globalPos());
+    menu->exec(event->globalPos());
 }

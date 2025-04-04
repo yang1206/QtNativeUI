@@ -1,56 +1,53 @@
-//
-// Created by Yang1206 on 2025/4/10.
-//
-
 #include <QClipboard>
-#include <QStyleOptionSpinBox>
 #include <QtGui/qevent.h>
 #include <QtGui/qguiapplication.h>
-#include <QtNativeUI/NSpinBox.h>
-#include "../private/nspinbox_p.h"
+#include <QtNativeUI/NDoubleSpinBox.h>
+#include "../private/ndoublespinbox_p.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NTheme.h"
 
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBackgroundHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBackgroundHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBackgroundFocusColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBackgroundFocusColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBackgroundDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBackgroundDisabledColor)
+// 属性创建
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBackgroundColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBackgroundColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBackgroundHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBackgroundHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBackgroundFocusColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBackgroundFocusColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBackgroundDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBackgroundDisabledColor)
 
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBorderColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBorderColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBorderDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBorderDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBorderColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBorderColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBorderDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBorderDisabledColor)
 
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBottomLineColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBottomLineColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBottomLineColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBottomLineColor)
 
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightButtonBgColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkButtonBgColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightButtonHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkButtonHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightButtonPressColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkButtonPressColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightButtonDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkButtonDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightButtonBgColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkButtonBgColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightButtonHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkButtonHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightButtonPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkButtonPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightButtonDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkButtonDisabledColor)
 
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, int, BorderRadius)
-Q_PROPERTY_CREATE_Q_CPP(NSpinBox, int, BorderWidth)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, int, BorderRadius)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, int, BorderWidth)
 
-NSpinBox::NSpinBox(QWidget* parent) : QSpinBox(parent), d_ptr(new NSpinBoxPrivate()) { init(); }
+NDoubleSpinBox::NDoubleSpinBox(QWidget* parent) : QDoubleSpinBox(parent), d_ptr(new NDoubleSpinBoxPrivate()) { init(); }
 
-NSpinBox::~NSpinBox() {}
+NDoubleSpinBox::~NDoubleSpinBox() {}
 
-void NSpinBox::init() {
-    Q_D(NSpinBox);
+void NDoubleSpinBox::init() {
+    Q_D(NDoubleSpinBox);
     d->q_ptr      = this;
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
+    // 初始化颜色
     d->_pLightBackgroundColor         = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
     d->_pDarkBackgroundColor          = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
     d->_pLightBackgroundHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
@@ -64,11 +61,10 @@ void NSpinBox::init() {
     d->_pLightBorderDisabledColor     = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_pDarkBorderDisabledColor      = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
 
-    d->_pLightBottomLineColor = nTheme->accentColor().normal();
-    d->_pDarkBottomLineColor  = nTheme->accentColor().normal();
     d->_pLightBottomLineColor = QColor(0x86, 0x86, 0x86);
     d->_pDarkBottomLineColor  = QColor(0x9A, 0x9A, 0x9A);
 
+    // 按钮颜色
     d->_pLightButtonBgColor       = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);
     d->_pDarkButtonBgColor        = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark);
     d->_pLightButtonHoverColor    = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light);
@@ -81,29 +77,33 @@ void NSpinBox::init() {
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
 
+    setDecimals(2);
+
+    // 设置样式
     d->_spinBoxStyle = new NSpinBoxStyle(d, style());
     setStyle(d->_spinBoxStyle);
-    setObjectName("NSpinBox");
+    setObjectName("NDoubleSpinBox");
     lineEdit()->setStyleSheet("border: none; background-color:transparent;");
     lineEdit()->setAlignment(Qt::AlignCenter);
 
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
     setFocusPolicy(Qt::StrongFocus);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
+
     setButtonSymbols(QAbstractSpinBox::UpDownArrows);
+    setAttribute(Qt::WA_MacShowFocusRect, false);
 
     setMinimumHeight(35);
 
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
-        Q_D(NSpinBox);
+        Q_D(NDoubleSpinBox);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
         update();
     });
 }
 
-void NSpinBox::contextMenuEvent(QContextMenuEvent* event) {
+void NDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) {
     NMenu* menu = new NMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     QAction* action = nullptr;
@@ -156,21 +156,25 @@ void NSpinBox::contextMenuEvent(QContextMenuEvent* event) {
         menu->addSeparator();
     }
 
+    // 数值操作菜单项
     action = menu->addItem(tr("增加"), NRegularIconType::ChevronUp20Regular);
     action->setEnabled(isEnabled() && value() < maximum());
-    connect(action, &QAction::triggered, this, &NSpinBox::stepUp);
+    connect(action, &QAction::triggered, this, &NDoubleSpinBox::stepUp);
 
     action = menu->addItem(tr("减少"), NRegularIconType::ChevronDown20Regular);
     action->setEnabled(isEnabled() && value() > minimum());
-    connect(action, &QAction::triggered, this, &NSpinBox::stepDown);
+    connect(action, &QAction::triggered, this, &NDoubleSpinBox::stepDown);
 
-    if (singleStep() != 1) {
-        menu->addSeparator();
+    // 小数步长信息
+    menu->addSeparator();
+    QString  stepInfo       = tr("步长: %1").arg(QString::number(singleStep(), 'f', decimals()));
+    QAction* stepInfoAction = menu->addAction(stepInfo);
+    stepInfoAction->setEnabled(false);
 
-        QString  stepInfo       = tr("步长: %1").arg(singleStep());
-        QAction* stepInfoAction = menu->addAction(stepInfo);
-        stepInfoAction->setEnabled(false);
-    }
+    // 小数位数信息
+    QString  decimalInfo       = tr("小数位数: %1").arg(decimals());
+    QAction* decimalInfoAction = menu->addAction(decimalInfo);
+    decimalInfoAction->setEnabled(false);
 
     menu->addSeparator();
 

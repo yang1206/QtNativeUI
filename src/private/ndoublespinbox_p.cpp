@@ -1,16 +1,16 @@
 //
-// Created by Yang1206 on 2025/4/2.
+// Created by Yang1206 on 2025/4/20.
 //
 
-#include "nspinbox_p.h"
-#include "QtNativeUI/NSpinBox.h"
+#include "ndoublespinbox_p.h"
+#include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NTheme.h"
 
-NSpinBoxPrivate::NSpinBoxPrivate(QObject* parent) : QObject(parent) {}
+NDoubleSpinBoxPrivate::NDoubleSpinBoxPrivate(QObject* parent) : QObject(parent) {}
 
-NSpinBoxPrivate::~NSpinBoxPrivate() {}
+NDoubleSpinBoxPrivate::~NDoubleSpinBoxPrivate() {}
 
-QColor NSpinBoxPrivate::backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const {
+QColor NDoubleSpinBoxPrivate::backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const {
     if (!isEnabled) {
         return isDark ? _pDarkBackgroundDisabledColor : _pLightBackgroundDisabledColor;
     } else if (hasFocus) {
@@ -22,7 +22,7 @@ QColor NSpinBoxPrivate::backgroundColorForState(bool isDark, bool isEnabled, boo
     }
 }
 
-QColor NSpinBoxPrivate::borderColorForState(bool isDark, bool isEnabled) const {
+QColor NDoubleSpinBoxPrivate::borderColorForState(bool isDark, bool isEnabled) const {
     if (!isEnabled) {
         return isDark ? _pDarkBorderDisabledColor : _pLightBorderDisabledColor;
     } else {
@@ -30,7 +30,7 @@ QColor NSpinBoxPrivate::borderColorForState(bool isDark, bool isEnabled) const {
     }
 }
 
-QColor NSpinBoxPrivate::bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const {
+QColor NDoubleSpinBoxPrivate::bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const {
     if (hasFocus && isEnabled) {
         return nTheme->accentColor().normal();
     } else {
@@ -38,7 +38,7 @@ QColor NSpinBoxPrivate::bottomLineColorForState(bool isDark, bool isEnabled, boo
     }
 }
 
-QColor NSpinBoxPrivate::buttonBackgroundColor(bool isDark, bool isEnabled, bool isHovered, bool isPressed) const {
+QColor NDoubleSpinBoxPrivate::buttonBackgroundColor(bool isDark, bool isEnabled, bool isHovered, bool isPressed) const {
     if (!isEnabled) {
         return isDark ? _pDarkButtonDisabledColor : _pLightButtonDisabledColor;
     } else if (isPressed) {
@@ -50,12 +50,12 @@ QColor NSpinBoxPrivate::buttonBackgroundColor(bool isDark, bool isEnabled, bool 
     }
 }
 
-int NSpinBoxPrivate::borderRadius() const { return _pBorderRadius; }
+int NDoubleSpinBoxPrivate::borderRadius() const { return _pBorderRadius; }
 
-int NSpinBoxPrivate::borderWidth() const { return _pBorderWidth; }
+int NDoubleSpinBoxPrivate::borderWidth() const { return _pBorderWidth; }
 
-int NSpinBoxPrivate::bottomLineWidth(bool hasFocus) const { return hasFocus ? 2 : 1; }
+int NDoubleSpinBoxPrivate::bottomLineWidth(bool hasFocus) const { return hasFocus ? 2 : 1; }
 
-bool NSpinBoxPrivate::isDarkMode() const { return _isDark; }
+bool NDoubleSpinBoxPrivate::isDarkMode() const { return _isDark; }
 
-int NSpinBoxPrivate::shadowBorderWidth() const { return _shadowBorderWidth; }
+int NDoubleSpinBoxPrivate::shadowBorderWidth() const { return _shadowBorderWidth; } 

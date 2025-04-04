@@ -1,13 +1,13 @@
 //
-// Created by Yang1206 on 2025/4/10.
+// Created by Yang1206 on 2025/4/20.
 //
 
-#ifndef NSPINBOX_P_H
-#define NSPINBOX_P_H
-#include <QtNativeUI/NSpinBox.h>
+#ifndef NDOUBLESPINBOX_P_H
+#define NDOUBLESPINBOX_P_H
+#include <QtNativeUI/NDoubleSpinBox.h>
 #include "nspinboxstyle.h"
 
-class NSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
+class NDoubleSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     Q_OBJECT
     // 背景颜色属性
     Q_PROPERTY_CREATE_D(QColor, LightBackgroundColor)
@@ -43,26 +43,27 @@ class NSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
 
-  public:
-    explicit NSpinBoxPrivate(QObject* parent = nullptr);
-    ~NSpinBoxPrivate();
-    Q_D_CREATE(NSpinBox)
+public:
+    explicit NDoubleSpinBoxPrivate(QObject* parent = nullptr);
+    ~NDoubleSpinBoxPrivate();
+    Q_D_CREATE(NDoubleSpinBox)
 
     NThemeType::ThemeMode _themeMode;
-    bool                  _isDark{false};
-    int                   _shadowBorderWidth{3};
+    bool _isDark{false};
+    int _shadowBorderWidth{3};
 
     NSpinBoxStyle* _spinBoxStyle{nullptr};
 
+    // 实现NSpinBoxStyleInterface
     QColor backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const override;
     QColor borderColorForState(bool isDark, bool isEnabled) const override;
     QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const override;
     QColor buttonBackgroundColor(bool isDark, bool isEnabled, bool isHovered, bool isPressed) const override;
-    int    borderRadius() const override;
-    int    borderWidth() const override;
-    int    bottomLineWidth(bool hasFocus) const override;
-    bool   isDarkMode() const override;
-    int    shadowBorderWidth() const override;
+    int borderRadius() const override;
+    int borderWidth() const override;
+    int bottomLineWidth(bool hasFocus) const override;
+    bool isDarkMode() const override;
+    int shadowBorderWidth() const override;
 };
 
-#endif // NSPINBOX_P_H
+#endif // NDOUBLESPINBOX_P_H 

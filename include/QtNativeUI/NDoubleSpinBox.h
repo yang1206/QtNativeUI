@@ -1,17 +1,18 @@
 //
-// Created by Yang1206 on 2025/4/10.
+// Created by Yang1206 on 2025/4/20.
 //
 
-#ifndef NSPINBOX_H
-#define NSPINBOX_H
+#ifndef NDOUBLESPINBOX_H
+#define NDOUBLESPINBOX_H
 
-#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include "stdafx.h"
 
-class NSpinBoxPrivate;
-class QTNATIVEUI_EXPORT NSpinBox : public QSpinBox {
+class NDoubleSpinBoxPrivate;
+class QTNATIVEUI_EXPORT NDoubleSpinBox : public QDoubleSpinBox {
     Q_OBJECT
-    Q_Q_CREATE(NSpinBox)
+    Q_Q_CREATE(NDoubleSpinBox)
+    // 背景颜色属性
     Q_PROPERTY_CREATE_Q_H(QColor, LightBackgroundColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBackgroundHoverColor)
@@ -20,12 +21,18 @@ class QTNATIVEUI_EXPORT NSpinBox : public QSpinBox {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundFocusColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBackgroundDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundDisabledColor)
+    
+    // 边框颜色属性
     Q_PROPERTY_CREATE_Q_H(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBorderDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderDisabledColor)
+    
+    // 底边线颜色
     Q_PROPERTY_CREATE_Q_H(QColor, LightBottomLineColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBottomLineColor)
+    
+    // 按钮颜色属性
     Q_PROPERTY_CREATE_Q_H(QColor, LightButtonBgColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkButtonBgColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightButtonHoverColor)
@@ -34,18 +41,20 @@ class QTNATIVEUI_EXPORT NSpinBox : public QSpinBox {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkButtonPressColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightButtonDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkButtonDisabledColor)
+    
+    // 边框属性
     Q_PROPERTY_CREATE_Q_H(int, BorderRadius)
     Q_PROPERTY_CREATE_Q_H(int, BorderWidth)
 
-  public:
-    explicit NSpinBox(QWidget* parent = nullptr);
-    ~NSpinBox();
+public:
+    explicit NDoubleSpinBox(QWidget* parent = nullptr);
+    ~NDoubleSpinBox();
 
-  protected:
+protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
 
-  private:
+private:
     void init();
 };
 
-#endif // NSPINBOX_H
+#endif // NDOUBLESPINBOX_H 
