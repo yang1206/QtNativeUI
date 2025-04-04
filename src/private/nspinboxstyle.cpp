@@ -66,7 +66,7 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
 
         painter->restore();
 
-        if (spinOpt->subControls & SC_SpinBoxUp) {
+        if ((spinOpt->subControls & SC_SpinBoxUp) || (spinOpt->subControls & SC_ScrollBarAddLine)) {
             bool upEnabled = isEnabled && (spinOpt->stepEnabled & QAbstractSpinBox::StepUpEnabled);
             bool upHover   = (spinOpt->activeSubControls & SC_SpinBoxUp) && (spinOpt->state & QStyle::State_MouseOver);
             bool upPressed = upHover && (spinOpt->state & QStyle::State_Sunken);
@@ -81,7 +81,7 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
             painter->restore();
         }
 
-        if (spinOpt->subControls & SC_SpinBoxDown) {
+        if ((spinOpt->subControls & SC_SpinBoxDown) || (spinOpt->subControls & SC_ScrollBarSubLine)) {
             bool downEnabled = isEnabled && (spinOpt->stepEnabled & QAbstractSpinBox::StepDownEnabled);
             bool downHover =
                 (spinOpt->activeSubControls & SC_SpinBoxDown) && (spinOpt->state & QStyle::State_MouseOver);
@@ -122,30 +122,24 @@ QRect NSpinBoxStyle::subControlRect(ComplexControl             cc,
         int   spacing          = 8;
         int   totalButtonWidth = 2 * buttonWidth + spacing;
 
-        switch (sc) {
-            case SC_SpinBoxUp:
-                return QRect(spinBoxRect.right() - buttonWidth - margin * 2,
-                             spinBoxRect.top() + (spinBoxRect.height() - buttonHeight) / 2,
-                             buttonWidth,
-                             buttonHeight);
-
-            case SC_SpinBoxDown:
-                return QRect(spinBoxRect.right() - 2 * buttonWidth - spacing - margin,
-                             spinBoxRect.top() + (spinBoxRect.height() - buttonHeight) / 2,
-                             buttonWidth,
-                             buttonHeight);
-
-            case SC_SpinBoxEditField:
-                return QRect(spinBoxRect.left(),
-                             spinBoxRect.top(),
-                             spinBoxRect.width() - totalButtonWidth - spacing,
-                             spinBoxRect.height());
-
-            case SC_SpinBoxFrame:
-                return spinBoxRect;
-
-            default:
-                break;
+        // 使用滚动条控件ID代替微调框控件ID
+        if (sc == SC_SpinBoxUp || sc == SC_ScrollBarAddLine) {
+            return QRect(spinBoxRect.right() - buttonWidth - margin * 2,
+                         spinBoxRect.top() + (spinBoxRect.height() - buttonHeight) / 2,
+                         buttonWidth,
+                         buttonHeight);
+        } else if (sc == SC_SpinBoxDown || sc == SC_ScrollBarSubLine) {
+            return QRect(spinBoxRect.right() - 2 * buttonWidth - spacing - margin,
+                         spinBoxRect.top() + (spinBoxRect.height() - buttonHeight) / 2,
+                         buttonWidth,
+                         buttonHeight);
+        } else if (sc == SC_SpinBoxEditField) {
+            return QRect(spinBoxRect.left(),
+                         spinBoxRect.top(),
+                         spinBoxRect.width() - totalButtonWidth - spacing,
+                         spinBoxRect.height());
+        } else if (sc == SC_SpinBoxFrame) {
+            return spinBoxRect;
         }
     }
 
@@ -159,4 +153,30 @@ int NSpinBoxStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, c
     }
 
     return QProxyStyle::pixelMetric(metric, option, widget);
+}
+
+QStyle::SubControl NSpinBoxStyle::hitTestComplexControl(ComplexControl             control,
+                                                        const QStyleOptionComplex* option,
+                                                        const QPoint&              pos,
+                                                        const QWidget*             widget) const {
+    if (control == CC_SpinBox &&
+        (qobject_cast<const NSpinBox*>(widget) || qobject_cast<const NDoubleSpinBox*>(widget))) {
+        // 获取按钮区域
+        QRect upRect   = subControlRect(control, option, SC_SpinBoxUp, widget);
+        QRect downRect = subControlRect(control, option, SC_SpinBoxDown, widget);
+        QRect editRect = subControlRect(control, option, SC_SpinBoxEditField, widget);
+
+        // 首先检查是否在自定义按钮区域内
+        if (upRect.contains(pos)) {
+            return SC_SpinBoxUp;
+        } else if (downRect.contains(pos)) {
+            return SC_SpinBoxDown;
+        } else if (editRect.contains(pos)) {
+            return SC_SpinBoxEditField;
+        } else {
+            return SC_SpinBoxFrame;
+        }
+    }
+
+    return QProxyStyle::hitTestComplexControl(control, option, pos, widget);
 }

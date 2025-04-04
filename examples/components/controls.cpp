@@ -151,7 +151,9 @@ QWidget* ControlsExample::createLineEdits() {
     // 带后缀的输入框
     NLineEdit* suffixLineEdit = new NLineEdit(container);
     suffixLineEdit->setPlaceholderText("带后缀图标的输入框");
-    suffixLineEdit->addAction(NFilledIconType::Search16Filled, NLineEdit::ActionPosition::TrailingPosition);
+    auto searchAction =
+        suffixLineEdit->addAction(NFilledIconType::Search16Filled, NLineEdit::ActionPosition::TrailingPosition);
+    connect(searchAction, &QAction::triggered, this, [=]() { qDebug() << "搜索"; });
     suffixLineEdit->setMinimumWidth(200);
     layout->addWidget(suffixLineEdit);
 

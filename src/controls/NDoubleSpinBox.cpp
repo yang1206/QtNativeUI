@@ -37,51 +37,49 @@ Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkButtonDisabledColor)
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, int, BorderWidth)
 
-NDoubleSpinBox::NDoubleSpinBox(QWidget* parent) : QDoubleSpinBox(parent), d_ptr(new NDoubleSpinBoxPrivate()) { 
-    init(); 
-}
+NDoubleSpinBox::NDoubleSpinBox(QWidget* parent) : QDoubleSpinBox(parent), d_ptr(new NDoubleSpinBoxPrivate()) { init(); }
 
 NDoubleSpinBox::~NDoubleSpinBox() {}
 
 void NDoubleSpinBox::init() {
     Q_D(NDoubleSpinBox);
-    d->q_ptr = this;
+    d->q_ptr      = this;
     d->_themeMode = nTheme->themeMode();
-    d->_isDark = nTheme->isDarkMode();
+    d->_isDark    = nTheme->isDarkMode();
 
     // 初始化颜色
-    d->_pLightBackgroundColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkBackgroundColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
-    d->_pLightBackgroundHoverColor = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
-    d->_pDarkBackgroundHoverColor = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
-    d->_pLightBackgroundFocusColor = NThemeColor(NFluentColorKey::ControlFillColorInputActive, NThemeType::Light);
-    d->_pDarkBackgroundFocusColor = NThemeColor(NFluentColorKey::ControlFillColorInputActive, NThemeType::Dark);
+    d->_pLightBackgroundColor         = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
+    d->_pDarkBackgroundColor          = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
+    d->_pLightBackgroundHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
+    d->_pDarkBackgroundHoverColor     = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
+    d->_pLightBackgroundFocusColor    = NThemeColor(NFluentColorKey::ControlFillColorInputActive, NThemeType::Light);
+    d->_pDarkBackgroundFocusColor     = NThemeColor(NFluentColorKey::ControlFillColorInputActive, NThemeType::Dark);
     d->_pLightBackgroundDisabledColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, NThemeType::Light);
-    d->_pDarkBackgroundDisabledColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, NThemeType::Dark);
-    d->_pLightBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
-    d->_pDarkBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
-    d->_pLightBorderDisabledColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
-    d->_pDarkBorderDisabledColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
+    d->_pDarkBackgroundDisabledColor  = NThemeColor(NFluentColorKey::ControlFillColorDisabled, NThemeType::Dark);
+    d->_pLightBorderColor             = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
+    d->_pDarkBorderColor              = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
+    d->_pLightBorderDisabledColor     = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
+    d->_pDarkBorderDisabledColor      = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
 
     d->_pLightBottomLineColor = QColor(0x86, 0x86, 0x86);
-    d->_pDarkBottomLineColor = QColor(0x9A, 0x9A, 0x9A);
+    d->_pDarkBottomLineColor  = QColor(0x9A, 0x9A, 0x9A);
 
     // 按钮颜色
-    d->_pLightButtonBgColor = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);
-    d->_pDarkButtonBgColor = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark);
-    d->_pLightButtonHoverColor = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light);
-    d->_pDarkButtonHoverColor = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Dark);
-    d->_pLightButtonPressColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);
-    d->_pDarkButtonPressColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark);
+    d->_pLightButtonBgColor       = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);
+    d->_pDarkButtonBgColor        = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark);
+    d->_pLightButtonHoverColor    = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light);
+    d->_pDarkButtonHoverColor     = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Dark);
+    d->_pLightButtonPressColor    = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);
+    d->_pDarkButtonPressColor     = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark);
     d->_pLightButtonDisabledColor = NThemeColor(NFluentColorKey::SubtleFillColorDisabled, NThemeType::Light);
-    d->_pDarkButtonDisabledColor = NThemeColor(NFluentColorKey::SubtleFillColorDisabled, NThemeType::Dark);
+    d->_pDarkButtonDisabledColor  = NThemeColor(NFluentColorKey::SubtleFillColorDisabled, NThemeType::Dark);
 
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
-    d->_pBorderWidth = 1;
+    d->_pBorderWidth  = 1;
 
     // 设置小数精度和显示格式
     setDecimals(2);
-    
+
     // 设置样式
     d->_spinBoxStyle = new NSpinBoxStyle(d, style());
     setStyle(d->_spinBoxStyle);
@@ -97,11 +95,10 @@ void NDoubleSpinBox::init() {
 
     setMinimumHeight(35);
 
-    // 主题变化时更新
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NDoubleSpinBox);
         d->_themeMode = themeMode;
-        d->_isDark = nTheme->isDarkMode();
+        d->_isDark    = nTheme->isDarkMode();
         update();
     });
 }
@@ -146,9 +143,9 @@ void NDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) {
         action->setEnabled(!isReadOnly() && !lineEdit()->text().isEmpty() && lineEdit()->hasSelectedText());
         connect(action, &QAction::triggered, this, [this]() {
             if (lineEdit()->hasSelectedText()) {
-                int startIndex = lineEdit()->selectionStart();
-                int endIndex = startIndex + lineEdit()->selectedText().length();
-                QString text = lineEdit()->text();
+                int     startIndex = lineEdit()->selectionStart();
+                int     endIndex   = startIndex + lineEdit()->selectedText().length();
+                QString text       = lineEdit()->text();
                 text.remove(startIndex, endIndex - startIndex);
                 lineEdit()->setText(text);
             }
@@ -170,12 +167,12 @@ void NDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) {
 
     // 小数步长信息
     menu->addSeparator();
-    QString stepInfo = tr("步长: %1").arg(QString::number(singleStep(), 'f', decimals()));
+    QString  stepInfo       = tr("步长: %1").arg(QString::number(singleStep(), 'f', decimals()));
     QAction* stepInfoAction = menu->addAction(stepInfo);
     stepInfoAction->setEnabled(false);
 
     // 小数位数信息
-    QString decimalInfo = tr("小数位数: %1").arg(decimals());
+    QString  decimalInfo       = tr("小数位数: %1").arg(decimals());
     QAction* decimalInfoAction = menu->addAction(decimalInfo);
     decimalInfoAction->setEnabled(false);
 
@@ -186,14 +183,7 @@ void NDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) {
     action->setEnabled(!lineEdit()->text().isEmpty() && !(lineEdit()->selectedText() == lineEdit()->text()));
     connect(action, &QAction::triggered, lineEdit(), &QLineEdit::selectAll);
 
-    // 解决菜单关闭后按钮无法点击的问题
-    connect(menu, &QMenu::aboutToHide, this, [this]() {
-        update();
-        QMetaObject::invokeMethod(this, [this]() {
-            setFocus();
-            clearFocus();
-        }, Qt::QueuedConnection);
-    });
-
-    menu->popup(event->globalPos());
-} 
+    menu->exec(event->globalPos());
+    delete menu;
+    event->accept();
+}

@@ -38,9 +38,18 @@ class NSpinBoxStyle : public QProxyStyle {
                          SubControl                 sc,
                          const QWidget*             widget = nullptr) const override;
 
+    SubControl hitTestComplexControl(ComplexControl             control,
+                                     const QStyleOptionComplex* option,
+                                     const QPoint&              pos,
+                                     const QWidget*             widget) const override;
+
     int pixelMetric(PixelMetric         metric,
                     const QStyleOption* option = nullptr,
                     const QWidget*      widget = nullptr) const override;
+
+    void resetSubControlState() {
+        // 这里不需要实际实现什么，只是提供一个方法让样式刷新
+    }
 
   private:
     const NSpinBoxStyleInterface* m_styleInterface;

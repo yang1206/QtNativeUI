@@ -3,6 +3,7 @@
 //
 
 #include <QClipboard>
+#include <QStyleOptionSpinBox>
 #include <QtGui/qevent.h>
 #include <QtGui/qguiapplication.h>
 #include <QtNativeUI/NSpinBox.h>
@@ -178,13 +179,7 @@ void NSpinBox::contextMenuEvent(QContextMenuEvent* event) {
     action->setEnabled(!lineEdit()->text().isEmpty() && !(lineEdit()->selectedText() == lineEdit()->text()));
     connect(action, &QAction::triggered, lineEdit(), &QLineEdit::selectAll);
 
-    connect(menu, &QMenu::aboutToHide, this, [this]() {
-        update();
-        QMetaObject::invokeMethod(this, [this]() {
-            setFocus();
-            clearFocus();
-        }, Qt::QueuedConnection);
-    });
-
-    menu->popup(event->globalPos());
+    menu->exec(event->globalPos());
+    delete menu;
+    event->accept();
 }
