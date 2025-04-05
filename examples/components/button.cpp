@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QButtonGroup>
 #include <QGridLayout>
+#include <QLabel>
 #include <QMenu>
 #include <QScrollArea>
 #include <QStyleHints>
@@ -132,16 +133,109 @@ QWidget* ButtonExample::createToggleButtons() {
 }
 
 QWidget* ButtonExample::createToolButtons() {
-    QWidget*     container = new QWidget;
-    QHBoxLayout* layout    = new QHBoxLayout(container);
-    layout->setSpacing(16);
-    NToolButton* toolBtn = new NToolButton();
-    toolBtn->setFixedSize(40, 40);
-    toolBtn->setText("Tool");
-    // toolBtn->setFluentIcon(NRegularIconType::SettingsChat16Regular, 24);
+    QWidget*     container  = new QWidget;
+    QVBoxLayout* mainLayout = new QVBoxLayout(container);
+    mainLayout->setSpacing(20);
 
-    layout->addWidget(toolBtn);
-    layout->addStretch();
+    // 图标位置示例
+    QWidget*     iconPositionContainer = new QWidget;
+    QHBoxLayout* iconPositionLayout    = new QHBoxLayout(iconPositionContainer);
+    iconPositionLayout->setSpacing(16);
+
+    // 只有图标
+    NToolButton* iconOnlyBtn = new NToolButton();
+    iconOnlyBtn->setToolTip("只有图标");
+    iconOnlyBtn->setFixedSize(40, 40);
+    iconOnlyBtn->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    iconOnlyBtn->setFluentIcon(NRegularIconType::Settings24Regular, 24);
+
+    // 只有文本
+    NToolButton* textOnlyBtn = new NToolButton();
+    textOnlyBtn->setToolTip("只有文本");
+    textOnlyBtn->setFixedSize(80, 40);
+    textOnlyBtn->setText("设置");
+    textOnlyBtn->setToolButtonStyle(Qt::ToolButtonTextOnly);
+
+    // 文本在图标旁边
+    NToolButton* textBesideBtn = new NToolButton();
+    textBesideBtn->setToolTip("文本在图标旁边");
+    textBesideBtn->setFixedSize(120, 40);
+    textBesideBtn->setText("设置");
+    textBesideBtn->setFluentIcon(NRegularIconType::Settings24Regular, 20);
+    textBesideBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+    // 文本在图标下方
+    NToolButton* textUnderBtn = new NToolButton();
+    textUnderBtn->setToolTip("文本在图标下方");
+    textUnderBtn->setFixedSize(60, 60);
+    textUnderBtn->setText("设置");
+    textUnderBtn->setFluentIcon(NRegularIconType::Settings24Regular, 24);
+    textUnderBtn->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+
+    // 禁用状态
+    NToolButton* disabledBtn = new NToolButton();
+    disabledBtn->setToolTip("禁用状态");
+
+    disabledBtn->setFixedSize(80, 40);
+    disabledBtn->setText("禁用");
+    disabledBtn->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    disabledBtn->setDisabled(true);
+
+    iconPositionLayout->addWidget(iconOnlyBtn);
+    iconPositionLayout->addWidget(textOnlyBtn);
+    iconPositionLayout->addWidget(textBesideBtn);
+    iconPositionLayout->addWidget(textUnderBtn);
+    iconPositionLayout->addWidget(disabledBtn);
+    iconPositionLayout->addStretch();
+
+    // 按钮类型示例
+    QWidget*     buttonTypeContainer = new QWidget;
+    QHBoxLayout* buttonTypeLayout    = new QHBoxLayout(buttonTypeContainer);
+    buttonTypeLayout->setSpacing(16);
+
+    // 标准按钮
+    NToolButton* standardBtn = new NToolButton();
+    standardBtn->setToolTip("标准按钮");
+    standardBtn->setFixedSize(120, 40);
+    standardBtn->setText("标准");
+    standardBtn->setFluentIcon(NRegularIconType::Document24Regular, 20);
+    standardBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+    // 强调色按钮
+    NToolButton* accentBtn = new NToolButton();
+    accentBtn->setToolTip("强调色按钮");
+    accentBtn->setFixedSize(120, 40);
+    accentBtn->setText("强调");
+    accentBtn->setFluentIcon(NFilledIconType::Document24Filled, 20);
+    accentBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    accentBtn->setButtonType(NToolButton::Accent);
+
+    // 自定义强调色按钮
+    NToolButton* customAccentBtn = new NToolButton();
+    customAccentBtn->setToolTip("自定义强调色");
+    customAccentBtn->setFixedSize(120, 40);
+    customAccentBtn->setText("自定义");
+    customAccentBtn->setFluentIcon(NFilledIconType::Document24Filled, 20);
+    customAccentBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    customAccentBtn->setButtonType(NToolButton::Accent);
+    customAccentBtn->setAccentColor(QColor(76, 175, 80)); // 绿色
+
+    buttonTypeLayout->addWidget(standardBtn);
+    buttonTypeLayout->addWidget(accentBtn);
+    buttonTypeLayout->addWidget(customAccentBtn);
+    buttonTypeLayout->addStretch();
+
+    // 状态示例
+    QWidget*     stateContainer = new QWidget;
+    QHBoxLayout* stateLayout    = new QHBoxLayout(stateContainer);
+    stateLayout->setSpacing(16);
+
+    // 添加各个部分到主布局
+    mainLayout->addWidget(new QLabel("不同图标位置样式："));
+    mainLayout->addWidget(iconPositionContainer);
+    mainLayout->addWidget(new QLabel("不同按钮类型："));
+    mainLayout->addWidget(buttonTypeContainer);
+
     return container;
 }
 
