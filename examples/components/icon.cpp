@@ -60,9 +60,9 @@ void IconExample::initUI() {
     QLabel*      typeLabel        = new QLabel("图标类型:", this);
 
     m_iconTypeGroup = new QButtonGroup(this);
-    m_allTypesRadio = new QRadioButton("全部", this);
-    m_regularRadio  = new QRadioButton("Regular", this);
-    m_filledRadio   = new QRadioButton("Filled", this);
+    m_allTypesRadio = new NRadioButton("全部", this);
+    m_regularRadio  = new NRadioButton("Regular", this);
+    m_filledRadio   = new NRadioButton("Filled", this);
 
     m_iconTypeGroup->addButton(m_allTypesRadio, IconFilterType::All);
     m_iconTypeGroup->addButton(m_regularRadio, IconFilterType::RegularOnly);

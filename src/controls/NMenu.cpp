@@ -193,11 +193,11 @@ void NMenu::showEvent(QShowEvent* event) {
     }
     d->_animationPix                 = this->grab(this->rect());
     QPropertyAnimation* posAnimation = new QPropertyAnimation(d, "pAnimationImagePosY");
-    connect(posAnimation, &QPropertyAnimation::finished, this, [=]() {
+    connect(posAnimation, &QPropertyAnimation::finished, this, [this, d]() {
         d->_animationPix = QPixmap();
         update();
     });
-    connect(posAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) { update(); });
+    connect(posAnimation, &QPropertyAnimation::valueChanged, this, [this]() { update(); });
     posAnimation->setEasingCurve(NDesignToken(NDesignTokenKey::EasingStandard).value<QEasingCurve>());
     posAnimation->setDuration(NDesignToken(NDesignTokenKey::AnimationSlow).toInt());
 

@@ -4,10 +4,9 @@
 #include <QButtonGroup>
 #include <QGridLayout>
 #include <QLabel>
-#include <QRadioButton>
 #include <QScrollArea>
 #include <QTimer>
-#include <QWidget>
+#include <QtNativeUI/NRadioButton.h>
 #include "QtNativeUI/NIconEnums.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NPushButton.h"
@@ -63,9 +62,9 @@ class IconExample : public QWidget {
 
     // 图标类型筛选
     QButtonGroup* m_iconTypeGroup;
-    QRadioButton* m_allTypesRadio;
-    QRadioButton* m_regularRadio;
-    QRadioButton* m_filledRadio;
+    NRadioButton* m_allTypesRadio;
+    NRadioButton* m_regularRadio;
+    NRadioButton* m_filledRadio;
 
     QList<IconInfo>        m_allIcons;
     QList<IconInfo>        m_filteredIcons;

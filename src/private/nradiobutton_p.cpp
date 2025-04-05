@@ -12,7 +12,7 @@ NRadioButtonPrivate::NRadioButtonPrivate(QObject* parent) : QObject(parent) {
     _innerCircleAnimation->setDuration(nTheme->getToken(NDesignTokenKey::AnimationNormal).toInt());
 }
 
-NRadioButtonPrivate::~NRadioButtonPrivate() { delete _innerCircleAnimation; }
+NRadioButtonPrivate::~NRadioButtonPrivate() {}
 
 void NRadioButtonPrivate::startInnerCircleAnimation(qreal startScale, qreal endScale) {
     _innerCircleAnimation->stop();
