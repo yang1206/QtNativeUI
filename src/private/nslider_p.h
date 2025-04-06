@@ -5,6 +5,7 @@
 #ifndef NSLIDER_P_H
 #define NSLIDER_P_H
 #include <QPropertyAnimation>
+#include <QProxyStyle>
 #include <QtNativeUI/NSlider.h>
 #include "QtNativeUI/NEnums.h"
 
@@ -38,6 +39,33 @@ class NSliderPrivate : public QObject {
     Q_PROPERTY_CREATE_D(int, TickThickness)
 
   public:
+    class Style : public QProxyStyle {
+    public:
+        explicit Style(NSliderPrivate* parent, QStyle* style = nullptr);
+
+        void drawComplexControl(ComplexControl control,
+                               const QStyleOptionComplex* option,
+                               QPainter* painter,
+                               const QWidget* widget = nullptr) const override;
+
+        void drawControl(ControlElement element,
+                        const QStyleOption* option,
+                        QPainter* painter,
+                        const QWidget* widget = nullptr) const override;
+
+        SubControl hitTestComplexControl(ComplexControl control,
+                                        const QStyleOptionComplex* option,
+                                        const QPoint& pos,
+                                        const QWidget* widget = nullptr) const override;
+
+    private:
+        NSliderPrivate* d;
+        void drawTrack(const QStyleOptionSlider* option, QPainter* painter, const QWidget* widget) const;
+        void drawProgress(const QStyleOptionSlider* option, QPainter* painter, const QWidget* widget) const;
+        void drawHandle(const QStyleOptionSlider* option, QPainter* painter, const QWidget* widget) const;
+        void drawTicks(const QStyleOptionSlider* option, QPainter* painter, const QWidget* widget) const;
+    };
+
     explicit NSliderPrivate(QObject* parent = nullptr);
     ~NSliderPrivate();
     Q_D_CREATE(NSlider)
@@ -69,6 +97,9 @@ class NSliderPrivate : public QObject {
     QColor _accentHoverColor;
     QColor _accentPressedColor;
     QColor _accentDisabledColor;
+    
+    // 样式
+    Style* _sliderStyle = nullptr;
 };
 
 #endif // NSLIDER_P_H
