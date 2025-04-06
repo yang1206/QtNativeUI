@@ -17,6 +17,7 @@
 #include "QtNativeUI/NHyperlinkButton.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NRadioButton.h"
+#include "QtNativeUI/NScrollBar.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolButton.h"
 #include "widgets/ExampleSection.h"
@@ -33,6 +34,8 @@ void ButtonExample::initUI() {
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
     m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    NScrollBar* vScrollBar = new NScrollBar(Qt::Vertical);
+    m_scrollArea->setVerticalScrollBar(vScrollBar);
 
     // 创建内容容器
     QWidget*     contentWidget = new QWidget(m_scrollArea);
