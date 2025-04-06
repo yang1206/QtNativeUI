@@ -85,9 +85,9 @@ QStyle::SubControl NSliderPrivate::Style::hitTestComplexControl(ComplexControl  
     return QProxyStyle::hitTestComplexControl(control, option, pos, widget);
 }
 
-void NSliderPrivate::Style::drawTrack(const QStyleOptionSlider* option,
-                                      QPainter*                 painter,
-                                      const QWidget*            widget) const {
+void NSliderPrivate::Style::drawTrack(const QStyleOptionSlider*       option,
+                                      QPainter*                       painter,
+                                      [[maybe_unused]] const QWidget* widget) const {
     painter->save();
 
     QColor trackColor;
@@ -118,9 +118,9 @@ void NSliderPrivate::Style::drawTrack(const QStyleOptionSlider* option,
     painter->restore();
 }
 
-void NSliderPrivate::Style::drawProgress(const QStyleOptionSlider* option,
-                                         QPainter*                 painter,
-                                         const QWidget*            widget) const {
+void NSliderPrivate::Style::drawProgress(const QStyleOptionSlider*       option,
+                                         QPainter*                       painter,
+                                         [[maybe_unused]] const QWidget* widget) const {
     painter->save();
 
     QColor progressColor;
@@ -159,9 +159,9 @@ void NSliderPrivate::Style::drawProgress(const QStyleOptionSlider* option,
     painter->restore();
 }
 
-void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider* option,
-                                       QPainter*                 painter,
-                                       const QWidget*            widget) const {
+void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
+                                       QPainter*                       painter,
+                                       [[maybe_unused]] const QWidget* widget) const {
     painter->save();
 
     painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
@@ -220,9 +220,9 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider* option,
     painter->restore();
 }
 
-void NSliderPrivate::Style::drawTicks(const QStyleOptionSlider* option,
-                                      QPainter*                 painter,
-                                      const QWidget*            widget) const {
+void NSliderPrivate::Style::drawTicks(const QStyleOptionSlider*       option,
+                                      QPainter*                       painter,
+                                      [[maybe_unused]] const QWidget* widget) const {
     painter->save();
 
     QColor tickColor;

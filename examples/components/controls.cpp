@@ -12,8 +12,10 @@
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
 
+#include <QtNativeUI/NPushButton.h>
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
+#include "QtNativeUI/NToolTip.h"
 
 ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
@@ -44,6 +46,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("SpinBox", createSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("DoubleSpinBox", createDoubleSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("Slider", createSliders()));
+    contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
 
     contentLayout->addStretch();
 
@@ -326,5 +329,127 @@ QWidget* ControlsExample::createSliders() {
     tickSlider->setMinimumWidth(200);
     layout->addWidget(tickSlider);
 
+    return container;
+}
+
+QWidget* ControlsExample::createToolTips() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(32);
+
+    // 基本提示按钮
+    QHBoxLayout* basicRow    = new QHBoxLayout();
+    NPushButton* basicButton = new NPushButton("悬停显示默认提示", container);
+    basicButton->setFixedSize(140, 40);
+    basicButton->setToolTip("这是一个基本工具提示");
+    NToolTipFilter* basicFilter = new NToolTipFilter(basicButton);
+    basicRow->addWidget(basicButton);
+    basicRow->addStretch();
+    layout->addLayout(basicRow);
+
+    // 不同位置的提示
+    QLabel* positionLabel = new QLabel("不同位置的工具提示：", container);
+    QFont   labelFont     = positionLabel->font();
+    labelFont.setBold(true);
+    positionLabel->setFont(labelFont);
+    layout->addWidget(positionLabel);
+
+    // 创建不同位置的工具提示按钮
+    QGridLayout* positionGrid = new QGridLayout();
+    positionGrid->setSpacing(16);
+
+    struct PositionInfo {
+        QString          name;
+        NToolTipPosition position;
+    };
+
+    QList<PositionInfo> positions = {{"上方", NToolTipPosition::TOP},
+                                     {"下方", NToolTipPosition::BOTTOM},
+                                     {"左侧", NToolTipPosition::LEFT},
+                                     {"右侧", NToolTipPosition::RIGHT},
+                                     {"左上", NToolTipPosition::TOP_LEFT},
+                                     {"右上", NToolTipPosition::TOP_RIGHT},
+                                     {"左下", NToolTipPosition::BOTTOM_LEFT},
+                                     {"右下", NToolTipPosition::BOTTOM_RIGHT}};
+
+    int row    = 0;
+    int col    = 0;
+    int maxCol = 4;
+
+    for (const auto& pos : positions) {
+        NPushButton* button = new NPushButton(pos.name + "提示", container);
+        button->setToolTip("这是一个" + pos.name + "位置的工具提示");
+        button->setMinimumWidth(120);
+        NToolTipFilter* filter = new NToolTipFilter(button, 300, pos.position);
+
+        positionGrid->addWidget(button, row, col);
+
+        col++;
+        if (col >= maxCol) {
+            col = 0;
+            row++;
+        }
+    }
+
+    layout->addLayout(positionGrid);
+
+    // 自定义延迟和持续时间
+    QLabel* customLabel = new QLabel("自定义延迟和持续时间：", container);
+    customLabel->setFont(labelFont);
+    layout->addWidget(customLabel);
+
+    QHBoxLayout* customRow = new QHBoxLayout();
+
+    // 快速显示的提示
+    NPushButton* quickButton = new NPushButton("快速显示(100ms延迟)", container);
+    quickButton->setToolTip("这个提示会快速显示");
+    NToolTipFilter* quickFilter = new NToolTipFilter(quickButton, 100);
+    customRow->addWidget(quickButton);
+
+    // 长时间显示的提示
+    NPushButton* longButton = new NPushButton("长时间显示(5秒)", container);
+    longButton->setToolTip("这个提示会显示5秒钟");
+    NToolTipFilter* longFilter = new NToolTipFilter(longButton);
+    longButton->setProperty("toolTipDuration", 5000);
+    customRow->addWidget(longButton);
+
+    // 不自动隐藏的提示
+    NPushButton* persistentButton = new NPushButton("不自动隐藏", container);
+    persistentButton->setToolTip("这个提示不会自动隐藏，直到鼠标移开");
+    NToolTipFilter* persistentFilter = new NToolTipFilter(persistentButton);
+    persistentButton->setProperty("toolTipDuration", -1);
+    customRow->addWidget(persistentButton);
+
+    layout->addLayout(customRow);
+
+    // 静态方法演示
+    QLabel* staticLabel = new QLabel("静态方法演示：", container);
+    staticLabel->setFont(labelFont);
+    layout->addWidget(staticLabel);
+
+    QHBoxLayout* staticRow = new QHBoxLayout();
+
+    NPushButton* showTextButton = new NPushButton("点击显示临时提示", container);
+    showTextButton->setFixedSize(120, 40);
+    connect(showTextButton, &NPushButton::clicked, [=]() {
+        NToolTip::showText("这是一个临时工具提示，3秒后消失", showTextButton, NToolTipPosition::TOP);
+    });
+    staticRow->addWidget(showTextButton);
+
+    // 自定义创建并显示
+    NPushButton* customCreateButton = new NPushButton("点击创建自定义提示", container);
+    customCreateButton->setFixedSize(140, 40);
+    connect(customCreateButton, &NPushButton::clicked, [=]() {
+        NToolTip* tooltip = NToolTip::createToolTip("这是一个自定义创建的工具提示", customCreateButton);
+        tooltip->setDuration(3000);
+        tooltip->adjustPosition(customCreateButton, NToolTipPosition::BOTTOM);
+        tooltip->show();
+    });
+    staticRow->addWidget(customCreateButton);
+
+    staticRow->addStretch();
+    layout->addLayout(staticRow);
+
+    layout->addStretch();
     return container;
 }
