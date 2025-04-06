@@ -53,7 +53,7 @@ void NSlider::init() {
     d->_isDark    = nTheme->isDarkMode();
 
     // 设置尺寸属性
-    d->_pTrackHeight        = 4;
+    d->_pTrackHeight        = 5;
     d->_pThumbDiameter      = 20;
     d->_pThumbInnerDiameter = 10;
     d->_pTrackCornerRadius  = 2;
@@ -169,4 +169,46 @@ void NSlider::leaveEvent(QEvent* event) {
     d->startThumbAnimation(d->_thumbScale, 1.0);
     update();
     QSlider::leaveEvent(event);
+}
+
+void NSlider::mousePressEvent(QMouseEvent* event) {
+    Q_D(NSlider);
+
+    if (isEnabled()) {
+        d->_isPressed  = true;
+        d->_isDragging = true;
+        d->startThumbAnimation(d->_thumbScale, 0.8);
+        update();
+    }
+
+    QSlider::mousePressEvent(event);
+}
+
+void NSlider::mouseReleaseEvent(QMouseEvent* event) {
+    Q_D(NSlider);
+
+    if (isEnabled()) {
+        d->_isPressed  = false;
+        d->_isDragging = false;
+
+        if (d->_isHovered) {
+            d->startThumbAnimation(d->_thumbScale, 1.3);
+        } else {
+            d->startThumbAnimation(d->_thumbScale, 1.0);
+        }
+        update();
+    }
+
+    QSlider::mouseReleaseEvent(event);
+}
+
+void NSlider::mouseMoveEvent(QMouseEvent* event) {
+    Q_D(NSlider);
+
+    if (isEnabled() && !d->_isDragging) {
+        d->_isHovered = rect().contains(event->pos());
+        update();
+    }
+
+    QSlider::mouseMoveEvent(event);
 }
