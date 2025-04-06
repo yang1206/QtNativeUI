@@ -49,21 +49,15 @@ class QTNATIVEUI_EXPORT NSlider : public QSlider {
     void resetAccentColor();
 
   protected:
-    void paintEvent(QPaintEvent* event) override;
+    void enterEvent(QEnterEvent* event) override;
+    void leaveEvent(QEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
-    void enterEvent(QEnterEvent* event) override;
-    void leaveEvent(QEvent* event) override;
-    bool event(QEvent* event) override;
 
   private:
     void init();
     void updateAccentColors();
-    void drawTrack(QPainter* painter);
-    void drawProgress(QPainter* painter);
-    void drawThumb(QPainter* painter);
-    void drawTicks(QPainter* painter);
 };
 
 #endif // NSLIDER_H

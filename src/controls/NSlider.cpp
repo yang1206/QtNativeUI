@@ -53,7 +53,7 @@ void NSlider::init() {
     d->_isDark    = nTheme->isDarkMode();
 
     // 设置尺寸属性
-    d->_pTrackHeight        = 4;
+    d->_pTrackHeight        = 5;
     d->_pThumbDiameter      = 20;
     d->_pThumbInnerDiameter = 10;
     d->_pTrackCornerRadius  = 2;
@@ -78,14 +78,11 @@ void NSlider::init() {
     d->_pDarkDisabledTickColor  = NThemeColor(NFluentColorKey::ControlStrongFillColorDisabled, NThemeType::Dark);
 
     updateAccentColors();
-
+    d->_sliderStyle = new NSliderPrivate::Style(d, style());
+    setStyle(d->_sliderStyle);
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
     setFocusPolicy(Qt::StrongFocus);
-
-    setStyleSheet("QSlider::groove:horizontal, QSlider::groove:vertical, "
-                  "QSlider::handle:horizontal, QSlider::handle:vertical "
-                  "{ background: transparent; border: none; }");
 
     if (orientation() == Qt::Horizontal) {
         setFixedHeight(d->_pThumbDiameter);
@@ -146,212 +143,6 @@ void NSlider::resetAccentColor() {
     update();
 }
 
-void NSlider::paintEvent(QPaintEvent* event) {
-    Q_UNUSED(event);
-
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    drawTrack(&painter);
-    drawProgress(&painter);
-
-    // 如果设置了刻度位置，绘制刻度
-    Q_D(NSlider);
-    if (tickPosition() != QSlider::NoTicks) {
-        drawTicks(&painter);
-    }
-
-    drawThumb(&painter);
-}
-
-void NSlider::drawTrack(QPainter* painter) {
-    Q_D(NSlider);
-
-    painter->save();
-
-    QColor trackColor;
-    if (!isEnabled()) {
-        trackColor = d->_isDark ? d->_pDarkDisabledTrackColor : d->_pLightDisabledTrackColor;
-    } else {
-        trackColor = d->_isDark ? d->_pDarkTrackColor : d->_pLightTrackColor;
-    }
-
-    int padding = d->_pThumbDiameter / 2;
-
-    if (orientation() == Qt::Horizontal) {
-        int   trackY = (height() - d->_pTrackHeight) / 2;
-        QRect trackRect(padding, trackY, width() - 2 * padding, d->_pTrackHeight);
-
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(trackColor);
-        painter->drawRoundedRect(trackRect, d->_pTrackCornerRadius, d->_pTrackCornerRadius);
-    } else {
-        int   trackX = (width() - d->_pTrackHeight) / 2;
-        QRect trackRect(trackX, padding, d->_pTrackHeight, height() - 2 * padding);
-
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(trackColor);
-        painter->drawRoundedRect(trackRect, d->_pTrackCornerRadius, d->_pTrackCornerRadius);
-    }
-
-    painter->restore();
-}
-
-void NSlider::drawProgress(QPainter* painter) {
-    Q_D(NSlider);
-
-    painter->save();
-
-    QColor progressColor;
-    if (!isEnabled()) {
-        progressColor = d->_isDark ? d->_pDarkDisabledProgressColor : d->_pLightDisabledProgressColor;
-    } else if (d->_isPressed) {
-        progressColor = d->_accentPressedColor;
-    } else if (d->_isHovered) {
-        progressColor = d->_accentHoverColor;
-    } else {
-        progressColor = d->_isDark ? d->_pDarkProgressColor : d->_pLightProgressColor;
-    }
-
-    int    padding = d->_pThumbDiameter / 2;
-    double ratio   = (value() - minimum()) / static_cast<double>(maximum() - minimum());
-
-    if (orientation() == Qt::Horizontal) {
-        int   trackY        = (height() - d->_pTrackHeight) / 2;
-        int   progressWidth = static_cast<int>((width() - 2 * padding) * ratio);
-        QRect progressRect(padding, trackY, progressWidth, d->_pTrackHeight);
-
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(progressColor);
-        painter->drawRoundedRect(progressRect, d->_pTrackCornerRadius, d->_pTrackCornerRadius);
-    } else {
-        int   trackX         = (width() - d->_pTrackHeight) / 2;
-        int   progressHeight = static_cast<int>((height() - 2 * padding) * ratio);
-        int   progressY      = height() - padding - progressHeight;
-        QRect progressRect(trackX, progressY, d->_pTrackHeight, progressHeight);
-
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(progressColor);
-        painter->drawRoundedRect(progressRect, d->_pTrackCornerRadius, d->_pTrackCornerRadius);
-    }
-
-    painter->restore();
-}
-
-void NSlider::drawThumb(QPainter* painter) {
-    Q_D(NSlider);
-
-    painter->save();
-
-    double ratio = (value() - minimum()) / static_cast<double>(maximum() - minimum());
-
-    QPointF thumbCenter;
-
-    if (orientation() == Qt::Horizontal) {
-        int thumbX  = d->_pThumbDiameter / 2 + static_cast<int>((width() - d->_pThumbDiameter) * ratio);
-        int thumbY  = height() / 2;
-        thumbCenter = QPointF(thumbX, thumbY);
-    } else {
-        int thumbX  = width() / 2;
-        int thumbY  = height() - d->_pThumbDiameter / 2 - static_cast<int>((height() - d->_pThumbDiameter) * ratio);
-        thumbCenter = QPointF(thumbX, thumbY);
-    }
-
-    QColor outerColor = d->_isDark ? d->_pDarkThumbOuterColor : d->_pLightThumbOuterColor;
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(outerColor);
-
-    painter->drawEllipse(thumbCenter, d->_pThumbDiameter / 2.0, d->_pThumbDiameter / 2.0);
-
-    QColor innerColor;
-    if (!isEnabled()) {
-        innerColor = d->_accentDisabledColor;
-    } else if (d->_isPressed) {
-        innerColor = d->_accentPressedColor;
-    } else if (d->_isHovered) {
-        innerColor = d->_accentHoverColor;
-    } else {
-        innerColor = d->_accentColor;
-    }
-
-    qreal innerRadius = (d->_pThumbInnerDiameter / 2.0) * d->_thumbScale;
-
-    painter->setBrush(innerColor);
-    painter->drawEllipse(thumbCenter, innerRadius, innerRadius);
-
-    painter->restore();
-}
-
-void NSlider::drawTicks(QPainter* painter) {
-    Q_D(NSlider);
-
-    painter->save();
-
-    QColor tickColor;
-    if (!isEnabled()) {
-        tickColor = d->_isDark ? d->_pDarkDisabledTickColor : d->_pLightDisabledTickColor;
-    } else {
-        tickColor = d->_isDark ? d->_pDarkTickColor : d->_pLightTickColor;
-    }
-
-    painter->setPen(QPen(tickColor, d->_pTickThickness));
-
-    int padding    = d->_pThumbDiameter / 2;
-    int valueRange = maximum() - minimum();
-
-    int interval = tickInterval();
-    if (interval <= 0) {
-        interval = qMax(1, valueRange / 10);
-    }
-
-    bool drawAbove = (tickPosition() & QSlider::TicksAbove);
-    bool drawBelow = (tickPosition() & QSlider::TicksBelow);
-
-    if (orientation() == Qt::Horizontal) {
-        int trackY     = (height() - d->_pTrackHeight) / 2;
-        int tickTop    = trackY - d->_pTickLength - 1;
-        int tickBottom = trackY + d->_pTrackHeight + 1;
-
-        for (int value = minimum(); value <= maximum(); value += interval) {
-            double ratio = (value - minimum()) / static_cast<double>(valueRange);
-            int    tickX = padding + static_cast<int>((width() - 2 * padding) * ratio);
-
-            if (drawAbove) {
-                painter->drawLine(tickX, tickTop, tickX, tickTop + d->_pTickLength);
-            }
-            if (drawBelow) {
-                painter->drawLine(tickX, tickBottom, tickX, tickBottom + d->_pTickLength);
-            }
-        }
-    } else {
-        int trackX    = (width() - d->_pTrackHeight) / 2;
-        int tickLeft  = trackX - d->_pTickLength - 1;
-        int tickRight = trackX + d->_pTrackHeight + 1;
-
-        for (int value = minimum(); value <= maximum(); value += interval) {
-            double ratio = (value - minimum()) / static_cast<double>(valueRange);
-            int    tickY = height() - padding - static_cast<int>((height() - 2 * padding) * ratio);
-
-            if (drawAbove) {
-                painter->drawLine(tickLeft, tickY, tickLeft + d->_pTickLength, tickY);
-            }
-            if (drawBelow) {
-                painter->drawLine(tickRight, tickY, tickRight + d->_pTickLength, tickY);
-            }
-        }
-    }
-
-    painter->restore();
-}
-
-bool NSlider::event(QEvent* event) {
-    if (!isEnabled()) {
-        return QSlider::event(event);
-    }
-
-    return QSlider::event(event);
-}
-
 void NSlider::enterEvent(QEnterEvent* event) {
     Q_D(NSlider);
 
@@ -383,51 +174,41 @@ void NSlider::leaveEvent(QEvent* event) {
 void NSlider::mousePressEvent(QMouseEvent* event) {
     Q_D(NSlider);
 
-    if (!isEnabled()) {
-        QSlider::mousePressEvent(event);
-        return;
+    if (isEnabled()) {
+        d->_isPressed  = true;
+        d->_isDragging = true;
+        d->startThumbAnimation(d->_thumbScale, 0.8);
+        update();
     }
 
-    d->_isPressed  = true;
-    d->_isDragging = true;
-    d->startThumbAnimation(d->_thumbScale, 0.8);
-    update();
     QSlider::mousePressEvent(event);
 }
 
 void NSlider::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NSlider);
 
-    if (!isEnabled()) {
-        QSlider::mouseReleaseEvent(event);
-        return;
+    if (isEnabled()) {
+        d->_isPressed  = false;
+        d->_isDragging = false;
+
+        if (d->_isHovered) {
+            d->startThumbAnimation(d->_thumbScale, 1.3);
+        } else {
+            d->startThumbAnimation(d->_thumbScale, 1.0);
+        }
+        update();
     }
 
-    d->_isPressed  = false;
-    d->_isDragging = false;
-
-    if (d->_isHovered) {
-        d->startThumbAnimation(d->_thumbScale, 1.3);
-    } else {
-        d->startThumbAnimation(d->_thumbScale, 1.0);
-    }
-
-    update();
     QSlider::mouseReleaseEvent(event);
 }
 
 void NSlider::mouseMoveEvent(QMouseEvent* event) {
     Q_D(NSlider);
 
-    if (!isEnabled()) {
-        QSlider::mouseMoveEvent(event);
-        return;
-    }
-
-    if (!d->_isDragging) {
+    if (isEnabled() && !d->_isDragging) {
         d->_isHovered = rect().contains(event->pos());
+        update();
     }
 
-    update();
     QSlider::mouseMoveEvent(event);
 }
