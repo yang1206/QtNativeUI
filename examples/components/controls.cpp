@@ -15,11 +15,12 @@
 #include <QtNativeUI/NPushButton.h>
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
+#include "QtNativeUI/NProgressBar.h"
 #include "QtNativeUI/NToolTip.h"
 
 ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
-// 在 initUI() 函数中添加 SpinBox 部分
+// 在 initUI() 函数中添加 ProgressBar 部分
 void ControlsExample::initUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -46,6 +47,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("SpinBox", createSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("DoubleSpinBox", createDoubleSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("Slider", createSliders()));
+    contentLayout->addWidget(new ExampleSection("ProgressBar", createProgressBars()));
     contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
 
     contentLayout->addStretch();
@@ -451,5 +453,109 @@ QWidget* ControlsExample::createToolTips() {
     layout->addLayout(staticRow);
 
     layout->addStretch();
+    return container;
+}
+
+// 添加 createProgressBars 函数实现
+QWidget* ControlsExample::createProgressBars() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本进度条
+    NProgressBar* basicProgressBar = new NProgressBar(container);
+    basicProgressBar->setValue(50);
+    basicProgressBar->setMinimumWidth(300);
+    layout->addWidget(basicProgressBar);
+
+    // 带文本的进度条
+    NProgressBar* textProgressBar = new NProgressBar(container);
+    textProgressBar->setValue(75);
+    textProgressBar->setFormat("已完成 %p%");
+    textProgressBar->setMinimumWidth(300);
+    layout->addWidget(textProgressBar);
+
+    // 不确定状态的进度条
+    NProgressBar* indeterminateProgressBar = new NProgressBar(container);
+    indeterminateProgressBar->setMinimum(0);
+    indeterminateProgressBar->setMaximum(0); // 设置为不确定状态
+    indeterminateProgressBar->setMinimumWidth(300);
+    layout->addWidget(indeterminateProgressBar);
+
+    // 反向进度条
+    NProgressBar* invertedProgressBar = new NProgressBar(container);
+    invertedProgressBar->setValue(60);
+    invertedProgressBar->setInvertedAppearance(true);
+    invertedProgressBar->setMinimumWidth(300);
+    layout->addWidget(invertedProgressBar);
+
+    // 垂直进度条
+    QHBoxLayout* verticalLayout = new QHBoxLayout();
+    
+    NProgressBar* verticalProgressBar = new NProgressBar(container);
+    verticalProgressBar->setOrientation(Qt::Vertical);
+    verticalProgressBar->setValue(80);
+    verticalProgressBar->setMinimumHeight(150);
+    verticalLayout->addWidget(verticalProgressBar);
+    
+    // 垂直反向进度条
+    NProgressBar* verticalInvertedProgressBar = new NProgressBar(container);
+    verticalInvertedProgressBar->setOrientation(Qt::Vertical);
+    verticalInvertedProgressBar->setValue(40);
+    verticalInvertedProgressBar->setInvertedAppearance(true);
+    verticalInvertedProgressBar->setMinimumHeight(150);
+    verticalLayout->addWidget(verticalInvertedProgressBar);
+    
+    verticalLayout->addStretch();
+    layout->addLayout(verticalLayout);
+
+    // 禁用状态的进度条
+    NProgressBar* disabledProgressBar = new NProgressBar(container);
+    disabledProgressBar->setValue(30);
+    disabledProgressBar->setEnabled(false);
+    disabledProgressBar->setMinimumWidth(300);
+    layout->addWidget(disabledProgressBar);
+
+    // 添加一个动态更新的进度条
+    NProgressBar* dynamicProgressBar = new NProgressBar(container);
+    dynamicProgressBar->setValue(0);
+    dynamicProgressBar->setMinimumWidth(300);
+    layout->addWidget(dynamicProgressBar);
+    
+    // 添加控制按钮
+    QHBoxLayout* controlLayout = new QHBoxLayout();
+    
+    NPushButton* startButton = new NPushButton("开始", container);
+    connect(startButton, &NPushButton::clicked, [dynamicProgressBar]() {
+        QTimer* timer = new QTimer(dynamicProgressBar);
+        dynamicProgressBar->setProperty("timer", QVariant::fromValue(timer));
+        connect(timer, &QTimer::timeout, [dynamicProgressBar]() {
+            int value = dynamicProgressBar->value();
+            if (value < 100) {
+                dynamicProgressBar->setValue(value + 1);
+            } else {
+                QTimer* timer = dynamicProgressBar->property("timer").value<QTimer*>();
+                if (timer) {
+                    timer->stop();
+                }
+            }
+        });
+        timer->start(50);
+    });
+    controlLayout->addWidget(startButton);
+    
+    NPushButton* resetButton = new NPushButton("重置", container);
+    connect(resetButton, &NPushButton::clicked, [dynamicProgressBar]() {
+        QTimer* timer = dynamicProgressBar->property("timer").value<QTimer*>();
+        if (timer) {
+            timer->stop();
+        }
+        dynamicProgressBar->setValue(0);
+    });
+    controlLayout->addWidget(resetButton);
+    
+    controlLayout->addStretch();
+    layout->addLayout(controlLayout);
+
     return container;
 }
