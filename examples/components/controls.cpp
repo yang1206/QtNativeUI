@@ -9,6 +9,7 @@
 #include "widgets/ExampleSection.h"
 
 // 在头文件包含部分添加
+#include <QTimer>
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
 
@@ -16,6 +17,7 @@
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
+#include "QtNativeUI/NScrollArea.h"
 #include "QtNativeUI/NToolTip.h"
 
 ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -48,6 +50,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("DoubleSpinBox", createDoubleSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("Slider", createSliders()));
     contentLayout->addWidget(new ExampleSection("ProgressBar", createProgressBars()));
+    contentLayout->addWidget(new ExampleSection("ScrollArea", createScrollAreas()));
     contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
 
     contentLayout->addStretch();
@@ -557,5 +560,92 @@ QWidget* ControlsExample::createProgressBars() {
     controlLayout->addStretch();
     layout->addLayout(controlLayout);
 
+    return container;
+}
+
+// 添加 createScrollAreas 函数实现
+QWidget* ControlsExample::createScrollAreas() {
+    QWidget* container = new QWidget;
+    QVBoxLayout* layout = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本滚动区域
+    QLabel* basicLabel = new QLabel("基本滚动区域：", container);
+    QFont labelFont = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    NScrollArea* basicScrollArea = new NScrollArea(container);
+    basicScrollArea->setMinimumHeight(200);
+    basicScrollArea->setMinimumWidth(400);
+    
+    // 创建内容
+    QWidget* contentWidget = new QWidget(basicScrollArea);
+    QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
+    
+    // 添加一些内容使其可滚动
+    for (int i = 1; i <= 20; ++i) {
+        NPushButton* button = new NPushButton(QString("按钮 %1").arg(i), contentWidget);
+        button->setMinimumWidth(380);
+        contentLayout->addWidget(button);
+    }
+    
+    contentLayout->addStretch();
+    basicScrollArea->setWidget(contentWidget);
+    layout->addWidget(basicScrollArea);
+
+    // 水平滚动区域
+    QLabel* horizontalLabel = new QLabel("水平滚动区域：", container);
+    horizontalLabel->setFont(labelFont);
+    layout->addWidget(horizontalLabel);
+
+    NScrollArea* horizontalScrollArea = new NScrollArea(container);
+    horizontalScrollArea->setMinimumHeight(100);
+    horizontalScrollArea->setMinimumWidth(400);
+    horizontalScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    horizontalScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    
+    // 创建水平内容
+    QWidget* horizontalContentWidget = new QWidget(horizontalScrollArea);
+    QHBoxLayout* horizontalContentLayout = new QHBoxLayout(horizontalContentWidget);
+    
+    // 添加一些内容使其可水平滚动
+    for (int i = 1; i <= 10; ++i) {
+        NPushButton* button = new NPushButton(QString("按钮 %1").arg(i), horizontalContentWidget);
+        button->setMinimumWidth(100);
+        horizontalContentLayout->addWidget(button);
+    }
+    
+    horizontalContentLayout->addStretch();
+    horizontalScrollArea->setWidget(horizontalContentWidget);
+    layout->addWidget(horizontalScrollArea);
+
+    // 禁用状态的滚动区域
+    QLabel* disabledLabel = new QLabel("禁用状态的滚动区域：", container);
+    disabledLabel->setFont(labelFont);
+    layout->addWidget(disabledLabel);
+
+    NScrollArea* disabledScrollArea = new NScrollArea(container);
+    disabledScrollArea->setMinimumHeight(150);
+    disabledScrollArea->setMinimumWidth(400);
+    disabledScrollArea->setEnabled(false);
+    
+    // 创建内容
+    QWidget* disabledContentWidget = new QWidget(disabledScrollArea);
+    QVBoxLayout* disabledContentLayout = new QVBoxLayout(disabledContentWidget);
+    
+    // 添加一些内容
+    for (int i = 1; i <= 10; ++i) {
+        NPushButton* button = new NPushButton(QString("按钮 %1").arg(i), disabledContentWidget);
+        button->setMinimumWidth(380);
+        disabledContentLayout->addWidget(button);
+    }
+    
+    disabledContentLayout->addStretch();
+    disabledScrollArea->setWidget(disabledContentWidget);
+    layout->addWidget(disabledScrollArea);
+
+    layout->addStretch();
     return container;
 }
