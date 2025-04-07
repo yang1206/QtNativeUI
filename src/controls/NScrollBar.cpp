@@ -73,10 +73,10 @@ void NScrollBar::init() {
     d->_pDarkArrowPressColor  = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
 
     // 初始化尺寸属性
-    d->_pTrackThickness       = 10; // 轨道厚度
+    d->_pTrackThickness       = 12; // 轨道厚度
     d->_pThumbThickness       = 6;  // 悬浮/按下时的厚度
     d->_pThumbNormalThickness = 3;  // 正常状态下的厚度
-    d->_pThumbCornerRadius    = 3;  // 滑块圆角
+    d->_pThumbCornerRadius    = 4;  // 滑块圆角
     d->_pTrackCornerRadius    = 4;  // 轨道圆角
 
     // 初始化样式
