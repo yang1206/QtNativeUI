@@ -13,11 +13,27 @@ class QTNATIVEUI_EXPORT NScrollArea : public QScrollArea {
     explicit NScrollArea(QWidget* parent = nullptr);
     ~NScrollArea();
 
+
+    void setUseCustomScrollBars(bool use);
+    bool useCustomScrollBars() const;
+    
+
+    void enableTransparentBackground();
+    
+
+    void setViewportMargins(int left, int top, int right, int bottom);
+    void setViewportMargins(int margins);
+    
+
+    QRect contentRect() const;
+
   protected:
     void paintEvent(QPaintEvent* event) override;
-
+    void resizeEvent(QResizeEvent* event) override;
+    
   private:
-    // 私有实现
+    void initScrollBars();
+    void updateScrollBars();
 };
 
 #endif // QTNATIVEUI_NSCROLLAREA_H
