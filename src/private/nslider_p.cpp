@@ -89,6 +89,7 @@ void NSliderPrivate::Style::drawTrack(const QStyleOptionSlider*       option,
                                       QPainter*                       painter,
                                       [[maybe_unused]] const QWidget* widget) const {
     painter->save();
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
     QColor trackColor;
     if (!(option->state & QStyle::State_Enabled)) {
@@ -122,6 +123,7 @@ void NSliderPrivate::Style::drawProgress(const QStyleOptionSlider*       option,
                                          QPainter*                       painter,
                                          [[maybe_unused]] const QWidget* widget) const {
     painter->save();
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
     QColor progressColor;
     if (!(option->state & QStyle::State_Enabled)) {
@@ -212,7 +214,6 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
 
     painter->setBrush(innerColor);
 
-    // 同样使用QPainterPath绘制内圆
     QPainterPath innerPath;
     innerPath.addEllipse(thumbCenter, innerRadius, innerRadius);
     painter->drawPath(innerPath);
