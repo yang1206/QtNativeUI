@@ -35,15 +35,17 @@ class NToggleSwitchPrivate : public QObject {
     void  setThumbRadius(qreal value) { _thumbRadius = value; }
 
     qreal thumbStretchFactor() const { return _thumbStretchFactor; }
-    void setThumbStretchFactor(qreal value) { 
+    void  setThumbStretchFactor(qreal value) {
         _thumbStretchFactor = value;
         q_ptr->update();
     }
 
-  public:
+  private:
     bool                  _isPressed{false};
     bool                  _isHovered{false};
     bool                  _isDragging{false};
+    bool                  _isChecked{false};
+    bool                  _visualChecked{false};
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
 
@@ -67,7 +69,7 @@ class NToggleSwitchPrivate : public QObject {
     QColor _accentTextColor;
     QColor _accentDisabledTextColor;
 
-    qreal _thumbStretchFactor{1.0};
+    qreal               _thumbStretchFactor{1.0};
     QPropertyAnimation* _thumbStretchAnimation{nullptr};
 
     void startThumbPosAnimation(qreal startX, qreal endX, bool isChecked);

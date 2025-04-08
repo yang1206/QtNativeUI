@@ -95,6 +95,9 @@ QWidget* ControlsExample::createToggleSwitches() {
 
     // 基本开关
     auto basicSwitch = new NToggleSwitch("基本开关", container);
+    connect(basicSwitch, &NToggleSwitch::checkedChanged, this, [](bool checked) {
+        qDebug() << "checkedChanged: " << checked;
+    });
     layout->addWidget(basicSwitch);
 
     // 默认选中的开关

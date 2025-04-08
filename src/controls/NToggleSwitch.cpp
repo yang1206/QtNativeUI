@@ -89,19 +89,20 @@ void NToggleSwitch::init() {
 }
 
 void NToggleSwitch::setChecked(bool checked) {
-    QAbstractButton::setChecked(checked);
     Q_D(NToggleSwitch);
-
-    if (checked == isChecked()) {
-        return;
+    if (d->_isChecked != checked) {
+        d->_isChecked     = checked;
+        d->_visualChecked = checked;
+        QAbstractButton::setChecked(checked);
+        Q_EMIT checkedChanged(checked);
+        update();
     }
-
-    int startX = d->_thumbCenterX;
-    int endX   = checked ? d->_trackWidth - d->_trackHeight / 2 : d->_trackHeight / 2;
-    d->startThumbPosAnimation(startX, endX, checked);
 }
 
-bool NToggleSwitch::isChecked() const { return QAbstractButton::isChecked(); }
+bool NToggleSwitch::isChecked() const {
+    Q_D(const NToggleSwitch);
+    return d->_isChecked;
+}
 
 bool NToggleSwitch::event(QEvent* event) {
     Q_D(NToggleSwitch);
@@ -162,7 +163,7 @@ void NToggleSwitch::drawTrack(QPainter* painter) {
     QColor trackColor;
     QColor borderColor = d->_isDark ? d->_pDarkTrackBorderColor : d->_pLightTrackBorderColor;
 
-    if (isChecked()) {
+    if (d->_visualChecked) {
         if (!isEnabled()) {
             trackColor  = d->_accentDisabledColor;
             borderColor = Qt::transparent;
@@ -274,45 +275,53 @@ void NToggleSwitch::drawText(QPainter* painter) {
 
 void NToggleSwitch::mousePressEvent(QMouseEvent* event) {
     Q_D(NToggleSwitch);
-
     if (event->button() == Qt::LeftButton) {
         d->_isPressed  = true;
         d->_isDragging = false;
         d->_lastMouseX = event->pos().x();
-
         d->adjustThumbCenterX();
-
-        // 按下时变成横向椭圆
         d->startThumbStretchAnimation(true);
+        update();
     }
 }
 
 void NToggleSwitch::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NToggleSwitch);
-
     if (event->button() == Qt::LeftButton) {
         d->_isPressed = false;
-
-        // 释放时恢复圆形
         d->startThumbStretchAnimation(false);
 
+        bool shouldToggle = false;
         if (d->_isDragging) {
             d->_isDragging = false;
+            shouldToggle   = (d->_thumbCenterX > d->_trackWidth / 2) != d->_isChecked;
+        } else {
+            shouldToggle = rect().contains(event->pos());
+        }
 
-            if (d->_thumbCenterX > d->_trackWidth / 2) {
+        if (shouldToggle) {
+            bool newState     = !d->_isChecked;
+            d->_visualChecked = newState;
+
+            if (newState) {
                 d->startThumbPosAnimation(d->_thumbCenterX, d->_trackWidth - d->_trackHeight / 2, true);
             } else {
                 d->startThumbPosAnimation(d->_thumbCenterX, d->_trackHeight / 2, false);
             }
+
+            setChecked(newState);
+
+            update();
         } else {
-            if (isChecked()) {
-                d->startThumbPosAnimation(d->_thumbCenterX, d->_trackHeight / 2, false);
-            } else {
+            if (d->_isChecked) {
                 d->startThumbPosAnimation(d->_thumbCenterX, d->_trackWidth - d->_trackHeight / 2, true);
+            } else {
+                d->startThumbPosAnimation(d->_thumbCenterX, d->_trackHeight / 2, false);
             }
         }
 
         d->startThumbRadiusAnimation(d->_thumbRadius, d->_trackHeight * 0.35);
+        update();
     }
 }
 

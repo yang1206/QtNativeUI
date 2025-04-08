@@ -30,6 +30,9 @@ class QTNATIVEUI_EXPORT NToggleSwitch : public QAbstractButton {
     void setChecked(bool checked);
     bool isChecked() const;
 
+  Q_SIGNALS:
+    void checkedChanged(bool checked);
+
   protected:
     void  paintEvent(QPaintEvent* event) override;
     void  mousePressEvent(QMouseEvent* event) override;
