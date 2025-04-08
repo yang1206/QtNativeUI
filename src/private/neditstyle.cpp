@@ -1,17 +1,17 @@
+#include "neditstyle.h"
 #include <QLineEdit>
 #include <QPainterPath>
 #include <QPlainTextEdit>
 #include <QStyleOptionFrame>
 #include "QtNativeUI/NTheme.h"
-#include "neditstyle.h"
 
 NEditStyle::NEditStyle(const NEditStyleInterface* styleInterface, QStyle* style)
     : QProxyStyle(style), m_styleInterface(styleInterface) {}
 
 void NEditStyle::drawPrimitive(PrimitiveElement    element,
-                                    const QStyleOption* option,
-                                    QPainter*           painter,
-                                    const QWidget*      widget) const {
+                               const QStyleOption* option,
+                               QPainter*           painter,
+                               const QWidget*      widget) const {
     if ((element == PE_PanelLineEdit || element == PE_FrameLineEdit || element == PE_Frame) && widget) {
         bool isTextInput = qobject_cast<const QLineEdit*>(widget) || qobject_cast<const QTextEdit*>(widget) ||
                            qobject_cast<const QPlainTextEdit*>(widget);
@@ -71,6 +71,30 @@ void NEditStyle::drawPrimitive(PrimitiveElement    element,
                 painter->setPen(QPen(bottomLineColor, bottomLineWidth));
                 painter->drawRoundedRect(
                     bottomRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
+
+                QColor textColor = m_styleInterface->textColorForState(isDark, isEnabled);
+
+                if (const QLineEdit* lineEdit = qobject_cast<const QLineEdit*>(widget)) {
+                    QLineEdit* nonConstLineEdit = const_cast<QLineEdit*>(lineEdit);
+                    QPalette   pal              = nonConstLineEdit->palette();
+                    pal.setColor(QPalette::Text, textColor);
+                    pal.setColor(QPalette::HighlightedText, textColor);
+                    nonConstLineEdit->setPalette(pal);
+                } else if (const QTextEdit* textEdit = qobject_cast<const QTextEdit*>(widget)) {
+                    QTextEdit* nonConstTextEdit = const_cast<QTextEdit*>(textEdit);
+                    QPalette   pal              = nonConstTextEdit->palette();
+                    pal.setColor(QPalette::Text, textColor);
+                    pal.setColor(QPalette::HighlightedText, textColor);
+                    nonConstTextEdit->setPalette(pal);
+                    nonConstTextEdit->viewport()->setPalette(pal);
+                } else if (const QPlainTextEdit* plainTextEdit = qobject_cast<const QPlainTextEdit*>(widget)) {
+                    QPlainTextEdit* nonConstPlainTextEdit = const_cast<QPlainTextEdit*>(plainTextEdit);
+                    QPalette        pal                   = nonConstPlainTextEdit->palette();
+                    pal.setColor(QPalette::Text, textColor);
+                    pal.setColor(QPalette::HighlightedText, textColor);
+                    nonConstPlainTextEdit->setPalette(pal);
+                    nonConstPlainTextEdit->viewport()->setPalette(pal);
+                }
 
                 painter->restore();
                 return;

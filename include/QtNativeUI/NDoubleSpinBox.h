@@ -21,17 +21,22 @@ class QTNATIVEUI_EXPORT NDoubleSpinBox : public QDoubleSpinBox {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundFocusColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBackgroundDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundDisabledColor)
-    
+
+    Q_PROPERTY_CREATE_Q_H(QColor, LightTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightTextDisabledColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkTextDisabledColor)
+
     // 边框颜色属性
     Q_PROPERTY_CREATE_Q_H(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBorderDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderDisabledColor)
-    
+
     // 底边线颜色
     Q_PROPERTY_CREATE_Q_H(QColor, LightBottomLineColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBottomLineColor)
-    
+
     // 按钮颜色属性
     Q_PROPERTY_CREATE_Q_H(QColor, LightButtonBgColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkButtonBgColor)
@@ -41,20 +46,21 @@ class QTNATIVEUI_EXPORT NDoubleSpinBox : public QDoubleSpinBox {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkButtonPressColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightButtonDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkButtonDisabledColor)
-    
+
     // 边框属性
     Q_PROPERTY_CREATE_Q_H(int, BorderRadius)
     Q_PROPERTY_CREATE_Q_H(int, BorderWidth)
 
-public:
+  public:
     explicit NDoubleSpinBox(QWidget* parent = nullptr);
     ~NDoubleSpinBox();
+    QLineEdit* getLineEdit() { return lineEdit(); }
 
-protected:
+  protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
 
-private:
+  private:
     void init();
 };
 
-#endif // NDOUBLESPINBOX_H 
+#endif // NDOUBLESPINBOX_H

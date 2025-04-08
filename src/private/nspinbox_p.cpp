@@ -50,6 +50,13 @@ QColor NSpinBoxPrivate::buttonBackgroundColor(bool isDark, bool isEnabled, bool 
     }
 }
 
+QColor NSpinBoxPrivate::textColorForState(bool isDark, bool isEnabled) const {
+    if (!isEnabled) {
+        return isDark ? _pDarkTextDisabledColor : _pLightTextDisabledColor;
+    }
+    return isDark ? _pDarkTextColor : _pLightTextColor;
+}
+
 int NSpinBoxPrivate::borderRadius() const { return _pBorderRadius; }
 
 int NSpinBoxPrivate::borderWidth() const { return _pBorderWidth; }

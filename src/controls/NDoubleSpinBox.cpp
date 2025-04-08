@@ -17,6 +17,11 @@ Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBackgroundFocusColor)
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBackgroundDisabledColor)
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBackgroundDisabledColor)
 
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightTextDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkTextDisabledColor)
+
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBorderDisabledColor)
@@ -60,9 +65,12 @@ void NDoubleSpinBox::init() {
     d->_pDarkBorderColor              = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
     d->_pLightBorderDisabledColor     = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_pDarkBorderDisabledColor      = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
-
-    d->_pLightBottomLineColor = QColor(0x86, 0x86, 0x86);
-    d->_pDarkBottomLineColor  = QColor(0x9A, 0x9A, 0x9A);
+    d->_pLightTextColor               = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+    d->_pDarkTextColor                = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightTextDisabledColor       = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
+    d->_pDarkTextDisabledColor        = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Dark);
+    d->_pLightBottomLineColor         = QColor(0x86, 0x86, 0x86);
+    d->_pDarkBottomLineColor          = QColor(0x9A, 0x9A, 0x9A);
 
     // 按钮颜色
     d->_pLightButtonBgColor       = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);

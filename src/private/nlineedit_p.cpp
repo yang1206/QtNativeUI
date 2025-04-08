@@ -7,9 +7,7 @@
 
 NLineEditPrivate::NLineEditPrivate(QObject* parent) : QObject(parent) {}
 
-NLineEditPrivate::~NLineEditPrivate() {
-
-}
+NLineEditPrivate::~NLineEditPrivate() {}
 
 QColor NLineEditPrivate::backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const {
     if (!isEnabled) {
@@ -39,22 +37,19 @@ QColor NLineEditPrivate::bottomLineColorForState(bool isDark, bool isEnabled, bo
     }
 }
 
-int NLineEditPrivate::borderRadius() const {
-    return _pBorderRadius;
+QColor NLineEditPrivate::textColorForState(bool isDark, bool isEnabled) const {
+    if (!isEnabled) {
+        return isDark ? _pDarkTextDisabledColor : _pLightTextDisabledColor;
+    }
+    return isDark ? _pDarkTextColor : _pLightTextColor;
 }
 
-int NLineEditPrivate::borderWidth() const {
-    return _pBorderWidth;
-}
+int NLineEditPrivate::borderRadius() const { return _pBorderRadius; }
 
-int NLineEditPrivate::bottomLineWidth(bool hasFocus) const {
-    return hasFocus ? 2 : 1;
-}
+int NLineEditPrivate::borderWidth() const { return _pBorderWidth; }
 
-bool NLineEditPrivate::isDarkMode() const {
-    return _isDark;
-}
+int NLineEditPrivate::bottomLineWidth(bool hasFocus) const { return hasFocus ? 2 : 1; }
 
-int NLineEditPrivate::shadowBorderWidth() const {
-    return _shadowBorderWidth;
-}
+bool NLineEditPrivate::isDarkMode() const { return _isDark; }
+
+int NLineEditPrivate::shadowBorderWidth() const { return _shadowBorderWidth; }

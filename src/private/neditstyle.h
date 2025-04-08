@@ -16,6 +16,7 @@ class NEditStyleInterface {
     virtual QColor borderColorForState(bool isDark, bool isEnabled) const = 0;
 
     virtual QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const = 0;
+    virtual QColor textColorForState(bool isDark, bool isEnabled) const                      = 0;
 
     virtual int borderRadius() const                 = 0;
     virtual int borderWidth() const                  = 0;

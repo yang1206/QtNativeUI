@@ -3,8 +3,7 @@
 
 NPlainTextEditPrivate::NPlainTextEditPrivate(QObject* parent) : QObject(parent) {}
 
-NPlainTextEditPrivate::~NPlainTextEditPrivate() {
-}
+NPlainTextEditPrivate::~NPlainTextEditPrivate() {}
 
 QColor NPlainTextEditPrivate::backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const {
     if (!isEnabled) {
@@ -34,22 +33,20 @@ QColor NPlainTextEditPrivate::bottomLineColorForState(bool isDark, bool isEnable
     }
 }
 
-int NPlainTextEditPrivate::borderRadius() const {
-    return _pBorderRadius;
+QColor NPlainTextEditPrivate::textColorForState(bool isDark, bool isEnabled) const {
+    if (!isEnabled) {
+        return isDark ? _pDarkTextDisabledColor : _pLightTextDisabledColor;
+    } else {
+        return isDark ? _pDarkTextColor : _pLightTextColor;
+    }
 }
 
-int NPlainTextEditPrivate::borderWidth() const {
-    return _pBorderWidth;
-}
+int NPlainTextEditPrivate::borderRadius() const { return _pBorderRadius; }
 
-int NPlainTextEditPrivate::bottomLineWidth(bool hasFocus) const {
-    return hasFocus ? 2 : 1;
-}
+int NPlainTextEditPrivate::borderWidth() const { return _pBorderWidth; }
 
-bool NPlainTextEditPrivate::isDarkMode() const {
-    return _isDark;
-}
+int NPlainTextEditPrivate::bottomLineWidth(bool hasFocus) const { return hasFocus ? 2 : 1; }
 
-int NPlainTextEditPrivate::shadowBorderWidth() const {
-    return _shadowBorderWidth;
-} 
+bool NPlainTextEditPrivate::isDarkMode() const { return _isDark; }
+
+int NPlainTextEditPrivate::shadowBorderWidth() const { return _shadowBorderWidth; }

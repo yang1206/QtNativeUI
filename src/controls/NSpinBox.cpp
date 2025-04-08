@@ -21,6 +21,11 @@ Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBackgroundFocusColor)
 Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBackgroundDisabledColor)
 Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBackgroundDisabledColor)
 
+Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightTextDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkTextDisabledColor)
+
 Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, DarkBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NSpinBox, QColor, LightBorderDisabledColor)
@@ -63,6 +68,11 @@ void NSpinBox::init() {
     d->_pDarkBorderColor              = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
     d->_pLightBorderDisabledColor     = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_pDarkBorderDisabledColor      = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
+
+    d->_pLightTextColor         = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+    d->_pDarkTextColor          = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightTextDisabledColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
+    d->_pDarkTextDisabledColor  = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Dark);
 
     d->_pLightBottomLineColor = nTheme->accentColor().normal();
     d->_pDarkBottomLineColor  = nTheme->accentColor().normal();

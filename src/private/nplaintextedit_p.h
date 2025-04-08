@@ -46,6 +46,7 @@ class NPlainTextEditPrivate : public QObject, public NEditStyleInterface {
     QColor backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const override;
     QColor borderColorForState(bool isDark, bool isEnabled) const override;
     QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const override;
+    QColor textColorForState(bool isDark, bool isEnabled) const override;
     int    borderRadius() const override;
     int    borderWidth() const override;
     int    bottomLineWidth(bool hasFocus) const override;
