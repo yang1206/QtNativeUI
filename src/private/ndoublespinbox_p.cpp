@@ -50,6 +50,14 @@ QColor NDoubleSpinBoxPrivate::buttonBackgroundColor(bool isDark, bool isEnabled,
     }
 }
 
+QColor NDoubleSpinBoxPrivate::textColorForState(bool isDark, bool isEnabled) const {
+    if (!isEnabled) {
+        return isDark ? _pDarkTextDisabledColor : _pLightTextDisabledColor;
+    } else {
+        return isDark ? _pDarkTextColor : _pLightTextColor;
+    }
+}
+
 int NDoubleSpinBoxPrivate::borderRadius() const { return _pBorderRadius; }
 
 int NDoubleSpinBoxPrivate::borderWidth() const { return _pBorderWidth; }
@@ -58,4 +66,4 @@ int NDoubleSpinBoxPrivate::bottomLineWidth(bool hasFocus) const { return hasFocu
 
 bool NDoubleSpinBoxPrivate::isDarkMode() const { return _isDark; }
 
-int NDoubleSpinBoxPrivate::shadowBorderWidth() const { return _shadowBorderWidth; } 
+int NDoubleSpinBoxPrivate::shadowBorderWidth() const { return _shadowBorderWidth; }

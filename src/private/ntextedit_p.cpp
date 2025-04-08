@@ -8,8 +8,7 @@
 
 NTextEditPrivate::NTextEditPrivate(QObject* parent) : QObject(parent) {}
 
-NTextEditPrivate::~NTextEditPrivate() {
-}
+NTextEditPrivate::~NTextEditPrivate() {}
 
 QColor NTextEditPrivate::backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const {
     if (!isEnabled) {
@@ -36,6 +35,14 @@ QColor NTextEditPrivate::bottomLineColorForState(bool isDark, bool isEnabled, bo
         return nTheme->accentColor().normal();
     } else {
         return isDark ? _pDarkBottomLineColor : _pLightBottomLineColor;
+    }
+}
+
+QColor NTextEditPrivate::textColorForState(bool isDark, bool isEnabled) const {
+    if (!isEnabled) {
+        return isDark ? _pDarkTextDisabledColor : _pLightTextDisabledColor;
+    } else {
+        return isDark ? _pDarkTextColor : _pLightTextColor;
     }
 }
 

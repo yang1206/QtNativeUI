@@ -12,15 +12,13 @@ class NSpinBoxStyleInterface {
     virtual QColor backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const = 0;
     virtual QColor borderColorForState(bool isDark, bool isEnabled) const                                   = 0;
     virtual QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const                = 0;
-
-    // 按钮部分颜色
     virtual QColor buttonBackgroundColor(bool isDark, bool isEnabled, bool isHovered, bool isPressed) const = 0;
-
-    virtual int  borderRadius() const                 = 0;
-    virtual int  borderWidth() const                  = 0;
-    virtual int  bottomLineWidth(bool hasFocus) const = 0;
-    virtual bool isDarkMode() const                   = 0;
-    virtual int  shadowBorderWidth() const            = 0;
+    virtual QColor textColorForState(bool isDark, bool isEnabled) const                                     = 0;
+    virtual int    borderRadius() const                                                                     = 0;
+    virtual int    borderWidth() const                                                                      = 0;
+    virtual int    bottomLineWidth(bool hasFocus) const                                                     = 0;
+    virtual bool   isDarkMode() const                                                                       = 0;
+    virtual int    shadowBorderWidth() const                                                                = 0;
 };
 
 class NSpinBoxStyle : public QProxyStyle {

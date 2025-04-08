@@ -20,6 +20,10 @@ class QTNATIVEUI_EXPORT NSpinBox : public QSpinBox {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundFocusColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBackgroundDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundDisabledColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightTextDisabledColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkTextDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBorderDisabledColor)
@@ -40,6 +44,7 @@ class QTNATIVEUI_EXPORT NSpinBox : public QSpinBox {
   public:
     explicit NSpinBox(QWidget* parent = nullptr);
     ~NSpinBox();
+    QLineEdit* getLineEdit() { return lineEdit(); }
 
   protected:
     void contextMenuEvent(QContextMenuEvent* event) override;

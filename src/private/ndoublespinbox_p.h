@@ -19,6 +19,11 @@ class NDoubleSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     Q_PROPERTY_CREATE_D(QColor, LightBackgroundDisabledColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBackgroundDisabledColor)
 
+    Q_PROPERTY_CREATE_D(QColor, LightTextColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkTextColor)
+    Q_PROPERTY_CREATE_D(QColor, LightTextDisabledColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkTextDisabledColor)
+
     // 边框颜色属性
     Q_PROPERTY_CREATE_D(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBorderColor)
@@ -43,14 +48,14 @@ class NDoubleSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
 
-public:
+  public:
     explicit NDoubleSpinBoxPrivate(QObject* parent = nullptr);
     ~NDoubleSpinBoxPrivate();
     Q_D_CREATE(NDoubleSpinBox)
 
     NThemeType::ThemeMode _themeMode;
-    bool _isDark{false};
-    int _shadowBorderWidth{3};
+    bool                  _isDark{false};
+    int                   _shadowBorderWidth{3};
 
     NSpinBoxStyle* _spinBoxStyle{nullptr};
 
@@ -59,11 +64,12 @@ public:
     QColor borderColorForState(bool isDark, bool isEnabled) const override;
     QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const override;
     QColor buttonBackgroundColor(bool isDark, bool isEnabled, bool isHovered, bool isPressed) const override;
-    int borderRadius() const override;
-    int borderWidth() const override;
-    int bottomLineWidth(bool hasFocus) const override;
-    bool isDarkMode() const override;
-    int shadowBorderWidth() const override;
+    QColor textColorForState(bool isDark, bool isEnabled) const override;
+    int    borderRadius() const override;
+    int    borderWidth() const override;
+    int    bottomLineWidth(bool hasFocus) const override;
+    bool   isDarkMode() const override;
+    int    shadowBorderWidth() const override;
 };
 
-#endif // NDOUBLESPINBOX_P_H 
+#endif // NDOUBLESPINBOX_P_H
