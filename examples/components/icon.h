@@ -4,13 +4,13 @@
 #include <QButtonGroup>
 #include <QGridLayout>
 #include <QLabel>
-#include <QScrollArea>
 #include <QTimer>
 #include <QtNativeUI/NRadioButton.h>
 #include "QtNativeUI/NIconEnums.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NPushButton.h"
 
+class NScrollArea;
 class IconButton : public NPushButton {
     Q_OBJECT
   public:
@@ -51,7 +51,7 @@ class IconExample : public QWidget {
     enum IconFilterType { All = 0, RegularOnly = 1, FilledOnly = 2 };
 
     NLineEdit*   m_searchEdit;
-    QScrollArea* m_scrollArea;
+    NScrollArea* m_scrollArea;
     QWidget*     m_contentWidget;
     QGridLayout* m_gridLayout;
     QLabel*      m_statusLabel;

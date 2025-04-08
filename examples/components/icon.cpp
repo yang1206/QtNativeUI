@@ -5,6 +5,7 @@
 #include <QRegularExpression>
 #include <QToolTip>
 #include "QtNativeUI/NIcon.h"
+#include "QtNativeUI/NScrollArea.h"
 
 IconButton::IconButton(quint32 iconCode, const QString& name, bool isFilled, QWidget* parent)
     : NPushButton(parent), m_iconName(name), m_iconCode(iconCode), m_isFilled(isFilled) {
@@ -81,7 +82,7 @@ void IconExample::initUI() {
     mainLayout->addLayout(typeFilterLayout);
 
     // 图标显示区域
-    m_scrollArea = new QScrollArea(this);
+    m_scrollArea = new NScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
     m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

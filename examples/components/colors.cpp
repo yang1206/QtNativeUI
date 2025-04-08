@@ -5,6 +5,8 @@
 #include <QVBoxLayout>
 #include <QtNativeUI/NTheme.h>
 
+#include "QtNativeUI/NScrollArea.h"
+
 ColorBlock::ColorBlock(const QString& name, const QColor& color, QWidget* parent)
     : QWidget(parent), m_name(name), m_color(color) {
     setMinimumSize(180, 60);
@@ -107,12 +109,12 @@ void ColorsExample::initUI() {
     mainLayout->setSpacing(0);
 
     // 创建滚动区域
-    m_scrollArea = new QScrollArea(this);
+    m_scrollArea = new NScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
     m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    QWidget* contentWidget = new QWidget(m_scrollArea);
+    QWidget*     contentWidget = new QWidget(m_scrollArea);
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
     contentLayout->setContentsMargins(32, 32, 32, 32);
     contentLayout->setSpacing(32);
@@ -120,13 +122,13 @@ void ColorsExample::initUI() {
     // 添加 Fluent 颜色部分
     QWidget* fluentSection = createSection("Fluent UI Colors");
     fluentSection->setObjectName("FluentUIColors"); // 设置对象名
-    setupFluentColors(fluentSection); // 直接传递部件
+    setupFluentColors(fluentSection);               // 直接传递部件
     contentLayout->addWidget(fluentSection);
 
     // 添加强调色部分
     QWidget* accentSection = createSection("Accent Colors");
     accentSection->setObjectName("AccentColors"); // 设置对象名
-    setupAccentColors(accentSection); // 直接传递部件
+    setupAccentColors(accentSection);             // 直接传递部件
     contentLayout->addWidget(accentSection);
 
     contentLayout->addStretch();
@@ -138,25 +140,25 @@ void ColorsExample::initUI() {
 // 修改 setupFluentColors 方法
 void ColorsExample::setupFluentColors(QWidget* section) {
     // 删除现有布局中的所有项目
-    QLayout* oldLayout = section->layout();
+    QLayout*     oldLayout     = section->layout();
     QVBoxLayout* sectionLayout = qobject_cast<QVBoxLayout*>(oldLayout);
-    
+
     // 创建网格布局
     QGridLayout* grid = new QGridLayout();
     grid->setSpacing(8);
     grid->setContentsMargins(0, 16, 0, 0);
 
-    int row = 0;
-    int col = 0;
+    int row     = 0;
+    int col     = 0;
     int maxCols = 3;
 
     // 创建所有 Fluent 颜色块
     for (int i = 0; i < NFluentColorKey::Count; ++i) {
-        auto key = static_cast<NFluentColorKey::Key>(i);
-        QString name = fluentColorKeyToString(key);
-        QColor color = nTheme->getColor(key);
+        auto    key   = static_cast<NFluentColorKey::Key>(i);
+        QString name  = fluentColorKeyToString(key);
+        QColor  color = nTheme->getColor(key);
 
-        ColorBlock* block = new ColorBlock(name, color, section);
+        ColorBlock* block  = new ColorBlock(name, color, section);
         m_colorBlocks[key] = block;
         grid->addWidget(block, row, col);
 
@@ -174,35 +176,29 @@ void ColorsExample::setupFluentColors(QWidget* section) {
 // 修改 setupAccentColors 方法
 void ColorsExample::setupAccentColors(QWidget* section) {
     // 删除现有布局中的所有项目
-    QLayout* oldLayout = section->layout();
+    QLayout*     oldLayout     = section->layout();
     QVBoxLayout* sectionLayout = qobject_cast<QVBoxLayout*>(oldLayout);
-    
+
     // 创建网格布局
     QGridLayout* grid = new QGridLayout();
     grid->setSpacing(16);
     grid->setContentsMargins(0, 16, 0, 0);
 
-    QList<QPair<QString, NAccentColorType::Type>> accentColors = {
-        {"Yellow", NAccentColorType::Yellow},
-        {"Orange", NAccentColorType::Orange},
-        {"Red", NAccentColorType::Red},
-        {"Magenta", NAccentColorType::Magenta},
-        {"Purple", NAccentColorType::Purple},
-        {"Blue", NAccentColorType::Blue},
-        {"Teal", NAccentColorType::Teal},
-        {"Green", NAccentColorType::Green}
-    };
+    QList<QPair<QString, NAccentColorType::Type>> accentColors = {{"Yellow", NAccentColorType::Yellow},
+                                                                  {"Orange", NAccentColorType::Orange},
+                                                                  {"Red", NAccentColorType::Red},
+                                                                  {"Magenta", NAccentColorType::Magenta},
+                                                                  {"Purple", NAccentColorType::Purple},
+                                                                  {"Blue", NAccentColorType::Blue},
+                                                                  {"Teal", NAccentColorType::Teal},
+                                                                  {"Green", NAccentColorType::Green}};
 
-    int row = 0;
-    int col = 0;
+    int row     = 0;
+    int col     = 0;
     int maxCols = 2;
 
     for (const auto& pair : accentColors) {
-        AccentColorBlock* block = new AccentColorBlock(
-            pair.first, 
-            nTheme->getAccentColor(pair.second),
-            section
-        );
+        AccentColorBlock* block = new AccentColorBlock(pair.first, nTheme->getAccentColor(pair.second), section);
         m_accentBlocks.append(block);
         grid->addWidget(block, row, col);
 

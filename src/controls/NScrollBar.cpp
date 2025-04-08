@@ -52,9 +52,9 @@ void NScrollBar::init() {
 
     // 半透明的滑块颜色
     d->_pLightThumbColor = QColor(NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Light));
-    d->_pLightThumbColor.setAlphaF(0.5);
+    d->_pLightThumbColor.setAlphaF(0.3);
     d->_pDarkThumbColor = QColor(NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Dark));
-    d->_pDarkThumbColor.setAlphaF(0.5);
+    d->_pDarkThumbColor.setAlphaF(0.3);
 
     // 悬浮和按下状态的不透明滑块颜色
     d->_pLightThumbHoverColor = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Light);
@@ -77,7 +77,7 @@ void NScrollBar::init() {
     d->_pThumbThickness       = 6;  // 悬浮/按下时的厚度
     d->_pThumbNormalThickness = 3;  // 正常状态下的厚度
     d->_pThumbCornerRadius    = 4;  // 滑块圆角
-    d->_pTrackCornerRadius    = 4;  // 轨道圆角
+    d->_pTrackCornerRadius    = 6;  // 轨道圆角
 
     // 初始化样式
     d->initScrollBarStyle();

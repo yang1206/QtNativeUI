@@ -9,7 +9,6 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QMenu>
-#include <QScrollArea>
 #include <QStyleHints>
 #include <QVBoxLayout>
 #include <QtNativeUI/NPushButton.h>
@@ -17,6 +16,7 @@
 #include "QtNativeUI/NHyperlinkButton.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NRadioButton.h"
+#include "QtNativeUI/NScrollArea.h"
 #include "QtNativeUI/NScrollBar.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolButton.h"
@@ -30,12 +30,9 @@ void ButtonExample::initUI() {
     mainLayout->setSpacing(0);
 
     // 创建滚动区域
-    m_scrollArea = new QScrollArea(this);
+    m_scrollArea = new NScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
-    m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    NScrollBar* vScrollBar = new NScrollBar(Qt::Vertical);
-    m_scrollArea->setVerticalScrollBar(vScrollBar);
 
     // 创建内容容器
     QWidget*     contentWidget = new QWidget(m_scrollArea);
