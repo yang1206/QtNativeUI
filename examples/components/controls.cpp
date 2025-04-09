@@ -465,63 +465,116 @@ QWidget* ControlsExample::createToolTips() {
 QWidget* ControlsExample::createProgressBars() {
     QWidget*     container = new QWidget;
     QVBoxLayout* layout    = new QVBoxLayout(container);
-    layout->setSpacing(16);
+    // layout->setSpacing(16);
 
     // 基本进度条
+    QLabel* basicLabel = new QLabel("基本进度条:", container);
+    layout->addWidget(basicLabel);
+
     NProgressBar* basicProgressBar = new NProgressBar(container);
     basicProgressBar->setValue(50);
     basicProgressBar->setMinimumWidth(300);
     layout->addWidget(basicProgressBar);
 
     // 带文本的进度条
+    QLabel* textLabel = new QLabel("带文本的进度条:", container);
+    layout->addWidget(textLabel);
+
     NProgressBar* textProgressBar = new NProgressBar(container);
+    textProgressBar->setTrackThickness(20);
+    textProgressBar->setBorderRadius(10);
     textProgressBar->setValue(75);
     textProgressBar->setFormat("已完成 %p%");
+    textProgressBar->setTextVisible(true);
     textProgressBar->setMinimumWidth(300);
     layout->addWidget(textProgressBar);
 
     // 不确定状态的进度条
+    QLabel* indeterminateLabel = new QLabel("不确定状态进度条:", container);
+    layout->addWidget(indeterminateLabel);
+
     NProgressBar* indeterminateProgressBar = new NProgressBar(container);
     indeterminateProgressBar->setMinimum(0);
     indeterminateProgressBar->setMaximum(0); // 设置为不确定状态
     indeterminateProgressBar->setMinimumWidth(300);
     layout->addWidget(indeterminateProgressBar);
 
-    // 反向进度条
-    NProgressBar* invertedProgressBar = new NProgressBar(container);
-    invertedProgressBar->setValue(60);
-    invertedProgressBar->setInvertedAppearance(true);
-    invertedProgressBar->setMinimumWidth(300);
-    layout->addWidget(invertedProgressBar);
-
     // 垂直进度条
-    QHBoxLayout* verticalLayout = new QHBoxLayout();
+    QLabel* verticalLabel = new QLabel("垂直进度条:", container);
+    layout->addWidget(verticalLabel);
 
-    NProgressBar* verticalProgressBar = new NProgressBar(container);
-    verticalProgressBar->setOrientation(Qt::Vertical);
-    verticalProgressBar->setValue(80);
+    QHBoxLayout* verticalLayout = new QHBoxLayout();
+    verticalLayout->setSpacing(16);
+
+    NProgressBar* verticalProgressBar = new NProgressBar(Qt::Vertical, container);
+    verticalProgressBar->setValue(75);
     verticalProgressBar->setMinimumHeight(150);
+    verticalProgressBar->setTrackThickness(8); // 设置轨道厚度
     verticalLayout->addWidget(verticalProgressBar);
 
-    // 垂直反向进度条
-    NProgressBar* verticalInvertedProgressBar = new NProgressBar(container);
-    verticalInvertedProgressBar->setOrientation(Qt::Vertical);
-    verticalInvertedProgressBar->setValue(40);
-    verticalInvertedProgressBar->setInvertedAppearance(true);
-    verticalInvertedProgressBar->setMinimumHeight(150);
-    verticalLayout->addWidget(verticalInvertedProgressBar);
+    // 垂直不确定状态进度条
+    NProgressBar* verticalIndeterminateProgressBar = new NProgressBar(Qt::Vertical, container);
+    verticalIndeterminateProgressBar->setMinimum(0);
+    verticalIndeterminateProgressBar->setMaximum(0);
+    verticalIndeterminateProgressBar->setMinimumHeight(150);
+    verticalIndeterminateProgressBar->setTrackThickness(8); // 设置轨道厚度
+    verticalLayout->addWidget(verticalIndeterminateProgressBar);
 
     verticalLayout->addStretch();
     layout->addLayout(verticalLayout);
 
-    // 禁用状态的进度条
+    // 状态示例
+    QLabel* stateLabel = new QLabel("状态示例:", container);
+    layout->addWidget(stateLabel);
+
+    QHBoxLayout* stateLayout = new QHBoxLayout();
+    stateLayout->setSpacing(16);
+
+    // 暂停状态
+    NProgressBar* pausedProgressBar = new NProgressBar(container);
+    pausedProgressBar->setValue(60);
+    pausedProgressBar->setMinimumWidth(200);
+    pausedProgressBar->setPaused(true);
+    QLabel* pausedLabel = new QLabel("暂停状态", container);
+    pausedLabel->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout* pausedLayout = new QVBoxLayout();
+    pausedLayout->addWidget(pausedProgressBar);
+    pausedLayout->addWidget(pausedLabel);
+    stateLayout->addLayout(pausedLayout);
+
+    // 错误状态
+    NProgressBar* errorProgressBar = new NProgressBar(container);
+    errorProgressBar->setValue(30);
+    errorProgressBar->setMinimumWidth(200);
+    errorProgressBar->setError(true);
+    QLabel* errorLabel = new QLabel("错误状态", container);
+    errorLabel->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout* errorLayout = new QVBoxLayout();
+    errorLayout->addWidget(errorProgressBar);
+    errorLayout->addWidget(errorLabel);
+    stateLayout->addLayout(errorLayout);
+
+    // 禁用状态
     NProgressBar* disabledProgressBar = new NProgressBar(container);
-    disabledProgressBar->setValue(30);
+    disabledProgressBar->setValue(45);
+    disabledProgressBar->setMinimumWidth(200);
     disabledProgressBar->setEnabled(false);
-    disabledProgressBar->setMinimumWidth(300);
-    layout->addWidget(disabledProgressBar);
+    QLabel* disabledLabel = new QLabel("禁用状态", container);
+    disabledLabel->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout* disabledLayout = new QVBoxLayout();
+    disabledLayout->addWidget(disabledProgressBar);
+    disabledLayout->addWidget(disabledLabel);
+    stateLayout->addLayout(disabledLayout);
+
+    layout->addLayout(stateLayout);
 
     // 添加一个动态更新的进度条
+    QLabel* dynamicLabel = new QLabel("动态进度条:", container);
+    layout->addWidget(dynamicLabel);
+
     NProgressBar* dynamicProgressBar = new NProgressBar(container);
     dynamicProgressBar->setValue(0);
     dynamicProgressBar->setMinimumWidth(300);
@@ -558,6 +611,32 @@ QWidget* ControlsExample::createProgressBars() {
         dynamicProgressBar->setValue(0);
     });
     controlLayout->addWidget(resetButton);
+
+    NPushButton* pauseButton = new NPushButton("暂停/继续", container);
+    connect(pauseButton, &NPushButton::clicked, [dynamicProgressBar]() {
+        QTimer* timer = dynamicProgressBar->property("timer").value<QTimer*>();
+
+        if (dynamicProgressBar->isPaused()) {
+            dynamicProgressBar->resume();
+            // 恢复定时器
+            if (timer && dynamicProgressBar->value() < 100) {
+                timer->start();
+            }
+        } else {
+            dynamicProgressBar->pause();
+            // 暂停定时器
+            if (timer) {
+                timer->stop();
+            }
+        }
+    });
+    controlLayout->addWidget(pauseButton);
+
+    NPushButton* errorButton = new NPushButton("错误", container);
+    connect(errorButton, &NPushButton::clicked, [dynamicProgressBar]() {
+        dynamicProgressBar->setError(!dynamicProgressBar->isError());
+    });
+    controlLayout->addWidget(errorButton);
 
     controlLayout->addStretch();
     layout->addLayout(controlLayout);
