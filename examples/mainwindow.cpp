@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     // 添加图标展示页面
     auto icons = new IconExample(this);
     m_tabWidget->addTab(icons, "Icons");
-
+    m_tabWidget->setStyleSheet("QTabWidget::pane { border: 1px solid #C2C7CB; }");
     // 设置窗口属性
     setWindowTitle("QtNativeUI by Yang1206");
     resize(900, 700);
