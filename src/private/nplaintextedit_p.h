@@ -29,6 +29,11 @@ class NPlainTextEditPrivate : public QObject, public NEditStyleInterface {
     Q_PROPERTY_CREATE_D(QColor, LightTextDisabledColor)
     Q_PROPERTY_CREATE_D(QColor, DarkTextDisabledColor)
 
+    Q_PROPERTY_CREATE_D(QColor, LightSelectionBackgroundColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkSelectionBackgroundColor)
+    Q_PROPERTY_CREATE_D(QColor, LightSelectionTextColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkSelectionTextColor)
+
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
 
@@ -47,6 +52,8 @@ class NPlainTextEditPrivate : public QObject, public NEditStyleInterface {
     QColor borderColorForState(bool isDark, bool isEnabled) const override;
     QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const override;
     QColor textColorForState(bool isDark, bool isEnabled) const override;
+    QColor selectionBackgroundColor(bool isDark) const override;
+    QColor selectionTextColor(bool isDark) const override;
     int    borderRadius() const override;
     int    borderWidth() const override;
     int    bottomLineWidth(bool hasFocus) const override;

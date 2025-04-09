@@ -29,6 +29,12 @@ Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightTextColor)
 Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkTextColor)
 Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightTextDisabledColor)
 Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkTextDisabledColor)
+
+Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightSelectionBackgroundColor)
+Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkSelectionBackgroundColor)
+Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, LightSelectionTextColor)
+Q_PROPERTY_CREATE_Q_CPP(NTextEdit, QColor, DarkSelectionTextColor)
+
 Q_PROPERTY_CREATE_Q_CPP(NTextEdit, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NTextEdit, int, BorderWidth)
 
@@ -66,6 +72,15 @@ void NTextEdit::init() {
     d->_pLightTextDisabledColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
     d->_pDarkTextDisabledColor  = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Dark);
 
+    d->_pLightSelectionBackgroundColor = nTheme->accentColor().normal();
+    d->_pDarkSelectionBackgroundColor  = nTheme->accentColor().normal();
+
+    bool useDarkTextOnLight = d->_pLightSelectionBackgroundColor.lightnessF() > 0.5;
+    bool useDarkTextOnDark  = d->_pDarkSelectionBackgroundColor.lightnessF() > 0.5;
+
+    d->_pLightSelectionTextColor = useDarkTextOnLight ? QColor(0x00, 0x00, 0x00) : QColor(0xFF, 0xFF, 0xFF);
+    d->_pDarkSelectionTextColor  = useDarkTextOnDark ? QColor(0x00, 0x00, 0x00) : QColor(0xFF, 0xFF, 0xFF);
+
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
     setObjectName("NTextEdit");
@@ -90,6 +105,20 @@ void NTextEdit::init() {
         Q_D(NTextEdit);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
+        update();
+    });
+
+    connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor& accentColor) {
+        Q_D(NTextEdit);
+        d->_pLightSelectionBackgroundColor = accentColor.normal();
+        d->_pDarkSelectionBackgroundColor  = accentColor.normal();
+
+        bool useDarkTextOnLight = d->_pLightSelectionBackgroundColor.lightnessF() > 0.5;
+        bool useDarkTextOnDark  = d->_pDarkSelectionBackgroundColor.lightnessF() > 0.5;
+
+        d->_pLightSelectionTextColor = useDarkTextOnLight ? QColor(0x00, 0x00, 0x00) : QColor(0xFF, 0xFF, 0xFF);
+        d->_pDarkSelectionTextColor  = useDarkTextOnDark ? QColor(0x00, 0x00, 0x00) : QColor(0xFF, 0xFF, 0xFF);
+
         update();
     });
 }

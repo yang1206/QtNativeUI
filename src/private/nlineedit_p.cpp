@@ -44,6 +44,14 @@ QColor NLineEditPrivate::textColorForState(bool isDark, bool isEnabled) const {
     return isDark ? _pDarkTextColor : _pLightTextColor;
 }
 
+QColor NLineEditPrivate::selectionBackgroundColor(bool isDark) const {
+    return isDark ? _pDarkSelectionBackgroundColor : _pLightSelectionBackgroundColor;
+}
+
+QColor NLineEditPrivate::selectionTextColor(bool isDark) const {
+    return isDark ? _pDarkSelectionTextColor : _pLightSelectionTextColor;
+}
+
 int NLineEditPrivate::borderRadius() const { return _pBorderRadius; }
 
 int NLineEditPrivate::borderWidth() const { return _pBorderWidth; }

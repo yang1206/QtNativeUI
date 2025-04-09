@@ -58,6 +58,14 @@ QColor NDoubleSpinBoxPrivate::textColorForState(bool isDark, bool isEnabled) con
     }
 }
 
+QColor NDoubleSpinBoxPrivate::selectionBackgroundColor(bool isDark) const {
+    return isDark ? _pDarkSelectionBackgroundColor : _pLightSelectionBackgroundColor;
+}
+
+QColor NDoubleSpinBoxPrivate::selectionTextColor(bool isDark) const {
+    return isDark ? _pDarkSelectionTextColor : _pLightSelectionTextColor;
+}
+
 int NDoubleSpinBoxPrivate::borderRadius() const { return _pBorderRadius; }
 
 int NDoubleSpinBoxPrivate::borderWidth() const { return _pBorderWidth; }

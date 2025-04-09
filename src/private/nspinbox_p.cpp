@@ -57,6 +57,14 @@ QColor NSpinBoxPrivate::textColorForState(bool isDark, bool isEnabled) const {
     return isDark ? _pDarkTextColor : _pLightTextColor;
 }
 
+QColor NSpinBoxPrivate::selectionBackgroundColor(bool isDark) const {
+    return isDark ? _pDarkSelectionBackgroundColor : _pLightSelectionBackgroundColor;
+}
+
+QColor NSpinBoxPrivate::selectionTextColor(bool isDark) const {
+    return isDark ? _pDarkSelectionTextColor : _pLightSelectionTextColor;
+}
+
 int NSpinBoxPrivate::borderRadius() const { return _pBorderRadius; }
 
 int NSpinBoxPrivate::borderWidth() const { return _pBorderWidth; }

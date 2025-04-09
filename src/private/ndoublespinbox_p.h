@@ -44,6 +44,11 @@ class NDoubleSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     Q_PROPERTY_CREATE_D(QColor, LightButtonDisabledColor)
     Q_PROPERTY_CREATE_D(QColor, DarkButtonDisabledColor)
 
+    Q_PROPERTY_CREATE_D(QColor, LightSelectionBackgroundColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkSelectionBackgroundColor)
+    Q_PROPERTY_CREATE_D(QColor, LightSelectionTextColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkSelectionTextColor)
+
     // 边框属性
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
@@ -65,6 +70,8 @@ class NDoubleSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const override;
     QColor buttonBackgroundColor(bool isDark, bool isEnabled, bool isHovered, bool isPressed) const override;
     QColor textColorForState(bool isDark, bool isEnabled) const override;
+    QColor selectionBackgroundColor(bool isDark) const override;
+    QColor selectionTextColor(bool isDark) const override;
     int    borderRadius() const override;
     int    borderWidth() const override;
     int    bottomLineWidth(bool hasFocus) const override;

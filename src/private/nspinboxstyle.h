@@ -14,6 +14,8 @@ class NSpinBoxStyleInterface {
     virtual QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const                = 0;
     virtual QColor buttonBackgroundColor(bool isDark, bool isEnabled, bool isHovered, bool isPressed) const = 0;
     virtual QColor textColorForState(bool isDark, bool isEnabled) const                                     = 0;
+    virtual QColor selectionBackgroundColor(bool isDark) const                                              = 0;
+    virtual QColor selectionTextColor(bool isDark) const                                                    = 0;
     virtual int    borderRadius() const                                                                     = 0;
     virtual int    borderWidth() const                                                                      = 0;
     virtual int    bottomLineWidth(bool hasFocus) const                                                     = 0;

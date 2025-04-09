@@ -113,18 +113,24 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
             painter->restore();
         }
         // 设置文字颜色
-        QColor textColor = m_styleInterface->textColorForState(isDark, isEnabled);
+        QColor textColor          = m_styleInterface->textColorForState(isDark, isEnabled);
+        QColor selectionBgColor   = m_styleInterface->selectionBackgroundColor(isDark);
+        QColor selectionTextColor = m_styleInterface->selectionTextColor(isDark);
         if (const NSpinBox* spinBox = qobject_cast<const NSpinBox*>(widget)) {
             NSpinBox* nonConstSpinBox = const_cast<NSpinBox*>(spinBox);
             QPalette  pal             = nonConstSpinBox->palette();
             pal.setColor(QPalette::Text, textColor);
             pal.setColor(QPalette::ButtonText, textColor);
+
+            pal.setColor(QPalette::Highlight, selectionBgColor);
+            pal.setColor(QPalette::HighlightedText, selectionTextColor);
             nonConstSpinBox->setPalette(pal);
 
             if (QLineEdit* lineEdit = nonConstSpinBox->getLineEdit()) {
                 QPalette lineEditPal = lineEdit->palette();
                 lineEditPal.setColor(QPalette::Text, textColor);
-                lineEditPal.setColor(QPalette::HighlightedText, textColor);
+                lineEditPal.setColor(QPalette::Highlight, selectionBgColor);
+                lineEditPal.setColor(QPalette::HighlightedText, selectionTextColor);
                 lineEdit->setPalette(lineEditPal);
             }
         } else if (const NDoubleSpinBox* doubleSpinBox = qobject_cast<const NDoubleSpinBox*>(widget)) {
@@ -132,12 +138,15 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
             QPalette        pal                   = nonConstDoubleSpinBox->palette();
             pal.setColor(QPalette::Text, textColor);
             pal.setColor(QPalette::ButtonText, textColor);
+            pal.setColor(QPalette::Highlight, selectionBgColor);
+            pal.setColor(QPalette::HighlightedText, selectionTextColor);
             nonConstDoubleSpinBox->setPalette(pal);
 
             if (QLineEdit* lineEdit = nonConstDoubleSpinBox->getLineEdit()) {
                 QPalette lineEditPal = lineEdit->palette();
                 lineEditPal.setColor(QPalette::Text, textColor);
-                lineEditPal.setColor(QPalette::HighlightedText, textColor);
+                lineEditPal.setColor(QPalette::Highlight, selectionBgColor);
+                lineEditPal.setColor(QPalette::HighlightedText, selectionTextColor);
                 lineEdit->setPalette(lineEditPal);
             }
         }

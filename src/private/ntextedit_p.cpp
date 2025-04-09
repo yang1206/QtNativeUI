@@ -46,6 +46,14 @@ QColor NTextEditPrivate::textColorForState(bool isDark, bool isEnabled) const {
     }
 }
 
+QColor NTextEditPrivate::selectionBackgroundColor(bool isDark) const {
+    return isDark ? _pDarkSelectionBackgroundColor : _pLightSelectionBackgroundColor;
+}
+
+QColor NTextEditPrivate::selectionTextColor(bool isDark) const {
+    return isDark ? _pDarkSelectionTextColor : _pLightSelectionTextColor;
+}
+
 int NTextEditPrivate::borderRadius() const { return _pBorderRadius; }
 
 int NTextEditPrivate::borderWidth() const { return _pBorderWidth; }

@@ -31,6 +31,11 @@ class QTNATIVEUI_EXPORT NPlainTextEdit : public QPlainTextEdit {
     Q_PROPERTY_CREATE_Q_H(QColor, LightTextDisabledColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkTextDisabledColor)
 
+    Q_PROPERTY_CREATE_Q_H(QColor, LightSelectionBackgroundColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkSelectionBackgroundColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightSelectionTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkSelectionTextColor)
+
     Q_PROPERTY_CREATE_Q_H(int, BorderRadius)
     Q_PROPERTY_CREATE_Q_H(int, BorderWidth)
 

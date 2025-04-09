@@ -72,26 +72,31 @@ void NEditStyle::drawPrimitive(PrimitiveElement    element,
                 painter->drawRoundedRect(
                     bottomRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
-                QColor textColor = m_styleInterface->textColorForState(isDark, isEnabled);
+                QColor selectionBgColor   = m_styleInterface->selectionBackgroundColor(isDark);
+                QColor selectionTextColor = m_styleInterface->selectionTextColor(isDark);
+                QColor textColor          = m_styleInterface->textColorForState(isDark, isEnabled);
 
                 if (const QLineEdit* lineEdit = qobject_cast<const QLineEdit*>(widget)) {
                     QLineEdit* nonConstLineEdit = const_cast<QLineEdit*>(lineEdit);
                     QPalette   pal              = nonConstLineEdit->palette();
                     pal.setColor(QPalette::Text, textColor);
-                    pal.setColor(QPalette::HighlightedText, textColor);
+                    pal.setColor(QPalette::Highlight, selectionBgColor);
+                    pal.setColor(QPalette::HighlightedText, selectionTextColor);
                     nonConstLineEdit->setPalette(pal);
                 } else if (const QTextEdit* textEdit = qobject_cast<const QTextEdit*>(widget)) {
                     QTextEdit* nonConstTextEdit = const_cast<QTextEdit*>(textEdit);
                     QPalette   pal              = nonConstTextEdit->palette();
                     pal.setColor(QPalette::Text, textColor);
-                    pal.setColor(QPalette::HighlightedText, textColor);
+                    pal.setColor(QPalette::Highlight, selectionBgColor);
+                    pal.setColor(QPalette::HighlightedText, selectionTextColor);
                     nonConstTextEdit->setPalette(pal);
                     nonConstTextEdit->viewport()->setPalette(pal);
                 } else if (const QPlainTextEdit* plainTextEdit = qobject_cast<const QPlainTextEdit*>(widget)) {
                     QPlainTextEdit* nonConstPlainTextEdit = const_cast<QPlainTextEdit*>(plainTextEdit);
                     QPalette        pal                   = nonConstPlainTextEdit->palette();
                     pal.setColor(QPalette::Text, textColor);
-                    pal.setColor(QPalette::HighlightedText, textColor);
+                    pal.setColor(QPalette::Highlight, selectionBgColor);
+                    pal.setColor(QPalette::HighlightedText, selectionTextColor);
                     nonConstPlainTextEdit->setPalette(pal);
                     nonConstPlainTextEdit->viewport()->setPalette(pal);
                 }
