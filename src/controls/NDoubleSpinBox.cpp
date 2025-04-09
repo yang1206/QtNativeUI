@@ -192,6 +192,4 @@ void NDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) {
     connect(action, &QAction::triggered, lineEdit(), &QLineEdit::selectAll);
 
     menu->exec(event->globalPos());
-    delete menu;
-    event->accept();
 }

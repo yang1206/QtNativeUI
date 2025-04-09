@@ -166,6 +166,21 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
                                         const QStyleOption* option,
                                         QPainter*           painter,
                                         const QWidget*      widget) const {
+    if (widget) {
+        const NMenu* menuWidget = qobject_cast<const NMenu*>(widget);
+        if (!menuWidget) {
+            // 如果不是NMenu，也检查它是否是NMenu的子控件
+            QWidget* parent = widget->parentWidget();
+            while (parent && !menuWidget) {
+                menuWidget = qobject_cast<const NMenu*>(parent);
+                parent     = parent->parentWidget();
+            }
+            if (!menuWidget) {
+                // 如果不是NMenu或其子控件，使用基础样式
+                return QProxyStyle::drawPrimitive(element, option, painter, widget);
+            }
+        }
+    }
     if (element == PE_PanelMenu) {
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
