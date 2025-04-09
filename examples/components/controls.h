@@ -21,6 +21,8 @@ class ControlsExample : public QWidget {
     QWidget* createDoubleSpinBoxes();
     QWidget* createSliders();
     QWidget* createToolTips();
+    QWidget* createProgressBars();
+    QWidget* createScrollAreas();
 
     QScrollArea* m_scrollArea;
 };

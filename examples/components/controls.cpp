@@ -15,18 +15,20 @@
 #include <QtNativeUI/NPushButton.h>
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
+#include "QtNativeUI/NProgressBar.h"
+#include "QtNativeUI/NScrollArea.h"
 #include "QtNativeUI/NToolTip.h"
 
 ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
-// 在 initUI() 函数中添加 SpinBox 部分
+// 在 initUI() 函数中添加 ProgressBar 部分
 void ControlsExample::initUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
     // 创建滚动区域
-    m_scrollArea = new QScrollArea(this);
+    m_scrollArea = new NScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
     m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -46,6 +48,8 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("SpinBox", createSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("DoubleSpinBox", createDoubleSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("Slider", createSliders()));
+    contentLayout->addWidget(new ExampleSection("ProgressBar", createProgressBars()));
+    contentLayout->addWidget(new ExampleSection("ScrollArea", createScrollAreas()));
     contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
 
     contentLayout->addStretch();
@@ -452,6 +456,197 @@ QWidget* ControlsExample::createToolTips() {
 
     staticRow->addStretch();
     layout->addLayout(staticRow);
+
+    layout->addStretch();
+    return container;
+}
+
+// 添加 createProgressBars 函数实现
+QWidget* ControlsExample::createProgressBars() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本进度条
+    NProgressBar* basicProgressBar = new NProgressBar(container);
+    basicProgressBar->setValue(50);
+    basicProgressBar->setMinimumWidth(300);
+    layout->addWidget(basicProgressBar);
+
+    // 带文本的进度条
+    NProgressBar* textProgressBar = new NProgressBar(container);
+    textProgressBar->setValue(75);
+    textProgressBar->setFormat("已完成 %p%");
+    textProgressBar->setMinimumWidth(300);
+    layout->addWidget(textProgressBar);
+
+    // 不确定状态的进度条
+    NProgressBar* indeterminateProgressBar = new NProgressBar(container);
+    indeterminateProgressBar->setMinimum(0);
+    indeterminateProgressBar->setMaximum(0); // 设置为不确定状态
+    indeterminateProgressBar->setMinimumWidth(300);
+    layout->addWidget(indeterminateProgressBar);
+
+    // 反向进度条
+    NProgressBar* invertedProgressBar = new NProgressBar(container);
+    invertedProgressBar->setValue(60);
+    invertedProgressBar->setInvertedAppearance(true);
+    invertedProgressBar->setMinimumWidth(300);
+    layout->addWidget(invertedProgressBar);
+
+    // 垂直进度条
+    QHBoxLayout* verticalLayout = new QHBoxLayout();
+
+    NProgressBar* verticalProgressBar = new NProgressBar(container);
+    verticalProgressBar->setOrientation(Qt::Vertical);
+    verticalProgressBar->setValue(80);
+    verticalProgressBar->setMinimumHeight(150);
+    verticalLayout->addWidget(verticalProgressBar);
+
+    // 垂直反向进度条
+    NProgressBar* verticalInvertedProgressBar = new NProgressBar(container);
+    verticalInvertedProgressBar->setOrientation(Qt::Vertical);
+    verticalInvertedProgressBar->setValue(40);
+    verticalInvertedProgressBar->setInvertedAppearance(true);
+    verticalInvertedProgressBar->setMinimumHeight(150);
+    verticalLayout->addWidget(verticalInvertedProgressBar);
+
+    verticalLayout->addStretch();
+    layout->addLayout(verticalLayout);
+
+    // 禁用状态的进度条
+    NProgressBar* disabledProgressBar = new NProgressBar(container);
+    disabledProgressBar->setValue(30);
+    disabledProgressBar->setEnabled(false);
+    disabledProgressBar->setMinimumWidth(300);
+    layout->addWidget(disabledProgressBar);
+
+    // 添加一个动态更新的进度条
+    NProgressBar* dynamicProgressBar = new NProgressBar(container);
+    dynamicProgressBar->setValue(0);
+    dynamicProgressBar->setMinimumWidth(300);
+    layout->addWidget(dynamicProgressBar);
+
+    // 添加控制按钮
+    QHBoxLayout* controlLayout = new QHBoxLayout();
+
+    NPushButton* startButton = new NPushButton("开始", container);
+    connect(startButton, &NPushButton::clicked, [dynamicProgressBar]() {
+        QTimer* timer = new QTimer(dynamicProgressBar);
+        dynamicProgressBar->setProperty("timer", QVariant::fromValue(timer));
+        connect(timer, &QTimer::timeout, [dynamicProgressBar]() {
+            int value = dynamicProgressBar->value();
+            if (value < 100) {
+                dynamicProgressBar->setValue(value + 1);
+            } else {
+                QTimer* timer = dynamicProgressBar->property("timer").value<QTimer*>();
+                if (timer) {
+                    timer->stop();
+                }
+            }
+        });
+        timer->start(50);
+    });
+    controlLayout->addWidget(startButton);
+
+    NPushButton* resetButton = new NPushButton("重置", container);
+    connect(resetButton, &NPushButton::clicked, [dynamicProgressBar]() {
+        QTimer* timer = dynamicProgressBar->property("timer").value<QTimer*>();
+        if (timer) {
+            timer->stop();
+        }
+        dynamicProgressBar->setValue(0);
+    });
+    controlLayout->addWidget(resetButton);
+
+    controlLayout->addStretch();
+    layout->addLayout(controlLayout);
+
+    return container;
+}
+
+// 添加 createScrollAreas 函数实现
+QWidget* ControlsExample::createScrollAreas() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本滚动区域
+    QLabel* basicLabel = new QLabel("基本滚动区域：", container);
+    QFont   labelFont  = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    NScrollArea* basicScrollArea = new NScrollArea(container);
+    basicScrollArea->setMinimumHeight(200);
+    basicScrollArea->setMinimumWidth(400);
+
+    // 创建内容
+    QWidget*     contentWidget = new QWidget(basicScrollArea);
+    QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
+
+    // 添加一些内容使其可滚动
+    for (int i = 1; i <= 20; ++i) {
+        NPushButton* button = new NPushButton(QString("按钮 %1").arg(i), contentWidget);
+        button->setMinimumWidth(380);
+        contentLayout->addWidget(button);
+    }
+
+    contentLayout->addStretch();
+    basicScrollArea->setWidget(contentWidget);
+    layout->addWidget(basicScrollArea);
+
+    // 水平滚动区域
+    QLabel* horizontalLabel = new QLabel("水平滚动区域：", container);
+    horizontalLabel->setFont(labelFont);
+    layout->addWidget(horizontalLabel);
+
+    NScrollArea* horizontalScrollArea = new NScrollArea(container);
+    horizontalScrollArea->setMinimumHeight(100);
+    horizontalScrollArea->setMinimumWidth(400);
+    horizontalScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    horizontalScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    // 创建水平内容
+    QWidget*     horizontalContentWidget = new QWidget(horizontalScrollArea);
+    QHBoxLayout* horizontalContentLayout = new QHBoxLayout(horizontalContentWidget);
+
+    // 添加一些内容使其可水平滚动
+    for (int i = 1; i <= 10; ++i) {
+        NPushButton* button = new NPushButton(QString("按钮 %1").arg(i), horizontalContentWidget);
+        button->setMinimumWidth(100);
+        horizontalContentLayout->addWidget(button);
+    }
+
+    horizontalContentLayout->addStretch();
+    horizontalScrollArea->setWidget(horizontalContentWidget);
+    layout->addWidget(horizontalScrollArea);
+
+    // 禁用状态的滚动区域
+    QLabel* disabledLabel = new QLabel("禁用状态的滚动区域：", container);
+    disabledLabel->setFont(labelFont);
+    layout->addWidget(disabledLabel);
+
+    NScrollArea* disabledScrollArea = new NScrollArea(container);
+    disabledScrollArea->setMinimumHeight(150);
+    disabledScrollArea->setMinimumWidth(400);
+    disabledScrollArea->setEnabled(false);
+
+    // 创建内容
+    QWidget*     disabledContentWidget = new QWidget(disabledScrollArea);
+    QVBoxLayout* disabledContentLayout = new QVBoxLayout(disabledContentWidget);
+
+    // 添加一些内容
+    for (int i = 1; i <= 10; ++i) {
+        NPushButton* button = new NPushButton(QString("按钮 %1").arg(i), disabledContentWidget);
+        button->setMinimumWidth(380);
+        disabledContentLayout->addWidget(button);
+    }
+
+    disabledContentLayout->addStretch();
+    disabledScrollArea->setWidget(disabledContentWidget);
+    layout->addWidget(disabledScrollArea);
 
     layout->addStretch();
     return container;

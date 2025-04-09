@@ -1,10 +1,10 @@
 #ifndef COLORS_H
 #define COLORS_H
 
-#include <QScrollArea>
 #include <QWidget>
 #include <QtNativeUI/NTheme.h>
 
+class NScrollArea;
 class ColorBlock : public QWidget {
     Q_OBJECT
   public:
@@ -43,12 +43,12 @@ class ColorsExample : public QWidget {
     void onColorChanged(NFluentColorKey::Key key, const QColor& color);
 
   private:
-    void initUI();
-    void setupFluentColors(QWidget* section);
-    void setupAccentColors(QWidget* section);
+    void     initUI();
+    void     setupFluentColors(QWidget* section);
+    void     setupAccentColors(QWidget* section);
     QWidget* createSection(const QString& title);
 
-    QScrollArea*                            m_scrollArea;
+    NScrollArea*                            m_scrollArea;
     QMap<NFluentColorKey::Key, ColorBlock*> m_colorBlocks;
     QList<AccentColorBlock*>                m_accentBlocks;
 };

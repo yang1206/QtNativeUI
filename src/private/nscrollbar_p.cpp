@@ -35,7 +35,7 @@ NScrollBarPrivate::NScrollBarPrivate(QObject* parent) : QObject(parent) {
     _pTrackCornerRadius    = 4;
 }
 
-NScrollBarPrivate::~NScrollBarPrivate() { delete style; }
+NScrollBarPrivate::~NScrollBarPrivate() {}
 
 void NScrollBarPrivate::updateStyle() {
     if (!style)
