@@ -47,8 +47,8 @@ class QTNATIVEUI_EXPORT NProgressBar : public QProgressBar {
 
     void setBorderRadius(int radius);
     int  getBorderRadius() const;
-    void setTrackThickness(int thickness);
-    int  getTrackThickness() const;
+    void setProgressThickness(int thickness);
+    int  getProgressThickness() const;
 
   signals:
     void trackThicknessChanged();

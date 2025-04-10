@@ -32,7 +32,7 @@ class NProgressBarPrivate : public QObject {
 
     // 形状属性
     Q_PROPERTY_CREATE_D(int, BorderRadius)
-    Q_PROPERTY_CREATE_D(int, TrackThickness)
+    Q_PROPERTY_CREATE_D(int, ProgressThickness)
 
     // 动画属性
     Q_PROPERTY_CREATE_D(bool, AnimationEnabled)

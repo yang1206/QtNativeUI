@@ -41,10 +41,16 @@ NProgressBarPrivate::~NProgressBarPrivate() {
 }
 
 QColor NProgressBarPrivate::getTrackColor() const {
+    QColor color;
     if (!q_ptr->isEnabled()) {
-        return _isDark ? _pDarkDisabledTrackColor : _pLightDisabledTrackColor;
+        color = _isDark ? _pDarkDisabledTrackColor : _pLightDisabledTrackColor;
+    } else {
+        color = _isDark ? _pDarkTrackColor : _pLightTrackColor;
     }
-    return _isDark ? _pDarkTrackColor : _pLightTrackColor;
+    
+    // 添加半透明效果
+    color.setAlpha(155);
+    return color;
 }
 
 QColor NProgressBarPrivate::getProgressColor() const {
@@ -63,26 +69,32 @@ QColor NProgressBarPrivate::getTextColor() const {
 
 QRect NProgressBarPrivate::getTrackRect() const {
     QRect rect = q_ptr->rect();
-
+    
     if (q_ptr->orientation() == Qt::Horizontal) {
-        int yOffset = (rect.height() - _pTrackThickness) / 2;
-        return QRect(rect.x(), rect.y() + yOffset, rect.width(), _pTrackThickness);
+        // 对于水平进度条，高度设为轨道厚度，但y位置设为中心
+        int y = rect.y() + (rect.height() - _pProgressThickness) / 2;
+        return QRect(rect.x(), y, rect.width(), _pProgressThickness);
     } else {
-        int xOffset = (rect.width() - _pTrackThickness) / 2;
-        return QRect(rect.x() + xOffset, rect.y(), _pTrackThickness, rect.height());
+        // 对于垂直进度条，宽度设为轨道厚度，但x位置设为中心
+        int x = rect.x() + (rect.width() - _pProgressThickness) / 2;
+        return QRect(x, rect.y(), _pProgressThickness, rect.height());
     }
 }
 
 QRect NProgressBarPrivate::getProgressRect() const {
     QRect trackRect = getTrackRect();
-
+    
     if (q_ptr->orientation() == Qt::Horizontal) {
         int width = calculateProgressWidth();
-        return QRect(trackRect.x(), trackRect.y(), width, trackRect.height());
+        // 使进度条高度是轨道厚度的两倍，确保可见性
+        int yOffset = (q_ptr->height() - _pProgressThickness) / 2;
+        return QRect(trackRect.x(), yOffset, width, _pProgressThickness);
     } else {
         int height = calculateProgressHeight();
         int y = trackRect.bottom() - height;
-        return QRect(trackRect.x(), y, trackRect.width(), height);
+        // 使进度条宽度是轨道厚度的两倍，确保可见性
+        int xOffset = (q_ptr->width() - _pProgressThickness) / 2;
+        return QRect(xOffset, y, _pProgressThickness, height);
     }
 }
 

@@ -465,7 +465,7 @@ QWidget* ControlsExample::createToolTips() {
 QWidget* ControlsExample::createProgressBars() {
     QWidget*     container = new QWidget;
     QVBoxLayout* layout    = new QVBoxLayout(container);
-    // layout->setSpacing(16);
+    layout->setSpacing(16);
 
     // 基本进度条
     QLabel* basicLabel = new QLabel("基本进度条:", container);
@@ -481,7 +481,7 @@ QWidget* ControlsExample::createProgressBars() {
     layout->addWidget(textLabel);
 
     NProgressBar* textProgressBar = new NProgressBar(container);
-    textProgressBar->setTrackThickness(20);
+    textProgressBar->setProgressThickness(20);
     textProgressBar->setBorderRadius(10);
     textProgressBar->setValue(75);
     textProgressBar->setFormat("已完成 %p%");
@@ -509,7 +509,7 @@ QWidget* ControlsExample::createProgressBars() {
     NProgressBar* verticalProgressBar = new NProgressBar(Qt::Vertical, container);
     verticalProgressBar->setValue(75);
     verticalProgressBar->setMinimumHeight(150);
-    verticalProgressBar->setTrackThickness(8); // 设置轨道厚度
+    verticalProgressBar->setProgressThickness(8);
     verticalLayout->addWidget(verticalProgressBar);
 
     // 垂直不确定状态进度条
@@ -517,7 +517,7 @@ QWidget* ControlsExample::createProgressBars() {
     verticalIndeterminateProgressBar->setMinimum(0);
     verticalIndeterminateProgressBar->setMaximum(0);
     verticalIndeterminateProgressBar->setMinimumHeight(150);
-    verticalIndeterminateProgressBar->setTrackThickness(8); // 设置轨道厚度
+    verticalIndeterminateProgressBar->setProgressThickness(8);
     verticalLayout->addWidget(verticalIndeterminateProgressBar);
 
     verticalLayout->addStretch();

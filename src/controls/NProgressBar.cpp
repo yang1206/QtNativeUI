@@ -39,8 +39,8 @@ void NProgressBar::init() {
 
     setObjectName("NProgressBar");
 
-    d->_pLightTrackColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkTrackColor  = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
+    d->_pLightTrackColor = QColor(0, 0, 0);
+    d->_pDarkTrackColor  = QColor(255, 255, 255);
 
     d->_pLightProgressColor = nTheme->accentColor().normal();
     d->_pDarkProgressColor  = nTheme->accentColor().normal();
@@ -59,18 +59,18 @@ void NProgressBar::init() {
     d->_pLightErrorColor  = NThemeColor(NFluentColorKey::SystemFillColorCritical, NThemeType::Light);
     d->_pDarkErrorColor   = NThemeColor(NFluentColorKey::SystemFillColorCritical, NThemeType::Dark);
 
-    d->_pBorderRadius   = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
-    d->_pTrackThickness = 6; // 默认轨道厚度
+    d->_pBorderRadius      = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+    d->_pProgressThickness = 4;
 
     d->_pAnimationEnabled  = true;
     d->_pAnimationDuration = 200;
 
     if (orientation() == Qt::Horizontal) {
-        setMinimumHeight(d->_pTrackThickness);
+        setMinimumHeight(d->_pProgressThickness);
         setMinimumWidth(100);
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     } else {
-        setMinimumWidth(d->_pTrackThickness);
+        setMinimumWidth(d->_pProgressThickness);
         setMinimumHeight(100);
         setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     }
@@ -129,11 +129,10 @@ void NProgressBar::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    drawTrack(&painter);
-
     if (minimum() >= maximum()) {
         drawIndeterminateProgress(&painter);
     } else {
+        drawTrack(&painter);
         drawProgress(&painter);
     }
 
@@ -144,12 +143,18 @@ void NProgressBar::paintEvent(QPaintEvent* event) {
 
 void NProgressBar::drawTrack(QPainter* painter) {
     Q_D(NProgressBar);
+    painter->save();
+    painter->setPen(d->getTrackColor());
 
-    QRect        trackRect = d->getTrackRect();
-    QPainterPath trackPath;
-    trackPath.addRoundedRect(trackRect, d->_pBorderRadius, d->_pBorderRadius);
+    if (orientation() == Qt::Horizontal) {
+        int y = rect().y() + rect().height() / 2;
+        painter->drawLine(0, y, width(), y);
+    } else {
+        int x = rect().x() + rect().width() / 2;
+        painter->drawLine(x, 0, x, height());
+    }
 
-    painter->fillPath(trackPath, d->getTrackColor());
+    painter->restore();
 }
 
 void NProgressBar::drawProgress(QPainter* painter) {
@@ -159,11 +164,9 @@ void NProgressBar::drawProgress(QPainter* painter) {
     if (progressRect.isEmpty())
         return;
 
-    QPainterPath progressPath;
-
-    progressPath.addRoundedRect(progressRect, d->_pBorderRadius, d->_pBorderRadius);
-
-    painter->fillPath(progressPath, d->getBarColorForState());
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(d->getBarColorForState());
+    painter->drawRoundedRect(progressRect, d->_pBorderRadius, d->_pBorderRadius);
 }
 
 void NProgressBar::drawIndeterminateProgress(QPainter* painter) {
@@ -262,10 +265,10 @@ void NProgressBar::changeEvent(QEvent* event) {
     } else if (event->type() == QEvent::OrientationChange) {
         Q_D(NProgressBar);
         if (orientation() == Qt::Horizontal) {
-            setMinimumSize(100, d->_pTrackThickness);
+            setMinimumSize(100, d->_pProgressThickness);
             setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         } else {
-            setMinimumSize(d->_pTrackThickness, 100);
+            setMinimumSize(d->_pProgressThickness, 100);
             setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
         }
     }
@@ -309,10 +312,10 @@ bool NProgressBar::isError() const {
     return d->isError();
 }
 
-void NProgressBar::setTrackThickness(int thickness) {
+void NProgressBar::setProgressThickness(int thickness) {
     Q_D(NProgressBar);
 
-    d->_pTrackThickness = thickness;
+    d->_pProgressThickness = thickness;
 
     if (orientation() == Qt::Horizontal) {
         setMinimumHeight(thickness);
@@ -336,9 +339,9 @@ void NProgressBar::setBorderRadius(int radius) {
     Q_EMIT borderRadiusChanged();
 }
 
-int NProgressBar::getTrackThickness() const {
+int NProgressBar::getProgressThickness() const {
     Q_D(const NProgressBar);
-    return d->_pTrackThickness;
+    return d->_pProgressThickness;
 }
 
 int NProgressBar::getBorderRadius() const {
