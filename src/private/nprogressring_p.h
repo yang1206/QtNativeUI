@@ -1,22 +1,20 @@
-#ifndef QTNATIVEUI_NPROGRESSBAR_P_H
-#define QTNATIVEUI_NPROGRESSBAR_P_H
+#ifndef QTNATIVEUI_NPROGRESSRING_P_H
+#define QTNATIVEUI_NPROGRESSRING_P_H
 
+#include <QObject>
 #include <QPropertyAnimation>
-#include <QtNativeUI/NProgressBar.h>
+#include <QtNativeUI/NProgressRing.h>
 #include "QtNativeUI/NEnums.h"
 
 class QParallelAnimationGroup;
-class NProgressRingPrivate;  // 前置声明
+class QSequentialAnimationGroup;
 
-class NProgressBarPrivate : public QObject {
+class NProgressRingPrivate : public QObject {
     Q_OBJECT
     Q_PROPERTY(qreal progressPosition READ progressPosition WRITE setProgressPosition)
-    Q_PROPERTY(qreal indeterminateOffset READ indeterminateOffset WRITE setIndeterminateOffset)
-    Q_PROPERTY(qreal shortPos READ shortPos WRITE setShortPos)
-    Q_PROPERTY(qreal longPos READ longPos WRITE setLongPos)
-    Q_D_CREATE(NProgressBar)
-
-    // 颜色属性
+    Q_PROPERTY(qreal startAngle READ startAngle WRITE setStartAngle)
+    Q_PROPERTY(qreal spanAngle READ spanAngle WRITE setSpanAngle)
+    Q_D_CREATE(NProgressRing)
     Q_PROPERTY_CREATE_D(QColor, LightTrackColor)
     Q_PROPERTY_CREATE_D(QColor, DarkTrackColor)
     Q_PROPERTY_CREATE_D(QColor, LightProgressColor)
@@ -31,87 +29,72 @@ class NProgressBarPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, DarkPausedColor)
     Q_PROPERTY_CREATE_D(QColor, LightErrorColor)
     Q_PROPERTY_CREATE_D(QColor, DarkErrorColor)
-
-    // 形状属性
-    Q_PROPERTY_CREATE_D(int, BorderRadius)
-    Q_PROPERTY_CREATE_D(int, ProgressThickness)
-
-    // 动画属性
+    Q_PROPERTY_CREATE_D(int, StrokeWidth)
     Q_PROPERTY_CREATE_D(bool, AnimationEnabled)
     Q_PROPERTY_CREATE_D(int, AnimationDuration)
 
-    // 添加友元声明
-    friend class NProgressRingPrivate;
-
   public:
-    explicit NProgressBarPrivate(QObject* parent = nullptr);
-    ~NProgressBarPrivate();
+    explicit NProgressRingPrivate(QObject* parent = nullptr);
+    ~NProgressRingPrivate();
 
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark{false};
+
+    int     _minimum{0};
+    int     _maximum{100};
+    int     _value{0};
+    QString _format;
+    bool    _textVisible{false};
 
     QColor getTrackColor() const;
     QColor getProgressColor() const;
     QColor getTextColor() const;
 
-    // 位置计算辅助方法
-    QRect getTrackRect() const;
-    QRect getProgressRect() const;
-    int   calculateProgressWidth() const;
-    int   calculateProgressHeight() const;
+    int calculateAngle() const;
 
-    // 动画相关属性和方法
     qreal progressPosition() const { return _progressPosition; }
     void  setProgressPosition(qreal position);
 
-    qreal indeterminateOffset() const { return _indeterminateOffset; }
-    void  setIndeterminateOffset(qreal offset);
-
     void startProgressAnimation(qreal endValue);
-    void startIndeterminateAnimation();
+    void startIndeterminateAnimations();
     void stopIndeterminateAnimation();
     void updateAnimations();
 
     QPropertyAnimation* _progressAnimation{nullptr};
-    QPropertyAnimation* _indeterminateAnimation{nullptr};
 
     qreal _progressPosition{0.0};
-    qreal _indeterminateOffset{0.0};
     bool  _isAnimationRunning{false};
 
-    // 状态相关
     bool isPaused() const { return _isPaused; }
     void setPaused(bool paused);
 
     bool isError() const { return _isError; }
     void setError(bool error);
 
-    // 获取基于当前状态的颜色
     QColor getBarColorForState() const;
 
-    // 不确定状态的两个位置
-    qreal shortPos() const { return _shortPos; }
-    void  setShortPos(qreal pos);
+    qreal startAngle() const { return _startAngle; }
+    void  setStartAngle(qreal angle);
 
-    qreal longPos() const { return _longPos; }
-    void  setLongPos(qreal pos);
-
-    // 启动双段式动画
-    void startIndeterminateAnimations();
+    qreal spanAngle() const;
+    void  setSpanAngle(qreal angle);
 
   private:
     bool _isPaused{false};
     bool _isError{false};
 
-    QPropertyAnimation*        _shortPosAnimation{nullptr};
-    QPropertyAnimation*        _longPosAnimation{nullptr};
-    QSequentialAnimationGroup* _longAnimationGroup{nullptr};
+    QPropertyAnimation*        _startAngleAni1{nullptr};
+    QPropertyAnimation*        _startAngleAni2{nullptr};
+    QPropertyAnimation*        _spanAngleAni1{nullptr};
+    QPropertyAnimation*        _spanAngleAni2{nullptr};
+    QSequentialAnimationGroup* _startAngleAniGroup{nullptr};
+    QSequentialAnimationGroup* _spanAngleAniGroup{nullptr};
     QParallelAnimationGroup*   _indeterminateAnimationGroup{nullptr};
 
-    qreal _shortPos{0.0};
-    qreal _longPos{0.0};
+    qreal _startAngle{0.0};
+    qreal _spanAngle{0.0};
 
-    qreal _pausedProgressPosition{0.0}; // 保存暂停时的进度位置
+    qreal _pausedProgressPosition{0.0};
 };
 
-#endif // QTNATIVEUI_NPROGRESSBAR_P_H
+#endif // QTNATIVEUI_NPROGRESSRING_P_H

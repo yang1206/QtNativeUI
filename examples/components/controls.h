@@ -3,8 +3,7 @@
 
 #include <QWidget>
 
-class QScrollArea;
-
+class NScrollArea;
 class ControlsExample : public QWidget {
     Q_OBJECT
   public:
@@ -22,9 +21,10 @@ class ControlsExample : public QWidget {
     QWidget* createSliders();
     QWidget* createToolTips();
     QWidget* createProgressBars();
+    QWidget* createProgressRings();
     QWidget* createScrollAreas();
 
-    QScrollArea* m_scrollArea;
+    NScrollArea* m_scrollArea;
 };
 
 #endif // CONTROLS_EXAMPLE_H
