@@ -151,7 +151,7 @@ void NProgressBar::drawTrack(QPainter* painter) {
         painter->drawLine(0, y, width(), y);
     } else {
         int x = rect().x() + rect().width() / 2;
-        painter->drawLine(x, 0, x, height());
+        painter->drawLine(x, 0, x, height() - 2);
     }
 
     painter->restore();

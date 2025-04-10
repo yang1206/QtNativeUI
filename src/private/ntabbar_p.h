@@ -10,25 +10,14 @@ class NTabBarPrivate : public QObject {
     Q_OBJECT
     Q_D_CREATE(NTabBar)
 
-    // 私有属性
-    // ...
-
   public:
     explicit NTabBarPrivate(QObject* parent = nullptr);
     ~NTabBarPrivate();
 
     NThemeType::ThemeMode _themeMode;
-    bool _isDark{false};
-
-    // 数据结构和状态
-    // ...
-
-    // 辅助方法
-    // ...
+    bool                  _isDark{false};
 
   private:
-    // 私有实现
-    // ...
 };
 
 #endif // QTNATIVEUI_NTABBAR_P_H
