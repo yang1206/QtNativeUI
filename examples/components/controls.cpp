@@ -1,23 +1,19 @@
 ﻿#include "controls.h"
-#include <QScrollArea>
 #include <QVBoxLayout>
 #include <QtNativeUI/NCheckBox.h>
 #include <QtNativeUI/NLineEdit.h>
-#include <QtNativeUI/NToggleSwitch.h>
-
-#include "QtNativeUI/NTextEdit.h"
-#include "widgets/ExampleSection.h"
-
-// 在头文件包含部分添加
+#include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
-
-#include <QtNativeUI/NPushButton.h>
+#include <QtNativeUI/NToggleSwitch.h>
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
+#include "QtNativeUI/NProgressRing.h"
 #include "QtNativeUI/NScrollArea.h"
+#include "QtNativeUI/NTextEdit.h"
 #include "QtNativeUI/NToolTip.h"
+#include "widgets/ExampleSection.h"
 
 ControlsExample::ControlsExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
@@ -49,6 +45,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("DoubleSpinBox", createDoubleSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("Slider", createSliders()));
     contentLayout->addWidget(new ExampleSection("ProgressBar", createProgressBars()));
+    contentLayout->addWidget(new ExampleSection("ProgressRing", createProgressRings()));
     contentLayout->addWidget(new ExampleSection("ScrollArea", createScrollAreas()));
     contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
 
@@ -494,8 +491,7 @@ QWidget* ControlsExample::createProgressBars() {
     layout->addWidget(indeterminateLabel);
 
     NProgressBar* indeterminateProgressBar = new NProgressBar(container);
-    indeterminateProgressBar->setMinimum(0);
-    indeterminateProgressBar->setMaximum(0); // 设置为不确定状态
+    indeterminateProgressBar->setIndeterminate(true);
     indeterminateProgressBar->setMinimumWidth(300);
     layout->addWidget(indeterminateProgressBar);
 
@@ -514,8 +510,7 @@ QWidget* ControlsExample::createProgressBars() {
 
     // 垂直不确定状态进度条
     NProgressBar* verticalIndeterminateProgressBar = new NProgressBar(Qt::Vertical, container);
-    verticalIndeterminateProgressBar->setMinimum(0);
-    verticalIndeterminateProgressBar->setMaximum(0);
+    verticalIndeterminateProgressBar->setIndeterminate(true);
     verticalIndeterminateProgressBar->setMinimumHeight(150);
     verticalIndeterminateProgressBar->setProgressThickness(8);
     verticalLayout->addWidget(verticalIndeterminateProgressBar);
@@ -641,6 +636,215 @@ QWidget* ControlsExample::createProgressBars() {
     controlLayout->addStretch();
     layout->addLayout(controlLayout);
 
+    return container;
+}
+
+// 添加 createProgressRings 函数实现
+QWidget* ControlsExample::createProgressRings() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本进度环
+    QLabel* basicLabel = new QLabel("基本进度环:", container);
+    layout->addWidget(basicLabel);
+
+    QHBoxLayout* basicLayout = new QHBoxLayout();
+    basicLayout->setSpacing(32);
+
+    NProgressRing* basicProgressRing = new NProgressRing(container);
+    basicProgressRing->setValue(50);
+    basicProgressRing->setFixedSize(100, 100);
+    basicLayout->addWidget(basicProgressRing);
+
+    // 自定义宽度的进度环
+    NProgressRing* thickProgressRing = new NProgressRing(container);
+    thickProgressRing->setValue(75);
+    thickProgressRing->setStrokeWidth(10);
+    thickProgressRing->setFixedSize(100, 100);
+    basicLayout->addWidget(thickProgressRing);
+
+    // 带文本的进度环
+    NProgressRing* textProgressRing = new NProgressRing(container);
+    textProgressRing->setValue(65);
+    textProgressRing->setFormat("%p%");
+    textProgressRing->setTextVisible(true);
+    textProgressRing->setFixedSize(100, 100);
+    basicLayout->addWidget(textProgressRing);
+
+    basicLayout->addStretch();
+    layout->addLayout(basicLayout);
+
+    // 不确定状态的进度环
+    QLabel* indeterminateLabel = new QLabel("不确定状态进度环:", container);
+    layout->addWidget(indeterminateLabel);
+
+    QHBoxLayout* indeterminateLayout = new QHBoxLayout();
+    indeterminateLayout->setSpacing(32);
+
+    NProgressRing* indeterminateProgressRing = new NProgressRing(container);
+    indeterminateProgressRing->setMinimum(0);
+    indeterminateProgressRing->setMaximum(0); // 设置为不确定状态
+    indeterminateProgressRing->setFixedSize(100, 100);
+    indeterminateLayout->addWidget(indeterminateProgressRing);
+
+    // 不确定状态带文本的进度环
+    NProgressRing* textIndeterminateProgressRing = new NProgressRing(container);
+    textIndeterminateProgressRing->setMinimum(0);
+    textIndeterminateProgressRing->setMaximum(0);
+    textIndeterminateProgressRing->setFormat("加载中...");
+    textIndeterminateProgressRing->setTextVisible(true);
+    textIndeterminateProgressRing->setFixedSize(100, 100);
+    indeterminateLayout->addWidget(textIndeterminateProgressRing);
+
+    // 不确定状态的专用进度环组件
+    NProgressRing* specialIndeterminateRing = new NProgressRing(container);
+    specialIndeterminateRing->setIndeterminate(true);
+    indeterminateLayout->addWidget(specialIndeterminateRing);
+
+    indeterminateLayout->addStretch();
+    layout->addLayout(indeterminateLayout);
+
+    // 状态示例
+    QLabel* stateLabel = new QLabel("状态示例:", container);
+    layout->addWidget(stateLabel);
+
+    QHBoxLayout* stateLayout = new QHBoxLayout();
+    stateLayout->setSpacing(32);
+
+    // 正常状态
+    NProgressRing* normalProgressRing = new NProgressRing(container);
+    normalProgressRing->setValue(80);
+    normalProgressRing->setFixedSize(100, 100);
+    QLabel* normalLabel = new QLabel("正常状态", container);
+    normalLabel->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout* normalLayout = new QVBoxLayout();
+    normalLayout->addWidget(normalProgressRing);
+    normalLayout->addWidget(normalLabel);
+    stateLayout->addLayout(normalLayout);
+
+    // 暂停状态
+    NProgressRing* pausedProgressRing = new NProgressRing(container);
+    pausedProgressRing->setValue(60);
+    pausedProgressRing->setPaused(true);
+    pausedProgressRing->setFixedSize(100, 100);
+    QLabel* pausedLabel = new QLabel("暂停状态", container);
+    pausedLabel->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout* pausedLayout = new QVBoxLayout();
+    pausedLayout->addWidget(pausedProgressRing);
+    pausedLayout->addWidget(pausedLabel);
+    stateLayout->addLayout(pausedLayout);
+
+    // 错误状态
+    NProgressRing* errorProgressRing = new NProgressRing(container);
+    errorProgressRing->setValue(30);
+    errorProgressRing->setError(true);
+    errorProgressRing->setFixedSize(100, 100);
+    QLabel* errorLabel = new QLabel("错误状态", container);
+    errorLabel->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout* errorLayout = new QVBoxLayout();
+    errorLayout->addWidget(errorProgressRing);
+    errorLayout->addWidget(errorLabel);
+    stateLayout->addLayout(errorLayout);
+
+    // 禁用状态
+    NProgressRing* disabledProgressRing = new NProgressRing(container);
+    disabledProgressRing->setValue(45);
+    disabledProgressRing->setEnabled(false);
+    disabledProgressRing->setFixedSize(100, 100);
+    QLabel* disabledLabel = new QLabel("禁用状态", container);
+    disabledLabel->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout* disabledLayout = new QVBoxLayout();
+    disabledLayout->addWidget(disabledProgressRing);
+    disabledLayout->addWidget(disabledLabel);
+    stateLayout->addLayout(disabledLayout);
+
+    stateLayout->addStretch();
+    layout->addLayout(stateLayout);
+
+    // 添加一个动态更新的进度环
+    QLabel* dynamicLabel = new QLabel("动态进度环:", container);
+    layout->addWidget(dynamicLabel);
+
+    QHBoxLayout* dynamicRingLayout = new QHBoxLayout();
+
+    NProgressRing* dynamicProgressRing = new NProgressRing(container);
+    dynamicProgressRing->setValue(0);
+    dynamicProgressRing->setFixedSize(120, 120);
+    dynamicProgressRing->setTextVisible(true);
+    dynamicProgressRing->setFormat("%p%");
+
+    dynamicRingLayout->addWidget(dynamicProgressRing);
+
+    // 控制按钮容器
+    QVBoxLayout* controlLayout = new QVBoxLayout();
+    controlLayout->setSpacing(8);
+
+    NPushButton* startButton = new NPushButton("开始", container);
+    connect(startButton, &NPushButton::clicked, [dynamicProgressRing]() {
+        QTimer* timer = new QTimer(dynamicProgressRing);
+        dynamicProgressRing->setProperty("timer", QVariant::fromValue(timer));
+        connect(timer, &QTimer::timeout, [dynamicProgressRing]() {
+            int value = dynamicProgressRing->value();
+            if (value < 100) {
+                dynamicProgressRing->setValue(value + 1);
+            } else {
+                QTimer* timer = dynamicProgressRing->property("timer").value<QTimer*>();
+                if (timer) {
+                    timer->stop();
+                }
+            }
+        });
+        timer->start(50);
+    });
+    controlLayout->addWidget(startButton);
+
+    NPushButton* resetButton = new NPushButton("重置", container);
+    connect(resetButton, &NPushButton::clicked, [dynamicProgressRing]() {
+        QTimer* timer = dynamicProgressRing->property("timer").value<QTimer*>();
+        if (timer) {
+            timer->stop();
+        }
+        dynamicProgressRing->setValue(0);
+    });
+    controlLayout->addWidget(resetButton);
+
+    NPushButton* pauseButton = new NPushButton("暂停/继续", container);
+    connect(pauseButton, &NPushButton::clicked, [dynamicProgressRing]() {
+        QTimer* timer = dynamicProgressRing->property("timer").value<QTimer*>();
+
+        if (dynamicProgressRing->isPaused()) {
+            dynamicProgressRing->resume();
+            // 恢复定时器
+            if (timer && dynamicProgressRing->value() < 100) {
+                timer->start();
+            }
+        } else {
+            dynamicProgressRing->pause();
+            // 暂停定时器
+            if (timer) {
+                timer->stop();
+            }
+        }
+    });
+    controlLayout->addWidget(pauseButton);
+
+    NPushButton* errorButton = new NPushButton("错误", container);
+    connect(errorButton, &NPushButton::clicked, [dynamicProgressRing]() {
+        dynamicProgressRing->setError(!dynamicProgressRing->isError());
+    });
+    controlLayout->addWidget(errorButton);
+
+    dynamicRingLayout->addLayout(controlLayout);
+    dynamicRingLayout->addStretch();
+
+    layout->addLayout(dynamicRingLayout);
+
+    layout->addStretch();
     return container;
 }
 

@@ -35,11 +35,13 @@ class QTNATIVEUI_EXPORT NProgressBar : public QProgressBar {
 
     void  setProgressPosition(qreal position);
     qreal progressPosition() const;
-
-    void pause();
-    void resume();
-    void setPaused(bool paused);
-    bool isPaused() const;
+    bool  isIndeterminate() const;
+    void  setIndeterminate(bool indeterminate);
+    void  pause();
+    void  resume();
+    void  reset();
+    void  setPaused(bool paused);
+    bool  isPaused() const;
 
     void error();
     void setError(bool error);

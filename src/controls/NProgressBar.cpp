@@ -287,6 +287,13 @@ void NProgressBar::resume() {
     d->setError(false);
 }
 
+void NProgressBar::reset() {
+    Q_D(NProgressBar);
+    setValue(minimum());
+    d->setProgressPosition(0);
+    update();
+}
+
 void NProgressBar::setPaused(bool paused) {
     Q_D(NProgressBar);
     d->setPaused(paused);
@@ -347,4 +354,14 @@ int NProgressBar::getProgressThickness() const {
 int NProgressBar::getBorderRadius() const {
     Q_D(const NProgressBar);
     return d->_pBorderRadius;
+}
+
+bool NProgressBar::isIndeterminate() const { return minimum() >= maximum(); }
+
+void NProgressBar::setIndeterminate(bool indeterminate) {
+    if (indeterminate) {
+        setRange(0, 0);
+    } else {
+        setRange(0, 100);
+    }
 }
