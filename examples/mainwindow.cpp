@@ -6,11 +6,14 @@
 #include "components/controls.h"
 #include "components/icon.h"
 #include "components/menu.h"
+#include "components/navigation.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     m_tabWidget = new QTabWidget(this);
     setCentralWidget(m_tabWidget);
-
+    m_tabWidget->setTabShape(QTabWidget::Rounded);
+    m_tabWidget->setTabPosition(QTabWidget::West);
+    m_tabWidget->setMovable(true);
     auto btn = new ButtonExample(this);
     m_tabWidget->addTab(btn, "Button");
 
@@ -19,6 +22,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
     auto controls = new ControlsExample(this);
     m_tabWidget->addTab(controls, "Controls");
+
+    auto navigation = new NavigationExample(this);
+    m_tabWidget->addTab(navigation, "Navigation");
 
     // 添加颜色展示页面
     auto colors = new ColorsExample(this);

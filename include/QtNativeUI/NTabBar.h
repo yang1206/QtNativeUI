@@ -1,46 +1,47 @@
 #ifndef QTNATIVEUI_NTABBAR_H
 #define QTNATIVEUI_NTABBAR_H
 
-#include <QWidget>
+#include <QTabBar>
 #include "stdafx.h"
 
+class QDrag;
+class QMimeData;
 class NTabBarPrivate;
-class QTNATIVEUI_EXPORT NTabBar : public QWidget {
+
+class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
     Q_OBJECT
     Q_Q_CREATE(NTabBar)
-
-    // 属性声明
-    // ...
+    Q_PROPERTY_CREATE_Q_H(int, BorderRadius)
+    Q_PROPERTY_CREATE_Q_H(bool, OverlayMode)
+    Q_PROPERTY_CREATE_Q_H(QColor, SelectedTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, UnselectedTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, HoverTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DisabledTextColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, SelectedBackgroundColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, HoverBackgroundColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, BorderColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, SeparatorColor)
 
   public:
     explicit NTabBar(QWidget* parent = nullptr);
     ~NTabBar();
-
-    // 公共方法
-    // ...
-
-  public slots:
-    // 槽函数
-    // ...
+    int hoverIndex() const;
 
   signals:
-    // 信号
-    // ...
+    void tabBarPressed(int index);
+    void tabDragStarted(QDrag* drag);
+    void tabDropped(QMimeData* data);
 
   protected:
-    // 保护方法和事件处理
-    void paintEvent(QPaintEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void resizeEvent(QResizeEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
+    void leaveEvent(QEvent* event) override;
     void changeEvent(QEvent* event) override;
-    // ...
 
   private:
     void init();
-    // 其他私有辅助方法
-    // ...
 };
 
 #endif // QTNATIVEUI_NTABBAR_H
