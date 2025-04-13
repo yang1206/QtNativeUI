@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QStyleOptionTab>
+
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTabBar.h"
 #include "QtNativeUI/NTheme.h"
@@ -31,7 +32,7 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
             painter->setPen(borderColor);
 
             QRect selectedTabRect;
-            int currentIndex = tabBar->currentIndex();
+            int   currentIndex = tabBar->currentIndex();
             if (currentIndex >= 0) {
                 selectedTabRect = tabBar->tabRect(currentIndex);
             }
@@ -43,12 +44,12 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
                 painter->drawLine(option->rect.left(), option->rect.top(), option->rect.right(), option->rect.top());
             } else if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
                 int lineX = selectedTabRect.right();
-                
+
                 if (selectedTabRect.isValid()) {
                     if (selectedTabRect.top() > option->rect.top()) {
                         painter->drawLine(lineX, option->rect.top(), lineX, selectedTabRect.top());
                     }
-                    
+
                     if (selectedTabRect.bottom() < option->rect.bottom()) {
                         painter->drawLine(lineX, selectedTabRect.bottom(), lineX, option->rect.bottom());
                     }
@@ -57,12 +58,12 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
                 }
             } else if (tabBar->shape() == QTabBar::RoundedEast || tabBar->shape() == QTabBar::TriangularEast) {
                 int lineX = selectedTabRect.left();
-                
+
                 if (selectedTabRect.isValid()) {
                     if (selectedTabRect.top() > option->rect.top()) {
                         painter->drawLine(lineX, option->rect.top(), lineX, selectedTabRect.top());
                     }
-                    
+
                     if (selectedTabRect.bottom() < option->rect.bottom()) {
                         painter->drawLine(lineX, selectedTabRect.bottom(), lineX, option->rect.bottom());
                     }
@@ -217,49 +218,49 @@ void NTabBarStyle::drawControl(ControlElement      element,
 
                 int tabIndex = tab->position;
                 int tabCount = tabBar->count();
-                
+
                 bool drawSeparator = false;
-                
+
                 if (!selected && tabIndex != tabCount - 1) {
                     bool nextTabSelected = false;
                     if (tabIndex + 1 < tabCount) {
                         nextTabSelected = tabBar->currentIndex() == tabIndex + 1;
                     }
-                    
+
                     if (!nextTabSelected) {
                         drawSeparator = true;
                     }
                 }
-                
+
                 if (drawSeparator) {
                     QColor separatorColor = isDark ? tabBar->getDarkItemSeparator() : tabBar->getLightItemSeparator();
                     painter->setPen(separatorColor);
-                    
+
                     if (isVertical) {
                         int lineY;
-                        
+
                         if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
                             lineY = rect.bottom();
-                            
+
                             int lineWidth = rect.width() / 2;
-                            int startX = rect.center().x() - lineWidth/2;
-                            int endX = startX + lineWidth;
-                            
+                            int startX    = rect.center().x() - lineWidth / 2;
+                            int endX      = startX + lineWidth;
+
                             painter->drawLine(startX, lineY, endX, lineY);
                         } else {
                             lineY = rect.bottom();
-                            
+
                             int lineWidth = rect.width() / 2;
-                            int startX = rect.center().x() - lineWidth/2;
-                            int endX = startX + lineWidth;
-                            
+                            int startX    = rect.center().x() - lineWidth / 2;
+                            int endX      = startX + lineWidth;
+
                             painter->drawLine(startX, lineY, endX, lineY);
                         }
                     } else {
-                        int lineX = rect.right();
+                        int lineX      = rect.right();
                         int lineHeight = rect.height() / 3;
-                        int startY = rect.center().y() - lineHeight/2;
-                        
+                        int startY     = rect.center().y() - lineHeight / 2;
+
                         painter->drawLine(lineX, startY, lineX, startY + lineHeight);
                     }
                 }
@@ -344,7 +345,7 @@ void NTabBarStyle::drawControl(ControlElement      element,
 
                         iconY = iconY - 1;
 
-                        iconRect.moveLeft(textRect.left() + 8);
+                        iconRect.moveLeft(textRect.left() + 6);
                         iconRect.moveTop(iconY);
 
                         textRect.setLeft(iconRect.right() + 6);

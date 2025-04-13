@@ -1,4 +1,5 @@
 #include <QDrag>
+#include <QHBoxLayout>
 #include <QMimeData>
 #include <QMouseEvent>
 #include <QPainter>
@@ -6,6 +7,8 @@
 #include <QtNativeUI/NTabBar.h>
 #include "../private/ntabbar_p.h"
 #include "../private/ntabbarstyle.h"
+#include "QtNativeUI/NIcon.h"
+#include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NTheme.h"
 
 Q_PROPERTY_CREATE_Q_CPP(NTabBar, int, BorderRadius)
@@ -109,6 +112,9 @@ void NTabBar::init() {
 
     setStyle(new NTabBarStyle(style()));
 
+    // 确保不调用Qt的原生setTabsClosable
+    QTabBar::setTabsClosable(false);
+
     // 连接主题变化信号
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NTabBar);
@@ -124,8 +130,92 @@ int NTabBar::hoverIndex() const {
     return d->_hoverIndex;
 }
 
+bool NTabBar::tabsClosable() const {
+    Q_D(const NTabBar);
+    return d->_tabsClosable;
+}
+
+void NTabBar::setTabsClosable(bool closable) {
+    Q_D(NTabBar);
+    if (d->_tabsClosable == closable)
+        return;
+
+    d->_tabsClosable = closable;
+
+    // 不调用QTabBar::setTabsClosable(closable)
+    // 为现有标签添加或移除关闭按钮
+    if (closable) {
+        for (int i = 0; i < count(); ++i) {
+            setupCustomCloseButton(i);
+        }
+    } else {
+        for (int i = 0; i < count(); ++i) {
+            setTabButton(i, QTabBar::RightSide, nullptr);
+        }
+    }
+
+    update();
+}
+
+void NTabBar::tabInserted(int index) {
+    Q_D(NTabBar);
+    QTabBar::tabInserted(index);
+
+    // 如果启用了关闭按钮，则为新标签添加关闭按钮
+    if (d->_tabsClosable) {
+        setupCustomCloseButton(index);
+    }
+}
+
+void NTabBar::setupCustomCloseButton(int index) {
+    QTabBar::Shape tabShape   = shape();
+    bool           isVertical = tabShape == QTabBar::RoundedWest || tabShape == QTabBar::RoundedEast ||
+                      tabShape == QTabBar::TriangularWest || tabShape == QTabBar::TriangularEast;
+
+    // 创建关闭按钮
+    NPushButton* closeBtn = new NPushButton(this);
+    closeBtn->setFluentIcon(NRegularIconType::Dismiss12Regular, 12);
+    closeBtn->setObjectName("tabCloseButton");
+
+    if (isVertical) {
+        QWidget*     container = new QWidget(this);
+        QHBoxLayout* layout    = new QHBoxLayout(container);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
+
+        closeBtn->setProperty("_nContentRect", QRect(0, 0, 20, 20));
+        closeBtn->setFixedSize(20, 20);
+
+        if (tabShape == QTabBar::RoundedWest || tabShape == QTabBar::TriangularWest) {
+            layout->addWidget(closeBtn);
+            layout->addStretch();
+        } else {
+            layout->addStretch();
+            layout->addWidget(closeBtn);
+        }
+
+        container->setStyleSheet("background: transparent;");
+        container->setFixedHeight(20);
+
+        setTabButton(index, QTabBar::LeftSide, container);
+
+        if (tabButton(index, QTabBar::RightSide)) {
+            setTabButton(index, QTabBar::RightSide, nullptr);
+        }
+    } else {
+        closeBtn->setProperty("_nContentRect", QRect(0, 0, 20, 20));
+        closeBtn->setFixedSize(20, 20);
+
+        setTabButton(index, QTabBar::RightSide, closeBtn);
+    }
+
+    connect(closeBtn, &NPushButton::clicked, this, [this, index]() { emit tabCloseRequested(index); });
+}
+
 void NTabBar::mousePressEvent(QMouseEvent* event) {
     Q_D(NTabBar);
+
+    // 不再需要检查关闭按钮点击
     QTabBar::mousePressEvent(event);
     d->_lastDragPix = grab(tabRect(currentIndex()));
     Q_EMIT tabBarPressed(currentIndex());
@@ -133,8 +223,6 @@ void NTabBar::mousePressEvent(QMouseEvent* event) {
 
 void NTabBar::mouseMoveEvent(QMouseEvent* event) {
     Q_D(NTabBar);
-
-    // 检测是否应该开始拖拽
     QRect moveRect = rect();
     moveRect.adjust(0, -height(), 0, height());
     QPoint currentPos = event->pos();
@@ -169,28 +257,7 @@ void NTabBar::mouseMoveEvent(QMouseEvent* event) {
     QTabBar::mouseMoveEvent(event);
 }
 
-void NTabBar::dragEnterEvent(QDragEnterEvent* event) {
-    if (event->mimeData()->property("DragType").toString() == "NTabBarDrag") {
-        event->acceptProposedAction();
-    }
-    QTabBar::dragEnterEvent(event);
-}
-
-void NTabBar::dropEvent(QDropEvent* event) {
-    if (event->mimeData()->property("NTabBarObject").value<NTabBar*>() != this) {
-        event->accept();
-        QMimeData* data = const_cast<QMimeData*>(event->mimeData());
-
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        data->setProperty("TabDropIndex", tabAt(event->position().toPoint()));
-#else
-        data->setProperty("TabDropIndex", tabAt(event->pos()));
-#endif
-
-        Q_EMIT tabDropped(data);
-    }
-    QTabBar::dropEvent(event);
-}
+void NTabBar::mouseReleaseEvent(QMouseEvent* event) { QTabBar::mouseReleaseEvent(event); }
 
 void NTabBar::leaveEvent(QEvent* event) {
     Q_D(NTabBar);

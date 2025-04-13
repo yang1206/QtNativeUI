@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     setCentralWidget(m_tabWidget);
     m_tabWidget->setTabShape(QTabWidget::Rounded);
     m_tabWidget->setTabPosition(QTabWidget::West);
+    m_tabWidget->setTabsClosable(true);
     m_tabWidget->setMovable(true);
     auto btn = new ButtonExample(this);
     m_tabWidget->addTab(btn, "Button");

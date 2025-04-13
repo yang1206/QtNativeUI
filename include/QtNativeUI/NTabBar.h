@@ -50,6 +50,13 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
     ~NTabBar();
     int hoverIndex() const;
 
+    // 重写关闭按钮相关方法
+    bool tabsClosable() const;
+    void setTabsClosable(bool closable);
+
+    // 用于设置自定义关闭按钮的方法
+    void setupCustomCloseButton(int index);
+
   signals:
     void tabBarPressed(int index);
     void tabDragStarted(QDrag* drag);
@@ -58,10 +65,12 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
   protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
-    void dragEnterEvent(QDragEnterEvent* event) override;
-    void dropEvent(QDropEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
     void leaveEvent(QEvent* event) override;
     void changeEvent(QEvent* event) override;
+
+    // 重写标签插入方法，以便添加关闭按钮
+    void tabInserted(int index) override;
 
   private:
     void init();

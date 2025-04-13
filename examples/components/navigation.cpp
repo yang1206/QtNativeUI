@@ -62,6 +62,7 @@ QWidget* NavigationExample::createTabBars() {
     // 创建一个带关闭按钮的NTabBar
     auto closableTabBar = new NTabBar(this);
     closableTabBar->setTabsClosable(true);
+    closableTabBar->setMovable(true);
     closableTabBar->addTab("Tab 1");
     closableTabBar->addTab("Tab 2");
     closableTabBar->addTab("Tab 3");
@@ -91,6 +92,8 @@ QWidget* NavigationExample::createTabBars() {
     verticalTabBar->addTab("Tab 1");
     verticalTabBar->addTab("Tab 2");
     verticalTabBar->addTab("Tab 3");
+    verticalTabBar->setTabsClosable(true);
+
     horizontalLayout->addWidget(verticalTabBar);
 
     auto verticalTabBar2 = new NTabBar(this);
@@ -98,6 +101,8 @@ QWidget* NavigationExample::createTabBars() {
     verticalTabBar2->addTab("Tab 1");
     verticalTabBar2->addTab("Tab 2");
     verticalTabBar2->addTab("Tab 3");
+    verticalTabBar2->setTabsClosable(true);
+    verticalTabBar2->setMovable(true);
     horizontalLayout->addWidget(verticalTabBar2);
 
     layout->addLayout(horizontalLayout);
