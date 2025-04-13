@@ -10,15 +10,43 @@ class NTabBarPrivate : public QObject {
     Q_OBJECT
     Q_D_CREATE(NTabBar)
     Q_PROPERTY_CREATE_D(int, BorderRadius)
-    Q_PROPERTY_CREATE_D(bool, OverlayMode)
-    Q_PROPERTY_CREATE_D(QColor, SelectedTextColor)
-    Q_PROPERTY_CREATE_D(QColor, UnselectedTextColor)
-    Q_PROPERTY_CREATE_D(QColor, HoverTextColor)
-    Q_PROPERTY_CREATE_D(QColor, DisabledTextColor)
-    Q_PROPERTY_CREATE_D(QColor, SelectedBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, HoverBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, BorderColor)
-    Q_PROPERTY_CREATE_D(QColor, SeparatorColor)
+
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderBackground)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderBackground)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderBackgroundSelected)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderBackgroundSelected)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderBackgroundPointerOver)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderBackgroundPointerOver)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderBackgroundPressed)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderBackgroundPressed)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderBackgroundDisabled)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderBackgroundDisabled)
+
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderForeground)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderForeground)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderForegroundSelected)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderForegroundSelected)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderForegroundPointerOver)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderForegroundPointerOver)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderForegroundPressed)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderForegroundPressed)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderForegroundDisabled)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderForegroundDisabled)
+
+    // 图标前景色（各状态）
+    Q_PROPERTY_CREATE_D(QColor, LightItemIconForeground)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemIconForeground)
+    Q_PROPERTY_CREATE_D(QColor, LightItemIconForegroundSelected)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemIconForegroundSelected)
+    Q_PROPERTY_CREATE_D(QColor, LightItemIconForegroundPointerOver)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemIconForegroundPointerOver)
+    Q_PROPERTY_CREATE_D(QColor, LightItemIconForegroundPressed)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemIconForegroundPressed)
+    Q_PROPERTY_CREATE_D(QColor, LightItemIconForegroundDisabled)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemIconForegroundDisabled)
+
+    Q_PROPERTY_CREATE_D(QColor, LightItemSeparator)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemSeparator)
 
   public:
     explicit NTabBarPrivate(QObject* parent = nullptr);

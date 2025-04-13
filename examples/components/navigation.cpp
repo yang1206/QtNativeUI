@@ -20,7 +20,6 @@ void NavigationExample::initUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
-
     // 创建滚动区域
     m_scrollArea = new NScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
@@ -86,7 +85,6 @@ QWidget* NavigationExample::createTabBars() {
     // 在视觉效果上分隔不同示例
     layout->addWidget(new QLabel(""));
 
-    // 创建一个水平排列的TabBar示例
     auto horizontalLayout = new QHBoxLayout();
     auto verticalTabBar   = new NTabBar(this);
     verticalTabBar->setShape(QTabBar::RoundedWest);

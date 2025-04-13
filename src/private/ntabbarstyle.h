@@ -27,15 +27,6 @@ class NTabBarStyle : public QProxyStyle {
                            const QWidget*      widget) const override;
 
     QRect subElementRect(SubElement element, const QStyleOption* option, const QWidget* widget) const override;
-
-  private:
-    NThemeType::ThemeMode _themeMode;
-    bool                  _isDark;
-    int                   _topRadius = 7;
-    int                   _margin    = 9;
-
-    // 辅助函数：绘制特殊形状的Tab路径
-    QPainterPath getTabPath(const QRect& tabRect) const;
 };
 
 #endif // QTNATIVEUI_NTABBARSTYLE_H

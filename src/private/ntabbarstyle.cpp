@@ -1,92 +1,124 @@
 #include "ntabbarstyle.h"
 
+#include <QDebug>
 #include <QPainter>
 #include <QPainterPath>
-#include <QStyleOption>
+#include <QStyleOptionTab>
 #include "QtNativeUI/NIcon.h"
+#include "QtNativeUI/NTabBar.h"
 #include "QtNativeUI/NTheme.h"
 
-NTabBarStyle::NTabBarStyle(QStyle* style) : QProxyStyle(style) {
-    _themeMode = nTheme->themeMode();
-    _isDark    = nTheme->isDarkMode();
-
-    connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
-        _themeMode = themeMode;
-        _isDark    = nTheme->isDarkMode();
-    });
-}
+NTabBarStyle::NTabBarStyle(QStyle* style) : QProxyStyle(style) {}
 
 NTabBarStyle::~NTabBarStyle() {}
-
-QPainterPath NTabBarStyle::getTabPath(const QRect& tabRect) const {
-    QPainterPath path;
-    path.moveTo(tabRect.x(), tabRect.bottom() + 1);
-    path.arcTo(QRectF(tabRect.x() - _margin, tabRect.bottom() - _margin * 2 + 1, _margin * 2, _margin * 2), -90, 90);
-    path.lineTo(tabRect.x() + _margin, tabRect.y() + _topRadius);
-    path.arcTo(QRectF(tabRect.x() + _margin, tabRect.y(), _topRadius * 2, _topRadius * 2), 180, -90);
-    path.lineTo(tabRect.right() - _margin - _topRadius, tabRect.y());
-    path.arcTo(
-        QRectF(tabRect.right() - _margin - 2 * _topRadius, tabRect.y(), _topRadius * 2, _topRadius * 2), 90, -90);
-    path.lineTo(tabRect.right() - _margin, tabRect.bottom() - _margin);
-    path.arcTo(
-        QRectF(tabRect.right() - _margin, tabRect.bottom() - 2 * _margin + 1, _margin * 2, _margin * 2), -180, 90);
-    path.lineTo(tabRect.right(), tabRect.bottom() + 10);
-    path.lineTo(tabRect.x(), tabRect.bottom() + 10);
-    path.closeSubpath();
-
-    return path;
-}
 
 void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
                                  const QStyleOption* option,
                                  QPainter*           painter,
                                  const QWidget*      widget) const {
+    const NTabBar* tabBar = qobject_cast<const NTabBar*>(widget);
+    if (!tabBar) {
+        return QProxyStyle::drawPrimitive(element, option, painter, widget);
+    }
+
     switch (element) {
-        case PE_FrameTabBarBase:
-            // 不绘制底边线
-            return;
-
-        case PE_IndicatorArrowLeft:
-        case PE_IndicatorArrowRight:
-            // 不绘制左右箭头
-            return;
-
-        case PE_PanelButtonTool:
-            // 不绘制工具按钮面板
-            return;
-
-        case PE_IndicatorTabTear:
-            // 不绘制标签撕裂指示器
-            return;
-
-        case PE_IndicatorTabClose: {
+        case PE_FrameTabBarBase: {
             painter->save();
-            painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
-            if (option->state.testFlag(QStyle::State_MouseOver)) {
-                painter->setPen(Qt::NoPen);
-                painter->setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
-                painter->drawRoundedRect(option->rect, 2, 2);
+            bool   isDark      = nTheme->isDarkMode();
+            QColor borderColor = isDark ? tabBar->getDarkItemSeparator() : tabBar->getLightItemSeparator();
+
+            painter->setPen(borderColor);
+
+            QRect selectedTabRect;
+            int currentIndex = tabBar->currentIndex();
+            if (currentIndex >= 0) {
+                selectedTabRect = tabBar->tabRect(currentIndex);
             }
 
-            QColor closeColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
-
-            // 绘制X形状
-            painter->setPen(QPen(closeColor, 1.5));
-            int margin = 4;
-            painter->drawLine(option->rect.x() + margin,
-                              option->rect.y() + margin,
-                              option->rect.right() - margin,
-                              option->rect.bottom() - margin);
-            painter->drawLine(option->rect.right() - margin,
-                              option->rect.y() + margin,
-                              option->rect.x() + margin,
-                              option->rect.bottom() - margin);
+            if (tabBar->shape() == QTabBar::RoundedNorth || tabBar->shape() == QTabBar::TriangularNorth) {
+                painter->drawLine(
+                    option->rect.left(), option->rect.bottom(), option->rect.right(), option->rect.bottom());
+            } else if (tabBar->shape() == QTabBar::RoundedSouth || tabBar->shape() == QTabBar::TriangularSouth) {
+                painter->drawLine(option->rect.left(), option->rect.top(), option->rect.right(), option->rect.top());
+            } else if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
+                int lineX = selectedTabRect.right();
+                
+                if (selectedTabRect.isValid()) {
+                    if (selectedTabRect.top() > option->rect.top()) {
+                        painter->drawLine(lineX, option->rect.top(), lineX, selectedTabRect.top());
+                    }
+                    
+                    if (selectedTabRect.bottom() < option->rect.bottom()) {
+                        painter->drawLine(lineX, selectedTabRect.bottom(), lineX, option->rect.bottom());
+                    }
+                } else {
+                    painter->drawLine(lineX, option->rect.top(), lineX, option->rect.bottom());
+                }
+            } else if (tabBar->shape() == QTabBar::RoundedEast || tabBar->shape() == QTabBar::TriangularEast) {
+                int lineX = selectedTabRect.left();
+                
+                if (selectedTabRect.isValid()) {
+                    if (selectedTabRect.top() > option->rect.top()) {
+                        painter->drawLine(lineX, option->rect.top(), lineX, selectedTabRect.top());
+                    }
+                    
+                    if (selectedTabRect.bottom() < option->rect.bottom()) {
+                        painter->drawLine(lineX, selectedTabRect.bottom(), lineX, option->rect.bottom());
+                    }
+                } else {
+                    painter->drawLine(lineX, option->rect.top(), lineX, option->rect.bottom());
+                }
+            }
 
             painter->restore();
             return;
         }
 
+        case PE_IndicatorTabClose: {
+            if (const QStyleOption* closeOption = option) {
+                bool enabled   = closeOption->state & State_Enabled;
+                bool selected  = closeOption->state & State_Selected;
+                bool mouseOver = closeOption->state & State_MouseOver;
+                bool pressed   = closeOption->state & State_Sunken;
+
+                bool   isDark = nTheme->isDarkMode();
+                QColor foregroundColor;
+
+                if (!enabled) {
+                    foregroundColor = isDark ? tabBar->getDarkItemHeaderForegroundDisabled()
+                                             : tabBar->getLightItemHeaderForegroundDisabled();
+                } else if (pressed) {
+                    foregroundColor = isDark ? tabBar->getDarkItemHeaderForegroundPressed()
+                                             : tabBar->getLightItemHeaderForegroundPressed();
+                } else if (mouseOver) {
+                    foregroundColor = isDark ? tabBar->getDarkItemHeaderForegroundPointerOver()
+                                             : tabBar->getLightItemHeaderForegroundPointerOver();
+                } else if (selected) {
+                    foregroundColor = isDark ? tabBar->getDarkItemHeaderForegroundSelected()
+                                             : tabBar->getLightItemHeaderForegroundSelected();
+                } else {
+                    foregroundColor =
+                        isDark ? tabBar->getDarkItemHeaderForeground() : tabBar->getLightItemHeaderForeground();
+                }
+
+                QRect iconRect = closeOption->rect;
+
+                int iconSize = qMin(iconRect.width(), iconRect.height());
+
+                QIcon closeIcon = nIcon->fromRegular(NRegularIconType::Dismiss24Regular, iconSize, foregroundColor);
+
+                QSize actualSize = QSize(iconSize, iconSize);
+                QRect drawRect   = QRect(iconRect.center().x() - actualSize.width() / 2,
+                                       iconRect.center().y() - actualSize.height() / 2,
+                                       actualSize.width(),
+                                       actualSize.height());
+
+                closeIcon.paint(painter, drawRect, Qt::AlignCenter, enabled ? QIcon::Normal : QIcon::Disabled);
+                return;
+            }
+            break;
+        }
         default:
             break;
     }
@@ -98,53 +130,138 @@ void NTabBarStyle::drawControl(ControlElement      element,
                                const QStyleOption* option,
                                QPainter*           painter,
                                const QWidget*      widget) const {
+    const NTabBar* tabBar = qobject_cast<const NTabBar*>(widget);
+    if (!tabBar) {
+        return QProxyStyle::drawControl(element, option, painter, widget);
+    }
+
     switch (element) {
         case CE_TabBarTabShape: {
             if (const QStyleOptionTab* tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
-                QRect tabRect = tab->rect;
                 painter->save();
-                painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-                painter->setPen(Qt::NoPen);
+                painter->setRenderHint(QPainter::Antialiasing, true);
 
-                if (tab->state.testFlag(QStyle::State_Selected)) {
-                    // 选中标签的特殊形状
-                    QRect adjustedRect = tabRect;
-                    adjustedRect.setLeft(adjustedRect.left() - _margin);
-                    if (tab->position != QStyleOptionTab::End) {
-                        adjustedRect.setRight(adjustedRect.right() + _margin + 1);
-                    }
+                bool selected   = tab->state & State_Selected;
+                bool enabled    = tab->state & State_Enabled;
+                bool mouseOver  = tab->state & State_MouseOver;
+                bool pressed    = tab->state & State_Sunken;
+                bool isDark     = nTheme->isDarkMode();
+                bool isVertical = tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::RoundedEast ||
+                                  tabBar->shape() == QTabBar::TriangularWest ||
+                                  tabBar->shape() == QTabBar::TriangularEast;
 
-                    // 选中的Tab使用SelectedBackgroundColor
-                    painter->setBrush(NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, _themeMode));
-                    if (_isDark) {
-                        painter->setBrush(
-                            NThemeColor(NFluentColorKey::SolidBackgroundFillColorQuarternary, _themeMode));
-                    }
+                int   borderRadius = tabBar->getBorderRadius();
+                QRect rect         = tab->rect;
 
-                    // 绘制特殊形状路径
-                    painter->drawPath(getTabPath(adjustedRect));
-                } else if (tab->state.testFlag(QStyle::State_MouseOver)) {
-                    // 悬停状态 - 也使用特殊形状，与选中保持一致
-                    QRect adjustedRect = tabRect;
-                    adjustedRect.setLeft(adjustedRect.left() - _margin);
-                    if (tab->position != QStyleOptionTab::End) {
-                        adjustedRect.setRight(adjustedRect.right() + _margin + 1);
-                    }
-
-                    // 悬停的Tab使用HoverBackgroundColor
-                    painter->setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
-
-                    // 绘制特殊形状路径
-                    painter->drawPath(getTabPath(adjustedRect));
+                QColor backgroundColor;
+                if (!enabled) {
+                    backgroundColor = isDark ? tabBar->getDarkItemHeaderBackgroundDisabled()
+                                             : tabBar->getLightItemHeaderBackgroundDisabled();
+                } else if (selected) {
+                    backgroundColor = isDark ? tabBar->getDarkItemHeaderBackgroundSelected()
+                                             : tabBar->getLightItemHeaderBackgroundSelected();
+                } else if (pressed) {
+                    backgroundColor = isDark ? tabBar->getDarkItemHeaderBackgroundPressed()
+                                             : tabBar->getLightItemHeaderBackgroundPressed();
+                } else if (mouseOver) {
+                    backgroundColor = isDark ? tabBar->getDarkItemHeaderBackgroundPointerOver()
+                                             : tabBar->getLightItemHeaderBackgroundPointerOver();
+                } else {
+                    backgroundColor =
+                        isDark ? tabBar->getDarkItemHeaderBackground() : tabBar->getLightItemHeaderBackground();
                 }
 
-                // 绘制分隔线
-                if (!tab->state.testFlag(QStyle::State_Selected) && !tab->state.testFlag(QStyle::State_MouseOver) &&
-                    tab->position != QStyleOptionTab::End && tab->selectedPosition != QStyleOptionTab::NextIsSelected) {
-                    painter->setPen(Qt::NoPen);
-                    painter->setBrush(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, _themeMode));
-                    painter->drawRoundedRect(
-                        QRectF(tabRect.right() - 3, tabRect.y() + 7, 3, tabRect.height() - 14), 2, 2);
+                QPainterPath path;
+
+                if (isVertical) {
+                    if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
+                        path.moveTo(rect.right(), rect.top());
+                        path.lineTo(rect.right(), rect.bottom());
+                        path.lineTo(rect.left() + borderRadius, rect.bottom());
+                        path.arcTo(rect.left(),
+                                   rect.bottom() - borderRadius * 2,
+                                   borderRadius * 2,
+                                   borderRadius * 2,
+                                   270,
+                                   -90);
+                        path.lineTo(rect.left(), rect.top() + borderRadius);
+                        path.arcTo(rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180, -90);
+                        path.closeSubpath();
+                    } else {
+                        path.moveTo(rect.left(), rect.top());
+                        path.lineTo(rect.left(), rect.bottom());
+                        path.lineTo(rect.right() - borderRadius, rect.bottom());
+                        path.arcTo(rect.right() - borderRadius * 2,
+                                   rect.bottom() - borderRadius * 2,
+                                   borderRadius * 2,
+                                   borderRadius * 2,
+                                   270,
+                                   90);
+                        path.lineTo(rect.right(), rect.top() + borderRadius);
+                        path.arcTo(
+                            rect.right() - borderRadius * 2, rect.top(), borderRadius * 2, borderRadius * 2, 0, 90);
+                        path.closeSubpath();
+                    }
+                } else {
+                    path.moveTo(rect.left(), rect.bottom());
+                    path.lineTo(rect.left(), rect.top() + borderRadius);
+                    path.arcTo(rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180, -90);
+                    path.lineTo(rect.right() - borderRadius, rect.top());
+                    path.arcTo(
+                        rect.right() - borderRadius * 2, rect.top(), borderRadius * 2, borderRadius * 2, 90, -90);
+                    path.lineTo(rect.right(), rect.bottom());
+                    path.closeSubpath();
+                }
+
+                painter->fillPath(path, backgroundColor);
+
+                int tabIndex = tab->position;
+                int tabCount = tabBar->count();
+                
+                bool drawSeparator = false;
+                
+                if (!selected && tabIndex != tabCount - 1) {
+                    bool nextTabSelected = false;
+                    if (tabIndex + 1 < tabCount) {
+                        nextTabSelected = tabBar->currentIndex() == tabIndex + 1;
+                    }
+                    
+                    if (!nextTabSelected) {
+                        drawSeparator = true;
+                    }
+                }
+                
+                if (drawSeparator) {
+                    QColor separatorColor = isDark ? tabBar->getDarkItemSeparator() : tabBar->getLightItemSeparator();
+                    painter->setPen(separatorColor);
+                    
+                    if (isVertical) {
+                        int lineY;
+                        
+                        if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
+                            lineY = rect.bottom();
+                            
+                            int lineWidth = rect.width() / 2;
+                            int startX = rect.center().x() - lineWidth/2;
+                            int endX = startX + lineWidth;
+                            
+                            painter->drawLine(startX, lineY, endX, lineY);
+                        } else {
+                            lineY = rect.bottom();
+                            
+                            int lineWidth = rect.width() / 2;
+                            int startX = rect.center().x() - lineWidth/2;
+                            int endX = startX + lineWidth;
+                            
+                            painter->drawLine(startX, lineY, endX, lineY);
+                        }
+                    } else {
+                        int lineX = rect.right();
+                        int lineHeight = rect.height() / 3;
+                        int startY = rect.center().y() - lineHeight/2;
+                        
+                        painter->drawLine(lineX, startY, lineX, startY + lineHeight);
+                    }
                 }
 
                 painter->restore();
@@ -154,44 +271,132 @@ void NTabBarStyle::drawControl(ControlElement      element,
 
         case CE_TabBarTabLabel: {
             if (const QStyleOptionTab* tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
-                QRect textRect = subElementRect(SE_TabBarTabText, tab, widget);
-                textRect.setLeft(textRect.left() + 10);
-
                 painter->save();
-                painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing |
-                                        QPainter::SmoothPixmapTransform);
+                painter->setRenderHint(QPainter::Antialiasing, true);
 
-                // 绘制图标
-                QIcon icon = tab->icon;
-                if (!icon.isNull()) {
-                    QRectF iconRect(tab->rect.x() + 15,
-                                    textRect.center().y() - (qreal) tab->iconSize.height() / 2 + 1,
-                                    tab->iconSize.width(),
-                                    tab->iconSize.height());
+                bool selected   = tab->state & State_Selected;
+                bool enabled    = tab->state & State_Enabled;
+                bool mouseOver  = tab->state & State_MouseOver;
+                bool pressed    = tab->state & State_Sunken;
+                bool isDark     = nTheme->isDarkMode();
+                bool isVertical = tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::RoundedEast ||
+                                  tabBar->shape() == QTabBar::TriangularWest ||
+                                  tabBar->shape() == QTabBar::TriangularEast;
 
-                    QIcon::Mode  iconMode  = (tab->state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled;
-                    QIcon::State iconState = (tab->state & QStyle::State_Selected) ? QIcon::On : QIcon::Off;
-
-                    QPixmap iconPix = icon.pixmap(tab->iconSize, widget->devicePixelRatio(), iconMode, iconState);
-
-                    painter->drawPixmap(iconRect.x(), iconRect.y(), iconPix);
-                }
-
-                // 绘制文字 - 使用恰当的颜色
                 QColor textColor;
-                if (!(tab->state & QStyle::State_Enabled)) {
-                    textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, _themeMode);
-                } else if (tab->state & QStyle::State_Selected) {
-                    textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
-                } else if (tab->state & QStyle::State_MouseOver) {
-                    textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
+                if (!enabled) {
+                    textColor = isDark ? tabBar->getDarkItemHeaderForegroundDisabled()
+                                       : tabBar->getLightItemHeaderForegroundDisabled();
+                } else if (selected) {
+                    textColor = isDark ? tabBar->getDarkItemHeaderForegroundSelected()
+                                       : tabBar->getLightItemHeaderForegroundSelected();
+                } else if (pressed) {
+                    textColor = isDark ? tabBar->getDarkItemHeaderForegroundPressed()
+                                       : tabBar->getLightItemHeaderForegroundPressed();
+                } else if (mouseOver) {
+                    textColor = isDark ? tabBar->getDarkItemHeaderForegroundPointerOver()
+                                       : tabBar->getLightItemHeaderForegroundPointerOver();
                 } else {
-                    textColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, _themeMode);
+                    textColor = isDark ? tabBar->getDarkItemHeaderForeground() : tabBar->getLightItemHeaderForeground();
                 }
+
+                QColor iconColor;
+                if (!enabled) {
+                    iconColor = isDark ? tabBar->getDarkItemIconForegroundDisabled()
+                                       : tabBar->getLightItemIconForegroundDisabled();
+                } else if (selected) {
+                    iconColor = isDark ? tabBar->getDarkItemIconForegroundSelected()
+                                       : tabBar->getLightItemIconForegroundSelected();
+                } else if (pressed) {
+                    iconColor = isDark ? tabBar->getDarkItemIconForegroundPressed()
+                                       : tabBar->getLightItemIconForegroundPressed();
+                } else if (mouseOver) {
+                    iconColor = isDark ? tabBar->getDarkItemIconForegroundPointerOver()
+                                       : tabBar->getLightItemIconForegroundPointerOver();
+                } else {
+                    iconColor = isDark ? tabBar->getDarkItemIconForeground() : tabBar->getLightItemIconForeground();
+                }
+
+                QRect textRect = tab->rect;
+
+                painter->setFont(widget->font());
+                QFontMetrics metrics(widget->font());
+
+                int textHeight   = metrics.height();
+                int textBaseline = textRect.center().y() + (metrics.ascent() - textHeight / 2);
+
+                if (!tab->icon.isNull()) {
+                    QSize iconSize(16, 16);
+                    QRect iconRect;
+
+                    if (isVertical) {
+                        iconRect.setWidth(iconSize.width());
+                        iconRect.setHeight(iconSize.height());
+                        iconRect.moveLeft(textRect.left() + 8);
+                        iconRect.moveTop(textRect.center().y() - iconSize.height() / 2);
+
+                        textRect.setLeft(iconRect.right() + 8);
+                    } else {
+                        iconRect.setWidth(iconSize.width());
+                        iconRect.setHeight(iconSize.height());
+
+                        int iconY = textRect.top() + (textRect.height() - iconSize.height()) / 2;
+
+                        iconY = iconY - 1;
+
+                        iconRect.moveLeft(textRect.left() + 8);
+                        iconRect.moveTop(iconY);
+
+                        textRect.setLeft(iconRect.right() + 6);
+                    }
+
+                    QIcon   icon   = tab->icon;
+                    QPixmap pixmap = icon.pixmap(iconSize);
+                    painter->drawPixmap(iconRect, pixmap);
+                }
+
+                if (tab->rightButtonSize.width() > 0) {
+                    textRect.setRight(textRect.right() - tab->rightButtonSize.width() - 4);
+                }
+
+                textRect.adjust(4, 0, -4, 0);
+                QString text = tab->text;
 
                 painter->setPen(textColor);
-                QString text = painter->fontMetrics().elidedText(tab->text, Qt::ElideRight, textRect.width());
-                painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip, text);
+
+                if (isVertical) {
+                    QString displayText = text;
+
+                    painter->save();
+
+                    if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
+                        painter->translate(textRect.center().x(), textRect.center().y());
+                        painter->rotate(-90);
+                    } else {
+                        painter->translate(textRect.center().x(), textRect.center().y());
+                        painter->rotate(90);
+                    }
+
+                    int textWidth  = metrics.horizontalAdvance(displayText);
+                    int textHeight = metrics.height();
+
+                    if (textWidth > textRect.height()) {
+                        displayText = metrics.elidedText(text, Qt::ElideRight, textRect.height());
+                        textWidth   = metrics.horizontalAdvance(displayText);
+                    }
+
+                    QRect rotatedTextRect(-textWidth / 2, -textHeight / 2, textWidth, textHeight);
+
+                    painter->drawText(rotatedTextRect, Qt::AlignCenter, displayText);
+
+                    painter->restore();
+                } else {
+                    QString elidedText = metrics.elidedText(text, Qt::ElideRight, textRect.width());
+
+                    int textY = textBaseline;
+
+                    painter->drawText(textRect.left(), textY, elidedText);
+                }
 
                 painter->restore();
                 return;
@@ -209,65 +414,82 @@ QSize NTabBarStyle::sizeFromContents(ContentsType        type,
                                      const QStyleOption* option,
                                      const QSize&        size,
                                      const QWidget*      widget) const {
-    switch (type) {
-        case CT_TabBarTab:
-            // 固定标签尺寸
-            return QSize(220, 35);
+    if (type == CT_TabBarTab) {
+        if (const QStyleOptionTab* tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
+            QSize          newSize = size;
+            const QTabBar* tabBar  = qobject_cast<const QTabBar*>(widget);
+            bool           isVertical =
+                tabBar && (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::RoundedEast ||
+                           tabBar->shape() == QTabBar::TriangularWest || tabBar->shape() == QTabBar::TriangularEast);
 
-        default:
-            break;
+            if (isVertical) {
+                QSize origSize = QProxyStyle::sizeFromContents(type, option, size, widget);
+
+                newSize.setWidth(qMax(origSize.width(), 32));
+                newSize.setHeight(qMax(origSize.height(), 100));
+
+                newSize.setHeight(qMin(newSize.height(), 240));
+                return newSize;
+            } else {
+                newSize.setHeight(qMax(newSize.height(), 32));
+
+                if (!tab->text.isEmpty()) {
+                    newSize.setWidth(qMax(newSize.width(), 100));
+                }
+
+                newSize.setWidth(qMin(newSize.width(), 240));
+            }
+
+            return newSize;
+        }
     }
 
     return QProxyStyle::sizeFromContents(type, option, size, widget);
 }
 
 QRect NTabBarStyle::subElementRect(SubElement element, const QStyleOption* option, const QWidget* widget) const {
-    switch (element) {
-        case SE_TabBarScrollLeftButton:
-        case SE_TabBarScrollRightButton:
-            // 隐藏滚动按钮
-            return QRect();
+    const QTabBar* tabBar = qobject_cast<const QTabBar*>(widget);
 
-        case SE_TabBarTabText: {
-            if (const QStyleOptionTab* tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
-                QRect textRect = tab->rect;
+    bool isVertical =
+        tabBar && (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::RoundedEast ||
+                   tabBar->shape() == QTabBar::TriangularWest || tabBar->shape() == QTabBar::TriangularEast);
 
-                // 为图标预留空间
-                if (!tab->icon.isNull()) {
-                    textRect.setLeft(textRect.left() + tab->iconSize.width() + 20);
+    if (isVertical && (element == SE_TabBarTabText || element == SE_TabBarTabLeftButton)) {
+        return QProxyStyle::subElementRect(element, option, widget);
+    }
+
+    if (element == SE_TabBarTabText) {
+        if (const QStyleOptionTab* tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
+            QRect textRect = tab->rect;
+
+            if (!tab->icon.isNull()) {
+                textRect.setLeft(textRect.left() + 24);
+            }
+
+            if (tab->rightButtonSize.width() > 0) {
+                textRect.setRight(textRect.right() - tab->rightButtonSize.width() - 4);
+            }
+
+            textRect.adjust(8, 0, -8, 0);
+
+            return textRect;
+        }
+    } else if (element == SE_TabBarTabRightButton) {
+        if (const QStyleOptionTab* tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
+            QRect closeRect;
+            if (tab->rightButtonSize.isValid()) {
+                const int size = 20;
+                closeRect.setSize(QSize(size, size));
+
+                if (isVertical) {
+                    closeRect.moveCenter(QPoint(tab->rect.center().x(), tab->rect.top() + size / 2 + 8));
                 } else {
-                    textRect.setLeft(textRect.left() + 15);
+                    closeRect.moveRight(tab->rect.right() - 8);
+                    closeRect.moveTop(tab->rect.center().y() - size / 2);
                 }
-
-                // 为关闭按钮预留空间
-                if (const QTabBar* tabBar = qobject_cast<const QTabBar*>(widget)) {
-                    if (tabBar->tabsClosable() && tab->state & QStyle::State_Enabled) {
-                        textRect.setRight(textRect.right() - 20);
-                    }
-                }
-
-                return textRect;
             }
-        } break;
-
-        case SE_TabBarTabLeftButton:
-            // 定位左侧按钮（通常是图标）
-            return QRect();
-
-        case SE_TabBarTabRightButton:
-            // 定位右侧按钮（通常是关闭按钮）
-            if (const QStyleOptionTab* tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
-                if (tab->rightButtonSize.isEmpty())
-                    return QRect();
-
-                QRect r(QPoint(), tab->rightButtonSize);
-                r.moveCenter(tab->rect.center());
-                r.moveRight(tab->rect.right() - 8);
-                return r;
-            }
-
-        default:
-            break;
+            return closeRect;
+        }
     }
 
     return QProxyStyle::subElementRect(element, option, widget);

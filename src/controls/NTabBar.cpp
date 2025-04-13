@@ -8,17 +8,43 @@
 #include "../private/ntabbarstyle.h"
 #include "QtNativeUI/NTheme.h"
 
-// 属性实现
 Q_PROPERTY_CREATE_Q_CPP(NTabBar, int, BorderRadius)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, bool, OverlayMode)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, SelectedTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, UnselectedTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, HoverTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DisabledTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, SelectedBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, HoverBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, BorderColor)
-Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, SeparatorColor)
+
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderBackground)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderBackground)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderBackgroundSelected)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderBackgroundSelected)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderBackgroundPointerOver)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderBackgroundPointerOver)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderBackgroundPressed)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderBackgroundPressed)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderBackgroundDisabled)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderBackgroundDisabled)
+
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderForeground)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderForeground)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderForegroundSelected)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderForegroundSelected)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderForegroundPointerOver)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderForegroundPointerOver)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderForegroundPressed)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderForegroundPressed)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderForegroundDisabled)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderForegroundDisabled)
+
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemIconForeground)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemIconForeground)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemIconForegroundSelected)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemIconForegroundSelected)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemIconForegroundPointerOver)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemIconForegroundPointerOver)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemIconForegroundPressed)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemIconForegroundPressed)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemIconForegroundDisabled)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemIconForegroundDisabled)
+
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemSeparator)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemSeparator)
 
 NTabBar::NTabBar(QWidget* parent) : QTabBar(parent), d_ptr(new NTabBarPrivate()) { init(); }
 
@@ -33,43 +59,54 @@ void NTabBar::init() {
     setObjectName("NTabBar");
     setStyleSheet("#NTabBar{background-color:transparent;}");
 
-    // 优化颜色定义
-    d->_pSelectedTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-    d->_pSelectedTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightItemHeaderBackground =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
+    d->_pDarkItemHeaderBackground =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Dark);
+    d->_pLightItemHeaderBackgroundSelected =
+        NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Light);
+    d->_pDarkItemHeaderBackgroundSelected =
+        NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Dark);
+    d->_pLightItemHeaderBackgroundPointerOver =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, NThemeType::Light);
+    d->_pDarkItemHeaderBackgroundPointerOver =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, NThemeType::Dark);
+    d->_pLightItemHeaderBackgroundPressed =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Light);
+    d->_pDarkItemHeaderBackgroundPressed =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Dark);
+    d->_pLightItemHeaderBackgroundDisabled =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
+    d->_pDarkItemHeaderBackgroundDisabled =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Dark);
 
-    d->_pUnselectedTextColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
-    d->_pUnselectedTextColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
+    d->_pLightItemHeaderForeground            = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
+    d->_pDarkItemHeaderForeground             = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
+    d->_pLightItemHeaderForegroundSelected    = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+    d->_pDarkItemHeaderForegroundSelected     = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightItemHeaderForegroundPointerOver = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
+    d->_pDarkItemHeaderForegroundPointerOver  = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
+    d->_pLightItemHeaderForegroundPressed     = NThemeColor(NFluentColorKey::TextFillColorTertiary, NThemeType::Light);
+    d->_pDarkItemHeaderForegroundPressed      = NThemeColor(NFluentColorKey::TextFillColorTertiary, NThemeType::Dark);
+    d->_pLightItemHeaderForegroundDisabled    = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
+    d->_pDarkItemHeaderForegroundDisabled     = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Dark);
 
-    d->_pHoverTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-    d->_pHoverTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightItemIconForeground            = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
+    d->_pDarkItemIconForeground             = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
+    d->_pLightItemIconForegroundSelected    = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+    d->_pDarkItemIconForegroundSelected     = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    d->_pLightItemIconForegroundPointerOver = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
+    d->_pDarkItemIconForegroundPointerOver  = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
+    d->_pLightItemIconForegroundPressed     = NThemeColor(NFluentColorKey::TextFillColorTertiary, NThemeType::Light);
+    d->_pDarkItemIconForegroundPressed      = NThemeColor(NFluentColorKey::TextFillColorTertiary, NThemeType::Dark);
+    d->_pLightItemIconForegroundDisabled    = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
+    d->_pDarkItemIconForegroundDisabled     = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Dark);
 
-    d->_pDisabledTextColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
-    d->_pDisabledTextColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Dark);
-
-    // 亮色主题使用SolidBackgroundFillColorTertiary作为选中背景
-    // 暗色主题使用SolidBackgroundFillColorQuarternary作为选中背景
-    d->_pSelectedBackgroundColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Light);
-    d->_pSelectedBackgroundColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorQuarternary, NThemeType::Dark);
-
-    // 使用SubtleFillColorSecondary作为悬停背景色，保持一致性
-    d->_pHoverBackgroundColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);
-    d->_pHoverBackgroundColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark);
-
-    d->_pBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
-    d->_pBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
-
-    d->_pSeparatorColor = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
-    d->_pSeparatorColor = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Dark);
+    d->_pLightItemSeparator = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
+    d->_pDarkItemSeparator  = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Dark);
 
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
-    d->_pOverlayMode  = false;
 
-    // 设置标签属性
-    setTabsClosable(true);
-    setMovable(true);
-    setAcceptDrops(true);
-
-    // 应用自定义样式
     setStyle(new NTabBarStyle(style()));
 
     // 连接主题变化信号
@@ -77,6 +114,7 @@ void NTabBar::init() {
         Q_D(NTabBar);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
+
         update();
     });
 }
