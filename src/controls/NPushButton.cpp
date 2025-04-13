@@ -17,6 +17,7 @@ Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightTextDefaultColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkTextDefaultColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightTextPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkTextPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NPushButton, bool, TransparentBackground)
 
 NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPushButtonPrivate()) {
     Q_D(NPushButton);
@@ -34,6 +35,7 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
     d->_pDarkTextDefaultColor  = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
     d->_pLightTextPressColor   = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
     d->_pDarkTextPressColor    = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
+    d->_pTransparentBackground = false;
 
     d->_lightBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_darkBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
@@ -194,7 +196,11 @@ void NPushButton::drawBackground(QPainter* painter) {
         } else if (d->_isHovered) {
             bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
         } else {
-            bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            if (d->_pTransparentBackground) {
+                bgColor = Qt::transparent;
+            } else {
+                bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            }
         }
 
         painter->setPen(Qt::NoPen);
@@ -204,6 +210,11 @@ void NPushButton::drawBackground(QPainter* painter) {
 
     if ((!d->_isPressed)) {
         if (d->_buttonType == NPushButtonPrivate::Accent) {
+            painter->restore();
+            return;
+        }
+
+        if (d->_pTransparentBackground && !d->_isHovered) {
             painter->restore();
             return;
         }
@@ -220,6 +231,10 @@ void NPushButton::drawBackground(QPainter* painter) {
 
 void NPushButton::drawBorder(QPainter* painter) {
     Q_D(NPushButton);
+
+    if (d->_pTransparentBackground && !d->_isHovered && !d->_isPressed && d->_buttonType != NPushButtonPrivate::Accent) {
+        return;
+    }
 
     if (d->_buttonType == NPushButtonPrivate::Accent) {
         return;

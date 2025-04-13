@@ -175,6 +175,7 @@ void NTabBar::setupCustomCloseButton(int index) {
     // 创建关闭按钮
     NPushButton* closeBtn = new NPushButton(this);
     closeBtn->setFluentIcon(NRegularIconType::Dismiss12Regular, 12);
+    closeBtn->setTransparentBackground(true);
     closeBtn->setObjectName("tabCloseButton");
 
     if (isVertical) {
