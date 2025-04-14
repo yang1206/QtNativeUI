@@ -39,7 +39,7 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
 
             if (tabBar->shape() == QTabBar::RoundedNorth || tabBar->shape() == QTabBar::TriangularNorth) {
                 painter->drawLine(
-                    option->rect.left(), option->rect.bottom(), option->rect.right(), option->rect.bottom());
+                    option->rect.left(), option->rect.bottom() - 1, option->rect.right(), option->rect.bottom() - 1);
             } else if (tabBar->shape() == QTabBar::RoundedSouth || tabBar->shape() == QTabBar::TriangularSouth) {
                 painter->drawLine(option->rect.left(), option->rect.top(), option->rect.right(), option->rect.top());
             } else if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
@@ -228,13 +228,11 @@ void NTabBarStyle::drawControl(ControlElement      element,
                     if (isVertical) {
                         // 垂直标签的边框处理
                         if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
-                            // 左侧标签 - 不绘制右边框(连接处)
                             painter->drawLine(
                                 rect.left(), rect.top() + borderRadius, rect.left(), rect.bottom() - borderRadius);
                             painter->drawLine(rect.left() + borderRadius, rect.bottom(), rect.right(), rect.bottom());
                             painter->drawLine(rect.left() + borderRadius, rect.top(), rect.right(), rect.top());
 
-                            // 绘制圆角
                             painter->drawArc(
                                 rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180 * 16, -90 * 16);
                             painter->drawArc(rect.left(),
@@ -244,7 +242,6 @@ void NTabBarStyle::drawControl(ControlElement      element,
                                              270 * 16,
                                              -90 * 16);
                         } else {
-                            // 右侧标签 - 不绘制左边框(连接处)
                             painter->drawLine(
                                 rect.right(), rect.top() + borderRadius, rect.right(), rect.bottom() - borderRadius);
                             painter->drawLine(rect.left(), rect.bottom(), rect.right() - borderRadius, rect.bottom());
@@ -265,11 +262,10 @@ void NTabBarStyle::drawControl(ControlElement      element,
                                              90 * 16);
                         }
                     } else {
-                        // 水平标签的边框处理 - 不绘制底部边框(连接处)
                         painter->drawLine(
                             rect.left() + borderRadius, rect.top(), rect.right() - borderRadius, rect.top());
-                        painter->drawLine(rect.left(), rect.top() + borderRadius, rect.left(), rect.bottom() - 1);
-                        painter->drawLine(rect.right(), rect.top() + borderRadius, rect.right(), rect.bottom() - 1);
+                        painter->drawLine(rect.left(), rect.top() + borderRadius, rect.left(), rect.bottom());
+                        painter->drawLine(rect.right(), rect.top() + borderRadius, rect.right(), rect.bottom());
 
                         // 绘制圆角
                         painter->drawArc(

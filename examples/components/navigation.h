@@ -13,6 +13,7 @@ class NavigationExample : public QWidget {
   private:
     void     initUI();
     QWidget* createTabBars();
+    QWidget* createTabWidgets();
 
   private:
     NScrollArea* m_scrollArea;
