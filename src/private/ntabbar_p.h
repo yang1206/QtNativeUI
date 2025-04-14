@@ -33,7 +33,6 @@ class NTabBarPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, LightItemHeaderForegroundDisabled)
     Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderForegroundDisabled)
 
-    // 图标前景色（各状态）
     Q_PROPERTY_CREATE_D(QColor, LightItemIconForeground)
     Q_PROPERTY_CREATE_D(QColor, DarkItemIconForeground)
     Q_PROPERTY_CREATE_D(QColor, LightItemIconForegroundSelected)
@@ -47,6 +46,8 @@ class NTabBarPrivate : public QObject {
 
     Q_PROPERTY_CREATE_D(QColor, LightItemSeparator)
     Q_PROPERTY_CREATE_D(QColor, DarkItemSeparator)
+    Q_PROPERTY_CREATE_D(QColor, LightItemHeaderBorderColorSelected)
+    Q_PROPERTY_CREATE_D(QColor, DarkItemHeaderBorderColorSelected)
 
   public:
     explicit NTabBarPrivate(QObject* parent = nullptr);
@@ -59,14 +60,14 @@ class NTabBarPrivate : public QObject {
     // 交互状态
     int     _hoverIndex{-1};
     QPixmap _lastDragPix; // 保存拖拽的标签图像
-    
+
     // 关闭按钮相关
     bool _tabsClosable{false}; // 是否显示关闭按钮
-    
+
     // 不再需要这些成员
-    // int _closeButtonHoverIndex{-1}; 
+    // int _closeButtonHoverIndex{-1};
     // int _closeButtonPressedIndex{-1};
-    
+
     // 不再需要这些方法
     // QRect closeButtonRect(int tabIndex) const;
     // bool isPointInCloseButton(const QPoint& point, int tabIndex) const;

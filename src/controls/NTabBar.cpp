@@ -48,6 +48,8 @@ Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemIconForegroundDisabled)
 
 Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemSeparator)
 Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemSeparator)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, LightItemHeaderBorderColorSelected)
+Q_PROPERTY_CREATE_Q_CPP(NTabBar, QColor, DarkItemHeaderBorderColorSelected)
 
 NTabBar::NTabBar(QWidget* parent) : QTabBar(parent), d_ptr(new NTabBarPrivate()) { init(); }
 
@@ -107,6 +109,9 @@ void NTabBar::init() {
 
     d->_pLightItemSeparator = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
     d->_pDarkItemSeparator  = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Dark);
+
+    d->_pLightItemHeaderBorderColorSelected = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Light);
+    d->_pDarkItemHeaderBorderColorSelected  = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Dark);
 
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
 

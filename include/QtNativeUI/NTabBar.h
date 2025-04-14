@@ -44,6 +44,8 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkItemIconForegroundDisabled)
     Q_PROPERTY_CREATE_Q_H(QColor, LightItemSeparator)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkItemSeparator)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightItemHeaderBorderColorSelected)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkItemHeaderBorderColorSelected)
 
   public:
     explicit NTabBar(QWidget* parent = nullptr);
