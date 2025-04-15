@@ -136,10 +136,6 @@ QString NTabWidget::tabToolTip(int index) const {
 void NTabWidget::setTabToolTip(int index, const QString& tip) {
     Q_D(NTabWidget);
     d->_tabBar->setTabToolTip(index, tip);
-
-    if (tip.isEmpty()) {
-        setToolTip("");
-    }
 }
 
 NTabBar* NTabWidget::tabBar() const {
