@@ -38,8 +38,10 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
             }
 
             if (tabBar->shape() == QTabBar::RoundedNorth || tabBar->shape() == QTabBar::TriangularNorth) {
-                painter->drawLine(
-                    option->rect.left(), option->rect.bottom() - 1, option->rect.right(), option->rect.bottom() - 1);
+                painter->drawLine(option->rect.left(),
+                                  option->rect.bottom() - 0.5,
+                                  option->rect.right(),
+                                  option->rect.bottom() - 0.5);
             } else if (tabBar->shape() == QTabBar::RoundedSouth || tabBar->shape() == QTabBar::TriangularSouth) {
                 painter->drawLine(option->rect.left(), option->rect.top(), option->rect.right(), option->rect.top());
             } else if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
@@ -204,29 +206,45 @@ void NTabBarStyle::drawControl(ControlElement      element,
                         path.closeSubpath();
                     }
                 } else {
-                    path.moveTo(rect.left(), rect.bottom());
-                    path.lineTo(rect.left(), rect.top() + borderRadius);
-                    path.arcTo(rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180, -90);
-                    path.lineTo(rect.right() - borderRadius, rect.top());
-                    path.arcTo(
-                        rect.right() - borderRadius * 2, rect.top(), borderRadius * 2, borderRadius * 2, 90, -90);
-                    path.lineTo(rect.right(), rect.bottom());
-                    path.closeSubpath();
+                    if (tabBar->shape() == QTabBar::RoundedSouth || tabBar->shape() == QTabBar::TriangularSouth) {
+                        path.moveTo(rect.topLeft());
+                        path.lineTo(rect.topRight());
+                        path.lineTo(rect.right(), rect.bottom() - borderRadius);
+                        path.arcTo(QRectF(rect.right() - 2.0 * borderRadius,
+                                          rect.bottom() - 2.0 * borderRadius,
+                                          2.0 * borderRadius,
+                                          2.0 * borderRadius),
+                                   0,
+                                   -90);
+                        path.arcTo(QRectF(rect.left(),
+                                          rect.bottom() - 2.0 * borderRadius,
+                                          2.0 * borderRadius,
+                                          2.0 * borderRadius),
+                                   270,
+                                   -90);
+                        path.closeSubpath();
+                    } else {
+                        path.moveTo(rect.left(), rect.bottom());
+                        path.lineTo(rect.left(), rect.top() + borderRadius);
+                        path.arcTo(rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180, -90);
+                        path.lineTo(rect.right() - borderRadius, rect.top());
+                        path.arcTo(
+                            rect.right() - borderRadius * 2, rect.top(), borderRadius * 2, borderRadius * 2, 90, -90);
+                        path.lineTo(rect.right(), rect.bottom());
+                        path.closeSubpath();
+                    }
                 }
 
                 painter->fillPath(path, backgroundColor);
 
-                // 为选中的标签绘制边框
                 if (selected) {
                     QColor borderColor = isDark ? tabBar->getDarkItemHeaderBorderColorSelected()
                                                 : tabBar->getLightItemHeaderBorderColorSelected();
                     painter->setPen(QPen(borderColor, 1.0));
 
-                    // 创建一个新路径用于绘制边框
                     QPainterPath borderPath;
 
                     if (isVertical) {
-                        // 垂直标签的边框处理
                         if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
                             painter->drawLine(
                                 rect.left(), rect.top() + borderRadius, rect.left(), rect.bottom() - borderRadius);
@@ -247,7 +265,6 @@ void NTabBarStyle::drawControl(ControlElement      element,
                             painter->drawLine(rect.left(), rect.bottom(), rect.right() - borderRadius, rect.bottom());
                             painter->drawLine(rect.left(), rect.top(), rect.right() - borderRadius, rect.top());
 
-                            // 绘制圆角
                             painter->drawArc(rect.right() - borderRadius * 2,
                                              rect.top(),
                                              borderRadius * 2,
@@ -262,20 +279,38 @@ void NTabBarStyle::drawControl(ControlElement      element,
                                              90 * 16);
                         }
                     } else {
-                        painter->drawLine(
-                            rect.left() + borderRadius, rect.top(), rect.right() - borderRadius, rect.top());
-                        painter->drawLine(rect.left(), rect.top() + borderRadius, rect.left(), rect.bottom());
-                        painter->drawLine(rect.right(), rect.top() + borderRadius, rect.right(), rect.bottom());
+                        if (tabBar->shape() == QTabBar::RoundedSouth || tabBar->shape() == QTabBar::TriangularSouth) {
+                            painter->drawLine(rect.left(), rect.top(), rect.right(), rect.top());
+                            painter->drawLine(rect.left(), rect.top(), rect.left(), rect.bottom() - borderRadius);
+                            painter->drawLine(rect.right(), rect.top(), rect.right(), rect.bottom() - borderRadius);
 
-                        // 绘制圆角
-                        painter->drawArc(
-                            rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180 * 16, -90 * 16);
-                        painter->drawArc(rect.right() - borderRadius * 2,
-                                         rect.top(),
-                                         borderRadius * 2,
-                                         borderRadius * 2,
-                                         90 * 16,
-                                         -90 * 16);
+                            painter->drawArc(rect.left(),
+                                             rect.bottom() - borderRadius * 2,
+                                             borderRadius * 2,
+                                             borderRadius * 2,
+                                             180 * 16,
+                                             90 * 16);
+                            painter->drawArc(rect.right() - borderRadius * 2,
+                                             rect.bottom() - borderRadius * 2,
+                                             borderRadius * 2,
+                                             borderRadius * 2,
+                                             270 * 16,
+                                             90 * 16);
+                        } else {
+                            painter->drawLine(
+                                rect.left() + borderRadius, rect.top(), rect.right() - borderRadius, rect.top());
+                            painter->drawLine(rect.left(), rect.top() + borderRadius, rect.left(), rect.bottom());
+                            painter->drawLine(rect.right(), rect.top() + borderRadius, rect.right(), rect.bottom());
+
+                            painter->drawArc(
+                                rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180 * 16, -90 * 16);
+                            painter->drawArc(rect.right() - borderRadius * 2,
+                                             rect.top(),
+                                             borderRadius * 2,
+                                             borderRadius * 2,
+                                             90 * 16,
+                                             -90 * 16);
+                        }
                     }
                 }
 
