@@ -1,6 +1,6 @@
 #include "mainwindow.h"
-#include <QTabWidget>
 #include <QVBoxLayout>
+#include <QtNativeUI/NTabWidget.h>
 #include "components/button.h"
 #include "components/colors.h"
 #include "components/controls.h"
@@ -9,9 +9,8 @@
 #include "components/navigation.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
-    m_tabWidget = new QTabWidget(this);
+    m_tabWidget = new NTabWidget(this);
     setCentralWidget(m_tabWidget);
-    m_tabWidget->setTabShape(QTabWidget::Rounded);
     m_tabWidget->setTabPosition(QTabWidget::West);
     m_tabWidget->setTabsClosable(true);
     m_tabWidget->setMovable(true);

@@ -51,6 +51,8 @@ class QTNATIVEUI_EXPORT NTabWidget : public QWidget {
 
     bool tabsClosable() const;
     void setTabsClosable(bool closable);
+    void setMovable(bool movable);
+    bool isMovable() const;
 
     int currentIndex() const;
 

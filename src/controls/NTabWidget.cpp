@@ -176,6 +176,16 @@ void NTabWidget::setTabsClosable(bool closable) {
     }
 }
 
+void NTabWidget::setMovable(bool movable) {
+    Q_D(NTabWidget);
+    d->_tabBar->setMovable(movable);
+}
+
+bool NTabWidget::isMovable() const {
+    Q_D(const NTabWidget);
+    return d->_tabBar->isMovable();
+}
+
 int NTabWidget::currentIndex() const {
     Q_D(const NTabWidget);
     return d->_pCurrentIndex;

@@ -2,16 +2,16 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTabWidget>
 
+class NTabWidget;
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
+  public:
+    explicit MainWindow(QWidget* parent = nullptr);
 
-private:
-    QTabWidget *m_tabWidget;
+  private:
+    NTabWidget* m_tabWidget;
 };
 
 #endif // MAINWINDOW_H
