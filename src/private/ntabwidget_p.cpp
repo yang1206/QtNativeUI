@@ -17,7 +17,13 @@ void NTabWidgetPrivate::updateLayout() {
     if (q_ptr->layout()) {
         delete q_ptr->layout();
     }
-    _stack->setStyleSheet("#stackedWidget { border: none; }");
+    
+    // 移除样式表，我们使用调色板
+    _stack->setStyleSheet(""); 
+    
+    // 确保堆栈小部件能够显示背景色
+    _stack->setAutoFillBackground(true);
+    
     switch (_pTabPosition) {
         case NTabWidget::North: {
             QVBoxLayout* layout = new QVBoxLayout(q_ptr);

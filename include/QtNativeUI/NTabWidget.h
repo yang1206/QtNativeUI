@@ -65,14 +65,13 @@ class QTNATIVEUI_EXPORT NTabWidget : public QWidget {
     void tabCloseRequested(int index);
 
   protected:
-    void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
     void changeEvent(QEvent* event) override;
 
   private:
     void init();
-    void updateTabBarPosition();
+    void updatePalette();
 };
 
 #endif // QTNATIVEUI_NTABWIDGET_H

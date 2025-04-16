@@ -27,10 +27,14 @@ void NTabWidget::init() {
 
     d->_pLightSelectedBackground = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Light);
     d->_pDarkSelectedBackground  = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Dark);
+
     // 创建和配置组件
     d->_tabBar = new NTabBar(this);
     d->_stack  = new QStackedWidget(this);
     d->_stack->setObjectName("stackedWidget");
+
+    // 设置初始调色板
+    updatePalette();
 
     d->updateLayout();
 
@@ -49,8 +53,16 @@ void NTabWidget::init() {
         Q_D(NTabWidget);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
+        updatePalette();
         update();
     });
+}
+
+void NTabWidget::updatePalette() {
+    Q_D(NTabWidget);
+    QPalette pal = palette();
+    d->_stack->setAutoFillBackground(true);
+    setPalette(pal);
 }
 
 NTabWidget::TabPosition NTabWidget::tabPosition() const {
@@ -209,34 +221,6 @@ void NTabWidget::setCurrentWidget(QWidget* widget) {
     int index = d->_stack->indexOf(widget);
     if (index != -1)
         setCurrentIndex(index);
-}
-
-void NTabWidget::paintEvent(QPaintEvent* event) {
-    Q_UNUSED(event);
-    Q_D(NTabWidget);
-
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    QColor bgColor = d->_isDark ? d->_pDarkSelectedBackground : d->_pLightSelectedBackground;
-
-    QRect contentRect;
-    switch (d->_pTabPosition) {
-        case North:
-            contentRect = QRect(0, d->_tabBar->height(), width(), height() - d->_tabBar->height());
-            break;
-        case South:
-            contentRect = QRect(0, 0, width(), height() - d->_tabBar->height());
-            break;
-        case West:
-            contentRect = QRect(d->_tabBar->width(), 0, width() - d->_tabBar->width(), height());
-            break;
-        case East:
-            contentRect = QRect(0, 0, width() - d->_tabBar->width(), height());
-            break;
-    }
-
-    painter.fillRect(contentRect, bgColor);
 }
 
 void NTabWidget::resizeEvent(QResizeEvent* event) {
