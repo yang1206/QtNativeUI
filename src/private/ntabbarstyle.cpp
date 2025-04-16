@@ -303,54 +303,53 @@ void NTabBarStyle::drawControl(ControlElement      element,
                     painter->drawPath(borderPath);
                 }
 
-                int tabIndex = tab->position;
-                int tabCount = tabBar->count();
-
-                bool drawSeparator = false;
-
-                if (!selected && tabIndex != tabCount - 1) {
-                    bool nextTabSelected = false;
-                    if (tabIndex + 1 < tabCount) {
-                        nextTabSelected = tabBar->currentIndex() == tabIndex + 1;
-                    }
-
-                    if (!nextTabSelected) {
-                        drawSeparator = true;
+                int tabIndex = -1;
+                for (int i = 0; i < tabBar->count(); ++i) {
+                    if (tabBar->tabRect(i).contains(tab->rect.center())) {
+                        tabIndex = i;
+                        break;
                     }
                 }
 
-                if (drawSeparator) {
-                    QColor separatorColor = isDark ? tabBar->getDarkItemSeparator() : tabBar->getLightItemSeparator();
-                    painter->setPen(separatorColor);
+                if (tabIndex == -1) {
+                } else {
+                    int tabCount     = tabBar->count();
+                    int currentIndex = tabBar->currentIndex();
 
-                    if (isVertical) {
-                        int lineY;
+                    bool isSelected = (tabIndex == currentIndex);
+                    bool isLastTab  = (tabIndex == tabCount - 1);
 
-                        if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
-                            lineY = rect.bottom();
-
-                            int lineWidth = rect.width() / 2;
-                            int startX    = rect.center().x() - lineWidth / 2;
-                            int endX      = startX + lineWidth;
-
-                            painter->drawLine(startX, lineY, endX, lineY);
-                        } else {
-                            lineY = rect.bottom();
-
-                            int lineWidth = rect.width() / 2;
-                            int startX    = rect.center().x() - lineWidth / 2;
-                            int endX      = startX + lineWidth;
-
-                            painter->drawLine(startX, lineY, endX, lineY);
+                    bool drawSeparator = false;
+                    if (!isLastTab) {
+                        if (!isSelected) {
+                            bool nextTabIsSelected = (tabIndex + 1 == currentIndex);
+                            if (!nextTabIsSelected) {
+                                drawSeparator = true;
+                            }
                         }
-                    } else {
-                        int lineX      = rect.right();
-                        int lineHeight = rect.height() / 3;
-                        int startY     = rect.center().y() - lineHeight / 2;
-
-                        painter->drawLine(lineX, startY, lineX, startY + lineHeight);
                     }
-                }
+
+                    if (drawSeparator) {
+                        QColor separatorColor =
+                            isDark ? tabBar->getDarkItemSeparator() : tabBar->getLightItemSeparator();
+                        painter->setPen(separatorColor);
+
+                        if (isVertical) {
+                            int lineY;
+                            lineY         = rect.bottom();
+                            int lineWidth = rect.width() / 2;
+                            int startX    = rect.center().x() - lineWidth / 2;
+                            int endX      = startX + lineWidth;
+                            painter->drawLine(startX, lineY, endX, lineY);
+
+                        } else {
+                            int lineX      = rect.right();
+                            int lineHeight = rect.height() / 3;
+                            int startY     = rect.center().y() - lineHeight / 2;
+                            painter->drawLine(lineX, startY, lineX, startY + lineHeight);
+                        }
+                    }
+                } // end if (tabIndex != -1)
 
                 painter->restore();
                 return;
