@@ -38,12 +38,29 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
             }
 
             if (tabBar->shape() == QTabBar::RoundedNorth || tabBar->shape() == QTabBar::TriangularNorth) {
-                painter->drawLine(option->rect.left(),
-                                  option->rect.bottom() - 0.5,
-                                  option->rect.right(),
-                                  option->rect.bottom() - 0.5);
+                int lineY = option->rect.bottom();
+                if (selectedTabRect.isValid()) {
+                    if (selectedTabRect.left() > option->rect.left()) {
+                        painter->drawLine(option->rect.left(), lineY, selectedTabRect.left(), lineY);
+                    }
+                    if (selectedTabRect.right() < option->rect.right()) {
+                        painter->drawLine(selectedTabRect.right(), lineY, option->rect.right(), lineY);
+                    }
+                } else {
+                    painter->drawLine(option->rect.left(), lineY, option->rect.right(), lineY);
+                }
             } else if (tabBar->shape() == QTabBar::RoundedSouth || tabBar->shape() == QTabBar::TriangularSouth) {
-                painter->drawLine(option->rect.left(), option->rect.top(), option->rect.right(), option->rect.top());
+                int lineY = option->rect.top();
+                if (selectedTabRect.isValid()) {
+                    if (selectedTabRect.left() > option->rect.left()) {
+                        painter->drawLine(option->rect.left(), lineY, selectedTabRect.left(), lineY);
+                    }
+                    if (selectedTabRect.right() < option->rect.right()) {
+                        painter->drawLine(selectedTabRect.right(), lineY, option->rect.right(), lineY);
+                    }
+                } else {
+                    painter->drawLine(option->rect.left(), lineY, option->rect.right(), lineY);
+                }
             } else if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
                 int lineX = selectedTabRect.right();
 
@@ -173,7 +190,6 @@ void NTabBarStyle::drawControl(ControlElement      element,
                     backgroundColor =
                         isDark ? tabBar->getDarkItemHeaderBackground() : tabBar->getLightItemHeaderBackground();
                 }
-
                 QPainterPath path;
 
                 if (isVertical) {
@@ -243,75 +259,48 @@ void NTabBarStyle::drawControl(ControlElement      element,
                     painter->setPen(QPen(borderColor, 1.0));
 
                     QPainterPath borderPath;
+                    qreal        topY    = rect.top();
+                    qreal        bottomY = rect.bottom();
+                    qreal        leftX   = rect.left();
+                    qreal        rightX  = rect.right();
+                    qreal        radius  = borderRadius;
 
                     if (isVertical) {
                         if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
-                            painter->drawLine(
-                                rect.left(), rect.top() + borderRadius, rect.left(), rect.bottom() - borderRadius);
-                            painter->drawLine(rect.left() + borderRadius, rect.bottom(), rect.right(), rect.bottom());
-                            painter->drawLine(rect.left() + borderRadius, rect.top(), rect.right(), rect.top());
-
-                            painter->drawArc(
-                                rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180 * 16, -90 * 16);
-                            painter->drawArc(rect.left(),
-                                             rect.bottom() - borderRadius * 2,
-                                             borderRadius * 2,
-                                             borderRadius * 2,
-                                             270 * 16,
-                                             -90 * 16);
+                            borderPath.moveTo(rightX, topY);
+                            borderPath.lineTo(leftX + radius, topY);
+                            borderPath.arcTo(leftX, topY, radius * 2, radius * 2, 90, 90);
+                            borderPath.lineTo(leftX, bottomY - radius);
+                            borderPath.arcTo(leftX, bottomY - radius * 2, radius * 2, radius * 2, 180, 90);
+                            borderPath.lineTo(rightX, bottomY);
                         } else {
-                            painter->drawLine(
-                                rect.right(), rect.top() + borderRadius, rect.right(), rect.bottom() - borderRadius);
-                            painter->drawLine(rect.left(), rect.bottom(), rect.right() - borderRadius, rect.bottom());
-                            painter->drawLine(rect.left(), rect.top(), rect.right() - borderRadius, rect.top());
-
-                            painter->drawArc(rect.right() - borderRadius * 2,
-                                             rect.top(),
-                                             borderRadius * 2,
-                                             borderRadius * 2,
-                                             0 * 16,
-                                             90 * 16);
-                            painter->drawArc(rect.right() - borderRadius * 2,
-                                             rect.bottom() - borderRadius * 2,
-                                             borderRadius * 2,
-                                             borderRadius * 2,
-                                             270 * 16,
-                                             90 * 16);
+                            borderPath.moveTo(leftX, topY);
+                            borderPath.lineTo(rightX - radius, topY);
+                            borderPath.arcTo(rightX - radius * 2, topY, radius * 2, radius * 2, 90, -90);
+                            borderPath.lineTo(rightX, bottomY - radius);
+                            borderPath.arcTo(rightX - radius * 2, bottomY - radius * 2, radius * 2, radius * 2, 0, -90);
+                            borderPath.lineTo(leftX, bottomY);
                         }
                     } else {
-                        if (tabBar->shape() == QTabBar::RoundedSouth || tabBar->shape() == QTabBar::TriangularSouth) {
-                            painter->drawLine(rect.left(), rect.top(), rect.right(), rect.top());
-                            painter->drawLine(rect.left(), rect.top(), rect.left(), rect.bottom() - borderRadius);
-                            painter->drawLine(rect.right(), rect.top(), rect.right(), rect.bottom() - borderRadius);
-
-                            painter->drawArc(rect.left(),
-                                             rect.bottom() - borderRadius * 2,
-                                             borderRadius * 2,
-                                             borderRadius * 2,
-                                             180 * 16,
-                                             90 * 16);
-                            painter->drawArc(rect.right() - borderRadius * 2,
-                                             rect.bottom() - borderRadius * 2,
-                                             borderRadius * 2,
-                                             borderRadius * 2,
-                                             270 * 16,
-                                             90 * 16);
+                        if (tabBar->shape() == QTabBar::RoundedNorth || tabBar->shape() == QTabBar::TriangularNorth) {
+                            borderPath.moveTo(leftX, bottomY);
+                            borderPath.lineTo(leftX, topY + radius);
+                            borderPath.arcTo(leftX, topY, radius * 2, radius * 2, 180, -90);
+                            borderPath.lineTo(rightX - radius, topY);
+                            borderPath.arcTo(rightX - radius * 2, topY, radius * 2, radius * 2, 90, -90);
+                            borderPath.lineTo(rightX, bottomY);
                         } else {
-                            painter->drawLine(
-                                rect.left() + borderRadius, rect.top(), rect.right() - borderRadius, rect.top());
-                            painter->drawLine(rect.left(), rect.top() + borderRadius, rect.left(), rect.bottom());
-                            painter->drawLine(rect.right(), rect.top() + borderRadius, rect.right(), rect.bottom());
-
-                            painter->drawArc(
-                                rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180 * 16, -90 * 16);
-                            painter->drawArc(rect.right() - borderRadius * 2,
-                                             rect.top(),
-                                             borderRadius * 2,
-                                             borderRadius * 2,
-                                             90 * 16,
-                                             -90 * 16);
+                            borderPath.moveTo(leftX, topY);
+                            borderPath.lineTo(leftX, bottomY - radius);
+                            borderPath.arcTo(leftX, bottomY - radius * 2, radius * 2, radius * 2, 180, 90);
+                            borderPath.lineTo(rightX - radius, bottomY);
+                            borderPath.arcTo(
+                                rightX - radius * 2, bottomY - radius * 2, radius * 2, radius * 2, 270, 90);
+                            borderPath.lineTo(rightX, topY);
                         }
                     }
+
+                    painter->drawPath(borderPath);
                 }
 
                 int tabIndex = tab->position;
