@@ -180,7 +180,7 @@ void NTabBar::setupCustomCloseButton(int index) {
 
     // 创建关闭按钮
     NPushButton* closeBtn = new NPushButton(this);
-    closeBtn->setFluentIcon(NRegularIconType::Dismiss12Regular, 12);
+    closeBtn->setFluentIcon(NRegularIconType::Dismiss12Regular, 16);
     closeBtn->setTransparentBackground(true);
     closeBtn->setObjectName("tabCloseButton");
 
@@ -190,8 +190,8 @@ void NTabBar::setupCustomCloseButton(int index) {
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
 
-        closeBtn->setProperty("_nContentRect", QRect(0, 0, 20, 20));
-        closeBtn->setFixedSize(20, 20);
+        closeBtn->setProperty("_nContentRect", QRect(0, 0, 24, 24));
+        closeBtn->setFixedSize(24, 24);
 
         if (tabShape == QTabBar::RoundedWest || tabShape == QTabBar::TriangularWest) {
             layout->addWidget(closeBtn);
@@ -202,7 +202,7 @@ void NTabBar::setupCustomCloseButton(int index) {
         }
 
         container->setStyleSheet("background: transparent;");
-        container->setFixedHeight(20);
+        container->setFixedHeight(24);
 
         setTabButton(index, QTabBar::LeftSide, container);
 
@@ -210,8 +210,8 @@ void NTabBar::setupCustomCloseButton(int index) {
             setTabButton(index, QTabBar::RightSide, nullptr);
         }
     } else {
-        closeBtn->setProperty("_nContentRect", QRect(0, 0, 20, 20));
-        closeBtn->setFixedSize(20, 20);
+        closeBtn->setProperty("_nContentRect", QRect(0, 0, 24, 24));
+        closeBtn->setFixedSize(24, 24);
 
         setTabButton(index, QTabBar::RightSide, closeBtn);
     }

@@ -565,7 +565,7 @@ QRect NTabBarStyle::subElementRect(SubElement element, const QStyleOption* optio
         if (const QStyleOptionTab* tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
             QRect closeRect;
             if (tab->rightButtonSize.isValid()) {
-                const int size = 20;
+                const int size = 24;
                 closeRect.setSize(QSize(size, size));
 
                 if (isVertical) {
@@ -577,6 +577,28 @@ QRect NTabBarStyle::subElementRect(SubElement element, const QStyleOption* optio
             }
             return closeRect;
         }
+    } else if (element == SE_TabBarScrollLeftButton) {
+        QRect rect = QProxyStyle::subElementRect(element, option, widget);
+        if (tabBar) {
+            if (isVertical) {
+                rect.moveTop(0);
+                rect.moveLeft((option->rect.width() - rect.width()) / 2);
+            } else {
+                rect.moveLeft(0);
+            }
+        }
+        return rect;
+    } else if (element == SE_TabBarScrollRightButton) {
+        QRect rect = QProxyStyle::subElementRect(element, option, widget);
+        if (tabBar) {
+            if (isVertical) {
+                rect.moveBottom(option->rect.bottom());
+                rect.moveLeft((option->rect.width() - rect.width()) / 2);
+            } else {
+                rect.moveRight(option->rect.right());
+            }
+        }
+        return rect;
     }
 
     return QProxyStyle::subElementRect(element, option, widget);
