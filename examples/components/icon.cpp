@@ -6,13 +6,14 @@
 #include <QToolTip>
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NScrollArea.h"
+#include "QtNativeUI/NToolTip.h"
 
 IconButton::IconButton(quint32 iconCode, const QString& name, bool isFilled, QWidget* parent)
     : NPushButton(parent), m_iconName(name), m_iconCode(iconCode), m_isFilled(isFilled) {
     // 使用固定尺寸
     setFixedSize(64, 64);
     setToolTip(QString("%1 (0x%2)").arg(name).arg(iconCode, 0, 16));
-
+    new NToolTipFilter(this, 300, NToolTipPosition::TOP);
     // 设置图标
     QIcon icon;
     if (isFilled) {
@@ -307,11 +308,5 @@ void IconExample::copyIconCode(IconButton* button) {
 
     QClipboard* clipboard = QApplication::clipboard();
     clipboard->setText(enumName);
-
-    // 更新状态栏
-    m_statusLabel->setText(QString("已复制: %1").arg(enumName));
-
-    // 显示工具提示提供即时反馈
-    QToolTip::showText(QCursor::pos(), QString("已复制: %1").arg(enumName), this);
-    QTimer::singleShot(2000, []() { QToolTip::hideText(); });
+    NToolTip::showText(QString("已复制: %1").arg(enumName), button, NToolTipPosition::TOP);
 }

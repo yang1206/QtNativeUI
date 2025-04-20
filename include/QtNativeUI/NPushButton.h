@@ -23,6 +23,7 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkTextDefaultColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightTextPressColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkTextPressColor)
+    Q_PROPERTY_CREATE_Q_H(bool, TransparentBackground)
 
   public:
     enum ButtonType {

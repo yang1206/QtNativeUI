@@ -86,10 +86,8 @@ class NProgressBarPrivate : public QObject {
     bool isError() const { return _isError; }
     void setError(bool error);
 
-    // 获取基于当前状态的颜色
     QColor getBarColorForState() const;
 
-    // 不确定状态的两个位置
     qreal shortPos() const { return _shortPos; }
     void  setShortPos(qreal pos);
 

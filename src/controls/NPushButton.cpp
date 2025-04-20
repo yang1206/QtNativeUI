@@ -17,6 +17,7 @@ Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightTextDefaultColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkTextDefaultColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightTextPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkTextPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NPushButton, bool, TransparentBackground)
 
 NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPushButtonPrivate()) {
     Q_D(NPushButton);
@@ -34,6 +35,7 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
     d->_pDarkTextDefaultColor  = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
     d->_pLightTextPressColor   = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
     d->_pDarkTextPressColor    = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
+    d->_pTransparentBackground = false;
 
     d->_lightBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_darkBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
@@ -141,18 +143,20 @@ void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing | QPainter::TextAntialiasing);
 
-    // 根据按钮状态选择阴影层级
-    NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
-    if (!isEnabled()) {
-        elevationKey = NDesignTokenKey::ElevationNone;
-    } else if (d->_isPressed) {
-        elevationKey = NDesignTokenKey::ElevationRest;
-    } else if (d->_isHovered) {
-        elevationKey = NDesignTokenKey::ElevationHover;
-    }
+    if (!d->_pTransparentBackground) {
+        // 根据按钮状态选择阴影层级
+        NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
+        if (!isEnabled()) {
+            elevationKey = NDesignTokenKey::ElevationNone;
+        } else if (d->_isPressed) {
+            elevationKey = NDesignTokenKey::ElevationRest;
+        } else if (d->_isHovered) {
+            elevationKey = NDesignTokenKey::ElevationHover;
+        }
 
-    // 绘制阴影
-    nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
+        // 绘制阴影
+        nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
+    }
 
     drawBackground(&painter);
     drawBorder(&painter);
@@ -194,7 +198,11 @@ void NPushButton::drawBackground(QPainter* painter) {
         } else if (d->_isHovered) {
             bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
         } else {
-            bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            if (d->_pTransparentBackground) {
+                bgColor = Qt::transparent;
+            } else {
+                bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            }
         }
 
         painter->setPen(Qt::NoPen);
@@ -204,6 +212,11 @@ void NPushButton::drawBackground(QPainter* painter) {
 
     if ((!d->_isPressed)) {
         if (d->_buttonType == NPushButtonPrivate::Accent) {
+            painter->restore();
+            return;
+        }
+
+        if (d->_pTransparentBackground && !d->_isHovered) {
             painter->restore();
             return;
         }
@@ -220,6 +233,11 @@ void NPushButton::drawBackground(QPainter* painter) {
 
 void NPushButton::drawBorder(QPainter* painter) {
     Q_D(NPushButton);
+
+    if (d->_pTransparentBackground && !d->_isHovered && !d->_isPressed &&
+        d->_buttonType != NPushButtonPrivate::Accent) {
+        return;
+    }
 
     if (d->_buttonType == NPushButtonPrivate::Accent) {
         return;
@@ -251,7 +269,7 @@ void NPushButton::drawIcon(QPainter* painter) {
                          d->_shadowBorderWidth,
                          width() - 2 * (d->_shadowBorderWidth),
                          height() - 2 * d->_shadowBorderWidth);
-    
+
     // 检查是否有自定义内容区域
     QVariant customRectVar = property("_nContentRect");
     if (customRectVar.isValid()) {
@@ -261,10 +279,9 @@ void NPushButton::drawIcon(QPainter* painter) {
     // 计算图标位置
     QRect iconRect;
     QSize iconSize = this->iconSize();
-    
+
     // 自定义文本间距
-    int iconTextSpacing = property("_nIconTextSpacing").isValid() ? 
-                         property("_nIconTextSpacing").toInt() : 4;
+    int iconTextSpacing = property("_nIconTextSpacing").isValid() ? property("_nIconTextSpacing").toInt() : 4;
 
     if (text().isEmpty()) {
         iconRect = QRect(foregroundRect.x() + (foregroundRect.width() - iconSize.width()) / 2,
@@ -329,8 +346,7 @@ void NPushButton::drawText(QPainter* painter) {
     painter->setPen(textColor);
 
     // 自定义文本间距
-    int iconTextSpacing = property("_nIconTextSpacing").isValid() ? 
-                         property("_nIconTextSpacing").toInt() : 4;
+    int iconTextSpacing = property("_nIconTextSpacing").isValid() ? property("_nIconTextSpacing").toInt() : 4;
 
     if (!icon().isNull()) {
         // 有图标时，文本需要右移
@@ -339,7 +355,8 @@ void NPushButton::drawText(QPainter* painter) {
         int   totalWidth = iconSize.width() + iconTextSpacing + textWidth;
 
         int   startX = foregroundRect.x() + (foregroundRect.width() - totalWidth) / 2;
-        QRect textRect(startX + iconSize.width() + iconTextSpacing, foregroundRect.y(), textWidth, foregroundRect.height());
+        QRect textRect(
+            startX + iconSize.width() + iconTextSpacing, foregroundRect.y(), textWidth, foregroundRect.height());
 
         painter->drawText(textRect, Qt::AlignCenter, text());
     } else {
