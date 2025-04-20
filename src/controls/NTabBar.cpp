@@ -65,6 +65,7 @@ void NTabBar::init() {
     setObjectName("NTabBar");
     setStyleSheet("#NTabBar{background-color:transparent;}");
     setAttribute(Qt::WA_Hover, true);
+    setUsesScrollButtons(true);
     d->_pLightItemHeaderBackground =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
     d->_pDarkItemHeaderBackground =

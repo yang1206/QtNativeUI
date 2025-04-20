@@ -61,6 +61,7 @@ void NTabWidget::init() {
 void NTabWidget::updatePalette() {
     Q_D(NTabWidget);
     QPalette pal = palette();
+    pal.setColor(QPalette::Window, d->_isDark ? d->_pDarkSelectedBackground : d->_pLightSelectedBackground);
     d->_stack->setAutoFillBackground(true);
     setPalette(pal);
 }

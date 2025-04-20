@@ -67,8 +67,6 @@ QWidget* NavigationExample::createTabBars() {
     closableTabBar->setTabsClosable(true);
     closableTabBar->setMovable(true);
     closableTabBar->addTab("Tab 1");
-    closableTabBar->addTab("Tab 2");
-    closableTabBar->addTab("Tab 3");
 
     // 添加一个按钮来动态添加标签
     auto addTabButton = new NPushButton("Add Tab", this);
