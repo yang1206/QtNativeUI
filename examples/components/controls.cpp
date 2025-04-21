@@ -6,6 +6,7 @@
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NToggleSwitch.h>
+#include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
@@ -48,6 +49,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("ProgressRing", createProgressRings()));
     contentLayout->addWidget(new ExampleSection("ScrollArea", createScrollAreas()));
     contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
+    contentLayout->addWidget(new ExampleSection("CalendarWidget", createCalendarWidgets()));
 
     contentLayout->addStretch();
 
@@ -930,6 +932,26 @@ QWidget* ControlsExample::createScrollAreas() {
     disabledContentLayout->addStretch();
     disabledScrollArea->setWidget(disabledContentWidget);
     layout->addWidget(disabledScrollArea);
+
+    layout->addStretch();
+    return container;
+}
+
+QWidget* ControlsExample::createCalendarWidgets() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 基本日历控件
+    QLabel* basicLabel = new QLabel("基本日历控件:", container);
+    layout->addWidget(basicLabel);
+
+    NCalendarWidget* basicCalendar = new NCalendarWidget(container);
+    basicCalendar->setMinimumWidth(300);
+    basicCalendar->setMinimumHeight(300);
+    layout->addWidget(basicCalendar);
+
+    // 当前演示仅包含基本的日历控件，后续可以添加更多示例
 
     layout->addStretch();
     return container;

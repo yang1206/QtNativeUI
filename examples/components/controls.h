@@ -23,6 +23,7 @@ class ControlsExample : public QWidget {
     QWidget* createProgressBars();
     QWidget* createProgressRings();
     QWidget* createScrollAreas();
+    QWidget* createCalendarWidgets();
 
     NScrollArea* m_scrollArea;
 };
