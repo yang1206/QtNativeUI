@@ -12,10 +12,14 @@ class QTNATIVEUI_EXPORT NTabWidget : public QTabWidget {
     Q_Q_CREATE(NTabWidget)
     Q_PROPERTY_CREATE_Q_H(QColor, LightSelectedBackground)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkSelectedBackground)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightBorderColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderColor)
+    Q_PROPERTY_CREATE_Q_H(int, BorderRadius)
+    Q_PROPERTY_CREATE_Q_H(int, BorderWidth)
 
   public:
     explicit NTabWidget(QWidget* parent = nullptr);
-    ~NTabWidget();
+    ~NTabWidget() override;
 
     NTabBar* tabBar() const;
 
@@ -24,10 +28,15 @@ class QTNATIVEUI_EXPORT NTabWidget : public QTabWidget {
 
   protected:
     void changeEvent(QEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void tabInserted(int index) override;
+    void showEvent(QShowEvent* event) override;
 
   private:
     void init();
     void updatePalette();
+    void adjustContentMargins();
 };
 
 #endif // QTNATIVEUI_NTABWIDGET_H

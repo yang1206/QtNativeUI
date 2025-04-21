@@ -11,6 +11,10 @@ class NTabWidgetPrivate : public QObject {
     Q_D_CREATE(NTabWidget)
     Q_PROPERTY_CREATE_D(QColor, LightSelectedBackground)
     Q_PROPERTY_CREATE_D(QColor, DarkSelectedBackground)
+    Q_PROPERTY_CREATE_D(QColor, LightBorderColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkBorderColor)
+    Q_PROPERTY_CREATE_D(int, BorderRadius)
+    Q_PROPERTY_CREATE_D(int, BorderWidth)
 
   public:
     explicit NTabWidgetPrivate(QObject* parent = nullptr);
