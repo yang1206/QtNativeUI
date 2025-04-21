@@ -19,6 +19,9 @@ class QTNATIVEUI_EXPORT NTabWidget : public QTabWidget {
 
     NTabBar* tabBar() const;
 
+    void setTabsClosable(bool closable);
+    bool tabsClosable() const;
+
   protected:
     void changeEvent(QEvent* event) override;
 

@@ -55,6 +55,9 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
     bool tabsClosable() const;
     void setTabsClosable(bool closable);
 
+  private slots:
+    void onCloseButtonClicked();
+
   signals:
     void tabBarPressed(int index);
     void tabDragStarted(QDrag* drag);

@@ -119,10 +119,8 @@ void NTabBar::init() {
 
     setStyle(new NTabBarStyle(style()));
 
-    // 确保不调用Qt的原生setTabsClosable
     QTabBar::setTabsClosable(false);
 
-    // 连接主题变化信号
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NTabBar);
         d->_themeMode = themeMode;
@@ -149,8 +147,6 @@ void NTabBar::setTabsClosable(bool closable) {
 
     d->_tabsClosable = closable;
 
-    // 不调用QTabBar::setTabsClosable(closable)
-    // 为现有标签添加或移除关闭按钮
     if (closable) {
         for (int i = 0; i < count(); ++i) {
             setupCustomCloseButton(i);
@@ -217,7 +213,22 @@ void NTabBar::setupCustomCloseButton(int index) {
         setTabButton(index, QTabBar::RightSide, closeBtn);
     }
 
-    connect(closeBtn, &NPushButton::clicked, this, [this, index]() { emit tabCloseRequested(index); });
+    connect(closeBtn, &NPushButton::clicked, this, &NTabBar::onCloseButtonClicked);
+
+    closeBtn->setProperty("original_index", index);
+}
+
+void NTabBar::onCloseButtonClicked() {
+    NPushButton* btn = qobject_cast<NPushButton*>(sender());
+    if (!btn)
+        return;
+
+    for (int i = 0; i < count(); ++i) {
+        if (tabButton(i, QTabBar::RightSide) == btn || tabButton(i, QTabBar::LeftSide) == btn) {
+            emit tabCloseRequested(i);
+            return;
+        }
+    }
 }
 
 void NTabBar::mousePressEvent(QMouseEvent* event) {

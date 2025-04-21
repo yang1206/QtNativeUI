@@ -198,6 +198,7 @@ QWidget* NavigationExample::createTabWidgets() {
 
         // 响应关闭标签请求
         connect(tabWidget, &NTabWidget::tabCloseRequested, tabWidget, [tabWidget](int index) {
+            qDebug() << index;
             QWidget* widget = tabWidget->widget(index);
             tabWidget->removeTab(index);
             delete widget;

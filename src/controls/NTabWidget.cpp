@@ -26,12 +26,20 @@ void NTabWidget::init() {
     NTabBar* tabBar = new NTabBar(this);
     setTabBar(tabBar);
 
-    // 如果需要，添加额外样式
     if (QSysInfo::productType() == "macos") {
-        // 添加macOS特定的样式覆盖
-        setDocumentMode(true); // 这在macOS上会禁用某些特定样式
+        setDocumentMode(true);
     }
     updatePalette();
+
+    NTabBar* nTabBar = qobject_cast<NTabBar*>(this->tabBar());
+    if (nTabBar) {
+        bool currentClosable = tabsClosable();
+        if (currentClosable) {
+            nTabBar->setTabsClosable(currentClosable);
+        }
+
+        connect(nTabBar, &QTabBar::tabCloseRequested, this, &QTabWidget::tabCloseRequested);
+    }
 
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NTabWidget);
@@ -56,3 +64,20 @@ void NTabWidget::changeEvent(QEvent* event) {
     }
     QTabWidget::changeEvent(event);
 }
+
+void NTabWidget::setTabsClosable(bool closable) {
+    NTabBar* nTabBar = qobject_cast<NTabBar*>(QTabWidget::tabBar());
+    if (nTabBar) {
+        nTabBar->setTabsClosable(closable);
+    }
+}
+
+bool NTabWidget::tabsClosable() const {
+    NTabBar* nTabBar = qobject_cast<NTabBar*>(QTabWidget::tabBar());
+    if (nTabBar) {
+        return nTabBar->tabsClosable();
+    }
+    return QTabWidget::tabsClosable();
+}
+
+NTabBar* NTabWidget::tabBar() const { return static_cast<NTabBar*>(QTabWidget::tabBar()); }
