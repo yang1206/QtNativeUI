@@ -190,6 +190,8 @@ QWidget* NavigationExample::createTabWidgets() {
             tabLayout->addWidget(new QLabel(QString("Content for Tab %1").arg(newIndex)));
 
             tabWidget->addTab(newTab, QString("Tab %1").arg(newIndex));
+            QString tipText = QString("Detailed information for Tab %1").arg(newIndex);
+            tabWidget->setTabToolTip(newIndex - 1, tipText);
             tabWidget->setCurrentIndex(tabWidget->count() - 1);
         });
 

@@ -1,3 +1,4 @@
+#include <QApplication>
 #include <QDrag>
 #include <QHBoxLayout>
 #include <QMimeData>
@@ -65,6 +66,7 @@ void NTabBar::init() {
     setObjectName("NTabBar");
     setStyleSheet("#NTabBar{background-color:transparent;}");
     setAttribute(Qt::WA_Hover, true);
+    setMouseTracking(true);
     setUsesScrollButtons(true);
     d->_pLightItemHeaderBackground =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
@@ -164,9 +166,37 @@ void NTabBar::tabInserted(int index) {
     Q_D(NTabBar);
     QTabBar::tabInserted(index);
 
-    // 如果启用了关闭按钮，则为新标签添加关闭按钮
     if (d->_tabsClosable) {
         setupCustomCloseButton(index);
+    }
+
+    // 重置工具提示状态，避免索引错误
+    d->_tooltipTabIndex = -1;
+    if (d->_tooltipTimer) {
+        d->_tooltipTimer->stop();
+    }
+    if (d->_currentTooltip) {
+        d->_currentTooltip->hide();
+        d->_currentTooltip->deleteLater();
+        d->_currentTooltip = nullptr;
+    }
+
+    // 确保标签布局更新后计算正确的矩形
+    QTimer::singleShot(0, this, [this, index]() { update(); });
+}
+
+void NTabBar::tabRemoved(int index) {
+    Q_D(NTabBar);
+    QTabBar::tabRemoved(index);
+
+    d->_tooltipTabIndex = -1;
+    if (d->_tooltipTimer) {
+        d->_tooltipTimer->stop();
+    }
+    if (d->_currentTooltip) {
+        d->_currentTooltip->hide();
+        d->_currentTooltip->deleteLater();
+        d->_currentTooltip = nullptr;
     }
 }
 
@@ -242,6 +272,8 @@ void NTabBar::mousePressEvent(QMouseEvent* event) {
 
 void NTabBar::mouseMoveEvent(QMouseEvent* event) {
     Q_D(NTabBar);
+
+    // 拖拽相关代码保持不变
     QRect moveRect = rect();
     moveRect.adjust(0, -height(), 0, height());
     QPoint currentPos = event->pos();
@@ -253,24 +285,78 @@ void NTabBar::mouseMoveEvent(QMouseEvent* event) {
         QPoint pixCenter = d->_lastDragPix.rect().center();
         drag->setHotSpot(pixCenter / pixRatio);
 
-        QMimeData* data = new QMimeData;
-        data->setProperty("DragType", "NTabBarDrag");
-        data->setProperty("TabIndex", currentIndex());
-        data->setProperty("TabIcon", tabIcon(currentIndex()));
-        data->setProperty("TabText", tabText(currentIndex()));
-        data->setProperty("NTabBarObject", QVariant::fromValue(this));
-        data->setProperty("QDragObject", QVariant::fromValue(drag));
+        QMimeData* dragData = new QMimeData;
+        dragData->setProperty("DragType", "NTabBarDrag");
+        dragData->setProperty("TabIndex", currentIndex());
+        dragData->setProperty("TabIcon", tabIcon(currentIndex()));
+        dragData->setProperty("TabText", tabText(currentIndex()));
+        dragData->setProperty("NTabBarObject", QVariant::fromValue(this));
+        dragData->setProperty("QDragObject", QVariant::fromValue(drag));
 
-        drag->setMimeData(data);
+        drag->setMimeData(dragData);
         Q_EMIT tabDragStarted(drag);
     }
 
-    // 更新悬停索引
     int oldHoverIndex = d->_hoverIndex;
     d->_hoverIndex    = tabAt(event->pos());
 
     if (oldHoverIndex != d->_hoverIndex) {
         update();
+    }
+
+    int tabIndex = tabAt(event->pos());
+    if (tabIndex >= 0 && tabIndex < count()) {
+        QString tip = tabToolTip(tabIndex);
+        if (!tip.isEmpty() && tabIndex != d->_tooltipTabIndex) {
+
+            d->_tooltipTabIndex = tabIndex;
+
+
+            if (d->_currentTooltip) {
+                d->_currentTooltip->hide();
+                d->_currentTooltip->deleteLater();
+                d->_currentTooltip = nullptr;
+            }
+
+
+            d->_currentTooltip = NToolTip::createToolTip(tip, this);
+            d->_currentTooltip->setDuration(5000);
+
+            QRect tabRect = this->tabRect(tabIndex);
+
+            NToolTipPosition position;
+            QPoint           globalPos;
+
+            if (shape() == QTabBar::RoundedNorth || shape() == QTabBar::TriangularNorth) {
+                position  = NToolTipPosition::BOTTOM;
+                globalPos = mapToGlobal(QPoint(tabRect.center().x(), tabRect.bottom()));
+            } else if (shape() == QTabBar::RoundedSouth || shape() == QTabBar::TriangularSouth) {
+                position  = NToolTipPosition::TOP;
+                globalPos = mapToGlobal(QPoint(tabRect.center().x(), tabRect.top()));
+            } else if (shape() == QTabBar::RoundedWest || shape() == QTabBar::TriangularWest) {
+                position  = NToolTipPosition::RIGHT;
+                globalPos = mapToGlobal(QPoint(tabRect.right(), tabRect.center().y()));
+            } else {
+                position  = NToolTipPosition::LEFT;
+                globalPos = mapToGlobal(QPoint(tabRect.left(), tabRect.center().y()));
+            }
+
+            QWidget* anchor = new QWidget(this);
+            anchor->setGeometry(QRect(mapFromGlobal(globalPos), QSize(1, 1)));
+            anchor->show();
+
+            d->_currentTooltip->adjustPosition(anchor, position);
+            d->_currentTooltip->show();
+
+            QTimer::singleShot(100, anchor, &QWidget::deleteLater);
+        }
+    } else if (d->_tooltipTabIndex != -1) {
+        d->_tooltipTabIndex = -1;
+        if (d->_currentTooltip) {
+            d->_currentTooltip->hide();
+            d->_currentTooltip->deleteLater();
+            d->_currentTooltip = nullptr;
+        }
     }
 
     QTabBar::mouseMoveEvent(event);
@@ -285,6 +371,11 @@ void NTabBar::leaveEvent(QEvent* event) {
         d->_hoverIndex = -1;
         update();
     }
+    if (d->_currentTooltip) {
+        d->_currentTooltip->hide();
+        d->_currentTooltip->deleteLater();
+        d->_currentTooltip = nullptr;
+    }
 
     QTabBar::leaveEvent(event);
 }
@@ -296,4 +387,115 @@ void NTabBar::changeEvent(QEvent* event) {
     }
 
     QTabBar::changeEvent(event);
+}
+
+bool NTabBar::event(QEvent* event) {
+    Q_D(NTabBar);
+
+    if (event->type() == QEvent::ToolTip) {
+        QHelpEvent* helpEvent = static_cast<QHelpEvent*>(event);
+        int         tabIndex  = tabAt(helpEvent->pos());
+
+        if (tabIndex >= 0 && tabIndex < count()) {
+            QString toolTipText = tabToolTip(tabIndex);
+            if (!toolTipText.isEmpty()) {
+                if (d->_currentTooltip) {
+                    d->_currentTooltip->hide();
+                    d->_currentTooltip->deleteLater();
+                    d->_currentTooltip = nullptr;
+                }
+                d->_currentTooltip = NToolTip::createToolTip(toolTipText, window());
+                d->_currentTooltip->setDuration(5000);
+                QRect tabRect = this->tabRect(tabIndex);
+
+                NToolTipPosition position;
+                QPoint           anchorPoint;
+
+                if (shape() == QTabBar::RoundedNorth || shape() == QTabBar::TriangularNorth) {
+                    position    = NToolTipPosition::BOTTOM;
+                    anchorPoint = QPoint(tabRect.center().x(), tabRect.bottom());
+                } else if (shape() == QTabBar::RoundedSouth || shape() == QTabBar::TriangularSouth) {
+                    position    = NToolTipPosition::TOP;
+                    anchorPoint = QPoint(tabRect.center().x(), tabRect.top());
+                } else if (shape() == QTabBar::RoundedWest || shape() == QTabBar::TriangularWest) {
+                    position    = NToolTipPosition::RIGHT;
+                    anchorPoint = QPoint(tabRect.right(), tabRect.center().y());
+                } else {
+                    position    = NToolTipPosition::LEFT;
+                    anchorPoint = QPoint(tabRect.left(), tabRect.center().y());
+                }
+                QWidget* anchor = new QWidget(this);
+                anchor->setGeometry(QRect(anchorPoint, QSize(1, 1)));
+                anchor->show();
+
+                QTimer::singleShot(0, this, [this, d, anchor, position]() {
+                    if (d->_currentTooltip) {
+                        d->_currentTooltip->adjustPosition(anchor, position);
+                        d->_currentTooltip->show();
+                        QTimer::singleShot(100, anchor, &QWidget::deleteLater);
+                    } else {
+                        anchor->deleteLater();
+                    }
+                });
+
+                return true;
+            }
+        }
+    } else if (event->type() == QEvent::Leave || event->type() == QEvent::MouseButtonPress) {
+        if (d->_currentTooltip) {
+            d->_currentTooltip->hide();
+            d->_currentTooltip->deleteLater();
+            d->_currentTooltip = nullptr;
+        }
+        d->_tooltipTabIndex = -1;
+        if (d->_tooltipTimer) {
+            d->_tooltipTimer->stop();
+        }
+    }
+
+    return QTabBar::event(event);
+}
+
+void NTabBar::setTabToolTip(int index, const QString& tip) {
+    QTabBar::setTabToolTip(index, tip);
+    Q_D(NTabBar);
+    if (d->_hoverIndex == index && !tip.isEmpty()) {
+        // 清理现有工具提示
+        if (d->_currentTooltip) {
+            d->_currentTooltip->hide();
+            d->_currentTooltip->deleteLater();
+            d->_currentTooltip = nullptr;
+        }
+
+        d->_currentTooltip = NToolTip::createToolTip(tip, this);
+        d->_currentTooltip->setDuration(5000);
+
+        QRect tabRect = this->tabRect(index);
+
+        NToolTipPosition position;
+        QPoint           globalPos;
+
+        if (shape() == QTabBar::RoundedNorth || shape() == QTabBar::TriangularNorth) {
+            position  = NToolTipPosition::BOTTOM;
+            globalPos = mapToGlobal(QPoint(tabRect.center().x(), tabRect.bottom()));
+        } else if (shape() == QTabBar::RoundedSouth || shape() == QTabBar::TriangularSouth) {
+            position  = NToolTipPosition::TOP;
+            globalPos = mapToGlobal(QPoint(tabRect.center().x(), tabRect.top()));
+        } else if (shape() == QTabBar::RoundedWest || shape() == QTabBar::TriangularWest) {
+            position  = NToolTipPosition::RIGHT;
+            globalPos = mapToGlobal(QPoint(tabRect.right(), tabRect.center().y()));
+        } else {
+            position  = NToolTipPosition::LEFT;
+            globalPos = mapToGlobal(QPoint(tabRect.left(), tabRect.center().y()));
+        }
+
+        QWidget* anchor = new QWidget(this);
+        anchor->setGeometry(QRect(mapFromGlobal(globalPos), QSize(1, 1)));
+        anchor->show();
+
+        d->_currentTooltip->adjustPosition(anchor, position);
+        d->_currentTooltip->show();
+
+        QTimer::singleShot(100, anchor, &QWidget::deleteLater);
+    }
 }

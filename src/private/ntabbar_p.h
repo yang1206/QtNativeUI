@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QtNativeUI/NTabBar.h>
 #include "QtNativeUI/NEnums.h"
+#include "QtNativeUI/NToolTip.h"
 
 class NTabBarPrivate : public QObject {
     Q_OBJECT
@@ -53,24 +54,15 @@ class NTabBarPrivate : public QObject {
     explicit NTabBarPrivate(QObject* parent = nullptr);
     ~NTabBarPrivate();
 
-    // 主题相关
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark{false};
+    int                   _hoverIndex{-1};
+    QPixmap               _lastDragPix;         // 保存拖拽的标签图像
+    bool                  _tabsClosable{false}; // 是否显示关闭按钮
 
-    // 交互状态
-    int     _hoverIndex{-1};
-    QPixmap _lastDragPix; // 保存拖拽的标签图像
-
-    // 关闭按钮相关
-    bool _tabsClosable{false}; // 是否显示关闭按钮
-
-    // 不再需要这些成员
-    // int _closeButtonHoverIndex{-1};
-    // int _closeButtonPressedIndex{-1};
-
-    // 不再需要这些方法
-    // QRect closeButtonRect(int tabIndex) const;
-    // bool isPointInCloseButton(const QPoint& point, int tabIndex) const;
+    int       _tooltipTabIndex{-1};
+    QTimer*   _tooltipTimer{nullptr};
+    NToolTip* _currentTooltip{nullptr};
 };
 
 #endif // QTNATIVEUI_NTABBAR_P_H

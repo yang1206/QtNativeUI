@@ -2,6 +2,7 @@
 #define QTNATIVEUI_NTABBAR_H
 
 #include <QTabBar>
+#include <QtNativeUI/NToolTip.h>
 #include "stdafx.h"
 
 class QDrag;
@@ -54,6 +55,7 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
 
     bool tabsClosable() const;
     void setTabsClosable(bool closable);
+    void setTabToolTip(int index, const QString& tip);
 
   private slots:
     void onCloseButtonClicked();
@@ -64,12 +66,14 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
     void tabDropped(QMimeData* data);
 
   protected:
+    bool event(QEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void leaveEvent(QEvent* event) override;
     void changeEvent(QEvent* event) override;
     void tabInserted(int index) override;
+    void tabRemoved(int index) override;
 
   private:
     void init();
