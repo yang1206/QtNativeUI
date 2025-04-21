@@ -190,6 +190,8 @@ QWidget* NavigationExample::createTabWidgets() {
             tabLayout->addWidget(new QLabel(QString("Content for Tab %1").arg(newIndex)));
 
             tabWidget->addTab(newTab, QString("Tab %1").arg(newIndex));
+            QString tipText = QString("Detailed information for Tab %1").arg(newIndex);
+            tabWidget->setTabToolTip(newIndex - 1, tipText);
             tabWidget->setCurrentIndex(tabWidget->count() - 1);
         });
 
@@ -198,6 +200,7 @@ QWidget* NavigationExample::createTabWidgets() {
 
         // 响应关闭标签请求
         connect(tabWidget, &NTabWidget::tabCloseRequested, tabWidget, [tabWidget](int index) {
+            qDebug() << index;
             QWidget* widget = tabWidget->widget(index);
             tabWidget->removeTab(index);
             delete widget;

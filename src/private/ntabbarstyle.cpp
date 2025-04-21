@@ -97,14 +97,12 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
 
         case PE_IndicatorTabClose: {
             if (const QStyleOption* closeOption = option) {
-                bool enabled   = closeOption->state & State_Enabled;
-                bool selected  = closeOption->state & State_Selected;
-                bool mouseOver = closeOption->state & State_MouseOver;
-                bool pressed   = closeOption->state & State_Sunken;
-
-                bool   isDark = nTheme->isDarkMode();
+                bool   enabled   = closeOption->state & State_Enabled;
+                bool   selected  = closeOption->state & State_Selected;
+                bool   mouseOver = closeOption->state & State_MouseOver;
+                bool   pressed   = closeOption->state & State_Sunken;
+                bool   isDark    = nTheme->isDarkMode();
                 QColor foregroundColor;
-
                 if (!enabled) {
                     foregroundColor = isDark ? tabBar->getDarkItemHeaderForegroundDisabled()
                                              : tabBar->getLightItemHeaderForegroundDisabled();
@@ -121,11 +119,8 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
                     foregroundColor =
                         isDark ? tabBar->getDarkItemHeaderForeground() : tabBar->getLightItemHeaderForeground();
                 }
-
-                QRect iconRect = closeOption->rect;
-
-                int iconSize = qMin(iconRect.width(), iconRect.height());
-
+                QRect iconRect  = closeOption->rect;
+                int   iconSize  = qMin(iconRect.width(), iconRect.height());
                 QIcon closeIcon = nIcon->fromRegular(NRegularIconType::Dismiss24Regular, iconSize, foregroundColor);
 
                 QSize actualSize = QSize(iconSize, iconSize);
@@ -464,8 +459,7 @@ void NTabBarStyle::drawControl(ControlElement      element,
                         painter->rotate(90);
                     }
 
-                    int textWidth  = metrics.horizontalAdvance(displayText);
-                    int textHeight = metrics.height();
+                    int textWidth = metrics.horizontalAdvance(displayText);
 
                     if (textWidth > textRect.height()) {
                         displayText = metrics.elidedText(text, Qt::ElideRight, textRect.height());
