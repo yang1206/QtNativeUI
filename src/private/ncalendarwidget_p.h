@@ -1,56 +1,55 @@
 #ifndef QTNATIVEUI_NCALENDARWIDGET_P_H
 #define QTNATIVEUI_NCALENDARWIDGET_P_H
 
+#include <QDate>
 #include <QObject>
-#include <QtNativeUI/NCalendarWidget.h>
+#include <QPixmap>
 #include "QtNativeUI/NEnums.h"
-#include "ncalendarwidgetstyle.h"
 
-class NCalendarWidgetPrivate : public QObject, public NCalendarWidgetStyleInterface {
+class QListView;
+class NCalendarWidget;
+class NBaseListView;
+class NCalendarModel;
+class NCalendarDelegate;
+class NPushButton;
+
+class NCalendarWidgetPrivate : public QObject {
     Q_OBJECT
-    Q_PROPERTY_CREATE_D(QColor, LightBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, LightHeaderBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkHeaderBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, LightDateTextColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDateTextColor)
-    Q_PROPERTY_CREATE_D(QColor, LightDateTextDisabledColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDateTextDisabledColor)
-    Q_PROPERTY_CREATE_D(QColor, LightDateBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDateBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, LightDateBackgroundHoverColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDateBackgroundHoverColor)
-    Q_PROPERTY_CREATE_D(QColor, LightDateBackgroundSelectedColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDateBackgroundSelectedColor)
-    Q_PROPERTY_CREATE_D(QColor, LightHeaderTextColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkHeaderTextColor)
-    Q_PROPERTY_CREATE_D(QColor, LightWeekdayTextColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkWeekdayTextColor)
-    Q_PROPERTY_CREATE_D(QColor, LightWeekendTextColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkWeekendTextColor)
-    Q_PROPERTY_CREATE_D(QColor, LightTodayBackgroundColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkTodayBackgroundColor)
+    Q_D_CREATE(NCalendarWidget)
     Q_PROPERTY_CREATE_D(int, BorderRadius)
+    Q_PROPERTY_CREATE_D(QDate, SelectedDate)
+    Q_PROPERTY_CREATE(qreal, ZoomRatio)
+    Q_PROPERTY_CREATE(qreal, PixOpacity)
 
   public:
     explicit NCalendarWidgetPrivate(QObject* parent = nullptr);
     ~NCalendarWidgetPrivate();
-    Q_D_CREATE(NCalendarWidget)
+
+    Q_SLOT void onSwitchButtonClicked();
+    Q_SLOT void onCalendarViewClicked(const QModelIndex& index);
+    Q_SLOT void onUpButtonClicked();
+    Q_SLOT void onDownButtonClicked();
+
+    QPixmap               _oldCalendarViewPix;
+    QPixmap               _newCalendarViewPix;
+    int                   _lastSelectedYear{0};
+    int                   _lastSelectedMonth{1};
+    qreal                 _borderWidth{1.5};
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark{false};
+    QListView*            _calendarView{nullptr};
+    NCalendarModel*       _calendarModel{nullptr};
+    NCalendarDelegate*    _calendarDelegate{nullptr};
+    QListView*            _calendarTitleView{nullptr};
+    NPushButton*          _modeSwitchButton{nullptr};
+    NPushButton*          _upButton{nullptr};
+    NPushButton*          _downButton{nullptr};
+    bool                  _isSwitchAnimationFinished{true};
+    bool                  _isDrawNewPix{false};
 
-    NCalendarWidgetStyle* _calendarStyle{nullptr};
-
-    QColor backgroundColorForState(bool isDark) const override;
-    QColor headerBackgroundColorForState(bool isDark) const override;
-    QColor dateTextColorForState(bool isDark, bool isEnabled) const override;
-    QColor dateBackgroundColorForState(bool isDark, bool isSelected, bool isHovered) const override;
-    QColor headerTextColorForState(bool isDark) const override;
-    QColor weekdayTextColorForState(bool isDark) const override;
-    QColor weekendTextColorForState(bool isDark) const override;
-    QColor todayBackgroundColorForState(bool isDark) const override;
-    int    borderRadius() const override;
-    bool   isDarkMode() const override;
+    void _scrollToDate(QDate date);
+    void _doSwitchAnimation(bool isZoomIn);
+    void _updateSwitchButtonText();
 };
 
 #endif // QTNATIVEUI_NCALENDARWIDGET_P_H

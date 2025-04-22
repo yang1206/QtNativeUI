@@ -1,126 +1,192 @@
+#include <QEvent>
+#include <QHBoxLayout>
+#include <QListView>
+#include <QPainter>
+#include <QVBoxLayout>
 #include <QtNativeUI/NCalendarWidget.h>
+#include "../private/ncalendardelegate.h"
+#include "../private/ncalendarmodel.h"
+#include "../private/ncalendartitledelegate.h"
+#include "../private/ncalendartitlemodel.h"
 #include "../private/ncalendarwidget_p.h"
-#include "../private/ncalendarwidgetstyle.h"
+#include "QtNativeUI/NPushButton.h"
+#include "QtNativeUI/NScrollBar.h"
 #include "QtNativeUI/NTheme.h"
-
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkBackgroundColor)
-
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightHeaderBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkHeaderBackgroundColor)
-
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightDateTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkDateTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightDateTextDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkDateTextDisabledColor)
-
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightDateBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkDateBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightDateBackgroundHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkDateBackgroundHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightDateBackgroundSelectedColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkDateBackgroundSelectedColor)
-
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightHeaderTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkHeaderTextColor)
-
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightWeekdayTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkWeekdayTextColor)
-
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightWeekendTextColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkWeekendTextColor)
-
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, LightTodayBackgroundColor)
-Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, QColor, DarkTodayBackgroundColor)
 
 Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, int, BorderRadius)
 
-NCalendarWidget::NCalendarWidget(QWidget* parent) 
-    : QCalendarWidget(parent), d_ptr(new NCalendarWidgetPrivate()) 
-{
-    init();
+NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new NCalendarWidgetPrivate()) {
+    Q_D(NCalendarWidget);
+    setFixedSize(305, 340);
+    setObjectName("NCalendarWidget");
+    d->q_ptr          = this;
+    d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+
+    // 日历标题
+    d->_calendarTitleView = new QListView(this);
+    d->_calendarTitleView->setFlow(QListView::LeftToRight);
+    d->_calendarTitleView->setViewMode(QListView::IconMode);
+    d->_calendarTitleView->setResizeMode(QListView::Adjust);
+    d->_calendarTitleView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    d->_calendarTitleView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    d->_calendarTitleView->setModel(new NCalendarTitleModel(this));
+    d->_calendarTitleView->setItemDelegate(new NCalendarTitleDelegate(this));
+    d->_calendarTitleView->setFixedHeight(30);
+
+    // 日历内容
+    d->_calendarView = new QListView(this);
+    d->_calendarView->setFlow(QListView::LeftToRight);
+    d->_calendarView->setViewMode(QListView::IconMode);
+    d->_calendarView->setResizeMode(QListView::Adjust);
+    // if (NScrollBar* vScrollBar = dynamic_cast<NScrollBar*>(d->_calendarView->verticalScrollBar())) {
+    //     vScrollBar->setSpeedLimit(6);
+    // }
+    d->_calendarView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    d->_calendarView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    d->_calendarView->setSelectionMode(QAbstractItemView::NoSelection);
+    d->_calendarModel = new NCalendarModel(this);
+    d->_calendarView->setModel(d->_calendarModel);
+    d->_calendarDelegate = new NCalendarDelegate(d->_calendarModel, this);
+    d->_calendarView->setItemDelegate(d->_calendarDelegate);
+    connect(d->_calendarView, &QListView::clicked, d, &NCalendarWidgetPrivate::onCalendarViewClicked);
+
+    // 模式切换按钮
+    d->_modeSwitchButton = new NPushButton(this);
+    d->_modeSwitchButton->setText("1924年1月");
+    QFont switchButtonFont = d->_modeSwitchButton->font();
+    switchButtonFont.setWeight(QFont::Bold);
+    d->_modeSwitchButton->setFont(switchButtonFont);
+    d->_modeSwitchButton->setTransparentBackground(true);
+    d->_modeSwitchButton->setFixedHeight(36);
+    d->_modeSwitchButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    connect(d->_modeSwitchButton, &NPushButton::clicked, d, &NCalendarWidgetPrivate::onSwitchButtonClicked);
+    connect(
+        d->_calendarView->verticalScrollBar(), &QScrollBar::valueChanged, d, [=]() { d->_updateSwitchButtonText(); });
+
+    // 翻页按钮
+    d->_upButton = new NPushButton(this);
+    d->_upButton->setFixedSize(36, 36);
+    d->_upButton->setFluentIcon(NRegularIconType::ChevronUp16Regular);
+    d->_upButton->setTransparentBackground(true);
+    connect(d->_upButton, &NPushButton::clicked, d, &NCalendarWidgetPrivate::onUpButtonClicked);
+
+    d->_downButton = new NPushButton(this);
+    d->_downButton->setFixedSize(36, 36);
+    d->_downButton->setFluentIcon(NRegularIconType::ChevronDown16Regular);
+    d->_downButton->setTransparentBackground(true);
+    connect(d->_downButton, &NPushButton::clicked, d, &NCalendarWidgetPrivate::onDownButtonClicked);
+
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    buttonLayout->setContentsMargins(5, 5, 10, 0);
+    buttonLayout->addWidget(d->_modeSwitchButton);
+    buttonLayout->addWidget(d->_upButton);
+    buttonLayout->addWidget(d->_downButton);
+
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(5, 0, 0, 0);
+    mainLayout->addLayout(buttonLayout);
+    mainLayout->addWidget(d->_calendarTitleView);
+    mainLayout->addWidget(d->_calendarView);
+
+    d->_themeMode = nTheme->themeMode();
+    d->_isDark    = nTheme->isDarkMode();
+    connect(nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) {
+        d->_themeMode = themeMode;
+        d->_isDark    = nTheme->isDarkMode();
+        update();
+    });
+
+    setVisible(true);
+    QDate currentDate     = QDate::currentDate();
+    d->_lastSelectedYear  = currentDate.year();
+    d->_lastSelectedMonth = currentDate.month();
+    d->_scrollToDate(currentDate);
 }
 
 NCalendarWidget::~NCalendarWidget() {}
 
-void NCalendarWidget::init() {
+void NCalendarWidget::setSelectedDate(QDate selectedDate) {
     Q_D(NCalendarWidget);
-    d->q_ptr = this;
-    d->_themeMode = nTheme->themeMode();
-    d->_isDark = nTheme->isDarkMode();
-    
-    // 初始化颜色属性
-    d->_pLightBackgroundColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkBackgroundColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
-    
-    d->_pLightHeaderBackgroundColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);
-    d->_pDarkHeaderBackgroundColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark);
-    
-    d->_pLightDateTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-    d->_pDarkDateTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
-    d->_pLightDateTextDisabledColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
-    d->_pDarkDateTextDisabledColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Dark);
-    
-    d->_pLightDateBackgroundColor = Qt::transparent;
-    d->_pDarkDateBackgroundColor = Qt::transparent;
-    d->_pLightDateBackgroundHoverColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);
-    d->_pDarkDateBackgroundHoverColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark);
-    d->_pLightDateBackgroundSelectedColor = nTheme->accentColor().normal();
-    d->_pDarkDateBackgroundSelectedColor = nTheme->accentColor().normal();
-    
-    d->_pLightHeaderTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-    d->_pDarkHeaderTextColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
-    
-    d->_pLightWeekdayTextColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
-    d->_pDarkWeekdayTextColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
-    
-    d->_pLightWeekendTextColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
-    d->_pDarkWeekendTextColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
-    
-    d->_pLightTodayBackgroundColor = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Light);
-    d->_pDarkTodayBackgroundColor = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Dark);
-    
-    d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
-    
-    // 设置样式
-    setObjectName("NCalendarWidget");
-    setStyleSheet("#NCalendarWidget{background-color:transparent;}");
-    
-    d->_calendarStyle = new NCalendarWidgetStyle(d, style());
-    setStyle(d->_calendarStyle);
-    
-    // Fluent 设计风格设置
-    setGridVisible(false);
-    setNavigationBarVisible(true);
-    setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
-    setHorizontalHeaderFormat(QCalendarWidget::ShortDayNames);
-    
-    // 设置字体
-    QFont font = this->font();
-    font.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeBody).toInt());
-    setFont(font);
-    
-    // 连接主题变化信号
-    connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
-        Q_D(NCalendarWidget);
-        d->_themeMode = themeMode;
-        d->_isDark = nTheme->isDarkMode();
-        update();
-    });
-    
-    // 连接强调色变化信号
-    connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor& accentColor) {
-        Q_D(NCalendarWidget);
-        d->_pLightDateBackgroundSelectedColor = accentColor.normal();
-        d->_pDarkDateBackgroundSelectedColor = accentColor.normal();
-        update();
-    });
+    if (!selectedDate.isValid() || selectedDate.daysTo(d->_calendarModel->getMaximumDate()) < 0 ||
+        selectedDate.daysTo(d->_calendarModel->getMinimumDate()) > 0) {
+        return;
+    }
+    d->_pSelectedDate = selectedDate;
+    d->_calendarView->selectionModel()->setCurrentIndex(d->_calendarModel->getIndexFromDate(selectedDate),
+                                                        QItemSelectionModel::Select);
+    Q_EMIT pSelectedDateChanged();
+}
+
+QDate NCalendarWidget::getSelectedDate() const {
+    Q_D(const NCalendarWidget);
+    return d->_pSelectedDate;
+    // return d->_calendarModel->getDateFromIndex(d->_calendarView->selectionModel()->currentIndex());
+}
+
+void NCalendarWidget::setMinimumDate(QDate minimudate) {
+    Q_D(NCalendarWidget);
+    if (!minimudate.isValid() || minimudate.daysTo(d->_calendarModel->getMaximumDate()) < 0) {
+        return;
+    }
+    d->_calendarModel->setMaximumDate(minimudate);
+    Q_EMIT pMinimumDateChanged();
+}
+
+QDate NCalendarWidget::getMinimumDate() const {
+    Q_D(const NCalendarWidget);
+    return d->_calendarModel->getMinimumDate();
+}
+
+void NCalendarWidget::setMaximumDate(QDate maximumDate) {
+    Q_D(NCalendarWidget);
+    if (!maximumDate.isValid() || maximumDate.daysTo(d->_calendarModel->getMinimumDate()) > 0) {
+        return;
+    }
+    d->_calendarModel->setMaximumDate(maximumDate);
+    Q_EMIT pMaximumDateChanged();
+}
+
+QDate NCalendarWidget::getMaximumDate() const {
+    Q_D(const NCalendarWidget);
+    return d->_calendarModel->getMaximumDate();
 }
 
 void NCalendarWidget::paintEvent(QPaintEvent* event) {
-    QCalendarWidget::paintEvent(event);
-}
+    Q_D(NCalendarWidget);
+    QPainter painter(this);
+    painter.save();
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-bool NCalendarWidget::event(QEvent* event) {
-    return QCalendarWidget::event(event);
+    QRect baseRect = rect();
+    baseRect.adjust(d->_borderWidth, d->_borderWidth, -d->_borderWidth, -d->_borderWidth);
+    painter.setPen(Qt::NoPen);
+
+    // 背景
+    QColor bgColor = d->_isDark ? NThemeColor(NFluentColorKey::CardBackgroundFillColorDefault, NThemeType::Dark)
+                                : NThemeColor(NFluentColorKey::CardBackgroundFillColorDefault, NThemeType::Light);
+    painter.setBrush(bgColor);
+
+    painter.drawRoundedRect(baseRect, d->_pBorderRadius, d->_pBorderRadius);
+
+    // 缩放动画
+    if (!d->_isSwitchAnimationFinished) {
+        painter.save();
+        QRect pixRect = QRect(baseRect.x(), d->_borderWidth + 45, baseRect.width(), baseRect.height() - 45);
+        painter.setOpacity(d->_pPixOpacity);
+        painter.translate(pixRect.center());
+        painter.scale(d->_pZoomRatio, d->_pZoomRatio);
+        painter.translate(-pixRect.center());
+        painter.drawPixmap(pixRect, d->_isDrawNewPix ? d->_newCalendarViewPix : d->_oldCalendarViewPix);
+        painter.restore();
+    }
+
+    // 分割线
+    QColor borderColor = d->_isDark ? NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Dark)
+                                    : NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Light);
+    painter.setPen(QPen(borderColor, d->_borderWidth));
+    painter.setBrush(Qt::NoBrush);
+    painter.drawRoundedRect(baseRect, d->_pBorderRadius, d->_pBorderRadius);
+    painter.drawLine(QPointF(baseRect.x(), 45), QPointF(baseRect.right(), 45));
+
+    painter.restore();
 }
