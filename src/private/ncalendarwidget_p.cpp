@@ -1,13 +1,13 @@
 #include "ncalendarwidget_p.h"
 
 #include <QApplication>
-#include <QListView>
 #include <QPropertyAnimation>
 #include <QScrollBar>
 
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NTheme.h"
+#include "nbaselistview.h"
 #include "ncalendardelegate.h"
 #include "ncalendarmodel.h"
 

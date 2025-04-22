@@ -1,9 +1,9 @@
 #include <QEvent>
 #include <QHBoxLayout>
-#include <QListView>
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QtNativeUI/NCalendarWidget.h>
+
 #include "../private/ncalendardelegate.h"
 #include "../private/ncalendarmodel.h"
 #include "../private/ncalendartitledelegate.h"
@@ -12,6 +12,7 @@
 #include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NScrollBar.h"
 #include "QtNativeUI/NTheme.h"
+#include "nbaselistview.h"
 
 Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, int, BorderRadius)
 
@@ -23,10 +24,10 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
 
     // 日历标题
-    d->_calendarTitleView = new QListView(this);
-    d->_calendarTitleView->setFlow(QListView::LeftToRight);
-    d->_calendarTitleView->setViewMode(QListView::IconMode);
-    d->_calendarTitleView->setResizeMode(QListView::Adjust);
+    d->_calendarTitleView = new NBaseListView(this);
+    d->_calendarTitleView->setFlow(NBaseListView::LeftToRight);
+    d->_calendarTitleView->setViewMode(NBaseListView::IconMode);
+    d->_calendarTitleView->setResizeMode(NBaseListView::Adjust);
     d->_calendarTitleView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     d->_calendarTitleView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     d->_calendarTitleView->setModel(new NCalendarTitleModel(this));
@@ -34,10 +35,10 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
     d->_calendarTitleView->setFixedHeight(30);
 
     // 日历内容
-    d->_calendarView = new QListView(this);
-    d->_calendarView->setFlow(QListView::LeftToRight);
-    d->_calendarView->setViewMode(QListView::IconMode);
-    d->_calendarView->setResizeMode(QListView::Adjust);
+    d->_calendarView = new NBaseListView(this);
+    d->_calendarView->setFlow(NBaseListView::LeftToRight);
+    d->_calendarView->setViewMode(NBaseListView::IconMode);
+    d->_calendarView->setResizeMode(NBaseListView::Adjust);
     // if (NScrollBar* vScrollBar = dynamic_cast<NScrollBar*>(d->_calendarView->verticalScrollBar())) {
     //     vScrollBar->setSpeedLimit(6);
     // }

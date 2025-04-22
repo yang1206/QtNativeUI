@@ -6,7 +6,6 @@
 #include <QPixmap>
 #include "QtNativeUI/NEnums.h"
 
-class QListView;
 class NCalendarWidget;
 class NBaseListView;
 class NCalendarModel;
@@ -37,10 +36,10 @@ class NCalendarWidgetPrivate : public QObject {
     qreal                 _borderWidth{1.5};
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark{false};
-    QListView*            _calendarView{nullptr};
+    NBaseListView*        _calendarView{nullptr};
     NCalendarModel*       _calendarModel{nullptr};
     NCalendarDelegate*    _calendarDelegate{nullptr};
-    QListView*            _calendarTitleView{nullptr};
+    NBaseListView*        _calendarTitleView{nullptr};
     NPushButton*          _modeSwitchButton{nullptr};
     NPushButton*          _upButton{nullptr};
     NPushButton*          _downButton{nullptr};
