@@ -20,6 +20,8 @@ class NToolButtonPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, DarkTextDefaultColor)
     Q_PROPERTY_CREATE_D(QColor, LightTextPressColor)
     Q_PROPERTY_CREATE_D(QColor, DarkTextPressColor)
+    Q_PROPERTY_CREATE_D(QColor, LightBorderColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkBorderColor)
 
   public:
     explicit NToolButtonPrivate(QObject* parent = nullptr);
@@ -34,14 +36,13 @@ class NToolButtonPrivate : public QObject {
     Q_ENUM(ButtonType)
 
   public:
-    QColor                _lightBorderColor;
-    QColor                _darkBorderColor;
     bool                  _isPressed{false};
     bool                  _isHovered{false};
     int                   _shadowBorderWidth{3};
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
     ButtonType            _buttonType{Standard};
+    bool                  _isTransparentBackground{false};
 
     QColor _accentDefaultColor;
     QColor _accentHoverColor;

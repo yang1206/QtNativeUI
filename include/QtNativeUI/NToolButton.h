@@ -25,6 +25,8 @@ class QTNATIVEUI_EXPORT NToolButton : public QToolButton {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkTextDefaultColor)
     Q_PROPERTY_CREATE_Q_H(QColor, LightTextPressColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkTextPressColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightBorderColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderColor)
 
   public:
     enum ButtonType {
@@ -45,6 +47,8 @@ class QTNATIVEUI_EXPORT NToolButton : public QToolButton {
 
     void setFluentIcon(NRegularIconType::Icon icon, int size = 16, const QColor& color = QColor());
     void setFluentIcon(NFilledIconType::Icon icon, int size = 16, const QColor& color = QColor());
+
+    void setTransparentBackground(bool transparent);
 
   protected:
     void enterEvent(QEnterEvent* event) override;
