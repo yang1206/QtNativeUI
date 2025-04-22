@@ -33,7 +33,6 @@ void ButtonExample::initUI() {
     m_scrollArea = new NScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setFrameShape(QFrame::NoFrame);
-
     // 创建内容容器
     QWidget*     contentWidget = new QWidget(m_scrollArea);
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
@@ -148,6 +147,7 @@ QWidget* ButtonExample::createToolButtons() {
     iconOnlyBtn->setFixedSize(40, 40);
     iconOnlyBtn->setToolButtonStyle(Qt::ToolButtonIconOnly);
     iconOnlyBtn->setFluentIcon(NRegularIconType::Settings24Regular, 24);
+    iconOnlyBtn->setTransparentBackground(true);
 
     // 只有文本
     NToolButton* textOnlyBtn = new NToolButton();
