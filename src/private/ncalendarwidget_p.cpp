@@ -82,8 +82,7 @@ void NCalendarWidgetPrivate::onCalendarViewClicked(const QModelIndex& index) {
         case DayMode: {
             QDate date = _calendarModel->getDateFromIndex(index);
             if (date.isValid()) {
-                _calendarView->clearSelection();
-                q->setSelectedDate(date);
+                handleDateSelection(date);
             }
             Q_EMIT q->clicked(_pSelectedDate);
             break;
@@ -191,19 +190,108 @@ void NCalendarWidgetPrivate::_updateSwitchButtonText() {
     if (!modelIndex.isValid()) {
         return;
     }
-    NCalendarData data = _calendarModel->data(modelIndex, Qt::UserRole).value<NCalendarData>();
+    QLocale       locale = QLocale::system();
+    NCalendarData data   = _calendarModel->data(modelIndex, Qt::UserRole).value<NCalendarData>();
     switch (_calendarModel->getDisplayMode()) {
         case YearMode: {
             _modeSwitchButton->setText(QString("%1-%2").arg(data.year - 5).arg(data.year + 10));
             break;
         }
         case MonthMode: {
-            _modeSwitchButton->setText(QString("%1年").arg(data.year));
+            _modeSwitchButton->setText(locale.toString(QDate(data.year, 1, 1), "yyyy"));
             break;
         }
         case DayMode: {
             _modeSwitchButton->setText(QString("%1年%2月").arg(data.year).arg(data.month));
             break;
         }
+    }
+}
+
+void NCalendarWidgetPrivate::handleDateSelection(const QDate& date) {
+    Q_Q(NCalendarWidget);
+
+    if (!date.isValid()) {
+        return;
+    }
+
+    switch (_selectionMode) {
+        case NCalendarWidget::SingleDate:
+            _pSelectedDate = date;
+            emit q->pSelectedDateChanged();
+            emit q->clicked(_pSelectedDate);
+            break;
+
+        case NCalendarWidget::MultipleDate:
+            // 切换日期选择状态
+            if (_selectedDates.contains(date)) {
+                _selectedDates.removeAll(date);
+            } else {
+                _selectedDates.append(date);
+            }
+            _pSelectedDate = date; // 更新当前选中
+            emit q->pSelectedDateChanged();
+            emit q->selectedDatesChanged(_selectedDates);
+            emit q->clicked(_pSelectedDate);
+            break;
+
+        case NCalendarWidget::DateRange:
+            // 如果第一个日期未设置或已有完整范围，从新开始
+            if (!_selectedDateRange.first.isValid() ||
+                (_selectedDateRange.first.isValid() && _selectedDateRange.second.isValid())) {
+                _selectedDateRange.first  = date;
+                _selectedDateRange.second = QDate();
+            } // 否则，设置结束日期
+            else {
+                _selectedDateRange.second = date;
+                // 确保开始日期不晚于结束日期
+                if (_selectedDateRange.first > _selectedDateRange.second) {
+                    std::swap(_selectedDateRange.first, _selectedDateRange.second);
+                }
+                emit q->selectedDateRangeChanged(_selectedDateRange);
+            }
+            _pSelectedDate = date; // 更新当前选中
+            emit q->pSelectedDateChanged();
+            emit q->clicked(_pSelectedDate);
+            break;
+    }
+    // 更新视图
+    updateDateSelection();
+}
+
+// 更新日期选择状态
+void NCalendarWidgetPrivate::updateDateSelection() {
+    // 清除现有选择
+    _calendarView->clearSelection();
+    // 根据模式设置选择
+    switch (_selectionMode) {
+        case NCalendarWidget::SingleDate:
+            if (_pSelectedDate.isValid()) {
+                QModelIndex index = _calendarModel->getIndexFromDate(_pSelectedDate);
+                _calendarView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
+            }
+            break;
+
+        case NCalendarWidget::MultipleDate:
+            for (const QDate& date : _selectedDates) {
+                QModelIndex index = _calendarModel->getIndexFromDate(date);
+                _calendarView->selectionModel()->select(index, QItemSelectionModel::Select);
+            }
+            break;
+
+        case NCalendarWidget::DateRange:
+            if (_selectedDateRange.first.isValid() && _selectedDateRange.second.isValid()) {
+                QDate currentDate = _selectedDateRange.first;
+                while (currentDate <= _selectedDateRange.second) {
+                    QModelIndex index = _calendarModel->getIndexFromDate(currentDate);
+                    _calendarView->selectionModel()->select(index, QItemSelectionModel::Select);
+                    currentDate = currentDate.addDays(1);
+                }
+            } else if (_selectedDateRange.first.isValid()) {
+                // 只有起始日期时
+                QModelIndex index = _calendarModel->getIndexFromDate(_selectedDateRange.first);
+                _calendarView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
+            }
+            break;
     }
 }

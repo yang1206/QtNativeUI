@@ -56,7 +56,7 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
     d->_modeSwitchButton->setFont(switchButtonFont);
     d->_modeSwitchButton->setTransparentBackground(true);
     d->_modeSwitchButton->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    d->_modeSwitchButton->setContentsMargins(10, 0, 0, 0);
+    d->_modeSwitchButton->setContentsMargins(30, 0, 0, 0);
     d->_modeSwitchButton->setFixedHeight(36);
     d->_modeSwitchButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     connect(d->_modeSwitchButton, &NPushButton::clicked, d, &NCalendarWidgetPrivate::onSwitchButtonClicked);
@@ -95,7 +95,12 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
         d->_isDark    = nTheme->isDarkMode();
         update();
     });
-
+    d->_locale         = QLocale::system();
+    int firstDayOfWeek = d->_locale.firstDayOfWeek();
+    d->_calendarModel->setFirstDayOfWeek(firstDayOfWeek);
+    d->_selectionMode = SingleDate;
+    d->_selectedDates.clear();
+    d->_selectedDateRange = QPair<QDate, QDate>(QDate(), QDate());
     setVisible(true);
     QDate currentDate     = QDate::currentDate();
     d->_lastSelectedYear  = currentDate.year();
@@ -149,6 +154,131 @@ void NCalendarWidget::setMaximumDate(QDate maximumDate) {
 QDate NCalendarWidget::getMaximumDate() const {
     Q_D(const NCalendarWidget);
     return d->_calendarModel->getMaximumDate();
+}
+
+void NCalendarWidget::setLocale(const QLocale& locale) {
+    Q_D(NCalendarWidget);
+    if (d->_locale != locale) {
+        d->_locale = locale;
+        // 更新首日设置
+        d->_calendarModel->setFirstDayOfWeek(locale.firstDayOfWeek());
+
+        // 更新日历视图
+        d->_calendarModel->invalidate(); // 需要添加此方法来触发模型刷新
+        update();
+
+        emit localeChanged(locale);
+    }
+}
+
+void NCalendarWidget::setDateSelectionMode(DateSelectionMode mode) {
+    Q_D(NCalendarWidget);
+    if (d->_selectionMode != mode) {
+        d->_selectionMode = mode;
+        // 清除现有选择
+        if (mode == SingleDate) {
+            d->_selectedDates.clear();
+            d->_selectedDateRange = QPair<QDate, QDate>(QDate(), QDate());
+        } else if (mode == MultipleDate) {
+            d->_selectedDateRange = QPair<QDate, QDate>(QDate(), QDate());
+            // 保留当前选中日期
+            if (d->_pSelectedDate.isValid() && !d->_selectedDates.contains(d->_pSelectedDate)) {
+                d->_selectedDates.append(d->_pSelectedDate);
+            }
+        } else if (mode == DateRange) {
+            d->_selectedDates.clear();
+            // 初始化日期范围的起始日期
+            if (d->_pSelectedDate.isValid()) {
+                d->_selectedDateRange.first  = d->_pSelectedDate;
+                d->_selectedDateRange.second = d->_pSelectedDate;
+            }
+        }
+        // 更新视图
+        d->updateDateSelection();
+        update();
+        emit dateSelectionModeChanged(mode);
+    }
+}
+
+NCalendarWidget::DateSelectionMode NCalendarWidget::dateSelectionMode() const {
+    Q_D(const NCalendarWidget);
+    return d->_selectionMode;
+}
+
+// 多选日期相关方法
+void NCalendarWidget::setSelectedDates(const QList<QDate>& dates) {
+    Q_D(NCalendarWidget);
+    // 切换到多选模式
+    setDateSelectionMode(MultipleDate);
+    // 验证并设置日期
+    QList<QDate> validDates;
+    for (const QDate& date : dates) {
+        if (date.isValid() && date >= d->_calendarModel->getMinimumDate() &&
+            date <= d->_calendarModel->getMaximumDate()) {
+            validDates.append(date);
+        }
+    }
+    if (d->_selectedDates != validDates) {
+        d->_selectedDates = validDates;
+        // 如果有日期，将第一个设为当前选中
+        if (!validDates.isEmpty()) {
+            d->_pSelectedDate = validDates.first();
+            emit pSelectedDateChanged();
+        }
+        // 更新视图
+        d->updateDateSelection();
+        update();
+        emit selectedDatesChanged(validDates);
+    }
+}
+
+QList<QDate> NCalendarWidget::selectedDates() const {
+    Q_D(const NCalendarWidget);
+    return d->_selectedDates;
+}
+
+// 日期范围相关方法
+void NCalendarWidget::setDateRange(const QDate& startDate, const QDate& endDate) {
+    Q_D(NCalendarWidget);
+    // 切换到范围模式
+    setDateSelectionMode(DateRange);
+    // 验证日期范围
+    QDate validStartDate = startDate;
+    QDate validEndDate   = endDate;
+    if (!validStartDate.isValid() || validStartDate < d->_calendarModel->getMinimumDate()) {
+        validStartDate = d->_calendarModel->getMinimumDate();
+    }
+    if (!validEndDate.isValid() || validEndDate > d->_calendarModel->getMaximumDate()) {
+        validEndDate = d->_calendarModel->getMaximumDate();
+    }
+    // 确保开始日期不晚于结束日期
+    if (validStartDate > validEndDate) {
+        std::swap(validStartDate, validEndDate);
+    }
+    QPair<QDate, QDate> newRange(validStartDate, validEndDate);
+    if (d->_selectedDateRange != newRange) {
+        d->_selectedDateRange = newRange;
+
+        // 将当前选中设为范围开始
+        d->_pSelectedDate = validStartDate;
+        emit pSelectedDateChanged();
+
+        // 更新视图
+        d->updateDateSelection();
+        update();
+
+        emit selectedDateRangeChanged(newRange);
+    }
+}
+
+QPair<QDate, QDate> NCalendarWidget::selectedDateRange() const {
+    Q_D(const NCalendarWidget);
+    return d->_selectedDateRange;
+}
+
+QLocale NCalendarWidget::locale() const {
+    Q_D(const NCalendarWidget);
+    return d->_locale;
 }
 
 void NCalendarWidget::paintEvent(QPaintEvent* event) {

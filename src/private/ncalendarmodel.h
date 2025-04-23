@@ -42,6 +42,14 @@ class NCalendarModel : public QAbstractListModel {
     void          setDisplayMode(NCalendarType displayType);
     NCalendarType getDisplayMode() const;
 
+    void setFirstDayOfWeek(int day);
+    int  firstDayOfWeek() const;
+
+    void invalidate() {
+        beginResetModel();
+        endResetModel();
+    }
+
     QModelIndex      getIndexFromDate(QDate date);
     QDate            getDateFromIndex(const QModelIndex& index) const;
     virtual QVariant data(const QModelIndex& index, int role) const override;
@@ -57,6 +65,7 @@ class NCalendarModel : public QAbstractListModel {
     int           _offset{0};
     NCalendarType _displayMode{NCalendarType::DayMode};
     int           _dayRowCount{0};
+    int           _firstDayOfWeek{1};
     QDate         _pMinimumDate;
     QDate         _pMaximumDate;
     void          _initRowCount();
