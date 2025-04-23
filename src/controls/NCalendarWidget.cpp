@@ -55,7 +55,7 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
     d->_modeSwitchButton->setFont(switchButtonFont);
     d->_modeSwitchButton->setTransparentBackground(true);
     d->_modeSwitchButton->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    d->_modeSwitchButton->setContentsMargins(30, 0, 0, 0);
+    d->_modeSwitchButton->setContentsMargins(10, 0, 0, 0);
     d->_modeSwitchButton->setFixedHeight(36);
     d->_modeSwitchButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     connect(d->_modeSwitchButton, &NPushButton::clicked, d, &NCalendarWidgetPrivate::onSwitchButtonClicked);
