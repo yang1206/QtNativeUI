@@ -10,7 +10,7 @@ NCalendarTitleDelegate::NCalendarTitleDelegate(QObject* parent)
 {
     _themeMode = nTheme->themeMode();
     _isDark = nTheme->isDarkMode();
-    
+
     connect(nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) {
         _themeMode = themeMode;
         _isDark = nTheme->isDarkMode();
@@ -26,15 +26,15 @@ void NCalendarTitleDelegate::paint(QPainter* painter, const QStyleOptionViewItem
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     QRectF itemRect = option.rect;
-    
+
     // 文字绘制
     QString title = index.data(Qt::UserRole).toString();
     if (!title.isEmpty())
     {
-        QColor textColor = _isDark ? 
+        QColor textColor = _isDark ?
             NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark) :
             NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
-            
+
         painter->setPen(textColor);
         QFont font = painter->font();
         font.setWeight(QFont::Bold);

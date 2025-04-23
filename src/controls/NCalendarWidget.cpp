@@ -39,9 +39,6 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
     d->_calendarView->setFlow(NBaseListView::LeftToRight);
     d->_calendarView->setViewMode(NBaseListView::IconMode);
     d->_calendarView->setResizeMode(NBaseListView::Adjust);
-    // if (NScrollBar* vScrollBar = dynamic_cast<NScrollBar*>(d->_calendarView->verticalScrollBar())) {
-    //     vScrollBar->setSpeedLimit(6);
-    // }
     d->_calendarView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     d->_calendarView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     d->_calendarView->setSelectionMode(QAbstractItemView::NoSelection);
@@ -58,6 +55,8 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
     switchButtonFont.setWeight(QFont::Bold);
     d->_modeSwitchButton->setFont(switchButtonFont);
     d->_modeSwitchButton->setTransparentBackground(true);
+    d->_modeSwitchButton->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    d->_modeSwitchButton->setContentsMargins(10, 0, 0, 0);
     d->_modeSwitchButton->setFixedHeight(36);
     d->_modeSwitchButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     connect(d->_modeSwitchButton, &NPushButton::clicked, d, &NCalendarWidgetPrivate::onSwitchButtonClicked);
@@ -66,15 +65,15 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
 
     // 翻页按钮
     d->_upButton = new NPushButton(this);
-    d->_upButton->setFixedSize(36, 36);
-    d->_upButton->setFluentIcon(NRegularIconType::ChevronUp16Regular);
     d->_upButton->setTransparentBackground(true);
+    d->_upButton->setFixedSize(36, 36);
+    d->_upButton->setFluentIcon(NFilledIconType::CaretUp16Filled);
     connect(d->_upButton, &NPushButton::clicked, d, &NCalendarWidgetPrivate::onUpButtonClicked);
 
     d->_downButton = new NPushButton(this);
-    d->_downButton->setFixedSize(36, 36);
-    d->_downButton->setFluentIcon(NRegularIconType::ChevronDown16Regular);
     d->_downButton->setTransparentBackground(true);
+    d->_downButton->setFixedSize(36, 36);
+    d->_downButton->setFluentIcon(NFilledIconType::CaretDown16Filled);
     connect(d->_downButton, &NPushButton::clicked, d, &NCalendarWidgetPrivate::onDownButtonClicked);
 
     QHBoxLayout* buttonLayout = new QHBoxLayout();

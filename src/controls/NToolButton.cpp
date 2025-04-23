@@ -23,12 +23,15 @@ Q_PROPERTY_CREATE_Q_CPP(NToolButton, QColor, LightTextPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NToolButton, QColor, DarkTextPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NToolButton, QColor, LightBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NToolButton, QColor, DarkBorderColor)
+Q_PROPERTY_CREATE_Q_CPP(NToolButton, bool, TransparentBackground)
 
 NToolButton::NToolButton(QWidget* parent) : QToolButton(parent), d_ptr(new NToolButtonPrivate()) {
     Q_D(NToolButton);
     d->q_ptr = this;
     init();
 }
+
+NToolButton::NToolButton(QString text, QWidget* parent) : NToolButton(parent) { setText(text); }
 
 NToolButton::~NToolButton() {}
 
@@ -50,7 +53,7 @@ void NToolButton::init() {
     d->_pDarkTextPressColor    = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
     d->_pLightBorderColor      = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_pDarkBorderColor       = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
-
+    d->_pTransparentBackground = false;
     updateAccentColors();
 
     setMouseTracking(true);
@@ -153,20 +156,18 @@ void NToolButton::paintEvent(QPaintEvent* event) {
     Q_D(NToolButton);
     QPainter painter(this);
     painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing | QPainter::TextAntialiasing);
+    if (!d->_pTransparentBackground) {
+        NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
+        if (!isEnabled()) {
+            elevationKey = NDesignTokenKey::ElevationNone;
+        } else if (d->_isPressed) {
+            elevationKey = NDesignTokenKey::ElevationRest;
+        } else if (d->_isHovered) {
+            elevationKey = NDesignTokenKey::ElevationHover;
+        }
 
-    NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
-    if (!isEnabled()) {
-        elevationKey = NDesignTokenKey::ElevationNone;
-    } else if (d->_isPressed) {
-        elevationKey = NDesignTokenKey::ElevationRest;
-    } else if (d->_isHovered) {
-        elevationKey = NDesignTokenKey::ElevationHover;
-    }
-
-    if (!d->_isTransparentBackground) {
         nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
     }
-
     drawBackground(&painter);
     drawBorder(&painter);
     drawIcon(&painter);
@@ -207,7 +208,11 @@ void NToolButton::drawBackground(QPainter* painter) {
         } else if (d->_isHovered) {
             bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
         } else {
-            bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            if (d->_pTransparentBackground) {
+                bgColor = Qt::transparent;
+            } else {
+                bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            }
         }
 
         painter->setPen(Qt::NoPen);
@@ -215,8 +220,13 @@ void NToolButton::drawBackground(QPainter* painter) {
         painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
-    if (!d->_isPressed && !d->_isTransparentBackground) {
+    if ((!d->_isPressed)) {
         if (d->_buttonType == NToolButtonPrivate::Accent) {
+            painter->restore();
+            return;
+        }
+
+        if (d->_pTransparentBackground && !d->_isHovered) {
             painter->restore();
             return;
         }
@@ -233,8 +243,8 @@ void NToolButton::drawBackground(QPainter* painter) {
 
 void NToolButton::drawBorder(QPainter* painter) {
     Q_D(NToolButton);
-
-    if (d->_buttonType == NToolButtonPrivate::Accent) {
+    if (d->_pTransparentBackground && !d->_isHovered && !d->_isPressed &&
+        d->_buttonType != NToolButtonPrivate::Accent) {
         return;
     }
 
@@ -479,23 +489,4 @@ void NToolButton::updateFluentIcon() {
     }
 
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
-}
-
-void NToolButton::setTransparentBackground(bool transparent) {
-    Q_D(NToolButton);
-    d->_isTransparentBackground = transparent;
-
-    d->_pLightBorderColor  = d->_isTransparentBackground
-                                 ? Qt::transparent
-                                 : NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
-    d->_pDarkBorderColor   = d->_isTransparentBackground
-                                 ? Qt::transparent
-                                 : NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
-    d->_pLightDefaultColor = d->_isTransparentBackground
-                                 ? Qt::transparent
-                                 : NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
-    d->_pDarkDefaultColor  = d->_isTransparentBackground
-                                 ? Qt::transparent
-                                 : NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
-    update();
 }

@@ -24,6 +24,7 @@ class QTNATIVEUI_EXPORT NPushButton : public QPushButton {
     Q_PROPERTY_CREATE_Q_H(QColor, LightTextPressColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkTextPressColor)
     Q_PROPERTY_CREATE_Q_H(bool, TransparentBackground)
+    Q_PROPERTY_CREATE_Q_H(Qt::Alignment, Alignment)
 
   public:
     enum ButtonType {
