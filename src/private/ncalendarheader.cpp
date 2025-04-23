@@ -1,9 +1,38 @@
-#include "ncalendartitledelegate.h"
+//
+// Created by Yang1206 on 2025/4/24.
+//
 
+#include "ncalendarheader.h"
 #include <QPainter>
 #include <QPainterPath>
 #include <QStyleOption>
+#include <qlocale.h>
 #include "QtNativeUI/NTheme.h"
+
+NCalendarTitleModel::NCalendarTitleModel(QObject* parent) : QAbstractListModel{parent} {
+    _firstDayOfWeek = _locale.firstDayOfWeek();
+}
+
+NCalendarTitleModel::~NCalendarTitleModel() {}
+
+void NCalendarTitleModel::setLocale(const QLocale& locale) {
+    if (_locale != locale) {
+        beginResetModel();
+        _locale = locale;
+        endResetModel();
+    }
+}
+
+int NCalendarTitleModel::rowCount(const QModelIndex& parent) const { return 7; }
+
+QVariant NCalendarTitleModel::data(const QModelIndex& index, int role) const {
+    if (role == Qt::UserRole) {
+        if (index.row() >= 0 && index.row() < 7) {
+            return _locale.dayName(index.row() == 0 ? 7 : index.row(), QLocale::NarrowFormat);
+        }
+    }
+    return QVariant();
+}
 
 NCalendarTitleDelegate::NCalendarTitleDelegate(QObject* parent) : QStyledItemDelegate{parent} {
     _themeMode = nTheme->themeMode();

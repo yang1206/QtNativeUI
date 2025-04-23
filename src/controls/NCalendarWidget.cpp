@@ -5,9 +5,8 @@
 #include <QtNativeUI/NCalendarWidget.h>
 
 #include "../private/ncalendardelegate.h"
+#include "../private/ncalendarheader.h"
 #include "../private/ncalendarmodel.h"
-#include "../private/ncalendartitledelegate.h"
-#include "../private/ncalendartitlemodel.h"
 #include "../private/ncalendarwidget_p.h"
 #include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NScrollBar.h"
