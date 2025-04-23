@@ -127,7 +127,6 @@ void NCalendarDelegate::_drawYearOrMonth(QPainter*                   painter,
 void NCalendarDelegate::_drawDays(QPainter*                   painter,
                                   const QStyleOptionViewItem& option,
                                   const QModelIndex&          index) const {
-    // TODO 不同模式选择绘制需要不同效果
     qreal    penWidth   = 1.5;
     qreal    baseRadius = _pItemWidth * 0.5 - penWidth;
     QVariant variant    = index.data(Qt::UserRole);
@@ -137,7 +136,6 @@ void NCalendarDelegate::_drawDays(QPainter*                   painter,
         bool          isNow    = false;
         NCalendarData data     = variant.value<NCalendarData>();
 
-        // 当前日期绘制
         if (data.year == _nowDate.year() && data.month == _nowDate.month() && data.day == _nowDate.day()) {
             isNow              = true;
             QColor accentColor = nTheme->accentColor().normal();
@@ -155,7 +153,6 @@ void NCalendarDelegate::_drawDays(QPainter*                   painter,
                 painter->drawEllipse(itemRect.center(), baseRadius, baseRadius);
             }
         } else {
-            // 选中和悬停效果绘制
             if (option.state.testFlag(QStyle::State_Selected)) {
                 QColor accentColor = nTheme->accentColor().normal();
                 QColor borderColor =
@@ -181,7 +178,6 @@ void NCalendarDelegate::_drawDays(QPainter*                   painter,
             }
         }
 
-        // 文字绘制
         QColor textColor;
         bool   isEnabled = option.state & QStyle::State_Enabled;
 

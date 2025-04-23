@@ -64,6 +64,14 @@ QDate NCalendarModel::getDateFromIndex(const QModelIndex& index) const {
     return _pMinimumDate.addDays(index.row() - _offset);
 }
 
+void NCalendarModel::setLocale(const QLocale& locale) {
+    if (_locale != locale) {
+        beginResetModel();
+        _locale = locale;
+        endResetModel();
+    }
+}
+
 QVariant NCalendarModel::data(const QModelIndex& index, int role) const {
     if (role == Qt::UserRole) {
         switch (_displayMode) {
@@ -84,12 +92,11 @@ QVariant NCalendarModel::data(const QModelIndex& index, int role) const {
                 if (index.row() >= _offset) {
                     QDate date = getDateFromIndex(index);
                     if (date.day() == 1) {
-                        QLocale locale = QLocale::system();
                         return QVariant::fromValue<NCalendarData>(
                             NCalendarData(date.year(),
                                           date.month(),
                                           date.day(),
-                                          locale.monthName(date.month(), QLocale::ShortFormat)));
+                                          _locale.monthName(date.month(), QLocale::ShortFormat)));
                     } else {
                         return QVariant::fromValue<NCalendarData>(NCalendarData(date.year(), date.month(), date.day()));
                     }

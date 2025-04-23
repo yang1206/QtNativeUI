@@ -160,11 +160,17 @@ void NCalendarWidget::setLocale(const QLocale& locale) {
     Q_D(NCalendarWidget);
     if (d->_locale != locale) {
         d->_locale = locale;
-        // 更新首日设置
         d->_calendarModel->setFirstDayOfWeek(locale.firstDayOfWeek());
 
-        // 更新日历视图
-        d->_calendarModel->invalidate(); // 需要添加此方法来触发模型刷新
+        d->_calendarModel->setLocale(locale);
+        d->_updateSwitchButtonText();
+
+        if (NCalendarTitleModel* titleModel = qobject_cast<NCalendarTitleModel*>(d->_calendarTitleView->model())) {
+            titleModel->setFirstDayOfWeek(locale.firstDayOfWeek());
+            titleModel->setLocale(locale);
+        }
+
+        d->_calendarModel->invalidate();
         update();
 
         emit localeChanged(locale);
@@ -175,25 +181,21 @@ void NCalendarWidget::setDateSelectionMode(DateSelectionMode mode) {
     Q_D(NCalendarWidget);
     if (d->_selectionMode != mode) {
         d->_selectionMode = mode;
-        // 清除现有选择
         if (mode == SingleDate) {
             d->_selectedDates.clear();
             d->_selectedDateRange = QPair<QDate, QDate>(QDate(), QDate());
         } else if (mode == MultipleDate) {
             d->_selectedDateRange = QPair<QDate, QDate>(QDate(), QDate());
-            // 保留当前选中日期
             if (d->_pSelectedDate.isValid() && !d->_selectedDates.contains(d->_pSelectedDate)) {
                 d->_selectedDates.append(d->_pSelectedDate);
             }
         } else if (mode == DateRange) {
             d->_selectedDates.clear();
-            // 初始化日期范围的起始日期
             if (d->_pSelectedDate.isValid()) {
                 d->_selectedDateRange.first  = d->_pSelectedDate;
                 d->_selectedDateRange.second = d->_pSelectedDate;
             }
         }
-        // 更新视图
         d->updateDateSelection();
         update();
         emit dateSelectionModeChanged(mode);
@@ -205,12 +207,9 @@ NCalendarWidget::DateSelectionMode NCalendarWidget::dateSelectionMode() const {
     return d->_selectionMode;
 }
 
-// 多选日期相关方法
 void NCalendarWidget::setSelectedDates(const QList<QDate>& dates) {
     Q_D(NCalendarWidget);
-    // 切换到多选模式
     setDateSelectionMode(MultipleDate);
-    // 验证并设置日期
     QList<QDate> validDates;
     for (const QDate& date : dates) {
         if (date.isValid() && date >= d->_calendarModel->getMinimumDate() &&
@@ -220,12 +219,10 @@ void NCalendarWidget::setSelectedDates(const QList<QDate>& dates) {
     }
     if (d->_selectedDates != validDates) {
         d->_selectedDates = validDates;
-        // 如果有日期，将第一个设为当前选中
         if (!validDates.isEmpty()) {
             d->_pSelectedDate = validDates.first();
             emit pSelectedDateChanged();
         }
-        // 更新视图
         d->updateDateSelection();
         update();
         emit selectedDatesChanged(validDates);
@@ -240,9 +237,7 @@ QList<QDate> NCalendarWidget::selectedDates() const {
 // 日期范围相关方法
 void NCalendarWidget::setDateRange(const QDate& startDate, const QDate& endDate) {
     Q_D(NCalendarWidget);
-    // 切换到范围模式
     setDateSelectionMode(DateRange);
-    // 验证日期范围
     QDate validStartDate = startDate;
     QDate validEndDate   = endDate;
     if (!validStartDate.isValid() || validStartDate < d->_calendarModel->getMinimumDate()) {
@@ -251,7 +246,6 @@ void NCalendarWidget::setDateRange(const QDate& startDate, const QDate& endDate)
     if (!validEndDate.isValid() || validEndDate > d->_calendarModel->getMaximumDate()) {
         validEndDate = d->_calendarModel->getMaximumDate();
     }
-    // 确保开始日期不晚于结束日期
     if (validStartDate > validEndDate) {
         std::swap(validStartDate, validEndDate);
     }
@@ -259,11 +253,9 @@ void NCalendarWidget::setDateRange(const QDate& startDate, const QDate& endDate)
     if (d->_selectedDateRange != newRange) {
         d->_selectedDateRange = newRange;
 
-        // 将当前选中设为范围开始
         d->_pSelectedDate = validStartDate;
         emit pSelectedDateChanged();
 
-        // 更新视图
         d->updateDateSelection();
         update();
 
@@ -291,14 +283,12 @@ void NCalendarWidget::paintEvent(QPaintEvent* event) {
     baseRect.adjust(d->_borderWidth, d->_borderWidth, -d->_borderWidth, -d->_borderWidth);
     painter.setPen(Qt::NoPen);
 
-    // 背景
     QColor bgColor = d->_isDark ? NThemeColor(NFluentColorKey::CardBackgroundFillColorDefault, NThemeType::Dark)
                                 : NThemeColor(NFluentColorKey::CardBackgroundFillColorDefault, NThemeType::Light);
     painter.setBrush(bgColor);
 
     painter.drawRoundedRect(baseRect, d->_pBorderRadius, d->_pBorderRadius);
 
-    // 缩放动画
     if (!d->_isSwitchAnimationFinished) {
         painter.save();
         QRect pixRect = QRect(baseRect.x(), d->_borderWidth + 45, baseRect.width(), baseRect.height() - 45);
@@ -310,7 +300,6 @@ void NCalendarWidget::paintEvent(QPaintEvent* event) {
         painter.restore();
     }
 
-    // 分割线
     QColor borderColor = d->_isDark ? NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Dark)
                                     : NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Light);
     painter.setPen(QPen(borderColor, d->_borderWidth));

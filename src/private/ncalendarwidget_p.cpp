@@ -147,7 +147,6 @@ void NCalendarWidgetPrivate::_doSwitchAnimation(bool isZoomIn) {
             _calendarDelegate->setIsTransparent(false);
         });
         if (isZoomIn) {
-            // 放大 年-月-日
             newPixZoomAnimation->setStartValue(0.85);
             newPixZoomAnimation->setEndValue(1);
         } else {
@@ -190,7 +189,7 @@ void NCalendarWidgetPrivate::_updateSwitchButtonText() {
     if (!modelIndex.isValid()) {
         return;
     }
-    QLocale       locale = QLocale::system();
+    QLocale       locale = _locale;
     NCalendarData data   = _calendarModel->data(modelIndex, Qt::UserRole).value<NCalendarData>();
     switch (_calendarModel->getDisplayMode()) {
         case YearMode: {
@@ -202,7 +201,12 @@ void NCalendarWidgetPrivate::_updateSwitchButtonText() {
             break;
         }
         case DayMode: {
-            _modeSwitchButton->setText(QString("%1年%2月").arg(data.year).arg(data.month));
+            QDate date(data.year, data.month, 1);
+            if (locale.language() == QLocale::Chinese) {
+                _modeSwitchButton->setText(locale.toString(date, "yyyy年MM月"));
+            } else {
+                _modeSwitchButton->setText(locale.toString(date, "MMMM"));
+            }
             break;
         }
     }

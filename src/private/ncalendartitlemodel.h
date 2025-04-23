@@ -2,6 +2,7 @@
 #define QTNATIVEUI_NCALENDARTITLEMODEL_H
 
 #include <QAbstractListModel>
+#include <qlocale.h>
 
 class NCalendarTitleModel : public QAbstractListModel {
     Q_OBJECT
@@ -10,13 +11,15 @@ class NCalendarTitleModel : public QAbstractListModel {
     ~NCalendarTitleModel();
 
     void setFirstDayOfWeek(int day) { _firstDayOfWeek = day; }
+    void setLocale(const QLocale& locale);
 
   protected:
     virtual int      rowCount(const QModelIndex& parent = QModelIndex()) const override;
     virtual QVariant data(const QModelIndex& index, int role) const override;
 
   private:
-    int _firstDayOfWeek{1};
+    int     _firstDayOfWeek{1};
+    QLocale _locale{QLocale::system()};
 };
 
 #endif // QTNATIVEUI_NCALENDARTITLEMODEL_H

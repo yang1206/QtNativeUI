@@ -44,6 +44,7 @@ class NCalendarModel : public QAbstractListModel {
 
     void setFirstDayOfWeek(int day);
     int  firstDayOfWeek() const;
+    void setLocale(const QLocale& locale);
 
     void invalidate() {
         beginResetModel();
@@ -64,6 +65,7 @@ class NCalendarModel : public QAbstractListModel {
   private:
     int           _offset{0};
     NCalendarType _displayMode{NCalendarType::DayMode};
+    QLocale       _locale{QLocale::system()};
     int           _dayRowCount{0};
     int           _firstDayOfWeek{1};
     QDate         _pMinimumDate;
