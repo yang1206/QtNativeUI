@@ -62,8 +62,8 @@ void NToggleButton::init() {
 
     setMinimumHeight(32);
 
-    int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingL).toInt();
-    int verticalSpacing   = NDesignToken(NDesignTokenKey::SpacingS).toInt();
+    int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingNone).toInt();
+    int verticalSpacing   = NDesignToken(NDesignTokenKey::SpacingNone).toInt();
     setContentsMargins(horizontalSpacing, verticalSpacing, horizontalSpacing, verticalSpacing);
 
     QFont font = this->font();
@@ -326,10 +326,11 @@ void NToggleButton::drawIcon(QPainter* painter) {
 
     painter->save();
 
-    QRect foregroundRect(d->_shadowBorderWidth,
-                         d->_shadowBorderWidth,
-                         width() - 2 * (d->_shadowBorderWidth),
-                         height() - 2 * d->_shadowBorderWidth);
+    QMargins margins = contentsMargins();
+    QRect    foregroundRect(d->_shadowBorderWidth + margins.left(),
+                         d->_shadowBorderWidth + margins.top(),
+                         width() - 2 * d->_shadowBorderWidth - margins.left() - margins.right(),
+                         height() - 2 * d->_shadowBorderWidth - margins.top() - margins.bottom());
 
     QRect iconRect;
     QSize iconSize = d->_iconSize;
@@ -367,10 +368,12 @@ void NToggleButton::drawText(QPainter* painter) {
         return;
 
     painter->save();
-    QRect foregroundRect(d->_shadowBorderWidth,
-                         d->_shadowBorderWidth,
-                         width() - 2 * (d->_shadowBorderWidth),
-                         height() - 2 * d->_shadowBorderWidth);
+    QMargins margins = contentsMargins();
+
+    QRect foregroundRect(d->_shadowBorderWidth + margins.left(),
+                         d->_shadowBorderWidth + margins.top(),
+                         width() - 2 * d->_shadowBorderWidth - margins.left() - margins.right(),
+                         height() - 2 * d->_shadowBorderWidth - margins.top() - margins.bottom());
 
     QColor textColor;
 
