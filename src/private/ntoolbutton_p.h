@@ -22,6 +22,7 @@ class NToolButtonPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, DarkTextPressColor)
     Q_PROPERTY_CREATE_D(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBorderColor)
+    Q_PROPERTY_CREATE_D(bool, TransparentBackground)
 
   public:
     explicit NToolButtonPrivate(QObject* parent = nullptr);
@@ -42,7 +43,6 @@ class NToolButtonPrivate : public QObject {
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
     ButtonType            _buttonType{Standard};
-    bool                  _isTransparentBackground{false};
 
     QColor _accentDefaultColor;
     QColor _accentHoverColor;

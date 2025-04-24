@@ -1,4 +1,6 @@
 ﻿#include "controls.h"
+#include <QComboBox>
+#include <QGroupBox>
 #include <QVBoxLayout>
 #include <QtNativeUI/NCheckBox.h>
 #include <QtNativeUI/NLineEdit.h>
@@ -6,6 +8,7 @@
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NToggleSwitch.h>
+#include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
@@ -48,6 +51,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("ProgressRing", createProgressRings()));
     contentLayout->addWidget(new ExampleSection("ScrollArea", createScrollAreas()));
     contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
+    contentLayout->addWidget(new ExampleSection("CalendarWidget", createCalendarWidgets()));
 
     contentLayout->addStretch();
 
@@ -932,5 +936,169 @@ QWidget* ControlsExample::createScrollAreas() {
     layout->addWidget(disabledScrollArea);
 
     layout->addStretch();
+    return container;
+}
+
+QWidget* ControlsExample::createCalendarWidgets() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    QLabel* titleLabel = new QLabel("日历控件演示", container);
+    QFont   titleFont  = titleLabel->font();
+    titleFont.setBold(true);
+    titleFont.setPointSize(titleFont.pointSize() + 2);
+    titleLabel->setFont(titleFont);
+    layout->addWidget(titleLabel);
+
+    QVBoxLayout* calendarLayout = new QVBoxLayout();
+    calendarLayout->setSpacing(20);
+
+    // 1. 单日期选择
+    QVBoxLayout* singleDateLayout = new QVBoxLayout();
+    QLabel*      singleLabel      = new QLabel("单日期选择模式", container);
+    QFont        labelFont        = singleLabel->font();
+    labelFont.setBold(true);
+    singleLabel->setFont(labelFont);
+    singleDateLayout->addWidget(singleLabel);
+
+    NCalendarWidget* singleCalendar = new NCalendarWidget(container);
+    singleCalendar->setDateSelectionMode(NCalendarWidget::SingleDate);
+
+    QLabel* selectedDateLabel = new QLabel("选择的日期：", container);
+    singleDateLayout->addWidget(singleCalendar);
+    singleDateLayout->addWidget(selectedDateLabel);
+
+    // 连接信号槽，显示选择的日期
+    connect(singleCalendar, &NCalendarWidget::clicked, [=](QDate date) {
+        selectedDateLabel->setText("选择的日期：" + date.toString("yyyy-MM-dd"));
+    });
+
+    calendarLayout->addLayout(singleDateLayout);
+
+    // 2. 多日期选择
+    QVBoxLayout* multipleDateLayout = new QVBoxLayout();
+    QLabel*      multipleLabel      = new QLabel("多日期选择模式", container);
+    multipleLabel->setFont(labelFont);
+    multipleDateLayout->addWidget(multipleLabel);
+
+    NCalendarWidget* multipleCalendar = new NCalendarWidget(container);
+    multipleCalendar->setDateSelectionMode(NCalendarWidget::MultipleDate);
+
+    QLabel* multipleDatesLabel = new QLabel("选择的日期：", container);
+    multipleDateLayout->addWidget(multipleCalendar);
+    multipleDateLayout->addWidget(multipleDatesLabel);
+
+    // 连接信号槽，显示选择的多个日期
+    connect(multipleCalendar, &NCalendarWidget::selectedDatesChanged, [=](const QList<QDate>& dates) {
+        QString dateStr = "选择的日期：";
+        for (const QDate& date : dates) {
+            dateStr += date.toString("yyyy-MM-dd") + "\n";
+        }
+        multipleDatesLabel->setText(dateStr);
+    });
+
+    calendarLayout->addLayout(multipleDateLayout);
+
+    // 3. 日期范围选择
+    QVBoxLayout* rangeDateLayout = new QVBoxLayout();
+    QLabel*      rangeLabel      = new QLabel("日期范围选择模式", container);
+    rangeLabel->setFont(labelFont);
+    rangeDateLayout->addWidget(rangeLabel);
+
+    NCalendarWidget* rangeCalendar = new NCalendarWidget(container);
+    rangeCalendar->setDateSelectionMode(NCalendarWidget::DateRange);
+
+    QLabel* rangeDatesLabel = new QLabel("选择的日期范围：", container);
+    rangeDateLayout->addWidget(rangeCalendar);
+    rangeDateLayout->addWidget(rangeDatesLabel);
+
+    // 连接信号槽，显示选择的日期范围
+    connect(rangeCalendar, &NCalendarWidget::selectedDateRangeChanged, [=](const QPair<QDate, QDate>& range) {
+        if (range.first.isValid() && range.second.isValid()) {
+            rangeDatesLabel->setText("选择的日期范围：" + range.first.toString("yyyy-MM-dd") + " 至 " +
+                                     range.second.toString("yyyy-MM-dd"));
+        } else if (range.first.isValid()) {
+            rangeDatesLabel->setText("选择的日期：" + range.first.toString("yyyy-MM-dd"));
+        }
+    });
+
+    calendarLayout->addLayout(rangeDateLayout);
+
+    layout->addLayout(calendarLayout);
+
+    // 添加操作控制区域
+    QGroupBox*   controlsGroup  = new QGroupBox("日历控制", container);
+    QVBoxLayout* controlsLayout = new QVBoxLayout(controlsGroup);
+
+    // 设置最小和最大日期
+    QHBoxLayout* dateRangeLayout = new QHBoxLayout();
+    QLabel*      minDateLabel    = new QLabel("最小日期:", container);
+    QLabel*      maxDateLabel    = new QLabel("最大日期:", container);
+
+    NLineEdit* minDateEdit = new NLineEdit(container);
+    minDateEdit->setPlaceholderText("YYYY-MM-DD");
+
+    NLineEdit* maxDateEdit = new NLineEdit(container);
+    maxDateEdit->setPlaceholderText("YYYY-MM-DD");
+
+    NPushButton* setRangeButton = new NPushButton("设置日期范围", container);
+
+    dateRangeLayout->addWidget(minDateLabel);
+    dateRangeLayout->addWidget(minDateEdit);
+    dateRangeLayout->addWidget(maxDateLabel);
+    dateRangeLayout->addWidget(maxDateEdit);
+    dateRangeLayout->addWidget(setRangeButton);
+
+    connect(setRangeButton, &NPushButton::clicked, [=]() {
+        QDate minDate = QDate::fromString(minDateEdit->text(), "yyyy-MM-dd");
+        QDate maxDate = QDate::fromString(maxDateEdit->text(), "yyyy-MM-dd");
+
+        if (minDate.isValid() && maxDate.isValid()) {
+            singleCalendar->setMinimumDate(minDate);
+            singleCalendar->setMaximumDate(maxDate);
+
+            multipleCalendar->setMinimumDate(minDate);
+            multipleCalendar->setMaximumDate(maxDate);
+
+            rangeCalendar->setMinimumDate(minDate);
+            rangeCalendar->setMaximumDate(maxDate);
+        }
+    });
+
+    controlsLayout->addLayout(dateRangeLayout);
+
+    // 设置区域语言
+    QHBoxLayout* localeLayout = new QHBoxLayout();
+    QLabel*      localeLabel  = new QLabel("设置语言:", container);
+
+    QComboBox* localeCombo = new QComboBox(container);
+    localeCombo->addItem("中文", QLocale::Chinese);
+    localeCombo->addItem("英文", QLocale::English);
+    localeCombo->addItem("法文", QLocale::French);
+    localeCombo->addItem("德文", QLocale::German);
+    localeCombo->addItem("日文", QLocale::Japanese);
+
+    NPushButton* setLocaleButton = new NPushButton("应用", container);
+
+    localeLayout->addWidget(localeLabel);
+    localeLayout->addWidget(localeCombo);
+    localeLayout->addWidget(setLocaleButton);
+    localeLayout->addStretch();
+
+    connect(setLocaleButton, &NPushButton::clicked, [=]() {
+        QLocale::Language lang = static_cast<QLocale::Language>(localeCombo->currentData().toInt());
+        QLocale           locale(lang);
+
+        singleCalendar->setLocale(locale);
+        multipleCalendar->setLocale(locale);
+        rangeCalendar->setLocale(locale);
+    });
+
+    controlsLayout->addLayout(localeLayout);
+
+    layout->addWidget(controlsGroup);
+    layout->addStretch();
+
     return container;
 }

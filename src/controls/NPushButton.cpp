@@ -18,6 +18,7 @@ Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkTextDefaultColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, LightTextPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, QColor, DarkTextPressColor)
 Q_PROPERTY_CREATE_Q_CPP(NPushButton, bool, TransparentBackground)
+Q_PROPERTY_CREATE_Q_CPP(NPushButton, Qt::Alignment, Alignment)
 
 NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPushButtonPrivate()) {
     Q_D(NPushButton);
@@ -36,6 +37,7 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
     d->_pLightTextPressColor   = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
     d->_pDarkTextPressColor    = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
     d->_pTransparentBackground = false;
+    d->_pAlignment             = Qt::AlignCenter;
 
     d->_lightBorderColor = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Light);
     d->_darkBorderColor  = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, NThemeType::Dark);
@@ -45,9 +47,8 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
     setMouseTracking(true);
 
     setMinimumHeight(32);
-
-    int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingL).toInt();
-    int verticalSpacing   = NDesignToken(NDesignTokenKey::SpacingS).toInt();
+    int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingNone).toInt();
+    int verticalSpacing   = NDesignToken(NDesignTokenKey::SpacingNone).toInt();
     setContentsMargins(horizontalSpacing, verticalSpacing, horizontalSpacing, verticalSpacing);
 
     QFont font = this->font();
@@ -239,10 +240,6 @@ void NPushButton::drawBorder(QPainter* painter) {
         return;
     }
 
-    if (d->_buttonType == NPushButtonPrivate::Accent) {
-        return;
-    }
-
     painter->save();
 
     QRect foregroundRect(d->_shadowBorderWidth,
@@ -265,10 +262,12 @@ void NPushButton::drawIcon(QPainter* painter) {
 
     painter->save();
 
-    QRect foregroundRect(d->_shadowBorderWidth,
-                         d->_shadowBorderWidth,
-                         width() - 2 * (d->_shadowBorderWidth),
-                         height() - 2 * d->_shadowBorderWidth);
+    QMargins margins = contentsMargins();
+
+    QRect foregroundRect(d->_shadowBorderWidth + margins.left(),
+                         d->_shadowBorderWidth + margins.top(),
+                         width() - 2 * d->_shadowBorderWidth - margins.left() - margins.right(),
+                         height() - 2 * d->_shadowBorderWidth - margins.top() - margins.bottom());
 
     // 检查是否有自定义内容区域
     QVariant customRectVar = property("_nContentRect");
@@ -316,12 +315,13 @@ void NPushButton::drawText(QPainter* painter) {
         return;
 
     painter->save();
-    QRect foregroundRect(d->_shadowBorderWidth,
-                         d->_shadowBorderWidth,
-                         width() - 2 * (d->_shadowBorderWidth),
-                         height() - 2 * d->_shadowBorderWidth);
+    QMargins margins = contentsMargins();
 
-    // 检查是否有自定义内容区域
+    QRect foregroundRect(d->_shadowBorderWidth + margins.left(),
+                         d->_shadowBorderWidth + margins.top(),
+                         width() - 2 * d->_shadowBorderWidth - margins.left() - margins.right(),
+                         height() - 2 * d->_shadowBorderWidth - margins.top() - margins.bottom());
+
     QVariant customRectVar = property("_nContentRect");
     if (customRectVar.isValid()) {
         foregroundRect = customRectVar.toRect();
@@ -358,10 +358,10 @@ void NPushButton::drawText(QPainter* painter) {
         QRect textRect(
             startX + iconSize.width() + iconTextSpacing, foregroundRect.y(), textWidth, foregroundRect.height());
 
-        painter->drawText(textRect, Qt::AlignCenter, text());
+        painter->drawText(textRect, d->_pAlignment, text());
     } else {
         // 无图标时居中显示
-        painter->drawText(foregroundRect, Qt::AlignCenter, text());
+        painter->drawText(foregroundRect, d->_pAlignment, text());
     }
 
     painter->restore();

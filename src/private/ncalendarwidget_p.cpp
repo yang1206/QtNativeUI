@@ -1,0 +1,301 @@
+#include "ncalendarwidget_p.h"
+
+#include <QApplication>
+#include <QPropertyAnimation>
+#include <QScrollBar>
+
+#include "QtNativeUI/NCalendarWidget.h"
+#include "QtNativeUI/NPushButton.h"
+#include "QtNativeUI/NTheme.h"
+#include "nbaselistview.h"
+#include "ncalendardelegate.h"
+#include "ncalendarmodel.h"
+
+NCalendarWidgetPrivate::NCalendarWidgetPrivate(QObject* parent) : QObject{parent} {
+    _pZoomRatio  = 1;
+    _pPixOpacity = 1;
+}
+
+NCalendarWidgetPrivate::~NCalendarWidgetPrivate() {}
+
+void NCalendarWidgetPrivate::onSwitchButtonClicked() {
+    if (!_isSwitchAnimationFinished) {
+        return;
+    }
+    Q_Q(NCalendarWidget);
+    NCalendarType displayMode = _calendarModel->getDisplayMode();
+    if (displayMode == NCalendarType::DayMode) {
+        _oldCalendarViewPix = q->grab(
+            QRect(_borderWidth, _borderWidth + 45, q->width() - 2 * _borderWidth, q->height() - 2 * _borderWidth - 45));
+        _calendarModel->setDisplayMode(NCalendarType::MonthMode);
+        _calendarTitleView->setVisible(false);
+        QApplication::processEvents();
+        _calendarView->setSpacing(15);
+        _scrollToDate(_pSelectedDate.isValid() ? _pSelectedDate : QDate::currentDate());
+        _newCalendarViewPix = q->grab(
+            QRect(_borderWidth, _borderWidth + 45, q->width() - 2 * _borderWidth, q->height() - 2 * _borderWidth - 45));
+        _doSwitchAnimation(false);
+    } else if (displayMode == NCalendarType::MonthMode) {
+        _oldCalendarViewPix = q->grab(
+            QRect(_borderWidth, _borderWidth + 45, q->width() - 2 * _borderWidth, q->height() - 2 * _borderWidth - 45));
+        _calendarModel->setDisplayMode(NCalendarType::YearMode);
+        _scrollToDate(_pSelectedDate.isValid() ? _pSelectedDate : QDate::currentDate());
+        _newCalendarViewPix = q->grab(
+            QRect(_borderWidth, _borderWidth + 45, q->width() - 2 * _borderWidth, q->height() - 2 * _borderWidth - 45));
+        _doSwitchAnimation(false);
+    }
+}
+
+void NCalendarWidgetPrivate::onCalendarViewClicked(const QModelIndex& index) {
+    Q_Q(NCalendarWidget);
+    if (!_isSwitchAnimationFinished) {
+        return;
+    }
+    switch (_calendarModel->getDisplayMode()) {
+        case YearMode: {
+            _oldCalendarViewPix = q->grab(QRect(
+                _borderWidth, _borderWidth + 45, q->width() - 2 * _borderWidth, q->height() - 2 * _borderWidth - 45));
+            _lastSelectedYear   = _calendarModel->getMinimumDate().year() + index.row();
+            _calendarModel->setDisplayMode(NCalendarType::MonthMode);
+            _scrollToDate(QDate(_lastSelectedYear, _lastSelectedMonth, 15));
+            _newCalendarViewPix = q->grab(QRect(
+                _borderWidth, _borderWidth + 45, q->width() - 2 * _borderWidth, q->height() - 2 * _borderWidth - 45));
+            _doSwitchAnimation(true);
+            break;
+        }
+        case MonthMode: {
+            _oldCalendarViewPix = q->grab(QRect(
+                _borderWidth, _borderWidth + 45, q->width() - 2 * _borderWidth, q->height() - 2 * _borderWidth - 45));
+            _lastSelectedMonth  = index.row() % 12 + 1;
+            _calendarModel->setDisplayMode(NCalendarType::DayMode);
+            _calendarTitleView->setVisible(true);
+            _calendarView->setSpacing(0);
+            _scrollToDate(QDate(_lastSelectedYear, _lastSelectedMonth, 15));
+            _calendarView->selectionModel()->setCurrentIndex(_calendarModel->getIndexFromDate(_pSelectedDate),
+                                                             QItemSelectionModel::Select);
+            _newCalendarViewPix = q->grab(QRect(
+                _borderWidth, _borderWidth + 45, q->width() - 2 * _borderWidth, q->height() - 2 * _borderWidth - 45));
+            _calendarTitleView->setVisible(false);
+            _doSwitchAnimation(true);
+            break;
+        }
+        case DayMode: {
+            QDate date = _calendarModel->getDateFromIndex(index);
+            if (date.isValid()) {
+                handleDateSelection(date);
+            }
+            Q_EMIT q->clicked(_pSelectedDate);
+            break;
+        }
+    }
+}
+
+void NCalendarWidgetPrivate::onUpButtonClicked() {
+    QScrollBar*         vscrollBar      = _calendarView->verticalScrollBar();
+    QPropertyAnimation* scrollAnimation = new QPropertyAnimation(vscrollBar, "value");
+    scrollAnimation->setEasingCurve(QEasingCurve::OutSine);
+    scrollAnimation->setDuration(300);
+    scrollAnimation->setStartValue(vscrollBar->value());
+    scrollAnimation->setEndValue(vscrollBar->value() - 150);
+    scrollAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void NCalendarWidgetPrivate::onDownButtonClicked() {
+    QScrollBar*         vscrollBar      = _calendarView->verticalScrollBar();
+    QPropertyAnimation* scrollAnimation = new QPropertyAnimation(vscrollBar, "value");
+    scrollAnimation->setEasingCurve(QEasingCurve::OutSine);
+    scrollAnimation->setDuration(300);
+    scrollAnimation->setStartValue(vscrollBar->value());
+    scrollAnimation->setEndValue(vscrollBar->value() + 150);
+    scrollAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void NCalendarWidgetPrivate::_scrollToDate(QDate date) {
+    int index = _calendarModel->getIndexFromDate(date).row();
+    switch (_calendarModel->getDisplayMode()) {
+        case YearMode:
+        case MonthMode: {
+            _calendarView->scrollTo(_calendarModel->index(index - 4), QAbstractItemView::PositionAtTop);
+            break;
+        }
+        case DayMode: {
+            _calendarView->scrollTo(_calendarModel->index(index - 14), QAbstractItemView::PositionAtTop);
+            break;
+        }
+    }
+}
+
+void NCalendarWidgetPrivate::_doSwitchAnimation(bool isZoomIn) {
+    Q_Q(NCalendarWidget);
+    if (!_isSwitchAnimationFinished) {
+        return;
+    }
+    _isDrawNewPix              = false;
+    _isSwitchAnimationFinished = false;
+    _calendarDelegate->setIsTransparent(true);
+    QPropertyAnimation* oldPixZoomAnimation = new QPropertyAnimation(this, "pZoomRatio");
+    connect(oldPixZoomAnimation, &QPropertyAnimation::valueChanged, this, [=]() { q->update(); });
+    connect(oldPixZoomAnimation, &QPropertyAnimation::finished, this, [=]() {
+        _isDrawNewPix                           = true;
+        QPropertyAnimation* newPixZoomAnimation = new QPropertyAnimation(this, "pZoomRatio");
+        connect(newPixZoomAnimation, &QPropertyAnimation::valueChanged, this, [=]() { q->update(); });
+        connect(newPixZoomAnimation, &QPropertyAnimation::finished, this, [=]() {
+            if (_calendarModel->getDisplayMode() == NCalendarType::DayMode) {
+                _calendarTitleView->setVisible(true);
+            }
+            _isSwitchAnimationFinished = true;
+            _calendarDelegate->setIsTransparent(false);
+        });
+        if (isZoomIn) {
+            newPixZoomAnimation->setStartValue(0.85);
+            newPixZoomAnimation->setEndValue(1);
+        } else {
+            newPixZoomAnimation->setStartValue(1.5);
+            newPixZoomAnimation->setEndValue(1);
+        }
+        newPixZoomAnimation->setDuration(300);
+        newPixZoomAnimation->setEasingCurve(QEasingCurve::OutCubic);
+        newPixZoomAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+    });
+    if (isZoomIn) {
+        // 放大 年-月-日
+        oldPixZoomAnimation->setStartValue(1);
+        oldPixZoomAnimation->setEndValue(1.15);
+    } else {
+        // 缩小 日-月-年
+        oldPixZoomAnimation->setStartValue(1);
+        oldPixZoomAnimation->setEndValue(0.85);
+    }
+    oldPixZoomAnimation->setDuration(150);
+    oldPixZoomAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+
+    QPropertyAnimation* oldPixOpacityAnimation = new QPropertyAnimation(this, "pPixOpacity");
+    connect(oldPixZoomAnimation, &QPropertyAnimation::finished, this, [=]() {
+        QPropertyAnimation* newPixOpacityAnimation = new QPropertyAnimation(this, "pPixOpacity");
+        newPixOpacityAnimation->setStartValue(0);
+        newPixOpacityAnimation->setEndValue(1);
+        newPixOpacityAnimation->setDuration(300);
+        newPixOpacityAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+    });
+    oldPixOpacityAnimation->setStartValue(1);
+    oldPixOpacityAnimation->setEndValue(0);
+    oldPixOpacityAnimation->setDuration(150);
+    oldPixOpacityAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void NCalendarWidgetPrivate::_updateSwitchButtonText() {
+    QModelIndex modelIndex =
+        _calendarView->indexAt(QPoint(_calendarView->rect().center().x() - 20, _calendarView->rect().center().y()));
+    if (!modelIndex.isValid()) {
+        return;
+    }
+    QLocale       locale = _locale;
+    NCalendarData data   = _calendarModel->data(modelIndex, Qt::UserRole).value<NCalendarData>();
+    switch (_calendarModel->getDisplayMode()) {
+        case YearMode: {
+            _modeSwitchButton->setText(QString("%1-%2").arg(data.year - 5).arg(data.year + 10));
+            break;
+        }
+        case MonthMode: {
+            _modeSwitchButton->setText(locale.toString(QDate(data.year, 1, 1), "yyyy"));
+            break;
+        }
+        case DayMode: {
+            QDate date(data.year, data.month, 1);
+            if (locale.language() == QLocale::Chinese) {
+                _modeSwitchButton->setText(locale.toString(date, "yyyy年MM月"));
+            } else {
+                _modeSwitchButton->setText(locale.toString(date, "MMMM"));
+            }
+            break;
+        }
+    }
+}
+
+void NCalendarWidgetPrivate::handleDateSelection(const QDate& date) {
+    Q_Q(NCalendarWidget);
+
+    if (!date.isValid()) {
+        return;
+    }
+
+    switch (_selectionMode) {
+        case NCalendarWidget::SingleDate:
+            _pSelectedDate = date;
+            emit q->pSelectedDateChanged();
+            emit q->clicked(_pSelectedDate);
+            break;
+
+        case NCalendarWidget::MultipleDate:
+            // 切换日期选择状态
+            if (_selectedDates.contains(date)) {
+                _selectedDates.removeAll(date);
+            } else {
+                _selectedDates.append(date);
+            }
+            _pSelectedDate = date; // 更新当前选中
+            emit q->pSelectedDateChanged();
+            emit q->selectedDatesChanged(_selectedDates);
+            emit q->clicked(_pSelectedDate);
+            break;
+
+        case NCalendarWidget::DateRange:
+            // 如果第一个日期未设置或已有完整范围，从新开始
+            if (!_selectedDateRange.first.isValid() ||
+                (_selectedDateRange.first.isValid() && _selectedDateRange.second.isValid())) {
+                _selectedDateRange.first  = date;
+                _selectedDateRange.second = QDate();
+            } // 否则，设置结束日期
+            else {
+                _selectedDateRange.second = date;
+                // 确保开始日期不晚于结束日期
+                if (_selectedDateRange.first > _selectedDateRange.second) {
+                    std::swap(_selectedDateRange.first, _selectedDateRange.second);
+                }
+                emit q->selectedDateRangeChanged(_selectedDateRange);
+            }
+            _pSelectedDate = date; // 更新当前选中
+            emit q->pSelectedDateChanged();
+            emit q->clicked(_pSelectedDate);
+            break;
+    }
+    // 更新视图
+    updateDateSelection();
+}
+
+// 更新日期选择状态
+void NCalendarWidgetPrivate::updateDateSelection() {
+    // 清除现有选择
+    _calendarView->clearSelection();
+    // 根据模式设置选择
+    switch (_selectionMode) {
+        case NCalendarWidget::SingleDate:
+            if (_pSelectedDate.isValid()) {
+                QModelIndex index = _calendarModel->getIndexFromDate(_pSelectedDate);
+                _calendarView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
+            }
+            break;
+
+        case NCalendarWidget::MultipleDate:
+            for (const QDate& date : _selectedDates) {
+                QModelIndex index = _calendarModel->getIndexFromDate(date);
+                _calendarView->selectionModel()->select(index, QItemSelectionModel::Select);
+            }
+            break;
+
+        case NCalendarWidget::DateRange:
+            if (_selectedDateRange.first.isValid() && _selectedDateRange.second.isValid()) {
+                QDate currentDate = _selectedDateRange.first;
+                while (currentDate <= _selectedDateRange.second) {
+                    QModelIndex index = _calendarModel->getIndexFromDate(currentDate);
+                    _calendarView->selectionModel()->select(index, QItemSelectionModel::Select);
+                    currentDate = currentDate.addDays(1);
+                }
+            } else if (_selectedDateRange.first.isValid()) {
+                // 只有起始日期时
+                QModelIndex index = _calendarModel->getIndexFromDate(_selectedDateRange.first);
+                _calendarView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
+            }
+            break;
+    }
+}
