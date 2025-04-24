@@ -9,6 +9,7 @@
 #include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NToggleSwitch.h>
 #include "QtNativeUI/NCalendarWidget.h"
+#include "QtNativeUI/NComboBox.h"
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
@@ -44,6 +45,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("LineEdit", createLineEdits()));
     contentLayout->addWidget(new ExampleSection("TextEdit", createTextEdits()));
     contentLayout->addWidget(new ExampleSection("PlainTextEdit", createPlainTextEdits()));
+    contentLayout->addWidget(new ExampleSection("ComboBox", createComboBoxes()));
     contentLayout->addWidget(new ExampleSection("SpinBox", createSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("DoubleSpinBox", createDoubleSpinBoxes()));
     contentLayout->addWidget(new ExampleSection("Slider", createSliders()));
@@ -1099,6 +1101,72 @@ QWidget* ControlsExample::createCalendarWidgets() {
 
     layout->addWidget(controlsGroup);
     layout->addStretch();
+
+    return container;
+}
+
+QWidget* ControlsExample::createComboBoxes() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 1. 基本下拉框
+    QLabel* basicLabel = new QLabel("基本下拉框:", container);
+    layout->addWidget(basicLabel);
+
+    NComboBox* basicComboBox = new NComboBox(container);
+    basicComboBox->addItem("选项 1");
+    basicComboBox->addItem("选项 2");
+    basicComboBox->addItem("选项 3");
+    basicComboBox->setMinimumWidth(200);
+    layout->addWidget(basicComboBox);
+
+    // 2. 预设选项的下拉框
+    QLabel* presetLabel = new QLabel("预设选项的下拉框:", container);
+    layout->addWidget(presetLabel);
+
+    QStringList cityList          = {"北京", "上海", "广州", "深圳", "杭州"};
+    NComboBox*  preselectComboBox = new NComboBox(cityList, container);
+    preselectComboBox->setCurrentIndex(2); // 选择"广州"
+    preselectComboBox->setMinimumWidth(200);
+    layout->addWidget(preselectComboBox);
+
+    // 3. 可编辑的下拉框
+    QLabel* editableLabel = new QLabel("可编辑的下拉框:", container);
+    layout->addWidget(editableLabel);
+
+    NComboBox* editableComboBox = new NComboBox(container);
+    editableComboBox->addItems({"选项 A", "选项 B", "选项 C"});
+    editableComboBox->setEditable(true);
+    editableComboBox->setMinimumWidth(200);
+    layout->addWidget(editableComboBox);
+
+    // 4. 禁用状态的下拉框
+    QLabel* disabledLabel = new QLabel("禁用状态的下拉框:", container);
+    layout->addWidget(disabledLabel);
+
+    NComboBox* disabledComboBox = new NComboBox(container);
+    disabledComboBox->addItems({"禁用项 1", "禁用项 2", "禁用项 3"});
+    disabledComboBox->setEnabled(false);
+    disabledComboBox->setMinimumWidth(200);
+    layout->addWidget(disabledComboBox);
+
+    // 5. 信号演示
+    QLabel* signalLabel = new QLabel("信号演示:", container);
+    layout->addWidget(signalLabel);
+
+    NComboBox* signalComboBox = new NComboBox(container);
+    signalComboBox->addItems({"红色", "绿色", "蓝色", "黄色", "紫色"});
+    signalComboBox->setMinimumWidth(200);
+    QLabel* selectionLabel = new QLabel("当前选择: 红色", container);
+    connect(signalComboBox,
+            QOverload<int>::of(&NComboBox::currentIndexChanged),
+            [selectionLabel, signalComboBox](int index) {
+                selectionLabel->setText("当前选择: " + signalComboBox->currentText());
+            });
+
+    layout->addWidget(signalComboBox);
+    layout->addWidget(selectionLabel);
 
     return container;
 }
