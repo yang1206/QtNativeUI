@@ -143,6 +143,31 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
     QProxyStyle::drawComplexControl(control, option, painter, widget);
 }
 
+void NComboBoxStyle::drawControl(ControlElement      element,
+                                 const QStyleOption* option,
+                                 QPainter*           painter,
+                                 const QWidget*      widget) const {
+    if (qobject_cast<const NComboBox*>(widget)) {
+        if (element == CE_ComboBoxLabel) {
+            const QStyleOptionComboBox* comboOpt = qstyleoption_cast<const QStyleOptionComboBox*>(option);
+            if (comboOpt) {
+                QRect  editRect    = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
+                QRect  contentRect = editRect.adjusted(4, 0, -4, 0);
+                bool   isDark      = m_styleInterface->isDarkMode();
+                bool   isEnabled   = comboOpt->state & QStyle::State_Enabled;
+                QColor textColor   = m_styleInterface->textColorForState(isDark, isEnabled);
+                painter->save();
+                painter->setPen(textColor);
+                painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, comboOpt->currentText);
+                painter->restore();
+                return;
+            }
+        }
+    }
+
+    QProxyStyle::drawControl(element, option, painter, widget);
+}
+
 QRect NComboBoxStyle::subControlRect(ComplexControl             cc,
                                      const QStyleOptionComplex* opt,
                                      SubControl                 sc,
