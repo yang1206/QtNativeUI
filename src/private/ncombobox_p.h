@@ -32,22 +32,20 @@ class NComboBoxPrivate : public QObject, public NComboBoxStyleInterface {
     Q_PROPERTY_CREATE_D(QColor, LightBottomLineColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBottomLineColor)
 
-    // 下拉按钮颜色属性
-    Q_PROPERTY_CREATE_D(QColor, LightDropdownBgColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDropdownBgColor)
-    Q_PROPERTY_CREATE_D(QColor, LightDropdownHoverColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDropdownHoverColor)
-    Q_PROPERTY_CREATE_D(QColor, LightDropdownPressColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDropdownPressColor)
-    Q_PROPERTY_CREATE_D(QColor, LightDropdownDisabledColor)
-    Q_PROPERTY_CREATE_D(QColor, DarkDropdownDisabledColor)
+    Q_PROPERTY_CREATE_D(QColor, LightDropdownButtonBgColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkDropdownButtonBgColor)
+    Q_PROPERTY_CREATE_D(QColor, LightDropdownButtonHoverColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkDropdownButtonHoverColor)
+    Q_PROPERTY_CREATE_D(QColor, LightDropdownButtonPressColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkDropdownButtonPressColor)
+    Q_PROPERTY_CREATE_D(QColor, LightDropdownButtonDisabledColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkDropdownButtonDisabledColor)
 
     Q_PROPERTY_CREATE_D(QColor, LightSelectionBackgroundColor)
     Q_PROPERTY_CREATE_D(QColor, DarkSelectionBackgroundColor)
     Q_PROPERTY_CREATE_D(QColor, LightSelectionTextColor)
     Q_PROPERTY_CREATE_D(QColor, DarkSelectionTextColor)
 
-    // 边框属性
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
 
@@ -63,7 +61,6 @@ class NComboBoxPrivate : public QObject, public NComboBoxStyleInterface {
 
     NComboBoxStyle* _comboBoxStyle{nullptr};
 
-    // NComboBoxStyleInterface实现
     QColor backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const override;
     QColor borderColorForState(bool isDark, bool isEnabled) const override;
     QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const override;

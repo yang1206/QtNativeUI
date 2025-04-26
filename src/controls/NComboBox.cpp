@@ -37,14 +37,14 @@ Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkBorderDisabledColor)
 Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightBottomLineColor)
 Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkBottomLineColor)
 
-Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightDropdownBgColor)
-Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkDropdownBgColor)
-Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightDropdownHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkDropdownHoverColor)
-Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightDropdownPressColor)
-Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkDropdownPressColor)
-Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightDropdownDisabledColor)
-Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkDropdownDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightDropdownButtonBgColor)
+Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkDropdownButtonBgColor)
+Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightDropdownButtonHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkDropdownButtonHoverColor)
+Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightDropdownButtonPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkDropdownButtonPressColor)
+Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightDropdownButtonDisabledColor)
+Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkDropdownButtonDisabledColor)
 
 Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightSelectionBackgroundColor)
 Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, DarkSelectionBackgroundColor)
@@ -89,20 +89,20 @@ void NComboBox::init() {
     d->_pLightTextDisabledColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
     d->_pDarkTextDisabledColor  = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Dark);
 
-    d->_pLightBottomLineColor = QColor(0x86, 0x86, 0x86);
-    d->_pDarkBottomLineColor  = QColor(0x9A, 0x9A, 0x9A);
-
-    d->_pLightDropdownBgColor       = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);
-    d->_pDarkDropdownBgColor        = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark);
-    d->_pLightDropdownHoverColor    = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light);
-    d->_pDarkDropdownHoverColor     = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Dark);
-    d->_pLightDropdownPressColor    = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);
-    d->_pDarkDropdownPressColor     = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark);
-    d->_pLightDropdownDisabledColor = NThemeColor(NFluentColorKey::SubtleFillColorDisabled, NThemeType::Light);
-    d->_pDarkDropdownDisabledColor  = NThemeColor(NFluentColorKey::SubtleFillColorDisabled, NThemeType::Dark);
+    d->_pLightDropdownButtonBgColor    = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);
+    d->_pDarkDropdownButtonBgColor     = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark);
+    d->_pLightDropdownButtonHoverColor = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light);
+    d->_pDarkDropdownButtonHoverColor  = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Dark);
+    d->_pLightDropdownButtonPressColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light);
+    d->_pDarkDropdownButtonPressColor  = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark);
+    d->_pLightDropdownButtonDisabledColor = NThemeColor(NFluentColorKey::SubtleFillColorDisabled, NThemeType::Light);
+    d->_pDarkDropdownButtonDisabledColor  = NThemeColor(NFluentColorKey::SubtleFillColorDisabled, NThemeType::Dark);
 
     d->_pLightSelectionBackgroundColor = nTheme->accentColor().normal();
     d->_pDarkSelectionBackgroundColor  = nTheme->accentColor().normal();
+
+    d->_pLightBottomLineColor = QColor(0x86, 0x86, 0x86);
+    d->_pDarkBottomLineColor  = QColor(0x9A, 0x9A, 0x9A);
 
     bool useDarkTextOnLight = d->_pLightSelectionBackgroundColor.lightnessF() > 0.5;
     bool useDarkTextOnDark  = d->_pDarkSelectionBackgroundColor.lightnessF() > 0.5;
@@ -204,7 +204,7 @@ void NComboBox::showPopup() {
             fixedSizeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
             QPropertyAnimation* viewPosAnimation = new QPropertyAnimation(view(), "pos");
-            connect(viewPosAnimation, &QPropertyAnimation::finished, this, [=]() {
+            connect(viewPosAnimation, &QPropertyAnimation::finished, this, [this, d, layout]() {
                 d->_isDropdownVisible = true;
                 layout->addWidget(view());
             });

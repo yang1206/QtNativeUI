@@ -37,13 +37,13 @@ QColor NComboBoxPrivate::bottomLineColorForState(bool isDark, bool isEnabled, bo
 QColor
 NComboBoxPrivate::dropdownButtonBackgroundColor(bool isDark, bool isEnabled, bool isHovered, bool isPressed) const {
     if (!isEnabled) {
-        return isDark ? _pDarkDropdownDisabledColor : _pLightDropdownDisabledColor;
+        return isDark ? _pDarkDropdownButtonDisabledColor : _pLightDropdownButtonDisabledColor;
     } else if (isPressed) {
-        return isDark ? _pDarkDropdownPressColor : _pLightDropdownPressColor;
+        return isDark ? _pDarkDropdownButtonPressColor : _pLightDropdownButtonPressColor;
     } else if (isHovered) {
-        return isDark ? _pDarkDropdownHoverColor : _pLightDropdownHoverColor;
+        return isDark ? _pDarkDropdownButtonHoverColor : _pLightDropdownButtonHoverColor;
     } else {
-        return isDark ? _pDarkDropdownBgColor : _pLightDropdownBgColor;
+        return isDark ? _pDarkDropdownButtonBgColor : _pLightDropdownButtonBgColor;
     }
 }
 

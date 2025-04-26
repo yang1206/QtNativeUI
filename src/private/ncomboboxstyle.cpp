@@ -14,9 +14,8 @@ void NComboBoxStyle::drawPrimitive(PrimitiveElement    element,
                                    const QStyleOption* option,
                                    QPainter*           painter,
                                    const QWidget*      widget) const {
-    // 完全阻止绘制焦点框
     if (element == PE_FrameFocusRect && qobject_cast<const NComboBox*>(widget)) {
-        return; // 不绘制任何内容
+        return;
     }
 
     QProxyStyle::drawPrimitive(element, option, painter, widget);
@@ -37,7 +36,6 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         QRect editRect  = subControlRect(control, comboOpt, SC_ComboBoxEditField, widget);
         QRect arrowRect = subControlRect(control, comboOpt, SC_ComboBoxArrow, widget);
 
-        // 添加阴影边距
         QRect foregroundRect(frameRect.x() + m_styleInterface->shadowBorderWidth(),
                              frameRect.y() + m_styleInterface->shadowBorderWidth(),
                              frameRect.width() - 2 * m_styleInterface->shadowBorderWidth(),
@@ -53,23 +51,19 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         bool isPressed    = comboOpt->state & QStyle::State_Sunken;
         bool isArrowHover = (comboOpt->activeSubControls & SC_ComboBoxArrow) && hasHover;
 
-        // 绘制背景
         QColor bgColor = m_styleInterface->backgroundColorForState(isDark, isEnabled, hasFocus, hasHover);
         painter->setPen(Qt::NoPen);
         painter->setBrush(bgColor);
         painter->drawRoundedRect(foregroundRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
-        // 绘制边框
         QColor borderColor = m_styleInterface->borderColorForState(isDark, isEnabled);
         painter->setPen(QPen(borderColor, m_styleInterface->borderWidth()));
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(foregroundRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
-        // 绘制底边线
         QColor bottomLineColor = m_styleInterface->bottomLineColorForState(isDark, isEnabled, hasFocus);
         int    bottomLineWidth = m_styleInterface->bottomLineWidth(hasFocus);
 
-        // 使用裁剪区域绘制底边线
         int          bottomRectHeight = bottomLineWidth + m_styleInterface->borderRadius() / 2;
         QRect        bottomRect       = foregroundRect;
         QPainterPath clipPath;
@@ -82,22 +76,19 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         painter->restore();
         painter->save();
 
-        // 绘制箭头按钮区域
         QColor arrowBgColor =
             m_styleInterface->dropdownButtonBackgroundColor(isDark, isEnabled, isArrowHover, isPressed);
 
         painter->setPen(Qt::NoPen);
         painter->setBrush(arrowBgColor);
 
-        // 创建一个圆角矩形，右侧与ComboBox对齐
-        QRect arrowBgRect = arrowRect.adjusted(0, 4, -4, -4);
+        QRect arrowBgRect = arrowRect.adjusted(0, 4, 0, -4);
         painter->drawRoundedRect(arrowBgRect, 4, 4);
 
-        // 绘制箭头图标
         QIcon arrowIcon =
-            nIcon->fromRegular(m_styleInterface->isDropdownVisible() ? NRegularIconType::ChevronUp16Regular
-                                                                     : NRegularIconType::ChevronDown16Regular,
-                               12);
+            nIcon->fromRegular(m_styleInterface->isDropdownVisible() ? NRegularIconType::ChevronUp12Regular
+                                                                     : NRegularIconType::ChevronDown12Regular,
+                               10);
 
         arrowIcon.paint(painter, arrowRect, Qt::AlignCenter, isEnabled ? QIcon::Normal : QIcon::Disabled);
 
@@ -127,7 +118,6 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
 
         painter->restore();
 
-        // 绘制当前文本 (对于非editable的combobox)
         if (!comboOpt->editable) {
             QRect   contentRect = editRect.adjusted(4, 0, -4, 0);
             QString text        = comboOpt->currentText;
@@ -148,6 +138,7 @@ void NComboBoxStyle::drawControl(ControlElement      element,
     if (element == CE_ShapedFrame) {
         if (widget->objectName() == "NComboBoxContainer") {
             int   _shadowBorderWidth = 6;
+            int   borderRadius       = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
             QRect viewRect           = option->rect;
             painter->save();
             painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
@@ -158,7 +149,7 @@ void NComboBoxStyle::drawControl(ControlElement      element,
                                  viewRect.height() - _shadowBorderWidth);
             painter->setPen(NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, nTheme->themeMode()));
             painter->setBrush(NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, nTheme->themeMode()));
-            painter->drawRoundedRect(foregroundRect, 3, 3);
+            painter->drawRoundedRect(foregroundRect, borderRadius, borderRadius);
             painter->restore();
         }
         return;
@@ -188,7 +179,8 @@ void NComboBoxStyle::drawControl(ControlElement      element,
                 }
                 // 选中Mark
                 painter->setPen(Qt::NoPen);
-                painter->setBrush(nTheme->isDarkMode() ? nTheme->accentColor().dark() : nTheme->accentColor().light());
+                painter->setBrush(nTheme->isDarkMode() ? nTheme->accentColor().lighter()
+                                                       : nTheme->accentColor().darker());
                 painter->drawRoundedRect(QRectF(optionRect.x() + 3,
                                                 optionRect.y() + optionRect.height() * 0.2,
                                                 3,
@@ -201,7 +193,6 @@ void NComboBoxStyle::drawControl(ControlElement      element,
                     painter->drawPath(path);
                 }
             }
-            // 文字绘制
             painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, nTheme->themeMode()));
             painter->drawText(
                 QRect(option->rect.x() + 15, option->rect.y(), option->rect.width() - 15, option->rect.height()),
@@ -242,7 +233,7 @@ QRect NComboBoxStyle::subControlRect(ComplexControl             cc,
 
         QRect comboRect  = opt->rect;
         int   margin     = 4;
-        int   arrowWidth = comboRect.height() - 2 * margin;
+        int   arrowWidth = comboRect.height() - 4 * margin;
 
         switch (sc) {
             case SC_ComboBoxFrame:

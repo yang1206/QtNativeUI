@@ -35,14 +35,14 @@ class QTNATIVEUI_EXPORT NComboBox : public QComboBox {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBottomLineColor)
 
     // 下拉按钮颜色属性
-    Q_PROPERTY_CREATE_Q_H(QColor, LightDropdownBgColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, DarkDropdownBgColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, LightDropdownHoverColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, DarkDropdownHoverColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, LightDropdownPressColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, DarkDropdownPressColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, LightDropdownDisabledColor)
-    Q_PROPERTY_CREATE_Q_H(QColor, DarkDropdownDisabledColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightDropdownButtonBgColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkDropdownButtonBgColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightDropdownButtonHoverColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkDropdownButtonHoverColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightDropdownButtonPressColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkDropdownButtonPressColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, LightDropdownButtonDisabledColor)
+    Q_PROPERTY_CREATE_Q_H(QColor, DarkDropdownButtonDisabledColor)
 
     // 选中项颜色
     Q_PROPERTY_CREATE_Q_H(QColor, LightSelectionBackgroundColor)

@@ -9,7 +9,6 @@ class NComboBoxStyleInterface {
   public:
     virtual ~NComboBoxStyleInterface() {}
 
-    // 文本框部分颜色
     virtual QColor backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const         = 0;
     virtual QColor borderColorForState(bool isDark, bool isEnabled) const                                           = 0;
     virtual QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const                        = 0;
@@ -39,8 +38,10 @@ class NComboBoxStyle : public QProxyStyle {
                             const QStyleOptionComplex* option,
                             QPainter*                  painter,
                             const QWidget*             widget = nullptr) const override;
-    void
-    drawControl(ControlElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const;
+    void drawControl(ControlElement      element,
+                     const QStyleOption* option,
+                     QPainter*           painter,
+                     const QWidget*      widget) const override;
 
     QRect subControlRect(ComplexControl             cc,
                          const QStyleOptionComplex* opt,
