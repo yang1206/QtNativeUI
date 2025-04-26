@@ -177,6 +177,7 @@ void NComboBox::showPopup() {
     bool oldAnimationEffects = qApp->isEffectEnabled(Qt::UI_AnimateCombo);
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, false);
     QComboBox::showPopup();
+    d->_isDropdownVisible = true;
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, oldAnimationEffects);
     if (count() > 0) {
         QWidget* container = this->findChild<QFrame*>();
@@ -205,7 +206,6 @@ void NComboBox::showPopup() {
 
             QPropertyAnimation* viewPosAnimation = new QPropertyAnimation(view(), "pos");
             connect(viewPosAnimation, &QPropertyAnimation::finished, this, [this, d, layout]() {
-                d->_isDropdownVisible = true;
                 layout->addWidget(view());
             });
             QPoint viewPos = view()->pos();

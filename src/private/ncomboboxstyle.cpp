@@ -85,10 +85,7 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         QRect arrowBgRect = arrowRect.adjusted(0, 4, 0, -4);
         painter->drawRoundedRect(arrowBgRect, 4, 4);
 
-        QIcon arrowIcon =
-            nIcon->fromRegular(m_styleInterface->isDropdownVisible() ? NRegularIconType::ChevronUp12Regular
-                                                                     : NRegularIconType::ChevronDown12Regular,
-                               10);
+        QIcon arrowIcon = nIcon->fromRegular(NRegularIconType::ChevronDown12Regular, 10);
 
         arrowIcon.paint(painter, arrowRect, Qt::AlignCenter, isEnabled ? QIcon::Normal : QIcon::Disabled);
 
@@ -138,16 +135,16 @@ void NComboBoxStyle::drawControl(ControlElement      element,
     if (element == CE_ShapedFrame) {
         if (widget->objectName() == "NComboBoxContainer") {
             int   _shadowBorderWidth = 6;
-            int   borderRadius       = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+            int   borderRadius       = NDesignToken(NDesignTokenKey::CornerRadiusMedium).toInt();
             QRect viewRect           = option->rect;
             painter->save();
             painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-            nTheme->drawEffectShadow(painter, viewRect, _shadowBorderWidth, 6, NDesignTokenKey::ElevationFlyout);
+            // nTheme->drawEffectShadow(painter, viewRect, _shadowBorderWidth, 6, NDesignTokenKey::ElevationFlyout);
             QRect foregroundRect(viewRect.x() + _shadowBorderWidth,
                                  viewRect.y(),
                                  viewRect.width() - 2 * _shadowBorderWidth,
                                  viewRect.height() - _shadowBorderWidth);
-            painter->setPen(NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, nTheme->themeMode()));
+            painter->setPen(NThemeColor(NFluentColorKey::ControlStrokeColorSecondary, nTheme->themeMode()));
             painter->setBrush(NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, nTheme->themeMode()));
             painter->drawRoundedRect(foregroundRect, borderRadius, borderRadius);
             painter->restore();
@@ -168,16 +165,8 @@ void NComboBoxStyle::drawControl(ControlElement      element,
 #endif
             path.addRoundedRect(optionRect, 5, 5);
             if (option->state & QStyle::State_Selected) {
-                if (option->state & QStyle::State_MouseOver) {
-                    // 选中时覆盖
-                    painter->setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, nTheme->themeMode()));
-                    painter->drawPath(path);
-                } else {
-                    // 选中
-                    painter->setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, nTheme->themeMode()));
-                    painter->drawPath(path);
-                }
-                // 选中Mark
+                painter->setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, nTheme->themeMode()));
+                painter->drawPath(path);
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(nTheme->isDarkMode() ? nTheme->accentColor().lighter()
                                                        : nTheme->accentColor().darker());
@@ -195,7 +184,7 @@ void NComboBoxStyle::drawControl(ControlElement      element,
             }
             painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, nTheme->themeMode()));
             painter->drawText(
-                QRect(option->rect.x() + 15, option->rect.y(), option->rect.width() - 15, option->rect.height()),
+                QRect(option->rect.x() + 20, option->rect.y(), option->rect.width() - 20, option->rect.height()),
                 Qt::AlignVCenter,
                 vopt->text);
             painter->restore();
