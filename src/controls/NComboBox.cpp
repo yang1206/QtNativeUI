@@ -141,9 +141,7 @@ void NComboBox::init() {
         }
         layout->addWidget(view());
         layout->setContentsMargins(6, 0, 6, 6);
-#ifndef Q_OS_WIN
         container->setStyleSheet("background-color:transparent;");
-#endif
     }
     QComboBox::setMaxVisibleItems(5);
 
