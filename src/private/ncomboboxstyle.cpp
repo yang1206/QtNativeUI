@@ -27,8 +27,6 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
                                         QPainter*                  painter,
                                         const QWidget*             widget) const {
     if (control == CC_ComboBox && qobject_cast<const NComboBox*>(widget)) {
-        // 稍后实现绘制逻辑
-        // ncomboboxstyle.cpp (继续)
         const QStyleOptionComboBox* comboOpt = qstyleoption_cast<const QStyleOptionComboBox*>(option);
         if (!comboOpt) {
             QProxyStyle::drawComplexControl(control, option, painter, widget);
@@ -147,21 +145,85 @@ void NComboBoxStyle::drawControl(ControlElement      element,
                                  const QStyleOption* option,
                                  QPainter*           painter,
                                  const QWidget*      widget) const {
-    if (qobject_cast<const NComboBox*>(widget)) {
-        if (element == CE_ComboBoxLabel) {
-            const QStyleOptionComboBox* comboOpt = qstyleoption_cast<const QStyleOptionComboBox*>(option);
-            if (comboOpt) {
-                QRect  editRect    = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
-                QRect  contentRect = editRect.adjusted(4, 0, -4, 0);
-                bool   isDark      = m_styleInterface->isDarkMode();
-                bool   isEnabled   = comboOpt->state & QStyle::State_Enabled;
-                QColor textColor   = m_styleInterface->textColorForState(isDark, isEnabled);
-                painter->save();
-                painter->setPen(textColor);
-                painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, comboOpt->currentText);
-                painter->restore();
-                return;
+    if (element == CE_ShapedFrame) {
+        if (widget->objectName() == "NComboBoxContainer") {
+            int   _shadowBorderWidth = 6;
+            QRect viewRect           = option->rect;
+            painter->save();
+            painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+            nTheme->drawEffectShadow(painter, viewRect, _shadowBorderWidth, 6, NDesignTokenKey::ElevationFlyout);
+            QRect foregroundRect(viewRect.x() + _shadowBorderWidth,
+                                 viewRect.y(),
+                                 viewRect.width() - 2 * _shadowBorderWidth,
+                                 viewRect.height() - _shadowBorderWidth);
+            painter->setPen(NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, nTheme->themeMode()));
+            painter->setBrush(NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, nTheme->themeMode()));
+            painter->drawRoundedRect(foregroundRect, 3, 3);
+            painter->restore();
+        }
+        return;
+    }
+    if (element == CE_ItemViewItem) {
+        if (const QStyleOptionViewItem* vopt = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
+            int margin = 2;
+            painter->save();
+            painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+            painter->setPen(Qt::NoPen);
+            QPainterPath path;
+            QRect        optionRect = option->rect;
+            optionRect.adjust(margin, margin, -margin, -margin);
+#ifndef Q_OS_WIN
+            optionRect.adjust(6, 0, -6, 0);
+#endif
+            path.addRoundedRect(optionRect, 5, 5);
+            if (option->state & QStyle::State_Selected) {
+                if (option->state & QStyle::State_MouseOver) {
+                    // 选中时覆盖
+                    painter->setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, nTheme->themeMode()));
+                    painter->drawPath(path);
+                } else {
+                    // 选中
+                    painter->setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, nTheme->themeMode()));
+                    painter->drawPath(path);
+                }
+                // 选中Mark
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(nTheme->isDarkMode() ? nTheme->accentColor().dark() : nTheme->accentColor().light());
+                painter->drawRoundedRect(QRectF(optionRect.x() + 3,
+                                                optionRect.y() + optionRect.height() * 0.2,
+                                                3,
+                                                optionRect.height() - +optionRect.height() * 0.4),
+                                         2,
+                                         2);
+            } else {
+                if (option->state & QStyle::State_MouseOver) {
+                    painter->setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, nTheme->themeMode()));
+                    painter->drawPath(path);
+                }
             }
+            // 文字绘制
+            painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, nTheme->themeMode()));
+            painter->drawText(
+                QRect(option->rect.x() + 15, option->rect.y(), option->rect.width() - 15, option->rect.height()),
+                Qt::AlignVCenter,
+                vopt->text);
+            painter->restore();
+        }
+        return;
+    }
+    if (element == CE_ComboBoxLabel) {
+        const QStyleOptionComboBox* comboOpt = qstyleoption_cast<const QStyleOptionComboBox*>(option);
+        if (comboOpt) {
+            QRect  editRect    = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
+            QRect  contentRect = editRect.adjusted(4, 0, -4, 0);
+            bool   isDark      = m_styleInterface->isDarkMode();
+            bool   isEnabled   = comboOpt->state & QStyle::State_Enabled;
+            QColor textColor   = m_styleInterface->textColorForState(isDark, isEnabled);
+            painter->save();
+            painter->setPen(textColor);
+            painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, comboOpt->currentText);
+            painter->restore();
+            return;
         }
     }
 
@@ -244,6 +306,11 @@ QSize NComboBoxStyle::sizeFromContents(ContentsType        type,
                                        const QStyleOption* option,
                                        const QSize&        size,
                                        const QWidget*      widget) const {
+    if (type == CT_ItemViewItem) {
+        QSize itemSize = QProxyStyle::sizeFromContents(type, option, size, widget);
+        itemSize.setHeight(35);
+        return itemSize;
+    }
     if (type == CT_ComboBox && qobject_cast<const NComboBox*>(widget)) {
         QSize newSize = QProxyStyle::sizeFromContents(type, option, size, widget);
         newSize.setHeight(qMax(newSize.height(), 35)); // 最小高度

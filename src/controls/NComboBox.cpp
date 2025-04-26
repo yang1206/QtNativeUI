@@ -1,12 +1,18 @@
+#include <QApplication>
 #include <QClipboard>
 #include <QGuiApplication>
+#include <QLayout>
 #include <QLineEdit>
+#include <QListView>
+#include <QPropertyAnimation>
 #include <QStyleOptionComboBox>
 #include <QtNativeUI/NComboBox.h>
 #include <qevent.h>
+
 #include "../private/ncombobox_p.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NMenu.h"
+#include "QtNativeUI/NScrollBar.h"
 #include "QtNativeUI/NTheme.h"
 
 Q_PROPERTY_CREATE_Q_CPP(NComboBox, QColor, LightBackgroundColor)
@@ -107,24 +113,40 @@ void NComboBox::init() {
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
 
-    // 设置样式
     d->_comboBoxStyle = new NComboBoxStyle(d, style());
     setStyle(d->_comboBoxStyle);
 
     setObjectName("NComboBox");
-
-    if (isEditable()) {
-        lineEdit()->setStyleSheet("border: none; background-color: transparent;");
-    }
-
-    setMouseTracking(true);
-    setAttribute(Qt::WA_Hover);
-    setFocusPolicy(Qt::StrongFocus);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
-
     setMinimumHeight(35);
 
-    // 连接主题变化信号
+    setView(new QListView(this));
+    QAbstractItemView* comboBoxView = this->view();
+    comboBoxView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    NScrollBar* scrollBar = new NScrollBar(this);
+    comboBoxView->setVerticalScrollBar(scrollBar);
+    comboBoxView->setAutoScroll(false);
+    comboBoxView->setSelectionMode(QAbstractItemView::NoSelection);
+    comboBoxView->setObjectName("NComboBoxView");
+    comboBoxView->setStyleSheet("#NComboBoxView{background-color:transparent;}");
+    comboBoxView->setStyle(d->_comboBoxStyle);
+    QWidget* container = this->findChild<QFrame*>();
+    if (container) {
+        container->setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
+        container->setAttribute(Qt::WA_TranslucentBackground);
+        container->setObjectName("NComboBoxContainer");
+        container->setStyle(d->_comboBoxStyle);
+        QLayout* layout = container->layout();
+        while (layout->count()) {
+            layout->takeAt(0);
+        }
+        layout->addWidget(view());
+        layout->setContentsMargins(6, 0, 6, 6);
+#ifndef Q_OS_WIN
+        container->setStyleSheet("background-color:transparent;");
+#endif
+    }
+    QComboBox::setMaxVisibleItems(5);
+
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NComboBox);
         d->_themeMode = themeMode;
@@ -132,7 +154,6 @@ void NComboBox::init() {
         update();
     });
 
-    // 连接强调色变化信号
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor& accentColor) {
         Q_D(NComboBox);
 
@@ -153,9 +174,48 @@ QLineEdit* NComboBox::getLineEdit() const { return lineEdit(); }
 
 void NComboBox::showPopup() {
     Q_D(NComboBox);
-    d->_isDropdownVisible = true;
+    bool oldAnimationEffects = qApp->isEffectEnabled(Qt::UI_AnimateCombo);
+    qApp->setEffectEnabled(Qt::UI_AnimateCombo, false);
     QComboBox::showPopup();
-    update();
+    qApp->setEffectEnabled(Qt::UI_AnimateCombo, oldAnimationEffects);
+    if (count() > 0) {
+        QWidget* container = this->findChild<QFrame*>();
+        if (container) {
+            int containerHeight = 0;
+            if (count() >= maxVisibleItems()) {
+                containerHeight = maxVisibleItems() * 35 + 8;
+            } else {
+                containerHeight = count() * 35 + 8;
+            }
+            view()->resize(view()->width(), containerHeight - 8);
+            container->move(container->x(), container->y() + 3);
+            QLayout* layout = container->layout();
+            while (layout->count()) {
+                layout->takeAt(0);
+            }
+            QPropertyAnimation* fixedSizeAnimation = new QPropertyAnimation(container, "maximumHeight");
+            connect(fixedSizeAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
+                container->setFixedHeight(value.toUInt());
+            });
+            fixedSizeAnimation->setStartValue(1);
+            fixedSizeAnimation->setEndValue(containerHeight);
+            fixedSizeAnimation->setEasingCurve(QEasingCurve::OutCubic);
+            fixedSizeAnimation->setDuration(400);
+            fixedSizeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+
+            QPropertyAnimation* viewPosAnimation = new QPropertyAnimation(view(), "pos");
+            connect(viewPosAnimation, &QPropertyAnimation::finished, this, [=]() {
+                d->_isDropdownVisible = true;
+                layout->addWidget(view());
+            });
+            QPoint viewPos = view()->pos();
+            viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() - view()->height()));
+            viewPosAnimation->setEndValue(viewPos);
+            viewPosAnimation->setEasingCurve(QEasingCurve::OutCubic);
+            viewPosAnimation->setDuration(400);
+            viewPosAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+        }
+    }
 }
 
 void NComboBox::hidePopup() {
