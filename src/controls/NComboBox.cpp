@@ -174,24 +174,46 @@ void NComboBox::showPopup() {
     Q_D(NComboBox);
     bool oldAnimationEffects = qApp->isEffectEnabled(Qt::UI_AnimateCombo);
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, false);
+
+    // 调用父类方法前先设置一些样式，以避免箭头显示
+    QWidget* container = findChild<QFrame*>();
+    if (container) {
+        container->setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
+        container->setAttribute(Qt::WA_TranslucentBackground);
+        container->setObjectName("NComboBoxContainer");
+        container->setStyle(d->_comboBoxStyle);
+    }
+
     QComboBox::showPopup();
     d->_isDropdownVisible = true;
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, oldAnimationEffects);
+
     if (count() > 0) {
         QWidget* container = this->findChild<QFrame*>();
         if (container) {
+            // 确保容器使用我们的样式
+            container->setObjectName("NComboBoxContainer");
+            container->setStyle(d->_comboBoxStyle);
+            container->setStyleSheet("background-color:transparent;");
+
+            // 计算容器高度
             int containerHeight = 0;
             if (count() >= maxVisibleItems()) {
                 containerHeight = maxVisibleItems() * 35 + 8;
             } else {
                 containerHeight = count() * 35 + 8;
             }
+
             view()->resize(view()->width(), containerHeight - 8);
             container->move(container->x(), container->y() + 3);
+
+            // 移除所有控件，包括可能的默认箭头控件
             QLayout* layout = container->layout();
-            while (layout->count()) {
+            while (layout && layout->count()) {
                 layout->takeAt(0);
             }
+
+            // 设置高度动画
             QPropertyAnimation* fixedSizeAnimation = new QPropertyAnimation(container, "maximumHeight");
             connect(fixedSizeAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
                 container->setFixedHeight(value.toUInt());
@@ -202,9 +224,16 @@ void NComboBox::showPopup() {
             fixedSizeAnimation->setDuration(400);
             fixedSizeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
+            // 设置视图位置动画
             QPropertyAnimation* viewPosAnimation = new QPropertyAnimation(view(), "pos");
             connect(viewPosAnimation, &QPropertyAnimation::finished, this, [this, d, layout]() {
                 layout->addWidget(view());
+
+                // 再次确保没有默认箭头
+                QWidget* container = findChild<QFrame*>();
+                if (container) {
+                    container->setStyleSheet("background-color:transparent;");
+                }
             });
             QPoint viewPos = view()->pos();
             viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() - view()->height()));
@@ -218,9 +247,9 @@ void NComboBox::showPopup() {
 
 void NComboBox::hidePopup() {
     Q_D(NComboBox);
-    d->_isDropdownVisible = false;
+
     QComboBox::hidePopup();
-    update();
+    d->_isDropdownVisible = false;
 }
 
 void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
@@ -230,7 +259,6 @@ void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
         return;
     }
 
-    // 对于可编辑的ComboBox，创建自定义菜单
     NMenu* menu = new NMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     QAction* action = nullptr;

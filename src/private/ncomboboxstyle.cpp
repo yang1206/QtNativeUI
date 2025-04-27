@@ -50,6 +50,7 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         bool hasHover     = comboOpt->state & QStyle::State_MouseOver;
         bool isPressed    = comboOpt->state & QStyle::State_Sunken;
         bool isArrowHover = (comboOpt->activeSubControls & SC_ComboBoxArrow) && hasHover;
+        bool isEditable   = comboOpt->editable;
 
         QColor bgColor = m_styleInterface->backgroundColorForState(isDark, isEnabled, hasFocus, hasHover);
         painter->setPen(Qt::NoPen);
@@ -61,17 +62,20 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(foregroundRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
-        QColor bottomLineColor = m_styleInterface->bottomLineColorForState(isDark, isEnabled, hasFocus);
-        int    bottomLineWidth = m_styleInterface->bottomLineWidth(hasFocus);
+        if (!isPressed || isEditable) {
+            QColor bottomLineColor =
+                m_styleInterface->bottomLineColorForState(isDark, isEnabled, hasFocus && isEditable);
+            int bottomLineWidth = m_styleInterface->bottomLineWidth(hasFocus && isEditable);
 
-        int          bottomRectHeight = bottomLineWidth + m_styleInterface->borderRadius() / 2;
-        QRect        bottomRect       = foregroundRect;
-        QPainterPath clipPath;
-        clipPath.addRect(
-            QRect(0, foregroundRect.bottom() - bottomRectHeight + 4, widget->width(), bottomRectHeight * 2));
-        painter->setClipPath(clipPath);
-        painter->setPen(QPen(bottomLineColor, bottomLineWidth));
-        painter->drawRoundedRect(bottomRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
+            int          bottomRectHeight = bottomLineWidth + m_styleInterface->borderRadius() / 2;
+            QRect        bottomRect       = foregroundRect;
+            QPainterPath clipPath;
+            clipPath.addRect(
+                QRect(0, foregroundRect.bottom() - bottomRectHeight + 4, widget->width(), bottomRectHeight * 2));
+            painter->setClipPath(clipPath);
+            painter->setPen(QPen(bottomLineColor, bottomLineWidth));
+            painter->drawRoundedRect(bottomRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
+        }
 
         painter->restore();
         painter->save();
@@ -85,11 +89,18 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         QRect arrowBgRect = arrowRect.adjusted(0, 4, 0, -4);
         painter->drawRoundedRect(arrowBgRect, 4, 4);
 
+        painter->save();
+
+        int yOffset = isPressed ? 2 : 0;
+
+        QRect pressedArrowRect = arrowRect.adjusted(0, yOffset, 0, yOffset);
+
         QIcon arrowIcon = nIcon->fromRegular(NRegularIconType::ChevronDown12Regular, 10);
 
-        arrowIcon.paint(painter, arrowRect, Qt::AlignCenter, isEnabled ? QIcon::Normal : QIcon::Disabled);
+        arrowIcon.paint(painter, pressedArrowRect, Qt::AlignCenter, isEnabled ? QIcon::Normal : QIcon::Disabled);
 
-        // 设置文字颜色
+        painter->restore();
+
         QColor textColor          = m_styleInterface->textColorForState(isDark, isEnabled);
         QColor selectionBgColor   = m_styleInterface->selectionBackgroundColor(isDark);
         QColor selectionTextColor = m_styleInterface->selectionTextColor(isDark);
@@ -139,7 +150,6 @@ void NComboBoxStyle::drawControl(ControlElement      element,
             QRect viewRect           = option->rect;
             painter->save();
             painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-            // nTheme->drawEffectShadow(painter, viewRect, _shadowBorderWidth, 6, NDesignTokenKey::ElevationFlyout);
             QRect foregroundRect(viewRect.x() + _shadowBorderWidth,
                                  viewRect.y(),
                                  viewRect.width() - 2 * _shadowBorderWidth,
@@ -151,6 +161,7 @@ void NComboBoxStyle::drawControl(ControlElement      element,
         }
         return;
     }
+
     if (element == CE_ItemViewItem) {
         if (const QStyleOptionViewItem* vopt = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
             int margin = 2;
@@ -191,18 +202,23 @@ void NComboBoxStyle::drawControl(ControlElement      element,
         }
         return;
     }
-    if (element == CE_ComboBoxLabel) {
-        const QStyleOptionComboBox* comboOpt = qstyleoption_cast<const QStyleOptionComboBox*>(option);
-        if (comboOpt) {
-            QRect  editRect    = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
-            QRect  contentRect = editRect.adjusted(4, 0, -4, 0);
-            bool   isDark      = m_styleInterface->isDarkMode();
-            bool   isEnabled   = comboOpt->state & QStyle::State_Enabled;
-            QColor textColor   = m_styleInterface->textColorForState(isDark, isEnabled);
-            painter->save();
-            painter->setPen(textColor);
-            painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, comboOpt->currentText);
-            painter->restore();
+    if (element == CE_ComboBoxLabel || element == CE_PushButtonBevel) {
+        if (qobject_cast<const NComboBox*>(widget)) {
+            if (element == CE_ComboBoxLabel) {
+                const QStyleOptionComboBox* comboOpt = qstyleoption_cast<const QStyleOptionComboBox*>(option);
+                if (comboOpt) {
+                    QRect  editRect    = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
+                    QRect  contentRect = editRect.adjusted(4, 0, -4, 0);
+                    bool   isDark      = m_styleInterface->isDarkMode();
+                    bool   isEnabled   = comboOpt->state & QStyle::State_Enabled;
+                    QColor textColor   = m_styleInterface->textColorForState(isDark, isEnabled);
+                    painter->save();
+                    painter->setPen(textColor);
+                    painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, comboOpt->currentText);
+                    painter->restore();
+                    return;
+                }
+            }
             return;
         }
     }
