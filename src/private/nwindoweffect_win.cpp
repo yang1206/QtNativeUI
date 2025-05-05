@@ -21,10 +21,12 @@ bool NWindowEffectWin::isWindows11OrGreater() {
 }
 
 void NWindowEffectWin::initWindowEffect(QWidget* window) {
-    // 设置窗口背景透明
+    // 设置窗口背景透明，但不影响子控件
     window->setAttribute(Qt::WA_TranslucentBackground);
-    window->setStyleSheet("background-color: transparent;");
-
+    QPalette pal = window->palette();
+    pal.setColor(QPalette::Window, Qt::transparent);
+    window->setPalette(pal);
+    
     // 扩展窗口框架到客户区
     const HWND hwnd = reinterpret_cast<HWND>(window->winId());
     
