@@ -26,17 +26,17 @@ void NWindowEffectWin::initWindowEffect(QWidget* window) {
     QPalette pal = window->palette();
     pal.setColor(QPalette::Window, Qt::transparent);
     window->setPalette(pal);
-    
+
     // 扩展窗口框架到客户区
     const HWND hwnd = reinterpret_cast<HWND>(window->winId());
-    
+
     // 启用DPI感知
     EnableNonClientDpiScaling(hwnd);
-    
+
     // 尝试启用现代窗口样式
-    BOOL value = TRUE;
-    DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
-    
+    // BOOL value = TRUE;
+    // DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+
     const MARGINS margins = {0, 0, 0, -1}; // -1表示整个客户区
     DwmExtendFrameIntoClientArea(hwnd, &margins);
 }
@@ -75,25 +75,21 @@ bool NWindowEffectWin::applyAcrylicEffect(QWidget* window) {
     }
 
     pfnSetWindowCompositionAttribute setWindowCompositionAttribute =
-        (pfnSetWindowCompositionAttribute)GetProcAddress(hUser, "SetWindowCompositionAttribute");
+        (pfnSetWindowCompositionAttribute) GetProcAddress(hUser, "SetWindowCompositionAttribute");
 
     if (!setWindowCompositionAttribute) {
         return false;
     }
 
     // 设置亚克力效果 - 修复颜色值问题
-    ACCENTPOLICY accent = {
-        ACCENT_ENABLE_ACRYLICBLURBEHIND,  // 亚克力模糊
-        0,
-        static_cast<int>(0x80F0F0F0),  // 使用小于INT_MAX的值
-        0
-    };
+    ACCENTPOLICY accent = {ACCENT_ENABLE_ACRYLICBLURBEHIND, // 亚克力模糊
+                           0,
+                           static_cast<int>(0x80F0F0F0), // 使用小于INT_MAX的值
+                           0};
 
-    WINCOMPATTRDATA data = {
-        19,  // WCA_ACCENT_POLICY
-        &accent,
-        sizeof(accent)
-    };
+    WINCOMPATTRDATA data = {19, // WCA_ACCENT_POLICY
+                            &accent,
+                            sizeof(accent)};
 
     return setWindowCompositionAttribute(hwnd, &data);
 }
@@ -102,16 +98,16 @@ bool NWindowEffectWin::applyMicaEffect(QWidget* window) {
     const HWND hwnd = reinterpret_cast<HWND>(window->winId());
 
     // 尝试在Windows 10中启用Mica
-    BOOL micaEnabled = TRUE;
-    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &micaEnabled, sizeof(micaEnabled));
+    BOOL    micaEnabled = TRUE;
+    HRESULT hr          = DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &micaEnabled, sizeof(micaEnabled));
 
     if (SUCCEEDED(hr)) {
         return true;
     }
 
-    // 如果失败，尝试使用暗模式
-    BOOL darkMode = TRUE;
-    hr = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
+    // // 如果失败，尝试使用暗模式
+    // BOOL darkMode = TRUE;
+    // hr            = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
 
     if (SUCCEEDED(hr)) {
         return true;
@@ -135,14 +131,14 @@ bool NWindowEffectWin::disableWindowEffects(QWidget* window) {
         }
 
         pfnSetWindowCompositionAttribute setWindowCompositionAttribute =
-            (pfnSetWindowCompositionAttribute)GetProcAddress(hUser, "SetWindowCompositionAttribute");
+            (pfnSetWindowCompositionAttribute) GetProcAddress(hUser, "SetWindowCompositionAttribute");
 
         if (!setWindowCompositionAttribute) {
             return false;
         }
 
-        ACCENTPOLICY accent = { ACCENT_DISABLED, 0, 0, 0 };
-        WINCOMPATTRDATA data = { 19, &accent, sizeof(accent) };
+        ACCENTPOLICY    accent = {ACCENT_DISABLED, 0, 0, 0};
+        WINCOMPATTRDATA data   = {19, &accent, sizeof(accent)};
         setWindowCompositionAttribute(hwnd, &data);
     }
 
@@ -153,13 +149,13 @@ bool NWindowEffectWin::enableSnapLayout(QWidget* window, bool enable) {
     if (!isWindows11OrGreater()) {
         return false;
     }
-    
+
     const HWND hwnd = reinterpret_cast<HWND>(window->winId());
-    
+
     // Windows 11 Snap Layout
-    BOOL value = enable ? TRUE : FALSE;
-    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &value, sizeof(value));
-    
+    BOOL    value = enable ? TRUE : FALSE;
+    HRESULT hr    = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &value, sizeof(value));
+
     return SUCCEEDED(hr);
 }
 #endif // Q_OS_WIN

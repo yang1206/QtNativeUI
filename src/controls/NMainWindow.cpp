@@ -46,14 +46,6 @@ bool NMainWindow::applyBackdropEffect(BackdropType type) {
 
     if (success) {
         d->setBackdropEffect(static_cast<int>(type));
-
-        // 如果是暗黑模式效果，确保通知NTheme
-        if (type == BackdropType::Mica || (type == BackdropType::Default && getDefaultEffect() == BackdropType::Mica)) {
-            if (nTheme->themeMode() != NThemeType::ThemeMode::Dark) {
-                // 只在需要时更新主题模式
-                nTheme->setThemeMode(NThemeType::ThemeMode::Dark);
-            }
-        }
     }
 
     return success;
