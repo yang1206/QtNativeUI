@@ -1,8 +1,8 @@
 #include "QtNativeUI/NDropDownButton.h"
 #include <QEvent>
-#include <QMouseEvent>
 #include <QPainterPath>
 #include "../private/ndropdownbutton_p.h"
+#include "QtNativeUI/NAnimation.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -17,6 +17,12 @@ void NDropDownButton::init() {
     d->q_ptr = this;
 
     setShowArrow(true);
+
+    // 初始化箭头动画
+    d->_arrowAnimation = new QtNativeUI::NTranslateYAnimation(this, 3.0);
+    connect(d->_arrowAnimation, &QtNativeUI::NTranslateYAnimation::yChanged, this, [d](qreal value) {
+        d->setArrowYOffset(value);
+    });
 
     connect(this, &NPushButton::clicked, this, &NDropDownButton::showMenu);
     d->_horizontalPadding   = NDesignToken(NDesignTokenKey::SpacingL).toInt();
@@ -108,7 +114,8 @@ void NDropDownButton::drawDropDownArrow() {
         arrowX = (width() - d->_arrowSize) / 2;
     }
 
-    int arrowY = (height() - d->_arrowSize) / 2;
+    // 应用Y轴动画偏移
+    int arrowY = (height() - d->_arrowSize) / 2 + d->arrowYOffset();
 
     QRect availableRect = rect().adjusted(d->_horizontalPadding, 0, -d->_horizontalPadding, 0);
 
@@ -135,4 +142,20 @@ void NDropDownButton::changeEvent(QEvent* event) {
         update();
     }
     NPushButton::changeEvent(event);
+}
+
+void NDropDownButton::mousePressEvent(QMouseEvent* event) {
+    Q_D(NDropDownButton);
+    if (d->_arrowAnimation) {
+        d->_arrowAnimation->setY(3.0);
+    }
+    NPushButton::mousePressEvent(event);
+}
+
+void NDropDownButton::mouseReleaseEvent(QMouseEvent* event) {
+    Q_D(NDropDownButton);
+    if (d->_arrowAnimation) {
+        d->_arrowAnimation->setY(0.0);
+    }
+    NPushButton::mouseReleaseEvent(event);
 }

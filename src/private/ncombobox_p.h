@@ -1,6 +1,7 @@
 #ifndef NCOMBOBOX_P_H
 #define NCOMBOBOX_P_H
 
+#include <QtNativeUI/NAnimation.h>
 #include <QtNativeUI/NComboBox.h>
 #include "ncomboboxstyle.h"
 
@@ -49,6 +50,9 @@ class NComboBoxPrivate : public QObject, public NComboBoxStyleInterface {
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
 
+    // 添加箭头Y轴偏移属性
+    Q_PROPERTY(qreal arrowYOffset READ arrowYOffset WRITE setArrowYOffset)
+
   public:
     explicit NComboBoxPrivate(QObject* parent = nullptr);
     ~NComboBoxPrivate();
@@ -60,6 +64,16 @@ class NComboBoxPrivate : public QObject, public NComboBoxStyleInterface {
     bool                  _isDropdownVisible{false};
 
     NComboBoxStyle* _comboBoxStyle{nullptr};
+
+    QtNativeUI::NTranslateYAnimation* _arrowAnimation{nullptr};
+
+    qreal arrowYOffset() const { return _arrowYOffset; }
+    void  setArrowYOffset(qreal offset) {
+        _arrowYOffset = offset;
+        if (q_ptr) {
+            q_ptr->update();
+        }
+    }
 
     QColor backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const override;
     QColor borderColorForState(bool isDark, bool isEnabled) const override;
@@ -74,6 +88,10 @@ class NComboBoxPrivate : public QObject, public NComboBoxStyleInterface {
     bool   isDarkMode() const override;
     int    shadowBorderWidth() const override;
     bool   isDropdownVisible() const override;
+    qreal  getArrowYOffset() const override { return _arrowYOffset; } // 添加获取箭头Y偏移的方法
+
+  private:
+    qreal _arrowYOffset{0}; // 箭头Y轴偏移量
 };
 
 #endif // NCOMBOBOX_P_H

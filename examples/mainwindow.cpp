@@ -2,7 +2,6 @@
 #include <QVBoxLayout>
 #include <QtNativeUI/NTabWidget.h>
 #include "components/button.h"
-#include "components/animation.h"
 #include "components/colors.h"
 #include "components/controls.h"
 #include "components/icon.h"
@@ -32,10 +31,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     // 添加图标展示页面
     auto icons = new IconExample(this);
     m_tabWidget->addTab(icons, "Icons");
-
-    // 添加动画展示页面
-    auto animations = new AnimationExample(this);
-    m_tabWidget->addTab(animations, "Animations");
 
     // 设置窗口属性
     setWindowTitle("QtNativeUI by Yang1206");

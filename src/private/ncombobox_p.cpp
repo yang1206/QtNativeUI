@@ -1,8 +1,9 @@
 #include "ncombobox_p.h"
+#include "QtNativeUI/NAnimation.h"
 #include "QtNativeUI/NComboBox.h"
 #include "QtNativeUI/NTheme.h"
 
-NComboBoxPrivate::NComboBoxPrivate(QObject* parent) : QObject(parent) {}
+NComboBoxPrivate::NComboBoxPrivate(QObject* parent) : QObject(parent), _arrowYOffset(0) {}
 
 NComboBoxPrivate::~NComboBoxPrivate() {}
 

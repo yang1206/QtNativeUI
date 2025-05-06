@@ -86,8 +86,9 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         painter->drawRoundedRect(arrowBgRect, 4, 4);
 
         QIcon arrowIcon = nIcon->fromRegular(NRegularIconType::ChevronDown12Regular, 10);
-
-        arrowIcon.paint(painter, arrowRect, Qt::AlignCenter, isEnabled ? QIcon::Normal : QIcon::Disabled);
+        QRect arrowRectWithOffset = arrowRect;
+        arrowRectWithOffset.translate(0, m_styleInterface->getArrowYOffset());
+        arrowIcon.paint(painter, arrowRectWithOffset, Qt::AlignCenter, isEnabled ? QIcon::Normal : QIcon::Disabled);
 
         // 设置文字颜色
         QColor textColor          = m_styleInterface->textColorForState(isDark, isEnabled);

@@ -65,6 +65,8 @@ class QTNATIVEUI_EXPORT NComboBox : public QComboBox {
     void contextMenuEvent(QContextMenuEvent* event) override;
     void showPopup() override;
     void hidePopup() override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
   private:
     void init();

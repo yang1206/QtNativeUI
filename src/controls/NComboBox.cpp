@@ -4,8 +4,7 @@
 #include <QLayout>
 #include <QLineEdit>
 #include <QListView>
-#include <QPropertyAnimation>
-#include <QStyleOptionComboBox>
+#include <QtNativeUI/NAnimation.h>
 #include <QtNativeUI/NComboBox.h>
 #include <qevent.h>
 
@@ -116,6 +115,12 @@ void NComboBox::init() {
     d->_comboBoxStyle = new NComboBoxStyle(d, style());
     setStyle(d->_comboBoxStyle);
 
+    // 初始化箭头动画
+    d->_arrowAnimation = new QtNativeUI::NTranslateYAnimation(this, 3.0);
+    connect(d->_arrowAnimation, &QtNativeUI::NTranslateYAnimation::yChanged, this, [d](qreal value) {
+        d->setArrowYOffset(value);
+    });
+
     setObjectName("NComboBox");
     setMinimumHeight(35);
 
@@ -203,9 +208,8 @@ void NComboBox::showPopup() {
             fixedSizeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
             QPropertyAnimation* viewPosAnimation = new QPropertyAnimation(view(), "pos");
-            connect(viewPosAnimation, &QPropertyAnimation::finished, this, [this, d, layout]() {
-                layout->addWidget(view());
-            });
+            connect(
+                viewPosAnimation, &QPropertyAnimation::finished, this, [this, layout]() { layout->addWidget(view()); });
             QPoint viewPos = view()->pos();
             viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() - view()->height()));
             viewPosAnimation->setEndValue(viewPos);
@@ -287,4 +291,21 @@ void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
     connect(action, &QAction::triggered, lineEdit(), &QLineEdit::selectAll);
 
     menu->exec(event->globalPos());
+}
+
+// 添加鼠标事件处理函数
+void NComboBox::mousePressEvent(QMouseEvent* event) {
+    Q_D(NComboBox);
+    if (d->_arrowAnimation) {
+        d->_arrowAnimation->setY(3.0); // 按下时向下移动
+    }
+    QComboBox::mousePressEvent(event);
+}
+
+void NComboBox::mouseReleaseEvent(QMouseEvent* event) {
+    Q_D(NComboBox);
+    if (d->_arrowAnimation) {
+        d->_arrowAnimation->setY(0.0); // 释放时恢复原位
+    }
+    QComboBox::mouseReleaseEvent(event);
 }
