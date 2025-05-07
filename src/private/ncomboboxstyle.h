@@ -22,7 +22,7 @@ class NComboBoxStyleInterface {
     virtual bool   isDarkMode() const                                                                               = 0;
     virtual int    shadowBorderWidth() const                                                                        = 0;
     virtual bool   isDropdownVisible() const                                                                        = 0;
-    virtual qreal  getArrowYOffset() const { return 0; } // 添加获取箭头Y偏移的方法
+    virtual qreal  getArrowYOffset() const = 0; // 使用NTranslateYAnimation控制的Y轴偏移
 };
 
 class NComboBoxStyle : public QProxyStyle {
