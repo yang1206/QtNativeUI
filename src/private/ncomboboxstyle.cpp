@@ -17,6 +17,11 @@ void NComboBoxStyle::drawPrimitive(PrimitiveElement    element,
     if (element == PE_FrameFocusRect && qobject_cast<const NComboBox*>(widget)) {
         return;
     }
+#ifndef Q_OS_WIN
+    if (element == PE_PanelMenu || PE_IndicatorArrowDown) {
+        return;
+    }
+#endif
 
     QProxyStyle::drawPrimitive(element, option, painter, widget);
 }
@@ -309,7 +314,7 @@ QSize NComboBoxStyle::sizeFromContents(ContentsType        type,
     }
     if (type == CT_ComboBox && qobject_cast<const NComboBox*>(widget)) {
         QSize newSize = QProxyStyle::sizeFromContents(type, option, size, widget);
-        newSize.setHeight(qMax(newSize.height(), 35)); // 最小高度
+        newSize.setHeight(qMax(newSize.height(), 35));
         return newSize;
     }
 
