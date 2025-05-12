@@ -114,8 +114,9 @@ void NTabBar::init() {
     d->_pLightItemSeparator = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
     d->_pDarkItemSeparator  = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Dark);
 
-    d->_pLightItemHeaderBorderColorSelected = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Light);
-    d->_pDarkItemHeaderBorderColorSelected  = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Dark);
+    d->_pLightItemHeaderBorderColorSelected =
+        NThemeColor(NFluentColorKey::SubtleFillColorTransparent, NThemeType::Light);
+    d->_pDarkItemHeaderBorderColorSelected = NThemeColor(NFluentColorKey::SubtleFillColorTransparent, NThemeType::Dark);
 
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
 
@@ -308,16 +309,13 @@ void NTabBar::mouseMoveEvent(QMouseEvent* event) {
     if (tabIndex >= 0 && tabIndex < count()) {
         QString tip = tabToolTip(tabIndex);
         if (!tip.isEmpty() && tabIndex != d->_tooltipTabIndex) {
-
             d->_tooltipTabIndex = tabIndex;
-
 
             if (d->_currentTooltip) {
                 d->_currentTooltip->hide();
                 d->_currentTooltip->deleteLater();
                 d->_currentTooltip = nullptr;
             }
-
 
             d->_currentTooltip = NToolTip::createToolTip(tip, this);
             d->_currentTooltip->setDuration(5000);
