@@ -12,7 +12,7 @@ NConfig::~NConfig() {
 
 void NConfig::initialize() {
 #ifdef Q_OS_WIN
-    qApp->setStyle("Fusion");
+    // qApp->setStyle("Fusion");
 
     QFont font = qApp->font();
     font.setPixelSize(13);
