@@ -33,10 +33,6 @@ void NWindowEffectWin::initWindowEffect(QWidget* window) {
     // 启用DPI感知
     EnableNonClientDpiScaling(hwnd);
 
-    // 尝试启用现代窗口样式
-    // BOOL value = TRUE;
-    // DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
-
     const MARGINS margins = {0, 0, 0, -1}; // -1表示整个客户区
     DwmExtendFrameIntoClientArea(hwnd, &margins);
 }
@@ -104,10 +100,6 @@ bool NWindowEffectWin::applyMicaEffect(QWidget* window) {
     if (SUCCEEDED(hr)) {
         return true;
     }
-
-    // // 如果失败，尝试使用暗模式
-    // BOOL darkMode = TRUE;
-    // hr            = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
 
     if (SUCCEEDED(hr)) {
         return true;

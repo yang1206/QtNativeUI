@@ -11,7 +11,6 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
     Q_Q_CREATE(NMainWindow)
   public:
     enum BackdropType {
-        Default = 0, // 自动选择最佳效果（平台相关）
         None    = 1, // 无特殊效果
         Mica    = 2, // Mica效果 (Windows 11)
         Acrylic = 3, // 亚克力效果 (Windows 10/11)

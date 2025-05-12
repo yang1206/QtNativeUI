@@ -10,21 +10,20 @@
 
 // Windows 10/11背景效果类
 class NWindowEffectWin {
-public:
+  public:
     // 背景类型常量定义
     enum BackdropType {
-        Default = 0,    // 自动选择
-        None = 1,       // 无特殊效果
-        Mica = 2,       // Mica效果 (Windows 11)
-        Acrylic = 3,    // 亚克力效果 (Windows 10/11)
-        Tabbed = 4      // 标签式效果 (Windows 11)
+        None    = 1, // 无特殊效果
+        Mica    = 2, // Mica效果 (Windows 11)
+        Acrylic = 3, // 亚克力效果 (Windows 10/11)
+        Tabbed  = 4  // 标签式效果 (Windows 11)
     };
 
     static void initWindowEffect(QWidget* window);
     static bool setWindowBackdropEffect(QWidget* window, int type);
     static bool enableSnapLayout(QWidget* window, bool enable);
 
-private:
+  private:
     static bool applyAcrylicEffect(QWidget* window);
     static bool applyMicaEffect(QWidget* window);
     static bool disableWindowEffects(QWidget* window);
@@ -39,20 +38,20 @@ private:
     };
 
     struct WINCOMPATTRDATA {
-        int nAttribute;
+        int   nAttribute;
         PVOID pData;
         ULONG ulDataSize;
     };
 
     // Windows 10亚克力效果相关常量
     enum ACCENT_STATE {
-        ACCENT_DISABLED = 0,
-        ACCENT_ENABLE_GRADIENT = 1,
+        ACCENT_DISABLED                   = 0,
+        ACCENT_ENABLE_GRADIENT            = 1,
         ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
-        ACCENT_ENABLE_BLURBEHIND = 3,
-        ACCENT_ENABLE_ACRYLICBLURBEHIND = 4,
-        ACCENT_ENABLE_HOSTBACKDROP = 5,
-        ACCENT_INVALID_STATE = 6
+        ACCENT_ENABLE_BLURBEHIND          = 3,
+        ACCENT_ENABLE_ACRYLICBLURBEHIND   = 4,
+        ACCENT_ENABLE_HOSTBACKDROP        = 5,
+        ACCENT_INVALID_STATE              = 6
     };
 
     typedef BOOL(WINAPI* pfnSetWindowCompositionAttribute)(HWND, WINCOMPATTRDATA*);
