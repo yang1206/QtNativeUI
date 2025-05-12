@@ -8,7 +8,8 @@
 #include "components/menu.h"
 #include "components/navigation.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
+    setBackdropEffect(BackdropType::None);
     m_tabWidget = new NTabWidget(this);
     setCentralWidget(m_tabWidget);
     m_tabWidget->setMovable(true);

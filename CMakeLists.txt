@@ -126,6 +126,9 @@ target_link_libraries(QtNativeUI
         Qt${QT_VERSION_MAJOR}::Widgets
 )
 
+if (WIN32)
+    target_link_libraries(QtNativeUI PRIVATE dwmapi uxtheme)
+endif ()
 
 # 安装配置
 include(GNUInstallDirs)
