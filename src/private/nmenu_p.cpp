@@ -12,7 +12,31 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                                       const QStyleOption* option,
                                       QPainter*           painter,
                                       const QWidget*      widget) const {
-    if (element == CE_MenuItem) {
+    // 首先判断是否为NMenu组件或其子组件
+    bool isNMenuOrChild = false;
+    if (widget) {
+        const NMenu* menuWidget = qobject_cast<const NMenu*>(widget);
+        if (menuWidget) {
+            isNMenuOrChild = true;
+        } else {
+            // 如果不是NMenu，检查它是否是NMenu的子控件
+            QWidget* parent = widget->parentWidget();
+            while (parent && !isNMenuOrChild) {
+                if (qobject_cast<const NMenu*>(parent)) {
+                    isNMenuOrChild = true;
+                }
+                parent = parent->parentWidget();
+            }
+        }
+    }
+    
+    // 如果不是NMenu或其子组件，使用基础样式
+    if (!isNMenuOrChild) {
+        QProxyStyle::drawControl(element, option, painter, widget);
+        return;
+    }
+
+    if (element == CE_MenuItem && qobject_cast<const NMenu*>(widget)) {
         if (const QStyleOptionMenuItem* mopt = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             painter->save();
             painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing |
@@ -207,52 +231,83 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
 }
 
 int NMenuPrivate::Style::pixelMetric(PixelMetric metric, const QStyleOption* option, const QWidget* widget) const {
+    // 判断是否为NMenu组件
     const NMenu* menu = qobject_cast<const NMenu*>(widget);
-
+    bool isNMenuOrChild = false;
+    
     if (menu) {
-        const NMenuPrivate* d = menu->d_func();
-
+        isNMenuOrChild = true;
+    } else if (widget) {
+        // 如果不是NMenu，检查它是否是NMenu的子控件
+        QWidget* parent = widget->parentWidget();
+        while (parent && !isNMenuOrChild) {
+            if (qobject_cast<const NMenu*>(parent)) {
+                isNMenuOrChild = true;
+            }
+            parent = parent->parentWidget();
+        }
+    }
+    
+    // 只有当组件是NMenu或其子组件时才应用自定义度量
+    if (isNMenuOrChild) {
+        const NMenuPrivate* d = menu ? menu->d_func() : this->d;
+        
         switch (metric) {
             case PM_MenuPanelWidth:
-                return 0; // 菜单面板宽度
+                return 0;
             case QStyle::PM_MenuHMargin:
-                return d->_itemPadding; // 菜单水平边距
+                return d->_itemPadding;
             case QStyle::PM_MenuVMargin:
-                return 4; // 菜单垂直边距
+                return 4;
             case QStyle::PM_MenuScrollerHeight:
-                return 16; // 菜单滚动条高度
+                return 16;
             case QStyle::PM_SubMenuOverlap:
-                return -2; // 子菜单重叠量
+                return -2;
             case QStyle::PM_MenuDesktopFrameWidth:
-                return 0; // 桌面菜单框架宽度
+                return 0;
             case QStyle::PM_MenuTearoffHeight:
-                return 0; // 菜单可拖动部分高度
+                return 0;
             default:
                 break;
         }
     }
-
+    
     return QProxyStyle::pixelMetric(metric, option, widget);
 }
 
-QSize NMenuPrivate::Style::sizeFromContents(ContentsType        type,
-                                            const QStyleOption* option,
-                                            const QSize&        size,
-                                            const QWidget*      widget) const {
-    switch (type) {
-        case QStyle::CT_MenuItem: {
-            if (const QStyleOptionMenuItem* mopt = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
-                if (mopt->menuItemType == QStyleOptionMenuItem::Separator) {
-                    break;
+QSize NMenuPrivate::Style::sizeFromContents(ContentsType type,
+                                          const QStyleOption* option,
+                                          const QSize& size,
+                                          const QWidget* widget) const {
+    // 判断是否为NMenu组件
+    bool isNMenuOrChild = false;
+    if (widget) {
+        const NMenu* menuWidget = qobject_cast<const NMenu*>(widget);
+        if (menuWidget) {
+            isNMenuOrChild = true;
+        } else {
+            // 如果不是NMenu，检查它是否是NMenu的子控件
+            QWidget* parent = widget->parentWidget();
+            while (parent && !isNMenuOrChild) {
+                if (qobject_cast<const NMenu*>(parent)) {
+                    isNMenuOrChild = true;
                 }
-                QSize menuItemSize = QProxyStyle::sizeFromContents(type, option, size, widget);
-                return QSize(menuItemSize.width(), d->_itemHeight);
+                parent = parent->parentWidget();
             }
         }
-        default: {
-            break;
+    }
+    
+    // 只有当组件是NMenu或其子组件时才应用自定义大小
+    if (isNMenuOrChild && type == QStyle::CT_MenuItem) {
+        if (const QStyleOptionMenuItem* mopt = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
+            if (mopt->menuItemType == QStyleOptionMenuItem::Separator) {
+                return QProxyStyle::sizeFromContents(type, option, size, widget);
+            }
+            QSize menuItemSize = QProxyStyle::sizeFromContents(type, option, size, widget);
+            return QSize(menuItemSize.width(), d->_itemHeight);
         }
     }
+    
     return QProxyStyle::sizeFromContents(type, option, size, widget);
 }
 

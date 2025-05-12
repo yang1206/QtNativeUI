@@ -26,8 +26,10 @@ void NTabWidget::init() {
 
     setObjectName("NTabWidget");
 
-    d->_pLightSelectedBackground = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Light);
-    d->_pDarkSelectedBackground  = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Dark);
+    d->_pLightSelectedBackground =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
+    d->_pDarkSelectedBackground =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Dark);
 
     d->_pLightBorderColor = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Light);
     d->_pDarkBorderColor  = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Dark);
@@ -101,13 +103,13 @@ void NTabWidget::paintEvent(QPaintEvent* event) {
     painter.setRenderHint(QPainter::Antialiasing, true);
 
     Q_D(NTabWidget);
-    QColor bgColor      = d->_isDark ? d->_pDarkSelectedBackground : d->_pLightSelectedBackground;
-    QColor borderColor  = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-    int    borderRadius = d->_pBorderRadius;
-    int    borderWidth  = d->_pBorderWidth;
-    QRect    contentRect = rect();
-    QTabBar* tb          = tabBar();
-    QRect    tabBarRect  = tb->geometry();
+    QColor   bgColor      = d->_isDark ? d->_pDarkSelectedBackground : d->_pLightSelectedBackground;
+    QColor   borderColor  = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
+    int      borderRadius = d->_pBorderRadius;
+    int      borderWidth  = d->_pBorderWidth;
+    QRect    contentRect  = rect();
+    QTabBar* tb           = tabBar();
+    QRect    tabBarRect   = tb->geometry();
 
     QPainterPath path;
 

@@ -197,18 +197,23 @@ void NComboBox::showPopup() {
     if (count() > 0) {
         QWidget* container = this->findChild<QFrame*>();
         if (container) {
+            // 计算容器高度
             int containerHeight = 0;
             if (count() >= maxVisibleItems()) {
                 containerHeight = maxVisibleItems() * 35 + 8;
             } else {
                 containerHeight = count() * 35 + 8;
             }
+
             view()->resize(view()->width(), containerHeight - 8);
             container->move(container->x(), container->y() + 3);
+
             QLayout* layout = container->layout();
-            while (layout->count()) {
+            while (layout && layout->count()) {
                 layout->takeAt(0);
             }
+
+            // 设置高度动画
             QPropertyAnimation* fixedSizeAnimation = new QPropertyAnimation(container, "maximumHeight");
             connect(fixedSizeAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
                 container->setFixedHeight(value.toUInt());
@@ -246,7 +251,7 @@ void NComboBox::hidePopup() {
     
     // 调用父类实现
     QComboBox::hidePopup();
-    update();
+    d->_isDropdownVisible = false;
 }
 
 void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
@@ -256,7 +261,6 @@ void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
         return;
     }
 
-    // 对于可编辑的ComboBox，创建自定义菜单
     NMenu* menu = new NMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     QAction* action = nullptr;
