@@ -101,10 +101,9 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         QRect pressedArrowRect = arrowRect.adjusted(0, yOffset, 0, yOffset);
 
         QIcon arrowIcon = nIcon->fromRegular(NRegularIconType::ChevronDown12Regular, 10);
-
-        arrowIcon.paint(painter, pressedArrowRect, Qt::AlignCenter, isEnabled ? QIcon::Normal : QIcon::Disabled);
-
-        painter->restore();
+        QRect arrowRectWithOffset = arrowRect;
+        arrowRectWithOffset.translate(0, m_styleInterface->getArrowYOffset());
+        arrowIcon.paint(painter, arrowRectWithOffset, Qt::AlignCenter, isEnabled ? QIcon::Normal : QIcon::Disabled);
 
         QColor textColor          = m_styleInterface->textColorForState(isDark, isEnabled);
         QColor selectionBgColor   = m_styleInterface->selectionBackgroundColor(isDark);

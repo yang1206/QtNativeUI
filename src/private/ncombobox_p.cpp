@@ -1,10 +1,16 @@
 #include "ncombobox_p.h"
 #include "QtNativeUI/NComboBox.h"
 #include "QtNativeUI/NTheme.h"
+#include "QtNativeUI/NAnimation.h"
 
-NComboBoxPrivate::NComboBoxPrivate(QObject* parent) : QObject(parent) {}
+NComboBoxPrivate::NComboBoxPrivate(QObject* parent) : QObject(parent), _arrowYOffset(0) {}
 
-NComboBoxPrivate::~NComboBoxPrivate() {}
+NComboBoxPrivate::~NComboBoxPrivate() {
+    if (_arrowAnimation) {
+        delete _arrowAnimation;
+        _arrowAnimation = nullptr;
+    }
+}
 
 QColor NComboBoxPrivate::backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const {
     if (!isEnabled) {
