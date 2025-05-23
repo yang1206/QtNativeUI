@@ -5,11 +5,9 @@
 #include <QContextMenuEvent>
 #include <QDebug>
 #include <QFormLayout>
-#include <QGroupBox>
 #include <QLabel>
 #include <QListWidget>
 #include <QVBoxLayout>
-#include <QtNativeUI/NCheckBox.h>
 #include <QtNativeUI/NFlyout.h>
 #include <QtNativeUI/NLineEdit.h>
 #include <QtNativeUI/NPushButton.h>
@@ -50,13 +48,6 @@ QWidget* DialogsExample::createFlyouts() {
     QWidget*     container = new QWidget;
     QVBoxLayout* layout    = new QVBoxLayout(container);
     layout->setSpacing(24);
-
-    QLabel* titleLabel = new QLabel("Flyout示例", container);
-    QFont   titleFont  = titleLabel->font();
-    titleFont.setBold(true);
-    titleFont.setPointSize(titleFont.pointSize() + 2);
-    titleLabel->setFont(titleFont);
-    layout->addWidget(titleLabel);
 
     // 基本Flyout示例
     QLabel* basicFlyoutLabel = new QLabel("基本Flyout:", container);
@@ -164,7 +155,7 @@ QWidget* DialogsExample::createFlyouts() {
         QVBoxLayout* contentLayout = new QVBoxLayout(formContent);
 
         QLabel* titleLabel = new QLabel("用户信息", formContent);
-        QFont titleFont = titleLabel->font();
+        QFont   titleFont  = titleLabel->font();
         titleFont.setBold(true);
 
         int newPointSize = titleFont.pointSize();
@@ -362,35 +353,35 @@ QWidget* DialogsExample::createFlyouts() {
 
     connect(offButton, &NPushButton::clicked, [this, offButton]() {
         // 创建内容
-        QWidget* content = new QWidget();
+        QWidget*     content       = new QWidget();
         QVBoxLayout* contentLayout = new QVBoxLayout(content);
-        
+
         QLabel* titleLabel = new QLabel("禁用Light Dismiss", content);
-        QFont titleFont = titleLabel->font();
+        QFont   titleFont  = titleLabel->font();
         titleFont.setBold(true);
         titleLabel->setFont(titleFont);
-        
+
         QLabel* descLabel = new QLabel("点击Flyout外部区域不会关闭此Flyout，必须通过按钮关闭", content);
         descLabel->setWordWrap(true);
-        
+
         NPushButton* closeButton = new NPushButton("关闭", content);
-        
+
         contentLayout->addWidget(titleLabel);
         contentLayout->addWidget(descLabel);
         contentLayout->addWidget(closeButton);
-        
+
         content->setMinimumSize(250, 150);
-        
+
         // 创建Flyout
         NFlyout* flyout = new NFlyout(content, this);
         flyout->setAttribute(Qt::WA_DeleteOnClose);
-        
+
         // 重要：先设置属性
         flyout->setLightDismissMode(NFlyout::Off);
-        
+
         // 然后连接信号
         connect(closeButton, &NPushButton::clicked, flyout, &NFlyout::hide);
-        
+
         // 最后显示
         flyout->showAt(offButton);
     });

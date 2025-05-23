@@ -2,7 +2,6 @@
 #define QTNATIVEUI_NFLYOUT_H
 
 #include <QParallelAnimationGroup>
-#include <QPoint>
 #include <QPropertyAnimation>
 #include <QWidget>
 #include "NColor.h"
@@ -41,7 +40,7 @@ class QTNATIVEUI_EXPORT NFlyout : public QWidget {
   public:
     explicit NFlyout(QWidget* parent = nullptr);
     explicit NFlyout(QWidget* content, QWidget* parent = nullptr);
-    ~NFlyout();
+    ~NFlyout() override;
 
     /**
      * @brief 设置Flyout内容

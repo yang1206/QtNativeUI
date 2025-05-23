@@ -19,7 +19,7 @@ NFlyoutAnimationManager::NFlyoutAnimationManager(NFlyout* flyout, QObject* paren
     setup();
 }
 
-void NFlyoutAnimationManager::setup() {
+void NFlyoutAnimationManager::setup() const {
     m_slideAni->setDuration(187);
     m_opacityAni->setDuration(187);
 
@@ -42,7 +42,7 @@ QPoint NFlyoutAnimationManager::position(QWidget* target) {
     return QPoint();
 }
 
-QPoint NFlyoutAnimationManager::adjustPosition(const QPoint& pos) {
+QPoint NFlyoutAnimationManager::adjustPosition(const QPoint& pos) const {
     QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
     if (!screen) {
         screen = QGuiApplication::primaryScreen();
@@ -153,21 +153,11 @@ QPoint NoneAnimationManager::position(QWidget* target) {
     return target->mapToGlobal(QPoint(-margins.left(), -m_flyout->sizeHint().height() + margins.bottom() - 8));
 }
 
-// 初始化所有动画管理器
-static struct AnimationManagerInitializer {
-    AnimationManagerInitializer() {
-        NFlyoutAnimationManager::registerManager<PullUpAnimationManager>(NFlyoutAnimationType::PULL_UP);
-        NFlyoutAnimationManager::registerManager<DropDownAnimationManager>(NFlyoutAnimationType::DROP_DOWN);
-        NFlyoutAnimationManager::registerManager<SlideLeftAnimationManager>(NFlyoutAnimationType::SLIDE_LEFT);
-        NFlyoutAnimationManager::registerManager<SlideRightAnimationManager>(NFlyoutAnimationType::SLIDE_RIGHT);
-        NFlyoutAnimationManager::registerManager<FadeInAnimationManager>(NFlyoutAnimationType::FADE_IN);
-        NFlyoutAnimationManager::registerManager<NoneAnimationManager>(NFlyoutAnimationType::NONE);
-    }
-} initializer;
-
-// NFlyoutPrivate实现
 NFlyoutPrivate::NFlyoutPrivate(QObject* parent)
     : QObject(parent),
+      _pContent(nullptr),
+      _pTarget(nullptr),
+      q_ptr(nullptr),
       _themeMode(nTheme->themeMode()),
       _isDark(nTheme->isDarkMode()),
       _isHovered(false),
@@ -180,17 +170,15 @@ NFlyoutPrivate::NFlyoutPrivate(QObject* parent)
       _animManager(nullptr),
       _fadeOutAnimation(nullptr),
       _shadowEffect(nullptr),
-      _mainLayout(nullptr),
-      _pContent(nullptr),
-      _pTarget(nullptr) {
+      _mainLayout(nullptr) {
     // 设置背景色和边框色
-    _pLightBackgroundColor = NThemeColor(NFluentColorKey::CardBackgroundFillColorDefault, NThemeType::Light);
-    _pDarkBackgroundColor  = NThemeColor(NFluentColorKey::CardBackgroundFillColorDefault, NThemeType::Dark);
+    _pLightBackgroundColor = QColor(248, 248, 248);
+    _pDarkBackgroundColor  = QColor(40, 40, 40);
     _pLightBorderColor     = NThemeColor(NFluentColorKey::SurfaceStrokeColorFlyout, NThemeType::Light);
     _pDarkBorderColor      = NThemeColor(NFluentColorKey::SurfaceStrokeColorFlyout, NThemeType::Dark);
 
     // 设置默认属性
-    _pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+    _pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusMedium).toInt();
     _pBorderWidth  = 1;
     _pPlacement    = Qt::BottomEdge;
 }
@@ -212,6 +200,13 @@ void NFlyoutPrivate::setupUI() {
 
     if (_pContent) {
         _mainLayout->addWidget(_pContent);
+
+        QColor shadowColor = _isDark ? QColor(0, 0, 0, 80) : QColor(0, 0, 0, 30);
+        _shadowEffect      = new QGraphicsDropShadowEffect(_pContent);
+        _shadowEffect->setBlurRadius(35);
+        _shadowEffect->setOffset(0, 8);
+        _shadowEffect->setColor(shadowColor);
+        _pContent->setGraphicsEffect(_shadowEffect);
     }
 }
 
@@ -247,7 +242,7 @@ NFlyoutAnimationManager* NFlyoutPrivate::animationManager() {
 
 void NFlyoutPrivate::updateThemeColors() { _isDark = nTheme->isDarkMode(); }
 
-QRect NFlyoutPrivate::calculatePlacement(QWidget* target, Qt::Edge placement) {
+QRect NFlyoutPrivate::calculatePlacement(const QWidget* target, const Qt::Edge placement) const {
     if (!target || !q_ptr) {
         return QRect();
     }

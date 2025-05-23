@@ -3,8 +3,6 @@
 
 #include <QGraphicsDropShadowEffect>
 #include <QObject>
-#include <QParallelAnimationGroup>
-#include <QPropertyAnimation>
 
 #include <QtNativeUI/NEnums.h>
 #include <QtNativeUI/NFlyout.h>
@@ -17,13 +15,13 @@ class NFlyoutAnimationManager : public QObject {
     Q_OBJECT
   public:
     explicit NFlyoutAnimationManager(NFlyout* flyout, QObject* parent = nullptr);
-    virtual ~NFlyoutAnimationManager() = default;
+    ~NFlyoutAnimationManager() override = default;
 
     virtual void   exec(const QPoint& pos);
     virtual QPoint position(QWidget* target);
 
-    QPoint adjustPosition(const QPoint& pos);
-    void   setup();
+    QPoint adjustPosition(const QPoint& pos) const;
+    void   setup() const;
 
   protected:
     NFlyout*                 m_flyout;
@@ -111,13 +109,13 @@ class NFlyoutPrivate : public QObject {
 
   public:
     explicit NFlyoutPrivate(QObject* parent = nullptr);
-    ~NFlyoutPrivate();
+    ~NFlyoutPrivate() override;
     Q_D_CREATE(NFlyout)
 
     // 初始化UI
     void  setupUI();
     void  updateThemeColors();
-    QRect calculatePlacement(QWidget* target, Qt::Edge placement);
+    QRect calculatePlacement(const QWidget* target, Qt::Edge placement) const;
 
     // 动画管理器
     NFlyoutAnimationManager* animationManager();

@@ -1,11 +1,8 @@
 ﻿#include "QtNativeUI/NFlyout.h"
 #include <QApplication>
-#include <QHideEvent>
 #include <QKeyEvent>
-#include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
-#include <QShowEvent>
 #include <QVBoxLayout>
 #include "../private/nflyout_p.h"
 #include "QtNativeUI/NTheme.h"
@@ -20,6 +17,10 @@ NFlyout::NFlyout(QWidget* parent) : QWidget(parent), d_ptr(new NFlyoutPrivate())
     Q_D(NFlyout);
     d->q_ptr = this;
 
+    // 设置默认属性
+    d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+    d->_pBorderWidth  = 1;
+    d->_pPlacement    = Qt::BottomEdge;
     // 设置窗口属性
     setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
@@ -182,11 +183,9 @@ void NFlyout::showAt(QWidget* target) {
     d->_pTarget = target;
     emit opening();
 
-    QPoint pos;
-
     // 根据placement属性计算位置
-    QRect rect = d->calculatePlacement(target, d->_pPlacement);
-    pos        = rect.topLeft();
+    QRect  rect = d->calculatePlacement(target, d->_pPlacement);
+    QPoint pos  = rect.topLeft();
 
     // 使用动画管理器执行动画
     exec(pos);
@@ -249,16 +248,12 @@ void NFlyout::paintEvent(QPaintEvent* event) {
     // 根据当前主题选择颜色
     QColor backgroundColor = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
     QColor borderColor     = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-    backgroundColor.setAlpha(255);
     // 绘制背景
     painter.setPen(Qt::NoPen);
     painter.setBrush(backgroundColor);
 
     // 计算内容矩形
-    QRect contentRect = QRect(d->_shadowBorderWidth,
-                              d->_shadowBorderWidth,
-                              width() - 2 * d->_shadowBorderWidth,
-                              height() - 2 * d->_shadowBorderWidth);
+    QRect contentRect = rect().adjusted(1, 1, -1, -1);
 
     painter.drawRoundedRect(contentRect, d->_pBorderRadius, d->_pBorderRadius);
 
@@ -311,36 +306,23 @@ void NFlyout::keyPressEvent(QKeyEvent* event) {
 bool NFlyout::eventFilter(QObject* watched, QEvent* event) {
     Q_D(NFlyout);
 
-    // 只有在Flyout打开时才处理事件
-    if (d->_isOpen && isVisible()) {
-        // 鼠标点击事件处理
-        if (event->type() == QEvent::MouseButtonPress) {
-            QMouseEvent* mouseEvent    = static_cast<QMouseEvent*>(event);
-            QWidget*     clickedWidget = QApplication::widgetAt(mouseEvent->globalPosition().toPoint());
+    if (isVisible() && event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent* mouseEvent    = static_cast<QMouseEvent*>(event);
+        QWidget*     clickedWidget = QApplication::widgetAt(mouseEvent->globalPosition().toPoint());
 
-            // 如果点击的不是Flyout或其子控件，并且不是目标控件
-            if (clickedWidget && clickedWidget != this && !isAncestorOf(clickedWidget) &&
-                (!d->_pTarget || (clickedWidget != d->_pTarget && !d->_pTarget->isAncestorOf(clickedWidget)))) {
-                // 检查Light Dismiss模式
-                bool shouldDismiss = false;
-
-                switch (d->_lightDismissMode) {
-                    case LightDismissMode::Auto: // 自动模式
-                        shouldDismiss = true;    // 默认关闭
-                        break;
-                    case LightDismissMode::On: // 强制开启
-                        shouldDismiss = true;
-                        break;
-                    case LightDismissMode::Off: // 强制关闭
-                        shouldDismiss = false;
-                        break;
-                }
-
-                if (shouldDismiss) {
-                    fadeOut();
-                    return true; // 消费这个事件，阻止它被传递
-                }
+        // 如果点击的不是Flyout或其子控件，也不是目标控件或其子控件
+        if (clickedWidget && clickedWidget != this && !isAncestorOf(clickedWidget) &&
+            (!d->_pTarget || (clickedWidget != d->_pTarget && !d->_pTarget->isAncestorOf(clickedWidget)))) {
+            // 严格检查Light Dismiss模式
+            if (d->_lightDismissMode == LightDismissMode::On) {
+                fadeOut();
+                return true; // 阻止事件传播
+            } else if (d->_lightDismissMode == LightDismissMode::Auto) {
+                // Auto模式下默认启用
+                fadeOut();
+                return true;
             }
+            // Off模式下不做任何处理，让事件继续传播
         }
     }
 
