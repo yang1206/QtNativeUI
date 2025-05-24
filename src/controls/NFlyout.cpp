@@ -1,5 +1,6 @@
 ﻿#include "QtNativeUI/NFlyout.h"
 #include <QApplication>
+#include <QDebug>
 #include <QKeyEvent>
 #include <QPainter>
 #include <QPainterPath>
@@ -22,7 +23,7 @@ NFlyout::NFlyout(QWidget* parent) : QWidget(parent), d_ptr(new NFlyoutPrivate())
     d->_pBorderWidth  = 1;
     d->_pPlacement    = Qt::BottomEdge;
     // 设置窗口属性
-    setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
+    setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::BypassWindowManagerHint);
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_DeleteOnClose, false);
 
@@ -141,6 +142,9 @@ NFlyoutAnimationType NFlyout::animationType() const {
 void NFlyout::setLightDismissMode(LightDismissMode mode) {
     Q_D(NFlyout);
     d->_lightDismissMode = mode;
+
+    // 确保事件过滤器已正确安装
+    setupEventFilter();
 }
 
 NFlyout::LightDismissMode NFlyout::lightDismissMode() const {
@@ -310,19 +314,17 @@ bool NFlyout::eventFilter(QObject* watched, QEvent* event) {
         QMouseEvent* mouseEvent    = static_cast<QMouseEvent*>(event);
         QWidget*     clickedWidget = QApplication::widgetAt(mouseEvent->globalPosition().toPoint());
 
-        // 如果点击的不是Flyout或其子控件，也不是目标控件或其子控件
         if (clickedWidget && clickedWidget != this && !isAncestorOf(clickedWidget) &&
             (!d->_pTarget || (clickedWidget != d->_pTarget && !d->_pTarget->isAncestorOf(clickedWidget)))) {
-            // 严格检查Light Dismiss模式
             if (d->_lightDismissMode == LightDismissMode::On) {
                 fadeOut();
-                return true; // 阻止事件传播
+                return true;
             } else if (d->_lightDismissMode == LightDismissMode::Auto) {
-                // Auto模式下默认启用
                 fadeOut();
                 return true;
+            } else if (d->_lightDismissMode == LightDismissMode::Off) {
+                return true;
             }
-            // Off模式下不做任何处理，让事件继续传播
         }
     }
 
@@ -357,4 +359,32 @@ QPoint NFlyout::calculatePositionForTarget(QWidget* target) {
         return QPoint();
 
     return d->animationManager()->position(target);
+}
+
+void NFlyout::setContentsMargins(int left, int top, int right, int bottom) {
+    Q_D(NFlyout);
+    if (d->_mainLayout) {
+        d->_mainLayout->setContentsMargins(left, top, right, bottom);
+
+        // 确保内容组件也应用相同的边距设置
+        if (d->_pContent && d->_pContent->layout()) {
+            // 如果内容有自己的布局，确保其边距为0
+            d->_pContent->layout()->setContentsMargins(0, 0, 0, 0);
+        }
+
+        updateGeometry();
+        update();
+    }
+}
+
+void NFlyout::setContentsMargins(const QMargins& margins) {
+    setContentsMargins(margins.left(), margins.top(), margins.right(), margins.bottom());
+}
+
+QMargins NFlyout::contentsMargins() const {
+    Q_D(const NFlyout);
+    if (d->_mainLayout) {
+        return d->_mainLayout->contentsMargins();
+    }
+    return QMargins();
 }

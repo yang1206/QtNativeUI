@@ -89,7 +89,7 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
 
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
-    connect(nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) {
+    connect(nTheme, &NTheme::themeModeChanged, this, [this, d](NThemeType::ThemeMode themeMode) {
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
         update();

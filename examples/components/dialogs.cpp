@@ -13,6 +13,8 @@
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NScrollArea.h>
 #include <QtNativeUI/NSpinBox.h>
+
+#include "QtNativeUI/NCalendarWidget.h"
 #include "widgets/ExampleSection.h"
 
 DialogsExample::DialogsExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -171,6 +173,7 @@ QWidget* DialogsExample::createFlyouts() {
         NLineEdit*   nameEdit   = new NLineEdit(formContent);
         NLineEdit*   emailEdit  = new NLineEdit(formContent);
         NSpinBox*    ageSpinBox = new NSpinBox(formContent);
+        ageSpinBox->setMinimumWidth(100);
         ageSpinBox->setRange(1, 120);
         ageSpinBox->setValue(30);
 
@@ -209,6 +212,7 @@ QWidget* DialogsExample::createFlyouts() {
 
     // 带列表的Flyout
     NPushButton* listFlyoutButton = new NPushButton("显示带列表的Flyout", container);
+
     connect(listFlyoutButton, &NPushButton::clicked, [this, listFlyoutButton]() {
         // 创建列表内容
         QWidget*     listContent   = new QWidget();
@@ -243,6 +247,7 @@ QWidget* DialogsExample::createFlyouts() {
 
         // 创建Flyout
         NFlyout* flyout = new NFlyout(listContent, this);
+        flyout->setContentsMargins(5, 5, 5, 5);
         flyout->setAttribute(Qt::WA_DeleteOnClose);
         flyout->setPlacement(Qt::BottomEdge);
 
@@ -261,6 +266,28 @@ QWidget* DialogsExample::createFlyouts() {
         flyout->showAt(listFlyoutButton);
     });
     customContentLayout->addWidget(listFlyoutButton);
+
+    // calendar的Flyout
+    NPushButton* calendarFlyoutButton = new NPushButton("显示日历视图的Flyout", container);
+
+    connect(calendarFlyoutButton, &NPushButton::clicked, [this, calendarFlyoutButton]() {
+        // 创建列表内容
+        QWidget*         calendarContent = new QWidget();
+        QVBoxLayout*     contentLayout   = new QVBoxLayout(calendarContent);
+        NCalendarWidget* calendarWidget  = new NCalendarWidget(calendarContent);
+        contentLayout->addWidget(calendarWidget);
+
+        calendarContent->setMinimumSize(250, 300);
+
+        // 创建Flyout
+        NFlyout* flyout = new NFlyout(calendarContent, this);
+        flyout->setContentsMargins(0, 0, 0, 0);
+        flyout->setAttribute(Qt::WA_DeleteOnClose);
+        flyout->setPlacement(Qt::BottomEdge);
+
+        flyout->showAt(calendarFlyoutButton);
+    });
+    customContentLayout->addWidget(calendarFlyoutButton);
     customContentLayout->addStretch();
 
     layout->addLayout(customContentLayout);

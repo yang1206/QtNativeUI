@@ -62,6 +62,10 @@ class QTNATIVEUI_EXPORT NFlyout : public QWidget {
      */
     QWidget* target() const;
 
+    void     setContentsMargins(const QMargins& margins);
+    void     setContentsMargins(int left, int top, int right, int bottom);
+    QMargins contentsMargins() const;
+
     /**
      * @brief 判断Flyout是否已打开
      */
