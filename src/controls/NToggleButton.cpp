@@ -62,7 +62,7 @@ void NToggleButton::init() {
 
     setMinimumHeight(32);
 
-    int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingNone).toInt();
+    int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingS).toInt();
     int verticalSpacing   = NDesignToken(NDesignTokenKey::SpacingNone).toInt();
     setContentsMargins(horizontalSpacing, verticalSpacing, horizontalSpacing, verticalSpacing);
 
@@ -105,29 +105,42 @@ void NToggleButton::toggle() { setChecked(!isChecked()); }
 
 QSize NToggleButton::sizeHint() const {
     Q_D(const NToggleButton);
-    QFontMetrics fm(font());
-    int          width  = 0;
-    int          height = 32;
 
-    if (!d->_pText.isEmpty()) {
-        width += fm.horizontalAdvance(d->_pText);
+    QFontMetrics fm(font());
+    int          textWidth = d->_pText.isEmpty() ? 0 : fm.horizontalAdvance(d->_pText);
+
+    int iconWidth       = 0;
+    int iconTextSpacing = 0;
+    if (!d->_icon.isNull()) {
+        iconWidth       = d->_iconSize.width();
+        iconTextSpacing = !d->_pText.isEmpty() ? 4 : 0;
     }
 
-    if (!d->_icon.isNull()) {
-        width += d->_iconSize.width();
-        if (!d->_pText.isEmpty()) {
-            width += 4;
+    int contentWidth = textWidth;
+    if (iconWidth > 0) {
+        if (textWidth > 0) {
+            contentWidth += iconWidth + iconTextSpacing;
+        } else {
+            contentWidth = iconWidth;
         }
     }
 
     QMargins margins = contentsMargins();
-    width += margins.left() + margins.right();
-    height += margins.top() + margins.bottom();
+    int      width   = contentWidth + margins.left() + margins.right() + 2 * d->_shadowBorderWidth;
+
+    int contentHeight = qMax(fm.height(), iconWidth > 0 ? d->_iconSize.height() : 0);
+    int height        = contentHeight + margins.top() + margins.bottom() + 2 * d->_shadowBorderWidth;
 
     return QSize(width, height);
 }
 
-QSize NToggleButton::minimumSizeHint() const { return QSize(32, 32); }
+QSize NToggleButton::minimumSizeHint() const {
+    QSize    baseSize = QSize(32, 32);
+    QMargins margins  = contentsMargins();
+
+    return QSize(baseSize.width() + margins.left() + margins.right(),
+                 baseSize.height() + margins.top() + margins.bottom());
+}
 
 void NToggleButton::setFluentIcon(NRegularIconType::Icon icon, int size, const QColor& color) {
     Q_D(NToggleButton);
@@ -376,7 +389,6 @@ void NToggleButton::drawText(QPainter* painter) {
                          height() - 2 * d->_shadowBorderWidth - margins.top() - margins.bottom());
 
     QColor textColor;
-
     if (d->_checked) {
         textColor = isEnabled() ? d->_pAccentTextColor : d->_pAccentDisabledTextColor;
     } else {
@@ -393,7 +405,7 @@ void NToggleButton::drawText(QPainter* painter) {
 
     painter->setPen(textColor);
 
-    if (d->_fluentIcon.iconCode != 0) {
+    if (!d->_icon.isNull()) {
         int   spacing    = 4;
         QSize iconSize   = d->_iconSize;
         int   textWidth  = painter->fontMetrics().horizontalAdvance(d->_pText);
@@ -402,7 +414,7 @@ void NToggleButton::drawText(QPainter* painter) {
         int   startX = foregroundRect.x() + (foregroundRect.width() - totalWidth) / 2;
         QRect textRect(startX + iconSize.width() + spacing, foregroundRect.y(), textWidth, foregroundRect.height());
 
-        painter->drawText(textRect, Qt::AlignCenter, d->_pText);
+        painter->drawText(textRect, Qt::AlignVCenter, d->_pText);
     } else {
         painter->drawText(foregroundRect, Qt::AlignCenter, d->_pText);
     }
