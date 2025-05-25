@@ -20,22 +20,13 @@ void NConfig::initialize() {
     font.setHintingPreference(QFont::PreferNoHinting);
     qApp->setFont(font);
 #endif
-
     nTranslation->setLanguage(QLocale::system().name());
 }
 
-bool NConfig::setLanguage(const QString& locale) {
-    return nTranslation->setLanguage(locale);
-}
+bool NConfig::setLanguage(const QString& locale) { return nTranslation->setLanguage(locale); }
 
-QString NConfig::currentLanguage() const {
-    return nTranslation->currentLanguage();
-}
+QString NConfig::currentLanguage() const { return nTranslation->currentLanguage(); }
 
-QStringList NConfig::availableLanguages() const {
-    return nTranslation->availableLanguages();
-}
+QStringList NConfig::availableLanguages() const { return nTranslation->availableLanguages(); }
 
-bool NConfig::loadCustomTranslation(const QString& filePath) {
-    return nTranslation->loadCustomTranslation(filePath);
-}
+bool NConfig::loadCustomTranslation(const QString& filePath) { return nTranslation->loadCustomTranslation(filePath); }

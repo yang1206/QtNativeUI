@@ -15,7 +15,7 @@ NCalendarDatePickerPrivate::NCalendarDatePickerPrivate(NCalendarDatePicker* q)
     _pSelectedDate    = QDate();
     _pMinimumDate     = QDate(1601, 1, 1);
     _pMaximumDate     = QDate(9999, 12, 31);
-    _pPlaceholderText = QObject::tr("Pick a date");
+    _pPlaceholderText = tr("Pick a date");
     _pDateFormat      = "yyyy-MM-dd";
     _locale           = QLocale::system();
     _isAccentStyle    = false;

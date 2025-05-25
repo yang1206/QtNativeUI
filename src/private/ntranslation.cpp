@@ -25,7 +25,6 @@ bool NTranslation::setLanguage(const QString& locale) {
     if (success) {
         QCoreApplication::installTranslator(&m_translator);
         m_currentLanguage = locale;
-        qDebug() << "Successfully loaded translation for" << locale << "from resources";
     } else {
         // 如果加载失败，尝试加载英语翻译作为后备
         success = tryLoadEnglishFallback();
@@ -35,14 +34,12 @@ bool NTranslation::setLanguage(const QString& locale) {
 }
 
 bool NTranslation::tryLoadEnglishFallback() {
-    // 尝试从资源加载英语翻译作为后备
     QString resourcePath = ":/translations/qtnativeui_en_US.qm";
     bool    success      = m_translator.load(resourcePath);
 
     if (success) {
         QCoreApplication::installTranslator(&m_translator);
         m_currentLanguage = "en_US";
-        qDebug() << "Loaded English fallback translation from resources";
     } else {
         qWarning() << "Failed to load any translation";
     }
