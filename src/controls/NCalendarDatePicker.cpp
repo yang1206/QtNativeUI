@@ -10,7 +10,13 @@ NCalendarDatePicker::NCalendarDatePicker(QWidget* parent)
     setFocusPolicy(Qt::StrongFocus);
 }
 
-NCalendarDatePicker::~NCalendarDatePicker() {}
+NCalendarDatePicker::~NCalendarDatePicker() {
+    Q_D(NCalendarDatePicker);
+    if (d->flyout) {
+        delete d->flyout;
+        d->flyout = nullptr;
+    }
+}
 
 void NCalendarDatePicker::setSelectedDate(QDate date) {
     Q_D(NCalendarDatePicker);
@@ -99,6 +105,11 @@ void NCalendarDatePicker::setLocale(const QLocale& locale) {
     Q_D(NCalendarDatePicker);
     if (d->_locale != locale) {
         d->_locale = locale;
+
+        if (d->calendarWidget) {
+            d->calendarWidget->setLocale(locale);
+        }
+
         d->updateDisplayText();
         update();
     }
@@ -113,6 +124,11 @@ void NCalendarDatePicker::setDateSelectionMode(NCalendarWidget::DateSelectionMod
     Q_D(NCalendarDatePicker);
     if (d->_selectionMode != mode) {
         d->_selectionMode = mode;
+
+        if (d->calendarWidget) {
+            d->calendarWidget->setDateSelectionMode(mode);
+        }
+
         emit dateSelectionModeChanged(mode);
     }
 }
@@ -125,11 +141,18 @@ NCalendarWidget::DateSelectionMode NCalendarDatePicker::dateSelectionMode() cons
 void NCalendarDatePicker::setSelectedDates(const QList<QDate>& dates) {
     Q_D(NCalendarDatePicker);
     d->_selectedDates = dates;
+
+    // 同步到日历组件
+    if (d->calendarWidget) {
+        d->calendarWidget->setSelectedDates(dates);
+    }
+
     if (!dates.isEmpty()) {
         d->_pSelectedDate = dates.first();
         d->updateDisplayText();
         emit pSelectedDateChanged();
     }
+
     emit selectedDatesChanged(dates);
 }
 
@@ -142,6 +165,10 @@ void NCalendarDatePicker::setDateRange(const QDate& startDate, const QDate& endD
     Q_D(NCalendarDatePicker);
     QPair<QDate, QDate> range(startDate, endDate);
     d->_selectedDateRange = range;
+
+    if (d->calendarWidget) {
+        d->calendarWidget->setDateRange(startDate, endDate);
+    }
 
     if (startDate.isValid()) {
         d->_pSelectedDate = startDate;

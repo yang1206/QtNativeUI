@@ -3,6 +3,8 @@
 #include <QLabel>
 #include <QStyle>
 
+#include "QtNativeUI/NCalendarWidget.h"
+#include "QtNativeUI/NFlyout.h"
 #include "QtNativeUI/NIcon.h"
 
 NCalendarDatePickerPrivate::NCalendarDatePickerPrivate(NCalendarDatePicker* q)
@@ -14,7 +16,7 @@ NCalendarDatePickerPrivate::NCalendarDatePickerPrivate(NCalendarDatePicker* q)
     _pMinimumDate     = QDate(1601, 1, 1);
     _pMaximumDate     = QDate(9999, 12, 31);
     _pPlaceholderText = QObject::tr("Pick a date");
-    _pDateFormat      = "MM/dd/yyyy"; // 与图片格式匹配
+    _pDateFormat      = "yyyy-MM-dd";
     _locale           = QLocale::system();
     _isAccentStyle    = false;
     _selectionMode    = NCalendarWidget::SingleDate;
@@ -23,24 +25,19 @@ NCalendarDatePickerPrivate::NCalendarDatePickerPrivate(NCalendarDatePicker* q)
 NCalendarDatePickerPrivate::~NCalendarDatePickerPrivate() {}
 
 void NCalendarDatePickerPrivate::initUi() {
-    q_ptr->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    // 创建主按钮，作为容器背景
+    q_ptr->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     button = new NPushButton(q_ptr);
     button->setObjectName("NCalendarDatePickerButton");
     button->setTransparentBackground(false);
     button->setBorderRadius(_pBorderRadius);
-
-    // 创建外部容器，并设置为事件透明
+    button->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     contentWidget = new QWidget(q_ptr);
     contentWidget->setObjectName("NCalendarDatePickerContent");
     contentWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-    // 创建日期标签
     dateLabel = new QLabel(contentWidget);
     dateLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-    // 创建图标标签
     iconLabel = new QLabel(contentWidget);
     iconLabel->setFixedSize(16, 16);
     QIcon calendarIcon = nIcon->fromRegular(NRegularIconType::CalendarLtr12Regular, 16);
@@ -54,37 +51,47 @@ void NCalendarDatePickerPrivate::initUi() {
     layout->addStretch();
     layout->addWidget(iconLabel);
 
-    // 设置主布局
     QHBoxLayout* mainLayout = new QHBoxLayout(q_ptr);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addWidget(button);
 
-    // 确保内容显示在按钮上方
     contentWidget->raise();
     contentWidget->resize(q_ptr->size());
 
-    // 初始文本设置
     updateDisplayText();
 
-    // 连接主题变化
     QObject::connect(nTheme, &NTheme::themeModeChanged, [this](NThemeType::ThemeMode themeMode) {
         _themeMode = themeMode;
         _isDark    = nTheme->isDarkMode();
         updateDisplayText();
         q_ptr->update();
     });
+
+    QObject::connect(button, &NPushButton::clicked, this, &NCalendarDatePickerPrivate::showCalendarFlyout);
 }
 
 void NCalendarDatePickerPrivate::updateDisplayText() {
     QString displayText = _pPlaceholderText;
-    if (_pSelectedDate.isValid()) {
+
+    if (_selectionMode == NCalendarWidget::SingleDate && _pSelectedDate.isValid()) {
         displayText = _locale.toString(_pSelectedDate, _pDateFormat);
+    } else if (_selectionMode == NCalendarWidget::MultipleDate && !_selectedDates.isEmpty()) {
+        if (_selectedDates.size() == 1) {
+            displayText = _locale.toString(_selectedDates.first(), _pDateFormat);
+        } else {
+            displayText = QString("%1 (%2)")
+                              .arg(_locale.toString(_selectedDates.first(), _pDateFormat))
+                              .arg(_selectedDates.size());
+        }
+    } else if (_selectionMode == NCalendarWidget::DateRange && _selectedDateRange.first.isValid() &&
+               _selectedDateRange.second.isValid()) {
+        displayText = QString("%1 - %2")
+                          .arg(_locale.toString(_selectedDateRange.first, _pDateFormat))
+                          .arg(_locale.toString(_selectedDateRange.second, _pDateFormat));
     }
 
-    // 更新日期标签文本
     dateLabel->setText(displayText);
 
-    // 根据暗黑模式更新颜色
     QColor textColor;
     if (_isDark) {
         textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
@@ -92,11 +99,100 @@ void NCalendarDatePickerPrivate::updateDisplayText() {
         textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
     }
 
-    // 设置颜色样式表
     QString colorStyle = QString("color: %1;").arg(textColor.name());
     dateLabel->setStyleSheet(colorStyle);
 
-    // 更新图标颜色
     QIcon calendarIcon = nIcon->fromRegular(NRegularIconType::CalendarLtr12Regular, 16, textColor);
     iconLabel->setPixmap(calendarIcon.pixmap(16, 16));
+}
+
+void NCalendarDatePickerPrivate::setupCalendarFlyout() {
+    calendarWidget = new NCalendarWidget();
+    calendarWidget->setLocale(_locale);
+    calendarWidget->setSelectedDate(_pSelectedDate.isValid() ? _pSelectedDate : QDate::currentDate());
+    calendarWidget->setMinimumDate(_pMinimumDate);
+    calendarWidget->setMaximumDate(_pMaximumDate);
+    calendarWidget->setDateSelectionMode(_selectionMode);
+
+    if (_selectionMode == NCalendarWidget::MultipleDate && !_selectedDates.isEmpty()) {
+        calendarWidget->setSelectedDates(_selectedDates);
+    } else if (_selectionMode == NCalendarWidget::DateRange &&
+               (_selectedDateRange.first.isValid() || _selectedDateRange.second.isValid())) {
+        calendarWidget->setDateRange(_selectedDateRange.first, _selectedDateRange.second);
+    }
+
+    flyout = new NFlyout(calendarWidget, nullptr);
+    flyout->setBorderRadius(_pBorderRadius);
+    flyout->setPlacement(Qt::BottomEdge);
+    flyout->setContentsMargins(0, 0, 0, 0);
+    flyout->setAnimationType(NFlyoutAnimationType::DROP_DOWN);
+    flyout->setLightDismissMode(NFlyout::On);
+
+    // 连接信号
+    QObject::connect(calendarWidget, &NCalendarWidget::clicked, this, &NCalendarDatePickerPrivate::handleDateSelection);
+    QObject::connect(calendarWidget,
+                     &NCalendarWidget::selectedDatesChanged,
+                     this,
+                     &NCalendarDatePickerPrivate::handleMultiDateSelection);
+    QObject::connect(calendarWidget,
+                     &NCalendarWidget::selectedDateRangeChanged,
+                     this,
+                     &NCalendarDatePickerPrivate::handleDateRangeSelection);
+    QObject::connect(flyout, &NFlyout::opening, [this]() { q_ptr->emit popupOpened(); });
+    QObject::connect(flyout, &NFlyout::closed, [this]() { q_ptr->emit popupClosed(); });
+}
+
+void NCalendarDatePickerPrivate::showCalendarFlyout() {
+    if (!flyout) {
+        setupCalendarFlyout();
+    }
+
+    // 更新日历控件的状态
+    calendarWidget->setLocale(_locale);
+    calendarWidget->setMinimumDate(_pMinimumDate);
+    calendarWidget->setMaximumDate(_pMaximumDate);
+    calendarWidget->setDateSelectionMode(_selectionMode);
+
+    if (_pSelectedDate.isValid()) {
+        calendarWidget->setSelectedDate(_pSelectedDate);
+    }
+
+    // 显示Flyout
+    flyout->showAt(q_ptr);
+}
+
+void NCalendarDatePickerPrivate::handleDateSelection(const QDate& date) {
+    if (date.isValid()) {
+        if (_selectionMode == NCalendarWidget::SingleDate) {
+            _pSelectedDate = date;
+            updateDisplayText();
+            q_ptr->emit pSelectedDateChanged();
+            q_ptr->emit dateSelected(date);
+            flyout->hide();
+        }
+    }
+}
+
+void NCalendarDatePickerPrivate::handleMultiDateSelection(const QList<QDate>& dates) {
+    if (_selectionMode == NCalendarWidget::MultipleDate) {
+        _selectedDates = dates;
+        if (!dates.isEmpty()) {
+            _pSelectedDate = dates.first();
+            updateDisplayText();
+            q_ptr->emit pSelectedDateChanged();
+        }
+        q_ptr->emit selectedDatesChanged(dates);
+    }
+}
+
+void NCalendarDatePickerPrivate::handleDateRangeSelection(const QPair<QDate, QDate>& range) {
+    if (_selectionMode == NCalendarWidget::DateRange) {
+        _selectedDateRange = range;
+        if (range.first.isValid()) {
+            _pSelectedDate = range.first;
+            updateDisplayText();
+            q_ptr->emit pSelectedDateChanged();
+        }
+        q_ptr->emit selectedDateRangeChanged(range);
+    }
 }
