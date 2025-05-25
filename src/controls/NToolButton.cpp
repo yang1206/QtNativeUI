@@ -60,7 +60,7 @@ void NToolButton::init() {
 
     setMinimumHeight(32);
 
-    int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingNone).toInt();
+    int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingS).toInt();
     int verticalSpacing   = NDesignToken(NDesignTokenKey::SpacingNone).toInt();
     setContentsMargins(horizontalSpacing, verticalSpacing, horizontalSpacing, verticalSpacing);
 
@@ -173,6 +173,35 @@ void NToolButton::paintEvent(QPaintEvent* event) {
     drawIcon(&painter);
     drawText(&painter);
     updateFluentIcon();
+}
+
+QSize NToolButton::sizeHint() const {
+    Q_D(const NToolButton);
+    QSize    baseSize  = QToolButton::sizeHint();
+    QMargins margins   = contentsMargins();
+    int      textWidth = 0;
+    if (!text().isEmpty()) {
+        QFontMetrics fm(font());
+        textWidth = fm.horizontalAdvance(text());
+        if (!icon().isNull()) {
+            int iconTextSpacing = property("_nIconTextSpacing").isValid() ? property("_nIconTextSpacing").toInt() : 4;
+            textWidth += iconSize().width() + iconTextSpacing;
+        }
+    } else if (!icon().isNull()) {
+        textWidth = iconSize().width();
+    }
+    textWidth += margins.left() + margins.right() + 2 * d->_shadowBorderWidth;
+    int width  = qMax(baseSize.width(), textWidth);
+    int height = baseSize.height() + margins.top() + margins.bottom();
+    return QSize(width, height);
+}
+
+QSize NToolButton::minimumSizeHint() const {
+    QSize    baseSize = QToolButton::minimumSizeHint();
+    QMargins margins  = contentsMargins();
+
+    return QSize(baseSize.width() + margins.left() + margins.right(),
+                 baseSize.height() + margins.top() + margins.bottom());
 }
 
 void NToolButton::drawBackground(QPainter* painter) {
