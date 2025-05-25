@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/translations">
+        <file>qtnativeui_zh_CN.qm</file>
+        <file>qtnativeui_en_US.qm</file>
+        <!-- 添加更多翻译文件 -->
+    </qresource>
+</RCC>

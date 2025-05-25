@@ -1,8 +1,9 @@
-
 #ifndef QTNATIVEUI_NCONFIG_H
 #define QTNATIVEUI_NCONFIG_H
 
 #include <QApplication>
+#include <QLocale>
+#include <QStringList>
 #include "singleton.h"
 #include "stdafx.h"
 
@@ -10,10 +11,15 @@ class QTNATIVEUI_EXPORT NConfig : public QObject {
     Q_OBJECT
     Q_SINGLETON_CREATE_H(NConfig)
 
-  public:
+public:
     void initialize();
+    
+    bool setLanguage(const QString& locale);
+    QString currentLanguage() const;
+    QStringList availableLanguages() const;
+    bool loadCustomTranslation(const QString& filePath);
 
-  private:
+private:
     explicit NConfig(QObject* parent = nullptr);
     ~NConfig();
 };
