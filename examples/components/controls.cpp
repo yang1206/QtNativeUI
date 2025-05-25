@@ -8,6 +8,8 @@
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NToggleSwitch.h>
+
+#include "QtNativeUI/NCalendarDatePicker.h"
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NComboBox.h"
 #include "QtNativeUI/NDoubleSpinBox.h"
@@ -54,7 +56,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("ScrollArea", createScrollAreas()));
     contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
     contentLayout->addWidget(new ExampleSection("CalendarWidget", createCalendarWidgets()));
-
+    contentLayout->addWidget(new ExampleSection("CalendarDatePicker", createCalendarDatePickers()));
     contentLayout->addStretch();
 
     m_scrollArea->setWidget(contentWidget);
@@ -1168,5 +1170,184 @@ QWidget* ControlsExample::createComboBoxes() {
     layout->addWidget(signalComboBox);
     layout->addWidget(selectionLabel);
 
+    return container;
+}
+
+QWidget* ControlsExample::createCalendarDatePickers() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    QLabel* titleLabel = new QLabel("日期选择器控件演示", container);
+    QFont   titleFont  = titleLabel->font();
+    titleFont.setBold(true);
+    titleFont.setPointSize(titleFont.pointSize() + 2);
+    titleLabel->setFont(titleFont);
+    layout->addWidget(titleLabel);
+
+    // 1. 基本日期选择器
+    QLabel* basicLabel = new QLabel("基本日期选择器:", container);
+    QFont   labelFont  = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    NCalendarDatePicker* basicPicker = new NCalendarDatePicker(container);
+    basicPicker->setMinimumWidth(250);
+    QLabel* basicSelectedLabel = new QLabel("选择的日期: 无", container);
+    connect(basicPicker, &NCalendarDatePicker::dateSelected, [=](QDate date) {
+        basicSelectedLabel->setText("选择的日期: " + date.toString("yyyy-MM-dd"));
+    });
+    layout->addWidget(basicPicker);
+    layout->addWidget(basicSelectedLabel);
+    layout->addSpacing(8);
+
+    // 2. 预设日期的选择器
+    QLabel* presetLabel = new QLabel("预设日期的选择器:", container);
+    presetLabel->setFont(labelFont);
+    layout->addWidget(presetLabel);
+
+    NCalendarDatePicker* presetPicker = new NCalendarDatePicker(container);
+    presetPicker->setSelectedDate(QDate::currentDate());
+    presetPicker->setMinimumWidth(250);
+    layout->addWidget(presetPicker);
+    layout->addSpacing(8);
+
+    // 3. 自定义日期格式
+    QLabel* formatLabel = new QLabel("自定义日期格式:", container);
+    formatLabel->setFont(labelFont);
+    layout->addWidget(formatLabel);
+
+    QHBoxLayout*         formatLayout  = new QHBoxLayout();
+    NCalendarDatePicker* formatPicker1 = new NCalendarDatePicker(container);
+    formatPicker1->setSelectedDate(QDate::currentDate());
+    formatPicker1->setDateFormat("yyyy年MM月dd日");
+    formatPicker1->setMinimumWidth(200);
+    NCalendarDatePicker* formatPicker2 = new NCalendarDatePicker(container);
+    formatPicker2->setSelectedDate(QDate::currentDate());
+    formatPicker2->setDateFormat("MM/dd/yyyy");
+    formatPicker2->setMinimumWidth(200);
+    formatLayout->addWidget(formatPicker1);
+    formatLayout->addWidget(formatPicker2);
+    formatLayout->addStretch();
+    layout->addLayout(formatLayout);
+    layout->addSpacing(8);
+
+    // 4. 不同选择模式
+    QLabel* modeLabel = new QLabel("不同选择模式:", container);
+    modeLabel->setFont(labelFont);
+    layout->addWidget(modeLabel);
+
+    QHBoxLayout* modeLayout = new QHBoxLayout();
+    // 单日期选择
+    QVBoxLayout* singleLayout    = new QVBoxLayout();
+    QLabel*      singleModeLabel = new QLabel("单日期选择", container);
+    singleModeLabel->setAlignment(Qt::AlignCenter);
+    NCalendarDatePicker* singlePicker = new NCalendarDatePicker(container);
+    singlePicker->setDateSelectionMode(NCalendarWidget::SingleDate);
+    singlePicker->setMinimumWidth(200);
+    QLabel* singleSelectedLabel = new QLabel("选择的日期: 无", container);
+    connect(singlePicker, &NCalendarDatePicker::dateSelected, [=](QDate date) {
+        singleSelectedLabel->setText("选择的日期: " + date.toString("yyyy-MM-dd"));
+    });
+    singleLayout->addWidget(singleModeLabel);
+    singleLayout->addWidget(singlePicker);
+    singleLayout->addWidget(singleSelectedLabel);
+    // 多日期选择
+    QVBoxLayout* multiLayout    = new QVBoxLayout();
+    QLabel*      multiModeLabel = new QLabel("多日期选择", container);
+    multiModeLabel->setAlignment(Qt::AlignCenter);
+    NCalendarDatePicker* multiPicker = new NCalendarDatePicker(container);
+    multiPicker->setDateSelectionMode(NCalendarWidget::MultipleDate);
+    multiPicker->setMinimumWidth(200);
+    QLabel* multiSelectedLabel = new QLabel("选择的日期: 无", container);
+    connect(multiPicker, &NCalendarDatePicker::selectedDatesChanged, [=](const QList<QDate>& dates) {
+        QString dateString = "选择的日期:\n";
+        for (const QDate& date : dates) {
+            dateString += date.toString("yyyy-MM-dd") + "\n";
+        }
+        multiSelectedLabel->setText(dateString);
+    });
+    multiLayout->addWidget(multiModeLabel);
+    multiLayout->addWidget(multiPicker);
+    multiLayout->addWidget(multiSelectedLabel);
+    // 日期范围选择
+    QVBoxLayout* rangeLayout    = new QVBoxLayout();
+    QLabel*      rangeModeLabel = new QLabel("日期范围选择", container);
+    rangeModeLabel->setAlignment(Qt::AlignCenter);
+    NCalendarDatePicker* rangePicker = new NCalendarDatePicker(container);
+    rangePicker->setDateSelectionMode(NCalendarWidget::DateRange);
+    rangePicker->setMinimumWidth(200);
+    QLabel* rangeSelectedLabel = new QLabel("选择的日期范围: 无", container);
+    connect(rangePicker, &NCalendarDatePicker::selectedDateRangeChanged, [=](const QPair<QDate, QDate>& range) {
+        if (range.first.isValid() && range.second.isValid()) {
+            rangeSelectedLabel->setText("选择的日期范围:\n" + range.first.toString("yyyy-MM-dd") + " 至\n" +
+                                        range.second.toString("yyyy-MM-dd"));
+        }
+    });
+    rangeLayout->addWidget(rangeModeLabel);
+    rangeLayout->addWidget(rangePicker);
+    rangeLayout->addWidget(rangeSelectedLabel);
+    modeLayout->addLayout(singleLayout);
+    modeLayout->addLayout(multiLayout);
+    modeLayout->addLayout(rangeLayout);
+    layout->addLayout(modeLayout);
+    layout->addSpacing(16);
+
+    // 5. 不同状态的选择器
+    QLabel* stateLabel = new QLabel("不同状态的选择器:", container);
+    stateLabel->setFont(labelFont);
+    layout->addWidget(stateLabel);
+
+    QHBoxLayout* stateLayout = new QHBoxLayout();
+    // 禁用状态
+    NCalendarDatePicker* disabledPicker = new NCalendarDatePicker(container);
+    disabledPicker->setSelectedDate(QDate::currentDate());
+    disabledPicker->setEnabled(false);
+    disabledPicker->setMinimumWidth(180);
+    QLabel* disabledLabel = new QLabel("禁用状态", container);
+    disabledLabel->setAlignment(Qt::AlignCenter);
+    QVBoxLayout* disabledLayout = new QVBoxLayout();
+    disabledLayout->addWidget(disabledPicker);
+    disabledLayout->addWidget(disabledLabel);
+    // 自定义占位符文本
+    NCalendarDatePicker* placeholderPicker = new NCalendarDatePicker(container);
+    placeholderPicker->setPlaceholderText("请选择一个日期");
+    placeholderPicker->setMinimumWidth(180);
+    QLabel* placeholderLabel = new QLabel("自定义占位符", container);
+    placeholderLabel->setAlignment(Qt::AlignCenter);
+    QVBoxLayout* placeholderLayout = new QVBoxLayout();
+    placeholderLayout->addWidget(placeholderPicker);
+    placeholderLayout->addWidget(placeholderLabel);
+    stateLayout->addLayout(disabledLayout);
+    stateLayout->addLayout(placeholderLayout);
+    layout->addLayout(stateLayout);
+    layout->addSpacing(16);
+
+    // 6. 日期限制
+    QLabel* limitLabel = new QLabel("日期范围限制:", container);
+    limitLabel->setFont(labelFont);
+    layout->addWidget(limitLabel);
+
+    QHBoxLayout*         limitLayout   = new QHBoxLayout();
+    NCalendarDatePicker* limitedPicker = new NCalendarDatePicker(container);
+    limitedPicker->setMinimumDate(QDate::currentDate().addDays(-10));
+    limitedPicker->setMaximumDate(QDate::currentDate().addDays(10));
+    limitedPicker->setMinimumWidth(250);
+    QLabel* rangeInfoLabel = new QLabel(QString("限制范围: %1 至 %2")
+                                            .arg(QDate::currentDate().addDays(-10).toString("yyyy-MM-dd"),
+                                                 QDate::currentDate().addDays(10).toString("yyyy-MM-dd")),
+                                        container);
+
+    QVBoxLayout* limitInfoLayout = new QVBoxLayout();
+    limitInfoLayout->addWidget(limitedPicker);
+    limitInfoLayout->addWidget(rangeInfoLabel);
+
+    limitLayout->addLayout(limitInfoLayout);
+    limitLayout->addStretch();
+
+    layout->addLayout(limitLayout);
+
+    layout->addStretch();
     return container;
 }
