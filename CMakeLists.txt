@@ -26,10 +26,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 # 查找依赖
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
-# 收集源文件 - 修改方式收集所有需要的文件
+# 收集源文件
 file(GLOB_RECURSE QtNativeUI_SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
@@ -41,8 +41,40 @@ file(GLOB_RECURSE QtNativeUI_HEADERS
 
 set(QtNativeUI_RESOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/resources/icons.qrc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/translations/translations.qrc"
 )
 
+# 定义翻译文件
+set(TS_FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/qtnativeui_zh_CN.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/qtnativeui_en_US.ts
+        # 添加更多语言...
+)
+
+# 设置lupdate目标
+qt_add_lupdate(QtNativeUI
+        TS_FILES ${TS_FILES}
+        SOURCES ${QtNativeUI_SOURCES} ${QtNativeUI_HEADERS}
+        INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+# 为每个TS文件创建一个自定义命令，直接在源目录中生成QM文件
+foreach (TS_FILE ${TS_FILES})
+    get_filename_component(QM_BASENAME ${TS_FILE} NAME_WE)
+    set(QM_FILE "${CMAKE_CURRENT_SOURCE_DIR}/translations/${QM_BASENAME}.qm")
+
+    add_custom_command(
+            OUTPUT ${QM_FILE}
+            COMMAND Qt${QT_VERSION_MAJOR}::lrelease ${TS_FILE} -qm ${QM_FILE}
+            DEPENDS ${TS_FILE}
+            COMMENT "Generating ${QM_BASENAME}.qm"
+            VERBATIM
+    )
+    list(APPEND QM_FILES ${QM_FILE})
+endforeach ()
+
+# 添加一个自定义目标，确保QM文件在构建时生成
+add_custom_target(translations ALL DEPENDS ${QM_FILES})
 
 # 创建库目标
 if (BUILD_SHARED_LIBS)
@@ -60,9 +92,11 @@ if (BUILD_SHARED_LIBS)
         )
     endif ()
 else ()
-    qt_add_library(QtNativeUI STATIC ${QtNativeUI_SOURCES} ${QtNativeUI_HEADERS}
-    )
+    qt_add_library(QtNativeUI STATIC ${QtNativeUI_SOURCES} ${QtNativeUI_HEADERS} ${QtNativeUI_RESOURCES})
 endif ()
+
+# 在创建QtNativeUI目标后添加依赖
+add_dependencies(QtNativeUI translations)
 
 set_target_properties(QtNativeUI PROPERTIES
         AUTOMOC ON
