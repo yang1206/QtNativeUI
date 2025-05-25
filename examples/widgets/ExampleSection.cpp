@@ -1,4 +1,4 @@
-﻿#include "Examplesection.h"
+﻿#include "ExampleSection.h"
 #include <QLabel>
 #include <QVBoxLayout>
 

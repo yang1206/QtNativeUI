@@ -4,6 +4,7 @@
 #include "components/button.h"
 #include "components/colors.h"
 #include "components/controls.h"
+#include "components/dialogs.h"
 #include "components/icon.h"
 #include "components/menu.h"
 #include "components/navigation.h"
@@ -17,6 +18,9 @@ MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
 
     auto menu = new MenuExample(this);
     m_tabWidget->addTab(menu, "Menu");
+
+    auto dialogs = new DialogsExample(this);
+    m_tabWidget->addTab(dialogs, "Dialogs");
 
     auto controls = new ControlsExample(this);
     m_tabWidget->addTab(controls, "Controls");

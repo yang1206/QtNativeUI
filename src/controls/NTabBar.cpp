@@ -183,7 +183,7 @@ void NTabBar::tabInserted(int index) {
     }
 
     // 确保标签布局更新后计算正确的矩形
-    QTimer::singleShot(0, this, [this, index]() { update(); });
+    QTimer::singleShot(0, this, [this]() { update(); });
 }
 
 void NTabBar::tabRemoved(int index) {
