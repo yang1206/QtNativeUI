@@ -39,7 +39,6 @@ class QTNATIVEUI_EXPORT NFlyout : public QWidget {
 
   public:
     explicit NFlyout(QWidget* parent = nullptr);
-    explicit NFlyout(QWidget* content, QWidget* parent = nullptr);
     ~NFlyout() override;
 
     /**
@@ -115,11 +114,11 @@ class QTNATIVEUI_EXPORT NFlyout : public QWidget {
      * @param isDeleteOnClose 关闭时是否自动删除
      * @return 创建的Flyout实例
      */
-    static NFlyout* make(QWidget*             content,
-                         QWidget*             target,
-                         QWidget*             parent          = nullptr,
-                         NFlyoutAnimationType animType        = NFlyoutAnimationType::PULL_UP,
-                         bool                 isDeleteOnClose = true);
+    static NFlyout* createWithContent(QWidget*             content,
+                                      QWidget*             target,
+                                      QWidget*             parent          = nullptr,
+                                      NFlyoutAnimationType animType        = NFlyoutAnimationType::PULL_UP,
+                                      bool                 isDeleteOnClose = true);
 
   public slots:
     /**

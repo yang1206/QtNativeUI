@@ -48,39 +48,6 @@ NFlyout::NFlyout(QWidget* parent) : QWidget(parent), d_ptr(new NFlyoutPrivate())
     });
 }
 
-NFlyout::NFlyout(QWidget* content, QWidget* parent) : QWidget(parent), d_ptr(new NFlyoutPrivate()) {
-    Q_D(NFlyout);
-    d->q_ptr = this;
-
-    // 设置窗口属性
-    setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
-    setAttribute(Qt::WA_TranslucentBackground);
-    setAttribute(Qt::WA_DeleteOnClose, false);
-
-    // 设置最小尺寸
-    setMinimumSize(100, 50);
-
-    // 设置鼠标追踪
-    setMouseTracking(true);
-
-    // 初始化UI
-    d->setupUI();
-
-    // 设置事件过滤器
-    setupEventFilter();
-
-    // 连接主题变更信号
-    connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
-        Q_D(NFlyout);
-        d->_themeMode = themeMode;
-        d->_isDark    = nTheme->isDarkMode();
-        update();
-    });
-
-    // 设置内容
-    setContent(content);
-}
-
 NFlyout::~NFlyout() { QApplication::instance()->removeEventFilter(this); }
 
 void NFlyout::setContent(QWidget* content) {
@@ -163,18 +130,17 @@ void NFlyout::setShadowEffect(int blurRadius, const QPoint& offset) {
     }
 }
 
-NFlyout*
-NFlyout::make(QWidget* content, QWidget* target, QWidget* parent, NFlyoutAnimationType animType, bool isDeleteOnClose) {
-    NFlyout* flyout = new NFlyout(content, parent);
-
+NFlyout* NFlyout::createWithContent(QWidget*             content,
+                                    QWidget*             target,
+                                    QWidget*             parent,
+                                    NFlyoutAnimationType animType,
+                                    bool                 isDeleteOnClose) {
+    NFlyout* flyout = new NFlyout(parent);
     // 配置属性
     flyout->setAnimationType(animType);
     flyout->setAttribute(Qt::WA_DeleteOnClose, isDeleteOnClose);
 
-    if (target) {
-        flyout->show();
-        flyout->showAt(target);
-    }
+    flyout->setContent(content);
 
     return flyout;
 }

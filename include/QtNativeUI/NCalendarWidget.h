@@ -47,6 +47,9 @@ class QTNATIVEUI_EXPORT NCalendarWidget : public QWidget {
 
   protected:
     void paintEvent(QPaintEvent* event) override;
+
+  private:
+    void init();
 };
 
 #endif // QTNATIVEUI_NCALENDARWIDGET_H

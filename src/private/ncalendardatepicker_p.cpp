@@ -2,10 +2,10 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QStyle>
-
-#include "QtNativeUI/NCalendarWidget.h"
-#include "QtNativeUI/NFlyout.h"
+#include <QTimer>
 #include "QtNativeUI/NIcon.h"
+
+#include "QtNativeUI/NFlyout.h"
 
 NCalendarDatePickerPrivate::NCalendarDatePickerPrivate(NCalendarDatePicker* q)
     : QObject(q), q_ptr(q), button(nullptr), contentWidget(nullptr), dateLabel(nullptr), iconLabel(nullptr) {
@@ -106,59 +106,66 @@ void NCalendarDatePickerPrivate::updateDisplayText() {
     iconLabel->setPixmap(calendarIcon.pixmap(16, 16));
 }
 
-void NCalendarDatePickerPrivate::setupCalendarFlyout() {
-    calendarWidget = new NCalendarWidget();
+void NCalendarDatePickerPrivate::showCalendarFlyout() {
+    // 创建日历组件
+    NCalendarWidget* calendarWidget = new NCalendarWidget(q_ptr);
+
     calendarWidget->setLocale(_locale);
-    calendarWidget->setSelectedDate(_pSelectedDate.isValid() ? _pSelectedDate : QDate::currentDate());
-    calendarWidget->setMinimumDate(_pMinimumDate);
-    calendarWidget->setMaximumDate(_pMaximumDate);
     calendarWidget->setDateSelectionMode(_selectionMode);
 
-    if (_selectionMode == NCalendarWidget::MultipleDate && !_selectedDates.isEmpty()) {
-        calendarWidget->setSelectedDates(_selectedDates);
-    } else if (_selectionMode == NCalendarWidget::DateRange &&
-               (_selectedDateRange.first.isValid() || _selectedDateRange.second.isValid())) {
-        calendarWidget->setDateRange(_selectedDateRange.first, _selectedDateRange.second);
+    // 设置日期范围
+    calendarWidget->setMinimumDate(_pMinimumDate);
+    calendarWidget->setMaximumDate(_pMaximumDate);
+
+    // 根据选择模式设置日期
+    switch (_selectionMode) {
+        case NCalendarWidget::SingleDate:
+            if (_pSelectedDate.isValid()) {
+                calendarWidget->setSelectedDate(_pSelectedDate);
+            }
+            break;
+        case NCalendarWidget::MultipleDate:
+            if (!_selectedDates.isEmpty()) {
+                calendarWidget->setSelectedDates(_selectedDates);
+            }
+            break;
+        case NCalendarWidget::DateRange:
+            if (_selectedDateRange.first.isValid() && _selectedDateRange.second.isValid()) {
+                calendarWidget->setDateRange(_selectedDateRange.first, _selectedDateRange.second);
+            }
+            break;
     }
 
-    flyout = new NFlyout(calendarWidget, nullptr);
-    flyout->setBorderRadius(_pBorderRadius);
-    flyout->setPlacement(Qt::BottomEdge);
-    flyout->setContentsMargins(0, 0, 0, 0);
-    flyout->setAnimationType(NFlyoutAnimationType::DROP_DOWN);
-    flyout->setLightDismissMode(NFlyout::On);
+    QWidget* content = new QWidget();
+    content->setFixedSize(305, 340);
+    content->setContentsMargins(0, 0, 0, 0);
+    QVBoxLayout* layout = new QVBoxLayout(content);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(calendarWidget);
 
-    // 连接信号
+    NFlyout* flyout = NFlyout::createWithContent(content, button, q_ptr);
+    flyout->setContentsMargins(0, 0, 0, 0);
+    flyout->setPlacement(Qt::BottomEdge);
+    // 连接日历的信号
     QObject::connect(calendarWidget, &NCalendarWidget::clicked, this, &NCalendarDatePickerPrivate::handleDateSelection);
+
     QObject::connect(calendarWidget,
                      &NCalendarWidget::selectedDatesChanged,
                      this,
                      &NCalendarDatePickerPrivate::handleMultiDateSelection);
+
     QObject::connect(calendarWidget,
                      &NCalendarWidget::selectedDateRangeChanged,
                      this,
                      &NCalendarDatePickerPrivate::handleDateRangeSelection);
-    QObject::connect(flyout, &NFlyout::opening, [this]() { q_ptr->emit popupOpened(); });
-    QObject::connect(flyout, &NFlyout::closed, [this]() { q_ptr->emit popupClosed(); });
-}
 
-void NCalendarDatePickerPrivate::showCalendarFlyout() {
-    if (!flyout) {
-        setupCalendarFlyout();
-    }
+    // 连接Flyout的信号
+    QObject::connect(flyout, &NFlyout::opened, q_ptr, &NCalendarDatePicker::popupOpened);
+    QObject::connect(flyout, &NFlyout::closed, q_ptr, &NCalendarDatePicker::popupClosed);
 
-    // 更新日历控件的状态
-    calendarWidget->setLocale(_locale);
-    calendarWidget->setMinimumDate(_pMinimumDate);
-    calendarWidget->setMaximumDate(_pMaximumDate);
-    calendarWidget->setDateSelectionMode(_selectionMode);
-
-    if (_pSelectedDate.isValid()) {
-        calendarWidget->setSelectedDate(_pSelectedDate);
-    }
-
-    // 显示Flyout
-    flyout->showAt(q_ptr);
+    // 显示弹出层
+    flyout->showAt(button);
 }
 
 void NCalendarDatePickerPrivate::handleDateSelection(const QDate& date) {
@@ -168,7 +175,6 @@ void NCalendarDatePickerPrivate::handleDateSelection(const QDate& date) {
             updateDisplayText();
             q_ptr->emit pSelectedDateChanged();
             q_ptr->emit dateSelected(date);
-            flyout->hide();
         }
     }
 }

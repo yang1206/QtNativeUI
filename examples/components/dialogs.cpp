@@ -100,7 +100,8 @@ QWidget* DialogsExample::createFlyouts() {
             content->setMinimumWidth(200);
 
             // 创建Flyout
-            NFlyout* flyout = new NFlyout(content, this);
+            NFlyout* flyout = new NFlyout(this);
+            flyout->setContent(content);
             flyout->setAttribute(Qt::WA_DeleteOnClose);
 
             // 设置位置属性 - 注意顺序，先设置属性，再调用showAt
@@ -196,7 +197,8 @@ QWidget* DialogsExample::createFlyouts() {
         formContent->setMinimumWidth(300);
 
         // 创建Flyout
-        NFlyout* flyout = new NFlyout(formContent, this);
+        NFlyout* flyout = NFlyout::createWithContent(formContent, formFlyoutButton, this);
+
         flyout->setAttribute(Qt::WA_DeleteOnClose);
         flyout->setPlacement(Qt::RightEdge);
 
@@ -246,7 +248,8 @@ QWidget* DialogsExample::createFlyouts() {
         listContent->setMinimumSize(250, 300);
 
         // 创建Flyout
-        NFlyout* flyout = new NFlyout(listContent, this);
+        NFlyout* flyout = new NFlyout(this);
+        flyout->setContent(listContent);
         flyout->setContentsMargins(5, 5, 5, 5);
         flyout->setAttribute(Qt::WA_DeleteOnClose);
         flyout->setPlacement(Qt::BottomEdge);
@@ -280,7 +283,8 @@ QWidget* DialogsExample::createFlyouts() {
         calendarContent->setMinimumSize(250, 300);
 
         // 创建Flyout
-        NFlyout* flyout = new NFlyout(calendarContent, this);
+        NFlyout* flyout = new NFlyout(this);
+        flyout->setContent(calendarContent);
         flyout->setContentsMargins(0, 0, 0, 0);
         flyout->setAttribute(Qt::WA_DeleteOnClose);
         flyout->setPlacement(Qt::BottomEdge);
@@ -322,7 +326,8 @@ QWidget* DialogsExample::createFlyouts() {
         content->setMinimumSize(250, 150);
 
         // 创建Flyout
-        NFlyout* flyout = new NFlyout(content, this);
+        NFlyout* flyout = new NFlyout(this);
+        flyout->setContent(content);
         flyout->setAttribute(Qt::WA_DeleteOnClose);
 
         // 自定义样式
@@ -371,7 +376,8 @@ QWidget* DialogsExample::createFlyouts() {
         content->setMinimumSize(250, 150);
 
         // 创建Flyout
-        NFlyout* flyout = new NFlyout(content, this);
+        NFlyout* flyout = new NFlyout(this);
+        flyout->setContent(content);
         flyout->setAttribute(Qt::WA_DeleteOnClose);
         flyout->setLightDismissMode(NFlyout::On);
 
@@ -400,7 +406,8 @@ QWidget* DialogsExample::createFlyouts() {
         content->setMinimumSize(250, 150);
 
         // 创建Flyout
-        NFlyout* flyout = new NFlyout(content, this);
+        NFlyout* flyout = new NFlyout(this);
+        flyout->setContent(content);
         flyout->setAttribute(Qt::WA_DeleteOnClose);
 
         // 重要：先设置属性

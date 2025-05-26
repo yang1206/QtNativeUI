@@ -15,7 +15,11 @@
 
 Q_PROPERTY_CREATE_Q_CPP(NCalendarWidget, int, BorderRadius)
 
-NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new NCalendarWidgetPrivate()) {
+NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new NCalendarWidgetPrivate()) { init(); }
+
+NCalendarWidget::~NCalendarWidget() {}
+
+void NCalendarWidget::init() {
     Q_D(NCalendarWidget);
     setFixedSize(305, 340);
     setObjectName("NCalendarWidget");
@@ -106,8 +110,6 @@ NCalendarWidget::NCalendarWidget(QWidget* parent) : QWidget{parent}, d_ptr(new N
     d->_lastSelectedMonth = currentDate.month();
     d->_scrollToDate(currentDate);
 }
-
-NCalendarWidget::~NCalendarWidget() {}
 
 void NCalendarWidget::setSelectedDate(QDate selectedDate) {
     Q_D(NCalendarWidget);
