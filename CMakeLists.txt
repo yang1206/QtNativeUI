@@ -10,6 +10,7 @@ project(QtNativeUI
 # 设置CMake选项
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(QtNativeUI_BUILD_EXAMPLES "Build QtNativeUI examples" ON)
+option(QtNativeUI_BUILD_TESTS "Build QtNativeUI tests" ON)
 
 # 设置CMake变量
 set(CMAKE_CXX_STANDARD 17)
@@ -218,3 +219,9 @@ install(
 if (QtNativeUI_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif ()
+
+# 在最后添加测试目录
+if (QtNativeUI_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
