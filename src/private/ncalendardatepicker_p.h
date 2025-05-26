@@ -8,6 +8,7 @@
 #include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NTheme.h"
 
+class NFlyout;
 class NCalendarDatePickerPrivate : public QObject {
     Q_OBJECT
   public:
@@ -39,6 +40,8 @@ class NCalendarDatePickerPrivate : public QObject {
     QList<QDate>                       _selectedDates;
     QPair<QDate, QDate>                _selectedDateRange;
     NCalendarWidget::DateSelectionMode _selectionMode;
+
+    NFlyout* currentFlyout = nullptr;
 
     void showCalendarFlyout();
     void handleDateSelection(const QDate& date);

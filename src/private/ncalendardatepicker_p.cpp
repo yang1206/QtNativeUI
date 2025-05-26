@@ -107,6 +107,11 @@ void NCalendarDatePickerPrivate::updateDisplayText() {
 }
 
 void NCalendarDatePickerPrivate::showCalendarFlyout() {
+    // 如果当前已有flyout显示，则不创建新的
+    if (currentFlyout) {
+        return;
+    }
+
     // 创建日历组件
     NCalendarWidget* calendarWidget = new NCalendarWidget(q_ptr);
 
@@ -147,6 +152,10 @@ void NCalendarDatePickerPrivate::showCalendarFlyout() {
     NFlyout* flyout = NFlyout::createWithContent(content, button, q_ptr);
     flyout->setContentsMargins(0, 0, 0, 0);
     flyout->setPlacement(Qt::BottomEdge);
+
+    // 保存当前flyout引用
+    currentFlyout = flyout;
+
     // 连接日历的信号
     QObject::connect(calendarWidget, &NCalendarWidget::clicked, this, &NCalendarDatePickerPrivate::handleDateSelection);
 
@@ -162,7 +171,11 @@ void NCalendarDatePickerPrivate::showCalendarFlyout() {
 
     // 连接Flyout的信号
     QObject::connect(flyout, &NFlyout::opened, q_ptr, &NCalendarDatePicker::popupOpened);
-    QObject::connect(flyout, &NFlyout::closed, q_ptr, &NCalendarDatePicker::popupClosed);
+    QObject::connect(flyout, &NFlyout::closed, this, [this]() {
+        // 在关闭时重置flyout引用
+        currentFlyout = nullptr;
+        q_ptr->emit popupClosed();
+    });
 
     // 显示弹出层
     flyout->showAt(button);
@@ -175,6 +188,7 @@ void NCalendarDatePickerPrivate::handleDateSelection(const QDate& date) {
             updateDisplayText();
             q_ptr->emit pSelectedDateChanged();
             q_ptr->emit dateSelected(date);
+            currentFlyout->fadeOut();
         }
     }
 }
