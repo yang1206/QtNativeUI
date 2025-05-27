@@ -2,51 +2,61 @@
 #define QTNATIVEUI_NMAINWINDOW_H
 
 #include <QMainWindow>
-#include "NEnums.h"
 #include "stdafx.h"
 
 class NMainWindowPrivate;
 class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
     Q_OBJECT
-    Q_Q_CREATE(NMainWindow)
+    Q_PROPERTY(BackdropType backdropEffect READ backdropEffect WRITE setBackdropEffect NOTIFY backdropEffectChanged)
+    Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY darkModeChanged)
   public:
     enum BackdropType {
         None    = 1, // 无特殊效果
         Mica    = 2, // Mica效果 (Windows 11)
         Acrylic = 3, // 亚克力效果 (Windows 10/11)
-        Tabbed  = 4  // 标签式效果 (Windows 11)
+        MicaAlt = 4, // MicaAlt效果 (Windows 11)
+        DWMBlur = 5  // DWM模糊效果 (Windows Vista+)
     };
     Q_ENUM(BackdropType)
 
     explicit NMainWindow(QWidget* parent = nullptr);
-    ~NMainWindow();
+    ~NMainWindow() override;
 
-    bool applyBackdropEffect(BackdropType type);
-
-    void setBackdropEffect(BackdropType type);
-    int  getBackdropEffect();
-
+    // 窗口效果相关
+    bool         applyBackdropEffect(BackdropType type);
+    void         setBackdropEffect(BackdropType type);
     BackdropType backdropEffect() const;
+    // 主题相关
+    bool isDarkMode() const;
 
-    // 启用/禁用窗口动画
+    // 窗口风格相关
     void enableWindowAnimation(bool enable);
+    void setRoundedCorners(bool enable);
+    // 窗口阴影设置
+    void setShadowEffect(bool enable);
 
   protected:
+    // 事件处理
+    bool eventFilter(QObject* watched, QEvent* event) override;
+    void changeEvent(QEvent* event) override;
+    bool nativeEvent(const QByteArray& eventType, void* message, qintptr* result) override;
+    void paintEvent(QPaintEvent* event) override;
+
+    // 初始化相关
     virtual void initWindow();
-    bool         eventFilter(QObject* watched, QEvent* event) override;
+
+  signals:
+    void backdropEffectChanged(BackdropType type);
+    void darkModeChanged(bool isDark);
 
   private:
-    // 初始化平台特定窗口效果
-    void initPlatformEffect();
-
-    // 平台特定效果设置
-    bool setPlatformEffect(BackdropType type);
-
+    void         initPlatformEffect();
+    bool         setPlatformEffect(BackdropType type);
     BackdropType getDefaultEffect();
 
-    // 保护子控件样式的方法
-    void protectWidgetStyle(QWidget* widget);
-    void updateChildrenStyles(QWidget* parent);
+    // 私有实现
+    NMainWindowPrivate* d_ptr;
+    Q_DECLARE_PRIVATE(NMainWindow)
 };
 
 #endif // QTNATIVEUI_NMAINWINDOW_H

@@ -6,11 +6,13 @@
 #define BUTTON_H
 #include <QWidget>
 
+class NMainWindow;
 class QScrollArea;
 class ButtonExample : public QWidget {
     Q_OBJECT
   public:
     explicit ButtonExample(QWidget* parent = nullptr);
+    void setMainWindow(NMainWindow* mainWindow) { m_mainWindow = mainWindow; }
 
   private:
     void     initUI();
@@ -21,6 +23,7 @@ class ButtonExample : public QWidget {
     QWidget* createToolButtons();
 
     QScrollArea* m_scrollArea;
+    NMainWindow* m_mainWindow = nullptr;
 };
 
 #endif // BUTTON_H

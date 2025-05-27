@@ -1,26 +1,100 @@
 #include "nwindoweffect_win.h"
-#include <QOperatingSystemVersion>
+#include <QDebug>
+#include <QPalette>
+#include "QtNativeUI/NFluentColors.h"
+#include "QtNativeUI/NTheme.h"
 
 #ifdef Q_OS_WIN
-// Windows 10/11 相关常量定义
-#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
-#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
-#endif
 
-#ifndef DWMWA_MICA_EFFECT
-#define DWMWA_MICA_EFFECT 1029
-#endif
+NWindowEffectWin* NWindowEffectWin::instance = nullptr;
 
-#ifndef DWMWA_SYSTEMBACKDROP_TYPE
-#define DWMWA_SYSTEMBACKDROP_TYPE 38
-#endif
-
-bool NWindowEffectWin::isWindows11OrGreater() {
-    return QOperatingSystemVersion::current() >=
-           QOperatingSystemVersion(QOperatingSystemVersion::Windows, 10, 0, 22000);
+NWindowEffectWin* NWindowEffectWin::getInstance() {
+    if (!instance) {
+        instance = new NWindowEffectWin();
+    }
+    return instance;
 }
 
-void NWindowEffectWin::initWindowEffect(QWidget* window) {
+NWindowEffectWin::NWindowEffectWin(QObject* parent) : QObject(parent) { initialize(); }
+
+NWindowEffectWin::~NWindowEffectWin() {
+    // 这里可以释放加载的库资源
+}
+
+bool NWindowEffectWin::initialize() {
+    if (_isInitialized) {
+        return true;
+    }
+
+    // 获取Windows版本信息
+    HMODULE ntdllModule = LoadLibraryW(L"ntdll.dll");
+    if (ntdllModule) {
+        auto rtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(GetProcAddress(ntdllModule, "RtlGetVersion"));
+        if (rtlGetVersion) {
+            _windowsVersionInfo.dwOSVersionInfoSize = sizeof(_windowsVersionInfo);
+            rtlGetVersion(&_windowsVersionInfo);
+        }
+        FreeLibrary(ntdllModule);
+    }
+
+    // 加载dwmapi.dll函数
+    HMODULE dwmModule = LoadLibraryW(L"dwmapi.dll");
+    if (dwmModule) {
+        _dwmExtendFrameIntoClientArea = reinterpret_cast<DwmExtendFrameIntoClientAreaFunc>(
+            GetProcAddress(dwmModule, "DwmExtendFrameIntoClientArea"));
+        _dwmSetWindowAttribute =
+            reinterpret_cast<DwmSetWindowAttributeFunc>(GetProcAddress(dwmModule, "DwmSetWindowAttribute"));
+        _dwmIsCompositionEnabled =
+            reinterpret_cast<DwmIsCompositionEnabledFunc>(GetProcAddress(dwmModule, "DwmIsCompositionEnabled"));
+        _dwmEnableBlurBehindWindow =
+            reinterpret_cast<DwmEnableBlurBehindWindowFunc>(GetProcAddress(dwmModule, "DwmEnableBlurBehindWindow"));
+    } else {
+        qWarning() << "加载dwmapi.dll失败";
+        return false;
+    }
+
+    // 加载user32.dll函数
+    HMODULE user32Module = LoadLibraryW(L"user32.dll");
+    if (user32Module) {
+        _setWindowCompositionAttribute = reinterpret_cast<SetWindowCompositionAttributeFunc>(
+            GetProcAddress(user32Module, "SetWindowCompositionAttribute"));
+    } else {
+        qWarning() << "加载user32.dll失败";
+        return false;
+    }
+
+    _isInitialized = true;
+    return true;
+}
+
+bool NWindowEffectWin::isWindowsVersionOrGreater(int major, int minor, int build) const {
+    return (_windowsVersionInfo.dwMajorVersion > major) ||
+           (_windowsVersionInfo.dwMajorVersion == major &&
+            ((_windowsVersionInfo.dwMinorVersion > minor) ||
+             (_windowsVersionInfo.dwMinorVersion == minor && _windowsVersionInfo.dwBuildNumber >= build)));
+}
+
+bool NWindowEffectWin::isWindows10OrGreater() const { return _windowsVersionInfo.dwMajorVersion >= 10; }
+
+bool NWindowEffectWin::isWindows11OrGreater() const {
+    return _windowsVersionInfo.dwMajorVersion >= 10 && _windowsVersionInfo.dwBuildNumber >= 22000;
+}
+
+bool NWindowEffectWin::isWindows11_22H2OrGreater() const {
+    return _windowsVersionInfo.dwMajorVersion >= 10 && _windowsVersionInfo.dwBuildNumber >= 22621;
+}
+
+void NWindowEffectWin::_externWindowMargins(HWND hwnd) {
+    // 使用特殊值-1来扩展整个窗口区域
+    const MARGINS margins = {-1, -1, -1, -1};
+    _dwmExtendFrameIntoClientArea(hwnd, &margins);
+}
+
+void NWindowEffectWin::extendFrameIntoClientArea(QWidget* window) {
+    if (!window || !_isInitialized) {
+        return;
+    }
+
     // 设置窗口背景透明，但不影响子控件
     window->setAttribute(Qt::WA_TranslucentBackground);
     QPalette pal = window->palette();
@@ -33,121 +107,230 @@ void NWindowEffectWin::initWindowEffect(QWidget* window) {
     // 启用DPI感知
     EnableNonClientDpiScaling(hwnd);
 
-    const MARGINS margins = {0, 0, 0, -1}; // -1表示整个客户区
-    DwmExtendFrameIntoClientArea(hwnd, &margins);
+    // 扩展窗口边框
+    _externWindowMargins(hwnd);
 }
 
-bool NWindowEffectWin::setWindowBackdropEffect(QWidget* window, int type) {
-    const HWND hwnd = reinterpret_cast<HWND>(window->winId());
-
-    if (isWindows11OrGreater()) {
-        // Windows 11 - 直接尝试设置SystemBackdropType
-        HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &type, sizeof(type));
-
-        if (SUCCEEDED(hr)) {
-            return true;
-        }
+bool NWindowEffectWin::setDarkMode(QWidget* window, bool isDark) {
+    if (!window || !_isInitialized) {
+        return false;
     }
 
-    // Windows 10回退方案
-    if (type == BackdropType::Acrylic) {
-        return applyAcrylicEffect(window);
-    } else if (type == BackdropType::Mica) {
-        return applyMicaEffect(window);
-    } else if (type == BackdropType::None) {
-        return disableWindowEffects(window);
+    const HWND hwnd = reinterpret_cast<HWND>(window->winId());
+
+    // Windows 10 1809以上版本支持暗色模式
+    if (isWindowsVersionOrGreater(10, 0, 17763)) {
+        BOOL  darkMode  = isDark ? TRUE : FALSE;
+        DWORD attribute = isWindowsVersionOrGreater(10, 0, 19041) ? DWMWA_USE_IMMERSIVE_DARK_MODE
+                                                                  : DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1;
+
+        HRESULT hr = _dwmSetWindowAttribute(hwnd, attribute, &darkMode, sizeof(darkMode));
+        return SUCCEEDED(hr);
     }
 
     return false;
 }
 
-bool NWindowEffectWin::applyAcrylicEffect(QWidget* window) {
-    const HWND hwnd = reinterpret_cast<HWND>(window->winId());
-
-    // 尝试使用Windows 10的亚克力效果
-    HMODULE hUser = GetModuleHandle(L"user32.dll");
-    if (!hUser) {
+bool NWindowEffectWin::setWindowEffect(QWidget* window, WindowBackdropType newType, WindowBackdropType oldType) {
+    if (!window || !_isInitialized) {
         return false;
     }
 
-    pfnSetWindowCompositionAttribute setWindowCompositionAttribute =
-        (pfnSetWindowCompositionAttribute) GetProcAddress(hUser, "SetWindowCompositionAttribute");
-
-    if (!setWindowCompositionAttribute) {
-        return false;
-    }
-
-    // 设置亚克力效果 - 修复颜色值问题
-    ACCENTPOLICY accent = {ACCENT_ENABLE_ACRYLICBLURBEHIND, // 亚克力模糊
-                           0,
-                           static_cast<int>(0x80F0F0F0), // 使用小于INT_MAX的值
-                           0};
-
-    WINCOMPATTRDATA data = {19, // WCA_ACCENT_POLICY
-                            &accent,
-                            sizeof(accent)};
-
-    return setWindowCompositionAttribute(hwnd, &data);
-}
-
-bool NWindowEffectWin::applyMicaEffect(QWidget* window) {
     const HWND hwnd = reinterpret_cast<HWND>(window->winId());
 
-    // 尝试在Windows 10中启用Mica
-    BOOL    micaEnabled = TRUE;
-    HRESULT hr          = DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &micaEnabled, sizeof(micaEnabled));
+    // 处理旧效果
+    switch (oldType) {
+        case Mica:
+        case MicaAlt:
+            if (isWindows11OrGreater()) {
+                if (isWindows11_22H2OrGreater()) {
+                    const int backdropType = DWMSBT_AUTO;
+                    _dwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdropType, sizeof(backdropType));
+                } else {
+                    const BOOL enabled = FALSE;
+                    _dwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &enabled, sizeof(enabled));
+                }
+            }
+            break;
 
-    if (SUCCEEDED(hr)) {
-        return true;
+        case Acrylic:
+        case DWMBlur:
+            if (isWindows11OrGreater()) {
+                const int backdropType = DWMSBT_AUTO;
+                _dwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdropType, sizeof(backdropType));
+            }
+
+            if (_setWindowCompositionAttribute) {
+                ACCENTPOLICY    policy = {ACCENT_DISABLED};
+                WINCOMPATTRDATA data   = {WCA_ACCENT_POLICY, &policy, sizeof(policy)};
+                _setWindowCompositionAttribute(hwnd, &data);
+            }
+
+            if (_dwmEnableBlurBehindWindow) {
+                DWM_BLURBEHIND bb = {0};
+                bb.fEnable        = FALSE;
+                bb.dwFlags        = DWM_BB_ENABLE;
+                _dwmEnableBlurBehindWindow(hwnd, &bb);
+            }
+            break;
+
+        default:
+            break;
     }
 
-    if (SUCCEEDED(hr)) {
-        return true;
-    }
+    // 应用新效果
+    switch (newType) {
+        case None: {
+            // 禁用特殊效果，设置普通背景色
+            window->setAttribute(Qt::WA_TranslucentBackground, false);
 
-    // 最后回退到亚克力效果
-    return applyAcrylicEffect(window);
-}
+            QColor backgroundColor =
+                nTheme->isDarkMode()
+                    ? nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Dark)
+                    : nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Light);
 
-bool NWindowEffectWin::disableWindowEffects(QWidget* window) {
-    const HWND hwnd = reinterpret_cast<HWND>(window->winId());
+            QPalette pal = window->palette();
+            pal.setColor(QPalette::Window, backgroundColor);
+            window->setPalette(pal);
+            window->setAutoFillBackground(true);
 
-    if (isWindows11OrGreater()) {
-        int type = BackdropType::None;
-        DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &type, sizeof(type));
-    } else {
-        // Windows 10 - 禁用特效
-        HMODULE hUser = GetModuleHandle(L"user32.dll");
-        if (!hUser) {
+            // 恢复普通窗口边距
+            const MARGINS margins = {0, 0, 0, 0};
+            _dwmExtendFrameIntoClientArea(hwnd, &margins);
+            return true;
+        }
+
+        case Mica: {
+            // 设置透明背景
+            window->setAttribute(Qt::WA_TranslucentBackground);
+            QPalette pal = window->palette();
+            pal.setColor(QPalette::Window, Qt::transparent);
+            window->setPalette(pal);
+
+            if (isWindows11_22H2OrGreater()) {
+                _externWindowMargins(hwnd);
+                const int backdropType = DWMSBT_MAINWINDOW;
+                HRESULT   hr =
+                    _dwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdropType, sizeof(backdropType));
+                return SUCCEEDED(hr);
+            } else if (isWindows11OrGreater()) {
+                _externWindowMargins(hwnd);
+                const BOOL enabled = TRUE;
+                HRESULT    hr      = _dwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &enabled, sizeof(enabled));
+                return SUCCEEDED(hr);
+            }
+            // 如果不支持Mica，则回退到Acrylic
+            newType = Acrylic;
+            break;
+        }
+
+        case MicaAlt: {
+            // 设置透明背景
+            window->setAttribute(Qt::WA_TranslucentBackground);
+            QPalette pal = window->palette();
+            pal.setColor(QPalette::Window, Qt::transparent);
+            window->setPalette(pal);
+
+            if (isWindows11_22H2OrGreater()) {
+                _externWindowMargins(hwnd);
+                const int backdropType = DWMSBT_TABBEDWINDOW;
+                HRESULT   hr =
+                    _dwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdropType, sizeof(backdropType));
+                return SUCCEEDED(hr);
+            }
+            // 如果不支持MicaAlt，则回退到Mica
+            newType = Mica;
+            return setWindowEffect(window, Mica, oldType);
+        }
+
+        case Acrylic: {
+            // 设置透明背景
+            window->setAttribute(Qt::WA_TranslucentBackground);
+            QPalette pal = window->palette();
+            pal.setColor(QPalette::Window, Qt::transparent);
+            window->setPalette(pal);
+
+            if (isWindows11OrGreater()) {
+                _externWindowMargins(hwnd);
+                const int backdropType = DWMSBT_TRANSIENTWINDOW;
+                HRESULT   hr =
+                    _dwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdropType, sizeof(backdropType));
+                if (SUCCEEDED(hr)) {
+                    return true;
+                }
+            }
+
+            // Windows 10回退方案
+            if (_setWindowCompositionAttribute) {
+                // 获取主题色并调整透明度
+                QColor themeColor =
+                    nTheme->isDarkMode()
+                        ? nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Dark)
+                        : nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Light);
+
+                themeColor.setAlpha(204); // 80%透明度
+
+                // ARGB格式
+                DWORD color = (themeColor.alpha() << 24) | (themeColor.red() << 16) | (themeColor.green() << 8) |
+                              themeColor.blue();
+
+                ACCENTPOLICY accent = {ACCENT_ENABLE_ACRYLICBLURBEHIND, 0, color, 0};
+
+                WINCOMPATTRDATA data = {WCA_ACCENT_POLICY, &accent, sizeof(accent)};
+
+                if (_setWindowCompositionAttribute(hwnd, &data)) {
+                    // 设置正确的窗口边距
+                    const MARGINS margins = {0, 0, 1, 0}; // 只扩展顶部
+                    _dwmExtendFrameIntoClientArea(hwnd, &margins);
+                    return true;
+                }
+            }
+
+            // 如果亚克力效果不可用，回退到DWM模糊
+            newType = DWMBlur;
+            break;
+        }
+
+        case DWMBlur: {
+            // 设置透明背景
+            window->setAttribute(Qt::WA_TranslucentBackground);
+            QPalette pal = window->palette();
+            pal.setColor(QPalette::Window, Qt::transparent);
+            window->setPalette(pal);
+
+            const MARGINS margins = {0, 0, 1, 0}; // 只扩展顶部
+            _dwmExtendFrameIntoClientArea(hwnd, &margins);
+
+            if (_setWindowCompositionAttribute) {
+                ACCENTPOLICY accent = {ACCENT_ENABLE_BLURBEHIND, 0, 0, 0};
+
+                WINCOMPATTRDATA data = {WCA_ACCENT_POLICY, &accent, sizeof(accent)};
+
+                return _setWindowCompositionAttribute(hwnd, &data);
+            } else if (_dwmEnableBlurBehindWindow) {
+                DWM_BLURBEHIND bb = {0};
+                bb.fEnable        = TRUE;
+                bb.dwFlags        = DWM_BB_ENABLE;
+
+                HRESULT hr = _dwmEnableBlurBehindWindow(hwnd, &bb);
+                return SUCCEEDED(hr);
+            }
             return false;
         }
 
-        pfnSetWindowCompositionAttribute setWindowCompositionAttribute =
-            (pfnSetWindowCompositionAttribute) GetProcAddress(hUser, "SetWindowCompositionAttribute");
-
-        if (!setWindowCompositionAttribute) {
-            return false;
-        }
-
-        ACCENTPOLICY    accent = {ACCENT_DISABLED, 0, 0, 0};
-        WINCOMPATTRDATA data   = {19, &accent, sizeof(accent)};
-        setWindowCompositionAttribute(hwnd, &data);
+        case Auto:
+        default:
+            if (isWindows11_22H2OrGreater()) {
+                return setWindowEffect(window, MicaAlt, oldType);
+            } else if (isWindows11OrGreater()) {
+                return setWindowEffect(window, Mica, oldType);
+            } else if (isWindows10OrGreater()) {
+                return setWindowEffect(window, Acrylic, oldType);
+            } else {
+                return setWindowEffect(window, None, oldType);
+            }
     }
 
-    return true;
-}
-
-bool NWindowEffectWin::enableSnapLayout(QWidget* window, bool enable) {
-    if (!isWindows11OrGreater()) {
-        return false;
-    }
-
-    const HWND hwnd = reinterpret_cast<HWND>(window->winId());
-
-    // Windows 11 Snap Layout
-    BOOL    value = enable ? TRUE : FALSE;
-    HRESULT hr    = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &value, sizeof(value));
-
-    return SUCCEEDED(hr);
+    return false;
 }
 #endif // Q_OS_WIN

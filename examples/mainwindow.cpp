@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     setCentralWidget(m_tabWidget);
     m_tabWidget->setMovable(true);
     auto btn = new ButtonExample(this);
+    btn->setMainWindow(this);
     m_tabWidget->addTab(btn, "Button");
 
     auto menu = new MenuExample(this);

@@ -1,22 +1,29 @@
 #ifndef QTNATIVEUI_NMAINWINDOW_P_H
 #define QTNATIVEUI_NMAINWINDOW_P_H
 
-#include <QObject>
-#include <QtNativeUI/NMainWindow.h>
+#include "QtNativeUI/NMainWindow.h"
 
 class NMainWindowPrivate : public QObject {
     Q_OBJECT
-    Q_PROPERTY_CREATE_D(int, BackdropEffect)
-
-public:
+  public:
     explicit NMainWindowPrivate(QObject* parent = nullptr);
-    ~NMainWindowPrivate();
+    ~NMainWindowPrivate() override;
 
-    // 手动添加getter和setter方法
-    void setBackdropEffect(int effect) { _pBackdropEffect = effect; }
-    int getBackdropEffect() const { return _pBackdropEffect; }
+    NMainWindow* q_ptr;
+    // 背景效果类型
+    NMainWindow::BackdropType backdropEffect = NMainWindow::None;
+    // 主题相关
+    bool isDarkMode = false;
+    // 窗口状态
+    bool isWindowActive = true;
+    // 窗口属性
+    QColor backgroundColor;
 
-    Q_D_CREATE(NMainWindow)
+    // 设置背景效果
+    void setBackdropEffect(NMainWindow::BackdropType type);
+
+    // 更新窗口背景颜色（用于None模式）
+    void updateBackgroundColor();
 };
 
 #endif // QTNATIVEUI_NMAINWINDOW_P_H

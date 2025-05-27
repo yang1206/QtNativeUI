@@ -1,6 +1,8 @@
+// NMainWindow.cpp
 #include <QApplication>
 #include <QEvent>
-#include <QOperatingSystemVersion>
+#include <QPainter>
+#include <QStyleOption>
 #include <QtNativeUI/NMainWindow.h>
 #include "../private/nmainwindow_p.h"
 #include "../private/nwindoweffect_win.h"
@@ -11,11 +13,12 @@ NMainWindow::NMainWindow(QWidget* parent) : QMainWindow(parent), d_ptr(new NMain
     initWindow();
 }
 
-NMainWindow::~NMainWindow() {}
+NMainWindow::~NMainWindow() { delete d_ptr; }
 
 void NMainWindow::initWindow() {
-    // 初始化平台特定效果前，添加一个标志表明这是NMainWindow
+    // 初始化窗口属性
     setProperty("nMainWindow", true);
+    setAttribute(Qt::WA_TranslucentBackground);
 
     // 初始化平台特定效果
     initPlatformEffect();
@@ -28,16 +31,42 @@ void NMainWindow::initWindow() {
 
     // 连接主题变化信号
     connect(nTheme, &NTheme::themeModeChanged, this, [this]() {
+        Q_D(NMainWindow);
+        d->isDarkMode = nTheme->isDarkMode();
+
+#ifdef Q_OS_WIN
+        // 更新窗口暗色模式
+        NWindowEffectWin::getInstance()->setDarkMode(this, d->isDarkMode);
+
+        // 如果是None模式，更新背景颜色
+        if (d->backdropEffect == None) {
+            d->updateBackgroundColor();
+            QPalette pal = palette();
+            pal.setColor(QPalette::Window, d->backgroundColor);
+            setPalette(pal);
+            update();
+        }
+#endif
+
+        // 发送样式更新事件
         QEvent event(QEvent::StyleChange);
         QApplication::sendEvent(this, &event);
+
+        emit darkModeChanged(d->isDarkMode);
     });
 }
 
 void NMainWindow::initPlatformEffect() {
 #ifdef Q_OS_WIN
-    NWindowEffectWin::initWindowEffect(this);
+    // 初始化效果类
+    NWindowEffectWin::getInstance()->initialize();
+
+    // 初始化窗口效果
+    NWindowEffectWin::getInstance()->extendFrameIntoClientArea(this);
+
+    // 根据当前主题设置窗口暗色模式
+    NWindowEffectWin::getInstance()->setDarkMode(this, nTheme->isDarkMode());
 #endif
-    // 其他平台不需要特殊初始化
 }
 
 bool NMainWindow::applyBackdropEffect(BackdropType type) {
@@ -45,33 +74,86 @@ bool NMainWindow::applyBackdropEffect(BackdropType type) {
     bool success = setPlatformEffect(type);
 
     if (success) {
-        d->setBackdropEffect(static_cast<int>(type));
+        BackdropType oldType = d->backdropEffect;
+        d->setBackdropEffect(type);
+
+        if (oldType != type) {
+            emit backdropEffectChanged(type);
+        }
     }
 
     return success;
 }
 
-void NMainWindow::setBackdropEffect(BackdropType type) {
-    d_ptr->_pBackdropEffect = type;
-    applyBackdropEffect(type);
-}
-
-int NMainWindow::getBackdropEffect() {
-    Q_D(const NMainWindow);
-    return d->_pBackdropEffect;
-}
+void NMainWindow::setBackdropEffect(BackdropType type) { applyBackdropEffect(type); }
 
 NMainWindow::BackdropType NMainWindow::backdropEffect() const {
     Q_D(const NMainWindow);
-    return static_cast<BackdropType>(d->getBackdropEffect());
+    return d->backdropEffect;
+}
+
+bool NMainWindow::isDarkMode() const {
+    Q_D(const NMainWindow);
+    return d->isDarkMode;
 }
 
 bool NMainWindow::setPlatformEffect(BackdropType type) {
 #ifdef Q_OS_WIN
-    // Windows平台使用特殊效果
-    return NWindowEffectWin::setWindowBackdropEffect(this, static_cast<int>(type));
+    Q_D(NMainWindow);
+
+    // 转换枚举类型
+    NWindowEffectWin::WindowBackdropType winType;
+    switch (type) {
+        case None:
+            winType = NWindowEffectWin::None;
+            break;
+        case Mica:
+            winType = NWindowEffectWin::Mica;
+            break;
+        case Acrylic:
+            winType = NWindowEffectWin::Acrylic;
+            break;
+        case MicaAlt:
+            winType = NWindowEffectWin::MicaAlt;
+            break;
+        case DWMBlur:
+            winType = NWindowEffectWin::DWMBlur;
+            break;
+        default:
+            winType = NWindowEffectWin::Auto;
+    }
+
+    // 获取旧效果类型
+    NWindowEffectWin::WindowBackdropType oldWinType;
+    switch (d->backdropEffect) {
+        case None:
+            oldWinType = NWindowEffectWin::None;
+            break;
+        case Mica:
+            oldWinType = NWindowEffectWin::Mica;
+            break;
+        case Acrylic:
+            oldWinType = NWindowEffectWin::Acrylic;
+            break;
+        case MicaAlt:
+            oldWinType = NWindowEffectWin::MicaAlt;
+            break;
+        case DWMBlur:
+            oldWinType = NWindowEffectWin::DWMBlur;
+            break;
+        default:
+            oldWinType = NWindowEffectWin::Auto;
+    }
+
+    bool result = NWindowEffectWin::getInstance()->setWindowEffect(this, winType, oldWinType);
+
+    if (type == None) {
+        // 确保窗口更新
+        update();
+    }
+
+    return result;
 #else
-    // 其他平台直接忽略效果设置，返回成功
     Q_UNUSED(type);
     return true;
 #endif
@@ -79,12 +161,17 @@ bool NMainWindow::setPlatformEffect(BackdropType type) {
 
 NMainWindow::BackdropType NMainWindow::getDefaultEffect() {
 #ifdef Q_OS_WIN
-    bool isWin11 =
-        QOperatingSystemVersion::current() >= QOperatingSystemVersion(QOperatingSystemVersion::Windows, 10, 0, 22000);
-    return isWin11 ? BackdropType::Mica : BackdropType::Acrylic;
+    if (NWindowEffectWin::getInstance()->isWindows11_22H2OrGreater()) {
+        return MicaAlt;
+    } else if (NWindowEffectWin::getInstance()->isWindows11OrGreater()) {
+        return Mica;
+    } else if (NWindowEffectWin::getInstance()->isWindows10OrGreater()) {
+        return Acrylic;
+    } else {
+        return None;
+    }
 #else
-    // 其他平台默认无效果
-    return BackdropType::None;
+    return None;
 #endif
 }
 
@@ -105,76 +192,69 @@ void NMainWindow::enableWindowAnimation(bool enable) {
 #else
     Q_UNUSED(enable);
 #endif
-    // 其他平台不进行特殊处理
 }
 
-// 添加一个事件过滤器，统一处理所有子控件的样式保持
-bool NMainWindow::eventFilter(QObject* watched, QEvent* event) {
-    // 当子控件添加到窗口时
-    if (event->type() == QEvent::ChildAdded) {
-        QChildEvent* childEvent = static_cast<QChildEvent*>(event);
-        QObject*     child      = childEvent->child();
+void NMainWindow::setRoundedCorners(bool enable) {
+#ifdef Q_OS_WIN
+    if (NWindowEffectWin::getInstance()->isWindows11OrGreater()) {
+        HWND  hwnd  = reinterpret_cast<HWND>(this->winId());
+        DWORD value = enable ? 1 : 0;
 
-        // 递归处理所有子控件
-        protectWidgetStyle(qobject_cast<QWidget*>(child));
-    } else if (event->type() == QEvent::StyleChange) {
-        // 样式变化时，确保所有子控件更新样式
-        updateChildrenStyles(this);
+        // Windows 11特有的圆角控制
+        NWindowEffectWin::getInstance()->_dwmSetWindowAttribute(
+            hwnd, NWindowEffectWin::DWMWA_WINDOW_CORNER_PREFERENCE, &value, sizeof(value));
     }
-
-    return QMainWindow::eventFilter(watched, event);
+#else
+    Q_UNUSED(enable);
+#endif
 }
 
-// 保护控件样式的通用方法
-void NMainWindow::protectWidgetStyle(QWidget* widget) {
-    if (!widget)
-        return;
+void NMainWindow::setShadowEffect(bool enable) {
+#ifdef Q_OS_WIN
+    HWND    hwnd    = reinterpret_cast<HWND>(this->winId());
+    MARGINS margins = {0};
 
-    // 排除NMainWindow自身
-    if (widget->property("nMainWindow").toBool())
-        return;
-
-    // 对任何以"N"开头的自定义控件应用样式保护
-    QString className = widget->metaObject()->className();
-    if (className.startsWith('N') && className != "NMainWindow") {
-        // 确保自定义控件保持其样式
-        widget->setAttribute(Qt::WA_StyledBackground, true);
-
-        // 确保控件的自动填充背景属性正确设置
-        if (widget->testAttribute(Qt::WA_TranslucentBackground)) {
-            // 对于透明背景的控件，不需要自动填充背景
-            widget->setAutoFillBackground(false);
-        } else {
-            // 对于非透明背景的控件，需要自动填充背景
-            widget->setAutoFillBackground(true);
-        }
+    if (enable) {
+        // 启用窗口阴影
+        margins.cxLeftWidth = 1;
     }
 
-    // 递归处理所有子控件
-    for (QObject* child : widget->children()) {
-        protectWidgetStyle(qobject_cast<QWidget*>(child));
-    }
+    // 设置阴影效果
+    NWindowEffectWin::getInstance()->_dwmExtendFrameIntoClientArea(hwnd, &margins);
+#else
+    Q_UNUSED(enable);
+#endif
 }
 
-// 更新所有子控件样式的方法
-void NMainWindow::updateChildrenStyles(QWidget* parent) {
-    if (!parent)
-        return;
+bool NMainWindow::eventFilter(QObject* watched, QEvent* event) { return QMainWindow::eventFilter(watched, event); }
 
-    // 对所有子控件发送样式变化事件
-    for (QObject* child : parent->children()) {
-        QWidget* childWidget = qobject_cast<QWidget*>(child);
-        if (childWidget) {
-            // 确保自定义控件保持其样式
-            QString className = childWidget->metaObject()->className();
-            if (className.startsWith('N') && className != "NMainWindow") {
-                // 发送样式更新事件
-                QEvent styleEvent(QEvent::StyleChange);
-                QApplication::sendEvent(childWidget, &styleEvent);
-            }
-
-            // 递归处理子控件的子控件
-            updateChildrenStyles(childWidget);
-        }
+void NMainWindow::changeEvent(QEvent* event) {
+    if (event->type() == QEvent::WindowStateChange) {
+        // 窗口状态变化时可能需要重新应用效果
+        applyBackdropEffect(backdropEffect());
     }
+
+    QMainWindow::changeEvent(event);
+}
+
+bool NMainWindow::nativeEvent(const QByteArray& eventType, void* message, qintptr* result) {
+    return QMainWindow::nativeEvent(eventType, message, result);
+}
+
+void NMainWindow::paintEvent(QPaintEvent* event) {
+    Q_D(NMainWindow);
+
+    // 如果是None模式，确保背景颜色正确
+    if (d->backdropEffect == None) {
+        QPainter painter(this);
+        painter.fillRect(rect(), d->backgroundColor);
+    }
+
+    // 处理子控件绘制
+    QStyleOption opt;
+    opt.initFrom(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+
+    QMainWindow::paintEvent(event);
 }

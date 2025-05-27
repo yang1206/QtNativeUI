@@ -15,6 +15,7 @@
 #include <QtNativeUI/NToggleButton.h>
 #include "QtNativeUI/NHyperlinkButton.h"
 #include "QtNativeUI/NIcon.h"
+#include "QtNativeUI/NMainWindow.h"
 #include "QtNativeUI/NRadioButton.h"
 #include "QtNativeUI/NScrollArea.h"
 #include "QtNativeUI/NScrollBar.h"
@@ -274,5 +275,47 @@ QWidget* ButtonExample::createRadioButtons() {
     layout->addWidget(radioBtn1);
     layout->addWidget(radioBtn2);
     layout->addWidget(radioBtn3);
+
+    // 2. 窗口效果切换单选按钮组
+    QLabel* windowEffectLabel = new QLabel("切换窗口效果：");
+    windowEffectLabel->setStyleSheet("font-weight: bold; margin-top: 16px;");
+    layout->addWidget(windowEffectLabel);
+
+    QButtonGroup* effectGroup = new QButtonGroup(this);
+    effectGroup->setExclusive(true);
+
+    NRadioButton* noneBtn    = new NRadioButton("无效果");
+    NRadioButton* micaBtn    = new NRadioButton("Mica (Windows 11)");
+    NRadioButton* micaAltBtn = new NRadioButton("MicaAlt (Windows 11 22H2+)");
+    NRadioButton* acrylicBtn = new NRadioButton("亚克力效果");
+    NRadioButton* dwmblurBtn = new NRadioButton("DWM模糊效果 (Windows 8)");
+
+    effectGroup->addButton(noneBtn, NMainWindow::None);
+    effectGroup->addButton(micaBtn, NMainWindow::Mica);
+    effectGroup->addButton(micaAltBtn, NMainWindow::MicaAlt);
+    effectGroup->addButton(acrylicBtn, NMainWindow::Acrylic);
+    effectGroup->addButton(dwmblurBtn, NMainWindow::DWMBlur);
+
+    // 连接信号槽，当选择改变时切换窗口效果
+    connect(effectGroup, QOverload<int>::of(&QButtonGroup::idClicked), this, [this](int id) {
+        if (m_mainWindow) {
+            m_mainWindow->setBackdropEffect(static_cast<NMainWindow::BackdropType>(id));
+        }
+    });
+
+    // 根据当前窗口效果设置选中状态
+    if (m_mainWindow) {
+        int              currentEffect = m_mainWindow->backdropEffect();
+        QAbstractButton* button        = effectGroup->button(currentEffect);
+        if (button) {
+            button->setChecked(true);
+        }
+    }
+
+    layout->addWidget(noneBtn);
+    layout->addWidget(micaBtn);
+    layout->addWidget(micaAltBtn);
+    layout->addWidget(acrylicBtn);
+    layout->addWidget(dwmblurBtn);
     return container;
 }
