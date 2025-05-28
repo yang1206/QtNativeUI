@@ -9,7 +9,7 @@ class NTabBarStyle : public QProxyStyle {
 
   public:
     explicit NTabBarStyle(QStyle* style = nullptr);
-    ~NTabBarStyle();
+    ~NTabBarStyle() override;
 
     void drawPrimitive(PrimitiveElement    element,
                        const QStyleOption* option,

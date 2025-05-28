@@ -25,11 +25,7 @@ void NTabBarStyle::drawPrimitive(PrimitiveElement    element,
     switch (element) {
         case PE_FrameTabBarBase: {
             painter->save();
-
-            bool   isDark      = nTheme->isDarkMode();
-            QColor borderColor = isDark ? tabBar->getDarkItemSeparator() : tabBar->getLightItemSeparator();
-
-            painter->setPen(borderColor);
+            painter->setPen(Qt::transparent);
 
             QRect selectedTabRect;
             int   currentIndex = tabBar->currentIndex();
@@ -185,117 +181,22 @@ void NTabBarStyle::drawControl(ControlElement      element,
                     backgroundColor =
                         isDark ? tabBar->getDarkItemHeaderBackground() : tabBar->getLightItemHeaderBackground();
                 }
-                QPainterPath path;
-
-                if (isVertical) {
-                    if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
-                        path.moveTo(rect.right(), rect.top());
-                        path.lineTo(rect.right(), rect.bottom());
-                        path.lineTo(rect.left() + borderRadius, rect.bottom());
-                        path.arcTo(rect.left(),
-                                   rect.bottom() - borderRadius * 2,
-                                   borderRadius * 2,
-                                   borderRadius * 2,
-                                   270,
-                                   -90);
-                        path.lineTo(rect.left(), rect.top() + borderRadius);
-                        path.arcTo(rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180, -90);
-                        path.closeSubpath();
-                    } else {
-                        path.moveTo(rect.left(), rect.top());
-                        path.lineTo(rect.left(), rect.bottom());
-                        path.lineTo(rect.right() - borderRadius, rect.bottom());
-                        path.arcTo(rect.right() - borderRadius * 2,
-                                   rect.bottom() - borderRadius * 2,
-                                   borderRadius * 2,
-                                   borderRadius * 2,
-                                   270,
-                                   90);
-                        path.lineTo(rect.right(), rect.top() + borderRadius);
-                        path.arcTo(
-                            rect.right() - borderRadius * 2, rect.top(), borderRadius * 2, borderRadius * 2, 0, 90);
-                        path.closeSubpath();
-                    }
-                } else {
-                    if (tabBar->shape() == QTabBar::RoundedSouth || tabBar->shape() == QTabBar::TriangularSouth) {
-                        path.moveTo(rect.topLeft());
-                        path.lineTo(rect.topRight());
-                        path.lineTo(rect.right(), rect.bottom() - borderRadius);
-                        path.arcTo(QRectF(rect.right() - 2.0 * borderRadius,
-                                          rect.bottom() - 2.0 * borderRadius,
-                                          2.0 * borderRadius,
-                                          2.0 * borderRadius),
-                                   0,
-                                   -90);
-                        path.arcTo(QRectF(rect.left(),
-                                          rect.bottom() - 2.0 * borderRadius,
-                                          2.0 * borderRadius,
-                                          2.0 * borderRadius),
-                                   270,
-                                   -90);
-                        path.closeSubpath();
-                    } else {
-                        path.moveTo(rect.left(), rect.bottom());
-                        path.lineTo(rect.left(), rect.top() + borderRadius);
-                        path.arcTo(rect.left(), rect.top(), borderRadius * 2, borderRadius * 2, 180, -90);
-                        path.lineTo(rect.right() - borderRadius, rect.top());
-                        path.arcTo(
-                            rect.right() - borderRadius * 2, rect.top(), borderRadius * 2, borderRadius * 2, 90, -90);
-                        path.lineTo(rect.right(), rect.bottom());
-                        path.closeSubpath();
-                    }
-                }
-
-                painter->fillPath(path, backgroundColor);
 
                 if (selected) {
-                    QColor borderColor = isDark ? tabBar->getDarkItemHeaderBorderColorSelected()
-                                                : tabBar->getLightItemHeaderBorderColorSelected();
-                    painter->setPen(QPen(borderColor, 1.0));
+                    QRect backgroundRect = rect.adjusted(1, 1, -1, -1);
+                    painter->setPen(Qt::NoPen);
+                    painter->setBrush(backgroundColor);
+                    painter->drawRoundedRect(backgroundRect, borderRadius, borderRadius);
 
-                    QPainterPath borderPath;
-                    qreal        topY    = rect.top();
-                    qreal        bottomY = rect.bottom();
-                    qreal        leftX   = rect.left();
-                    qreal        rightX  = rect.right();
-                    qreal        radius  = borderRadius;
-
-                    if (isVertical) {
-                        if (tabBar->shape() == QTabBar::RoundedWest || tabBar->shape() == QTabBar::TriangularWest) {
-                            borderPath.moveTo(rightX, topY);
-                            borderPath.lineTo(leftX + radius, topY);
-                            borderPath.arcTo(leftX, topY, radius * 2, radius * 2, 90, 90);
-                            borderPath.lineTo(leftX, bottomY - radius);
-                            borderPath.arcTo(leftX, bottomY - radius * 2, radius * 2, radius * 2, 180, 90);
-                            borderPath.lineTo(rightX, bottomY);
-                        } else {
-                            borderPath.moveTo(leftX, topY);
-                            borderPath.lineTo(rightX - radius, topY);
-                            borderPath.arcTo(rightX - radius * 2, topY, radius * 2, radius * 2, 90, -90);
-                            borderPath.lineTo(rightX, bottomY - radius);
-                            borderPath.arcTo(rightX - radius * 2, bottomY - radius * 2, radius * 2, radius * 2, 0, -90);
-                            borderPath.lineTo(leftX, bottomY);
-                        }
-                    } else {
-                        if (tabBar->shape() == QTabBar::RoundedNorth || tabBar->shape() == QTabBar::TriangularNorth) {
-                            borderPath.moveTo(leftX, bottomY);
-                            borderPath.lineTo(leftX, topY + radius);
-                            borderPath.arcTo(leftX, topY, radius * 2, radius * 2, 180, -90);
-                            borderPath.lineTo(rightX - radius, topY);
-                            borderPath.arcTo(rightX - radius * 2, topY, radius * 2, radius * 2, 90, -90);
-                            borderPath.lineTo(rightX, bottomY);
-                        } else {
-                            borderPath.moveTo(leftX, topY);
-                            borderPath.lineTo(leftX, bottomY - radius);
-                            borderPath.arcTo(leftX, bottomY - radius * 2, radius * 2, radius * 2, 180, 90);
-                            borderPath.lineTo(rightX - radius, bottomY);
-                            borderPath.arcTo(
-                                rightX - radius * 2, bottomY - radius * 2, radius * 2, radius * 2, 270, 90);
-                            borderPath.lineTo(rightX, topY);
-                        }
-                    }
-
-                    painter->drawPath(borderPath);
+                    QColor borderColor = isDark ? QColor(255, 255, 255, 18) : QColor(0, 0, 0, 16);
+                    painter->setPen(borderColor);
+                    painter->setBrush(Qt::NoBrush);
+                    painter->drawRoundedRect(backgroundRect, borderRadius, borderRadius);
+                } else if (mouseOver || pressed) {
+                    QRect backgroundRect = rect.adjusted(1, 1, -1, -1);
+                    painter->setPen(Qt::NoPen);
+                    painter->setBrush(backgroundColor);
+                    painter->drawRoundedRect(backgroundRect, borderRadius, borderRadius);
                 }
 
                 int tabIndex = -1;
@@ -306,8 +207,7 @@ void NTabBarStyle::drawControl(ControlElement      element,
                     }
                 }
 
-                if (tabIndex == -1) {
-                } else {
+                if (tabIndex != -1) {
                     int tabCount     = tabBar->count();
                     int currentIndex = tabBar->currentIndex();
 
@@ -344,7 +244,7 @@ void NTabBarStyle::drawControl(ControlElement      element,
                             painter->drawLine(lineX, startY, lineX, startY + lineHeight);
                         }
                     }
-                } // end if (tabIndex != -1)
+                }
 
                 painter->restore();
                 return;

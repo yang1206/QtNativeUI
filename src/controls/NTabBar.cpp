@@ -73,9 +73,9 @@ void NTabBar::init() {
     d->_pDarkItemHeaderBackground =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Dark);
     d->_pLightItemHeaderBackgroundSelected =
-        NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Light);
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTertiary, NThemeType::Light);
     d->_pDarkItemHeaderBackgroundSelected =
-        NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Dark);
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTertiary, NThemeType::Dark);
     d->_pLightItemHeaderBackgroundPointerOver =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, NThemeType::Light);
     d->_pDarkItemHeaderBackgroundPointerOver =
