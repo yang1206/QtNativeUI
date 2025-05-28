@@ -242,8 +242,8 @@ bool NMainWindow::nativeEvent(const QByteArray& eventType, void* message, qintpt
 }
 
 void NMainWindow::paintEvent(QPaintEvent* event) {
+#ifdef Q_OS_WIN
     Q_D(NMainWindow);
-
     // 如果是None模式，确保背景颜色正确
     if (d->backdropEffect == None) {
         QPainter painter(this);
@@ -256,5 +256,6 @@ void NMainWindow::paintEvent(QPaintEvent* event) {
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 
+#endif
     QMainWindow::paintEvent(event);
 }
