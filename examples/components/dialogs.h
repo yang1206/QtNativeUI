@@ -12,6 +12,7 @@ class DialogsExample : public QWidget {
   private:
     void     initUI();
     QWidget* createFlyouts();
+    QWidget* createContentDialogs();
 
     NScrollArea* m_scrollArea;
 };
