@@ -382,7 +382,6 @@ qreal NInfoBarPrivate::_calculateTargetPosY() {
 
 bool NInfoBarPrivate::_judgeCreateOrder(NInfoBar* otherInfoBar) {
     if (otherInfoBar->d_ptr->_createTime < _createTime) {
-        // otherInfoBar先创建
         return true;
     } else {
         return false;
@@ -404,15 +403,19 @@ void NInfoBarPrivate::_drawIconWithCircle(QPainter*              painter,
                                           const QColor&          circleBgColor) {
     Q_Q(NInfoBar);
     painter->save();
+
+    // 计算图标垂直位置，与标题保持一致
+    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 : q->height() / 2;
+
     QPainterPath textPath;
-    textPath.addEllipse(QPoint(_leftPadding + _iconSize, q->height() / 2), 9, 9);
+    textPath.addEllipse(QPoint(_leftPadding + _iconSize, iconY), 9, 9);
     painter->setClipPath(textPath);
     QColor iconColor = nTheme->isDarkMode() ? NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light)
                                             : NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
     painter->fillPath(textPath, circleBgColor);
 
     painter->drawPixmap(_leftPadding + _iconSize / 2,
-                        q->height() / 2 - _iconSize / 2,
+                        iconY - _iconSize / 2,
                         _iconSize,
                         _iconSize,
                         nIcon->fromRegular(iconType, _iconSize, iconColor).pixmap(_iconSize, _iconSize));
@@ -449,9 +452,13 @@ void NInfoBarPrivate::_drawInformation(QPainter* painter) {
     QColor iconColor =
         !nTheme->isDarkMode() == NThemeType::Light ? nTheme->accentColor().light() : nTheme->accentColor().dark();
     int iconSize = _iconSize * 2;
+
+    // 计算图标垂直位置，与标题保持一致
+    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 : q->height() / 2;
+
     painter->drawPixmap(
         _leftPadding,
-        q->height() / 2 - iconSize / 2,
+        iconY - iconSize / 2,
         iconSize,
         iconSize,
         nIcon->fromFilled(NFilledIconType::Info12Filled, iconSize, iconColor).pixmap(iconSize, iconSize));
@@ -486,7 +493,8 @@ void NInfoBarPrivate::_calculateTextLayout() {
     titleFont.setPixelSize(16);
     titleFont.setWeight(QFont::Bold);
     QFontMetrics titleMetrics(titleFont);
-    int          titleWidth = titleMetrics.horizontalAdvance(_title);
+    int          titleWidth  = titleMetrics.horizontalAdvance(_title);
+    int          titleHeight = titleMetrics.height();
 
     // 计算消息宽度
     QFont messageFont = q->font();
@@ -514,22 +522,22 @@ void NInfoBarPrivate::_calculateTextLayout() {
     int messageWidth = messageMetrics.horizontalAdvance(_message);
 
     // 判断是否需要换行显示消息
-    // 1. 如果消息宽度小于剩余宽度，且消息长度不超过50字符，则不换行
-    // 2. 否则，如果消息包含换行符或长度超过50字符，则换行显示
-    _isLongMessage = (messageWidth > remainingWidth) || (_message.length() > 50) || (_message.contains('\n'));
+    _isLongMessage = (messageWidth > remainingWidth) || (_message.length() > 40) || (_message.contains('\n'));
 
     // 根据是否换行设置控件高度
     if (_isLongMessage) {
-        // 计算消息文本需要的高度
         QRect messageRect(0, 0, availableWidth - 20, 1000);
         QRect boundingRect =
             messageMetrics.boundingRect(messageRect, Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop, _message);
 
-        // 设置最小高度为标题高度+消息高度+边距
-        int minHeight = titleMetrics.height() + boundingRect.height() + 30;
+        int topMargin           = 15;
+        int titleMessageSpacing = 8;
+        int bottomMargin        = 15;
+
+        int minHeight = topMargin + titleHeight + titleMessageSpacing + boundingRect.height() + bottomMargin;
+
         q->setMinimumHeight(std::max(60, minHeight));
     } else {
-        // 不换行时使用默认高度
         q->setMinimumHeight(60);
     }
 }
@@ -540,26 +548,30 @@ void NInfoBarPrivate::_drawText(QPainter* painter) {
     QColor textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
     painter->setPen(textColor);
 
+    // 设置标题字体
     QFont font = q->font();
     font.setWeight(QFont::Bold);
     font.setPixelSize(16);
     painter->setFont(font);
 
-    int titleX = _leftPadding + _titleLeftSpacing;
-    int titleY = _isLongMessage ? 15 : (q->height() / 2 - painter->fontMetrics().height() / 2);
+    int titleX         = _leftPadding + _titleLeftSpacing;
+    int titleTopMargin = 15; // 固定顶部边距
+    int titleY         = _isLongMessage ? titleTopMargin : (q->height() / 2 - painter->fontMetrics().height() / 2);
 
-    QRect titleRect(titleX, titleY, q->width() / 2, painter->fontMetrics().height());
-    painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignVCenter, _title);
+    painter->drawText(QRect(titleX, titleY, q->width() / 2, painter->fontMetrics().height()),
+                      Qt::AlignLeft | Qt::AlignVCenter,
+                      _title);
 
     font.setWeight(QFont::Medium);
     font.setPixelSize(14);
     painter->setFont(font);
 
+    int closeButtonSpace = _showCloseButton ? (_closeButtonWidth + _closeButtonLeftRightMargin) : 10;
+
     if (_isLongMessage) {
-        int messageX         = titleX;
-        int messageY         = titleY + painter->fontMetrics().height() + 5;
-        int closeButtonSpace = _showCloseButton ? (_closeButtonWidth + _closeButtonLeftRightMargin) : 10;
-        int messageWidth     = q->width() - messageX - closeButtonSpace - 20;
+        int messageX     = titleX;
+        int messageY     = titleY + painter->fontMetrics().height() + 8;
+        int messageWidth = q->width() - messageX - closeButtonSpace - 20;
 
         if (!_additionalWidgets.isEmpty()) {
             int widgetsWidth = 0;
@@ -573,10 +585,9 @@ void NInfoBarPrivate::_drawText(QPainter* painter) {
                           Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop,
                           _message);
     } else {
-        int titleWidth       = painter->fontMetrics().horizontalAdvance(_title);
-        int messageX         = titleX + titleWidth + _textLeftSpacing;
-        int closeButtonSpace = _showCloseButton ? (_closeButtonWidth + _closeButtonLeftRightMargin) : 10;
-        int messageWidth     = q->width() - messageX - closeButtonSpace - 20;
+        int titleWidth   = painter->fontMetrics().horizontalAdvance(_title);
+        int messageX     = titleX + titleWidth + _textLeftSpacing;
+        int messageWidth = q->width() - messageX - closeButtonSpace - 20;
 
         if (!_additionalWidgets.isEmpty()) {
             int widgetsWidth = 0;
