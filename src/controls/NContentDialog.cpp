@@ -83,18 +83,18 @@ NContentDialog::DialogResult NContentDialog::result() const {
 void NContentDialog::showEvent(QShowEvent* event) {
     Q_D(NContentDialog);
 
-    if (d->_maskWidget && parentWidget()) {
+    QWidget* activeWindow = QApplication::activeWindow();
+    if (d->_maskWidget && activeWindow) {
+        d->_maskWidget->setParent(activeWindow);
         d->_maskWidget->setVisible(true);
         d->_maskWidget->raise();
-        d->_maskWidget->setFixedSize(parentWidget()->size());
-        d->_maskWidget->doMaskAnimation(90); // 90% 透明度
+        d->_maskWidget->setFixedSize(activeWindow->size());
+        d->_maskWidget->doMaskAnimation(90);
     }
 
 #ifdef Q_OS_WIN
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 3) && QT_VERSION <= QT_VERSION_CHECK(6, 6, 1))
-    HWND hwnd = (HWND) d->_currentWinID;
-    // 这里需要添加setShadow函数的实现，或者使用nTheme的相应函数
-    // setShadow(hwnd);
+    HWND  hwnd       = (HWND) d->_currentWinID;
     DWORD style      = ::GetWindowLongPtr(hwnd, GWL_STYLE);
     bool  hasCaption = (style & WS_CAPTION) == WS_CAPTION;
     if (!hasCaption) {
