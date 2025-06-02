@@ -9,6 +9,7 @@
 #include <QListWidget>
 #include <QVBoxLayout>
 #include <QtNativeUI/NFlyout.h>
+#include <QtNativeUI/NInfoBar.h>
 #include <QtNativeUI/NLineEdit.h>
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NScrollArea.h>
@@ -38,6 +39,7 @@ void DialogsExample::initUI() {
     contentLayout->setSpacing(24);
 
     // 添加各个对话框控件区域
+    contentLayout->addWidget(new ExampleSection("InfoBar", createInfoBars()));
     contentLayout->addWidget(new ExampleSection("Flyout", createFlyouts()));
     contentLayout->addWidget(new ExampleSection("Content Dialog", createContentDialogs()));
 
@@ -46,6 +48,272 @@ void DialogsExample::initUI() {
     m_scrollArea->setWidget(contentWidget);
     mainLayout->addWidget(m_scrollArea);
     setMinimumWidth(600);
+}
+
+QWidget* DialogsExample::createInfoBars() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(24);
+
+    // 基本InfoBar示例
+    QLabel* basicInfoBarLabel = new QLabel("基本InfoBar:", container);
+    QFont   labelFont         = basicInfoBarLabel->font();
+    labelFont.setBold(true);
+    basicInfoBarLabel->setFont(labelFont);
+    layout->addWidget(basicInfoBarLabel);
+
+    // 不同类型的InfoBar
+    QGridLayout* typeGrid = new QGridLayout();
+    typeGrid->setSpacing(20);
+
+    // 信息类型
+    NPushButton* infoButton = new NPushButton("显示信息InfoBar", container);
+    connect(infoButton, &NPushButton::clicked, [this]() {
+        QString title   = "信息提示";
+        QString message = "这是一条普通信息提示，将在3秒后自动关闭";
+        NInfoBar::information(NInfoBarType::Top, title, message, 3000, this);
+    });
+    typeGrid->addWidget(infoButton, 0, 0);
+
+    // 成功类型
+    NPushButton* successButton = new NPushButton("显示成功InfoBar", container);
+    connect(successButton, &NPushButton::clicked, [this]() {
+        QString title   = "操作成功";
+        QString message = "您的操作已成功完成，系统已保存相关数据";
+        NInfoBar::success(NInfoBarType::Top, title, message, 3000, this);
+    });
+    typeGrid->addWidget(successButton, 0, 1);
+
+    // 警告类型
+    NPushButton* warningButton = new NPushButton("显示警告InfoBar", container);
+    connect(warningButton, &NPushButton::clicked, [this]() {
+        QString title   = "警告";
+        QString message = "系统检测到潜在风险，请注意数据安全";
+        NInfoBar::warning(NInfoBarType::Top, title, message, 3000, this);
+    });
+    typeGrid->addWidget(warningButton, 1, 0);
+
+    // 错误类型
+    NPushButton* errorButton = new NPushButton("显示错误InfoBar", container);
+    connect(errorButton, &NPushButton::clicked, [this]() {
+        QString title   = "错误";
+        QString message = "操作失败，请检查输入并重试";
+        NInfoBar::error(NInfoBarType::Top, title, message, 3000, this, false);
+    });
+    typeGrid->addWidget(errorButton, 1, 1);
+
+    layout->addLayout(typeGrid);
+
+    // 不同位置的InfoBar
+    QLabel* positionLabel = new QLabel("不同位置的InfoBar:", container);
+    positionLabel->setFont(labelFont);
+    layout->addWidget(positionLabel);
+
+    QGridLayout* positionGrid = new QGridLayout();
+    positionGrid->setSpacing(20);
+
+    // 定义位置数组
+    struct InfoBarPosition {
+        QString                      name;
+        NInfoBarType::PositionPolicy position;
+    };
+
+    QList<InfoBarPosition> positions = {{"顶部", NInfoBarType::Top},
+                                        {"顶部左侧", NInfoBarType::TopLeft},
+                                        {"顶部右侧", NInfoBarType::TopRight},
+                                        {"底部", NInfoBarType::Bottom},
+                                        {"底部左侧", NInfoBarType::BottomLeft},
+                                        {"底部右侧", NInfoBarType::BottomRight},
+                                        {"左侧", NInfoBarType::Left},
+                                        {"右侧", NInfoBarType::Right}};
+
+    int row    = 0;
+    int col    = 0;
+    int maxCol = 4;
+
+    for (const auto& pos : positions) {
+        NPushButton* button = new NPushButton(QString("%1位置").arg(pos.name), container);
+
+        connect(button, &NPushButton::clicked, [this, pos]() {
+            QString title   = QString("%1位置").arg(pos.name);
+            QString message = QString("这是显示在%1的InfoBar").arg(pos.name);
+            NInfoBar::information(pos.position, title, message, 3000, this);
+        });
+
+        positionGrid->addWidget(button, row, col);
+
+        col++;
+        if (col >= maxCol) {
+            col = 0;
+            row++;
+        }
+    }
+
+    layout->addLayout(positionGrid);
+
+    // 自定义显示时间
+    QLabel* durationLabel = new QLabel("自定义显示时间:", container);
+    durationLabel->setFont(labelFont);
+    layout->addWidget(durationLabel);
+
+    QHBoxLayout* durationLayout = new QHBoxLayout();
+
+    // 短时间显示
+    NPushButton* shortButton = new NPushButton("短时间显示(1秒)", container);
+    connect(shortButton, &NPushButton::clicked, [this]() {
+        QString title   = "短暂提示";
+        QString message = "这条消息将在1秒后消失";
+        NInfoBar::success(NInfoBarType::TopRight, title, message, 1000, this);
+    });
+    durationLayout->addWidget(shortButton);
+
+    // 长时间显示
+    NPushButton* longButton = new NPushButton("长时间显示(10秒)", container);
+    connect(longButton, &NPushButton::clicked, [this]() {
+        QString title   = "长时间提示";
+        QString message = "这条消息将在10秒后消失，或者您可以点击关闭按钮";
+        NInfoBar::warning(NInfoBarType::TopLeft, title, message, 10000, this);
+    });
+    durationLayout->addWidget(longButton);
+
+    // 不自动关闭
+    NPushButton* noAutoCloseButton = new NPushButton("不自动关闭", container);
+    connect(noAutoCloseButton, &NPushButton::clicked, [this]() {
+        QString title   = "重要通知";
+        QString message = "这条消息不会自动关闭，必须手动点击关闭";
+        NInfoBar::error(NInfoBarType::Bottom, title, message, 0, this);
+    });
+    durationLayout->addWidget(noAutoCloseButton);
+
+    durationLayout->addStretch();
+    layout->addLayout(durationLayout);
+
+    // 多个InfoBar堆叠
+    QLabel* stackLabel = new QLabel("多个InfoBar堆叠:", container);
+    stackLabel->setFont(labelFont);
+    layout->addWidget(stackLabel);
+
+    QHBoxLayout* stackLayout = new QHBoxLayout();
+
+    NPushButton* stackButton = new NPushButton("显示多个InfoBar", container);
+    connect(stackButton, &NPushButton::clicked, [this]() {
+        // 显示多个不同类型的InfoBar，它们会自动堆叠
+        QString title1   = "第一条消息";
+        QString message1 = "这是第一条消息，显示在顶部";
+        NInfoBar::information(NInfoBarType::Top, title1, message1, 5000, this);
+
+        QString title2   = "第二条消息";
+        QString message2 = "这是第二条消息，也显示在顶部，会自动堆叠";
+        NInfoBar::success(NInfoBarType::Top, title2, message2, 8000, this);
+
+        QString title3   = "第三条消息";
+        QString message3 = "这是第三条消息，同样显示在顶部，会继续堆叠";
+        NInfoBar::warning(NInfoBarType::Top, title3, message3, 10000, this);
+    });
+    stackLayout->addWidget(stackButton);
+
+    NPushButton* stackBottomButton = new NPushButton("在底部堆叠InfoBar", container);
+    connect(stackBottomButton, &NPushButton::clicked, [this]() {
+        // 显示多个不同类型的InfoBar在底部
+        QString title1   = "底部消息1";
+        QString message1 = "这是底部的第一条消息";
+        NInfoBar::information(NInfoBarType::Bottom, title1, message1, 5000, this);
+
+        QString title2   = "底部消息2";
+        QString message2 = "这是底部的第二条消息，会自动堆叠";
+        NInfoBar::success(NInfoBarType::Bottom, title2, message2, 8000, this);
+
+        QString title3   = "底部消息3";
+        QString message3 = "这是底部的第三条消息，继续堆叠";
+        NInfoBar::warning(NInfoBarType::Bottom, title3, message3, 10000, this);
+    });
+    stackLayout->addWidget(stackBottomButton);
+
+    stackLayout->addStretch();
+    layout->addLayout(stackLayout);
+
+    // 直接创建 InfoBar widget 示例
+    QLabel* staticInfoBarLabel = new QLabel("直接创建 InfoBar widget:", container);
+    staticInfoBarLabel->setFont(labelFont);
+    layout->addWidget(staticInfoBarLabel);
+
+    QVBoxLayout* staticInfoBarLayout = new QVBoxLayout();
+
+    // 创建一个容器用于放置 InfoBar
+    QWidget*     infoBarContainer       = new QWidget(container);
+    QVBoxLayout* infoBarContainerLayout = new QVBoxLayout(infoBarContainer);
+    infoBarContainerLayout->setContentsMargins(0, 10, 0, 10);
+
+    // 创建不同类型的 InfoBar
+    NInfoBar* infoInfoBar =
+        new NInfoBar(NInfoBarType::Information, "信息", "这是一条信息提示，显示在标题右侧", infoBarContainer);
+    infoBarContainerLayout->addWidget(infoInfoBar);
+
+    NInfoBar* successInfoBar = new NInfoBar(NInfoBarType::Success, "成功", "操作已成功完成", infoBarContainer);
+    infoBarContainerLayout->addWidget(successInfoBar);
+
+    NInfoBar* warningInfoBar = new NInfoBar(NInfoBarType::Warning, "警告", "检测到潜在风险", infoBarContainer);
+    infoBarContainerLayout->addWidget(warningInfoBar);
+
+    NInfoBar* errorInfoBar = new NInfoBar(NInfoBarType::Error, "错误", "操作失败，请重试", infoBarContainer);
+    infoBarContainerLayout->addWidget(errorInfoBar);
+
+    // 长文本示例
+    NInfoBar* longTextInfoBar = new NInfoBar(
+        NInfoBarType::Information,
+        "长文本示例",
+        "这是一段较长的文本内容，它将自动换行显示在标题的下方。这种设计符合 Fluent Design 的规范，提高了可读性。",
+        infoBarContainer);
+    infoBarContainerLayout->addWidget(longTextInfoBar);
+
+    // 添加按钮的示例
+    NInfoBar* withButtonInfoBar = new NInfoBar(NInfoBarType::Warning, "需要操作", "此操作需要确认", infoBarContainer);
+    NPushButton* confirmButton  = new NPushButton("确认", withButtonInfoBar);
+    NPushButton* cancelButton   = new NPushButton("取消", withButtonInfoBar);
+    withButtonInfoBar->addWidget(confirmButton);
+    withButtonInfoBar->addWidget(cancelButton);
+    infoBarContainerLayout->addWidget(withButtonInfoBar);
+
+    // 添加到布局
+    staticInfoBarLayout->addWidget(infoBarContainer);
+    layout->addLayout(staticInfoBarLayout);
+
+    // 动态创建和添加 InfoBar 的示例
+    QHBoxLayout* dynamicInfoBarLayout = new QHBoxLayout();
+    NPushButton* addInfoBarButton     = new NPushButton("添加新的 InfoBar", container);
+
+    QWidget*     dynamicContainer       = new QWidget(container);
+    QVBoxLayout* dynamicContainerLayout = new QVBoxLayout(dynamicContainer);
+    dynamicContainerLayout->setContentsMargins(0, 10, 0, 10);
+
+    connect(addInfoBarButton, &NPushButton::clicked, [=]() {
+        static int count      = 1;
+        NInfoBar*  newInfoBar = new NInfoBar(count % 4 == 0   ? NInfoBarType::Error
+                                            : count % 4 == 1 ? NInfoBarType::Information
+                                            : count % 4 == 2 ? NInfoBarType::Success
+                                                             : NInfoBarType::Warning,
+                                            QString("动态创建 #%1").arg(count),
+                                            QString("这是第 %1 个动态创建的 InfoBar").arg(count),
+                                            dynamicContainer);
+
+        // 如果是偶数，添加一个按钮
+        if (count % 2 == 0) {
+            NPushButton* actionButton = new NPushButton("操作", newInfoBar);
+            connect(actionButton, &NPushButton::clicked, [=]() { newInfoBar->deleteLater(); });
+            newInfoBar->addWidget(actionButton);
+        }
+
+        dynamicContainerLayout->addWidget(newInfoBar);
+        count++;
+    });
+
+    dynamicInfoBarLayout->addWidget(addInfoBarButton);
+    dynamicInfoBarLayout->addStretch();
+    layout->addLayout(dynamicInfoBarLayout);
+    layout->addWidget(dynamicContainer);
+
+    layout->addStretch();
+    return container;
 }
 
 QWidget* DialogsExample::createFlyouts() {

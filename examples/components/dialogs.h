@@ -13,6 +13,7 @@ class DialogsExample : public QWidget {
     void     initUI();
     QWidget* createFlyouts();
     QWidget* createContentDialogs();
+    QWidget* createInfoBars();
 
     NScrollArea* m_scrollArea;
 };
