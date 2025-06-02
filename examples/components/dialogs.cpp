@@ -14,6 +14,7 @@
 #include <QtNativeUI/NScrollArea.h>
 #include <QtNativeUI/NSpinBox.h>
 
+#include <QtNativeUI/NContentDialog.h>
 #include "QtNativeUI/NCalendarWidget.h"
 #include "widgets/ExampleSection.h"
 
@@ -38,6 +39,7 @@ void DialogsExample::initUI() {
 
     // 添加各个对话框控件区域
     contentLayout->addWidget(new ExampleSection("Flyout", createFlyouts()));
+    contentLayout->addWidget(new ExampleSection("Content Dialog", createContentDialogs()));
 
     contentLayout->addStretch();
 
@@ -424,6 +426,120 @@ QWidget* DialogsExample::createFlyouts() {
     dismissLayout->addWidget(offButton);
     dismissLayout->addStretch();
     layout->addLayout(dismissLayout);
+
+    layout->addStretch();
+    return container;
+}
+
+QWidget* DialogsExample::createContentDialogs() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(24);
+
+    // 基本 ContentDialog 示例
+    QLabel* basicDialogLabel = new QLabel("基本内容对话框:", container);
+    QFont   labelFont        = basicDialogLabel->font();
+    labelFont.setBold(true);
+    basicDialogLabel->setFont(labelFont);
+    layout->addWidget(basicDialogLabel);
+
+    // 基本对话框示例
+    QHBoxLayout* basicDialogLayout = new QHBoxLayout();
+    NPushButton* basicDialogButton = new NPushButton("显示基本对话框", container);
+
+    connect(basicDialogButton, &NPushButton::clicked, [this]() {
+        NContentDialog* dialog = new NContentDialog(this);
+        dialog->setTitle("确认操作");
+        dialog->setContent("您确定要执行此操作吗？此操作不可撤销。");
+        dialog->setPrimaryButtonText("确定");
+        dialog->setCloseButtonText("取消");
+
+        connect(dialog, &NContentDialog::primaryButtonClicked, [=]() { qDebug() << "用户点击了确定按钮"; });
+
+        connect(dialog, &NContentDialog::secondaryButtonClicked, [=]() { qDebug() << "用户点击了取消按钮"; });
+
+        NContentDialog::DialogResult result = dialog->showDialog();
+        qDebug() << "对话框结果:" << result;
+    });
+
+    basicDialogLayout->addWidget(basicDialogButton);
+    basicDialogLayout->addStretch();
+    layout->addLayout(basicDialogLayout);
+
+    // 自定义内容对话框
+    QLabel* customDialogLabel = new QLabel("自定义内容对话框:", container);
+    customDialogLabel->setFont(labelFont);
+    layout->addWidget(customDialogLabel);
+
+    QHBoxLayout* customDialogLayout = new QHBoxLayout();
+    NPushButton* customDialogButton = new NPushButton("显示自定义内容对话框", container);
+
+    connect(customDialogButton, &NPushButton::clicked, [this]() {
+        NContentDialog* dialog = new NContentDialog(this);
+        dialog->setTitle("自定义内容");
+
+        // 创建自定义内容
+        QWidget*     customContent = new QWidget();
+        QVBoxLayout* contentLayout = new QVBoxLayout(customContent);
+
+        QLabel* infoLabel = new QLabel("请输入您的信息:", customContent);
+
+        QFormLayout* formLayout = new QFormLayout();
+        NLineEdit*   nameEdit   = new NLineEdit(customContent);
+        NLineEdit*   emailEdit  = new NLineEdit(customContent);
+
+        formLayout->addRow("姓名:", nameEdit);
+        formLayout->addRow("邮箱:", emailEdit);
+
+        contentLayout->addWidget(infoLabel);
+        contentLayout->addLayout(formLayout);
+
+        dialog->setContentWidget(customContent);
+
+        dialog->setPrimaryButtonText("提交");
+        dialog->setCloseButtonText("取消");
+
+        connect(dialog, &NContentDialog::primaryButtonClicked, [=]() {
+            qDebug() << "提交的信息:" << nameEdit->text() << emailEdit->text();
+        });
+
+        NContentDialog::DialogResult result = dialog->showDialog();
+        qDebug() << "对话框结果:" << result;
+    });
+
+    customDialogLayout->addWidget(customDialogButton);
+    customDialogLayout->addStretch();
+    layout->addLayout(customDialogLayout);
+
+    // 三按钮对话框
+    QLabel* threeButtonLabel = new QLabel("三按钮对话框:", container);
+    threeButtonLabel->setFont(labelFont);
+    layout->addWidget(threeButtonLabel);
+
+    QHBoxLayout* threeButtonLayout       = new QHBoxLayout();
+    NPushButton* threeButtonDialogButton = new NPushButton("显示三按钮对话框", container);
+
+    connect(threeButtonDialogButton, &NPushButton::clicked, [this]() {
+        NContentDialog* dialog = new NContentDialog(this);
+        dialog->setTitle("保存文档");
+        dialog->setContent("是否要保存对文档的更改？");
+        dialog->setPrimaryButtonText("保存");
+        dialog->setSecondaryButtonText("不保存");
+        dialog->setCloseButtonText("取消");
+
+        connect(dialog, &NContentDialog::primaryButtonClicked, [=]() { qDebug() << "用户选择了保存"; });
+
+        connect(dialog, &NContentDialog::secondaryButtonClicked, [=]() { qDebug() << "用户选择了不保存"; });
+
+        connect(dialog, &NContentDialog::closeButtonClicked, [=]() { qDebug() << "用户选择了取消"; });
+
+        NContentDialog::DialogResult result = dialog->showDialog();
+        qDebug() << "对话框结果:" << result;
+    });
+
+    threeButtonLayout->addWidget(threeButtonDialogButton);
+    threeButtonLayout->addStretch();
+    layout->addLayout(threeButtonLayout);
 
     layout->addStretch();
     return container;
