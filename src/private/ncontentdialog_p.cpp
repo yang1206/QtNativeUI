@@ -75,7 +75,6 @@ void NContentDialogPrivate::initialize() {
     _buttonWidget = new QWidget(q);
     _buttonWidget->setFixedHeight(60);
     _buttonLayout = new QHBoxLayout(_buttonWidget);
-    _buttonLayout->setContentsMargins(24, 0, 24, 24);
     _buttonLayout->setSpacing(8);
 
     _leftButton = new NPushButton("cancel", q);
@@ -165,8 +164,6 @@ void NContentDialogPrivate::setupContentLayout() {
 
 void NContentDialogPrivate::doCloseAnimation() {
     Q_Q(NContentDialog);
-
-    // 确保遮罩也被隐藏
     if (_maskWidget) {
         _maskWidget->doMaskAnimation(0);
     }

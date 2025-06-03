@@ -8,9 +8,11 @@
 #include <QResizeEvent>
 #include <QScreen>
 #include <QStyle>
-
 #include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NTheme.h"
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#endif
 
 Q_PROPERTY_CREATE_Q_CPP(NContentDialog, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NContentDialog, QString, Title)
@@ -26,10 +28,9 @@ Q_PROPERTY_CREATE_Q_CPP(NContentDialog, bool, DefaultButton)
 NContentDialog::NContentDialog(QWidget* parent) : QDialog(parent), d_ptr(new NContentDialogPrivate()) {
     Q_D(NContentDialog);
     d->q_ptr = this;
-
-    // 窗口设置
     resize(400, height());
     setWindowModality(Qt::ApplicationModal);
+    setObjectName("NContentDialog");
 #ifdef Q_OS_WIN
     createWinId();
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 3) && QT_VERSION <= QT_VERSION_CHECK(6, 6, 1))
@@ -37,13 +38,16 @@ NContentDialog::NContentDialog(QWidget* parent) : QDialog(parent), d_ptr(new NCo
 #endif
 #else
     window()->setWindowFlags((window()->windowFlags()) | Qt::FramelessWindowHint);
-#endif
-    setObjectName("NContentDialog");
     setStyleSheet("#NContentDialog{background-color:transparent;}");
+#endif
+
     d->initialize();
 }
 
-NContentDialog::~NContentDialog() {}
+NContentDialog::~NContentDialog() {
+    Q_D(NContentDialog);
+    d->_maskWidget->deleteLater();
+}
 
 void NContentDialog::setContentWidget(QWidget* widget) {
     Q_D(NContentDialog);
@@ -94,7 +98,8 @@ void NContentDialog::showEvent(QShowEvent* event) {
 
 #ifdef Q_OS_WIN
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 3) && QT_VERSION <= QT_VERSION_CHECK(6, 6, 1))
-    HWND  hwnd       = (HWND) d->_currentWinID;
+    HWND hwnd = (HWND) d->_currentWinID;
+    ElaWinShadowHelper::getInstance()->setWindowShadow(d->_currentWinID);
     DWORD style      = ::GetWindowLongPtr(hwnd, GWL_STYLE);
     bool  hasCaption = (style & WS_CAPTION) == WS_CAPTION;
     if (!hasCaption) {
@@ -116,14 +121,6 @@ void NContentDialog::paintEvent(QPaintEvent* event) {
     nTheme->drawEffectShadow(
         &painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, NDesignTokenKey::ElevationRest);
 
-    QRect foregroundRect(d->_shadowBorderWidth,
-                         d->_shadowBorderWidth,
-                         width() - 2 * d->_shadowBorderWidth,
-                         height() - 2 * d->_shadowBorderWidth);
-
-    QPainterPath path;
-    path.addRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
-
     QColor bgColor;
     if (d->_isDark) {
         bgColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorQuarternary, NThemeType::Dark);
@@ -133,29 +130,11 @@ void NContentDialog::paintEvent(QPaintEvent* event) {
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(bgColor);
-    painter.drawPath(path);
+    painter.drawRect(rect());
 
-    QRect buttonAreaRect(foregroundRect.x(),
-                         foregroundRect.bottom() - d->_buttonWidget->height(),
-                         foregroundRect.width(),
-                         d->_buttonWidget->height());
-
-    QPainterPath buttonAreaPath;
-    buttonAreaPath.addRoundedRect(buttonAreaRect, d->_pBorderRadius, d->_pBorderRadius);
-
-    QColor buttonAreaColor;
-    if (d->_isDark) {
-        buttonAreaColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Dark);
-    } else {
-        buttonAreaColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Light);
-    }
-
-    painter.setBrush(buttonAreaColor);
-    painter.drawPath(buttonAreaPath);
-
+    painter.setBrush(NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, nTheme->themeMode()));
     painter.setPen(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, d->_themeMode));
-    painter.drawLine(foregroundRect.x(), buttonAreaRect.y(), foregroundRect.right(), buttonAreaRect.y());
-
+    painter.drawRoundedRect(QRectF(0, height() - 60, width(), 60), 8, 8);
     QDialog::paintEvent(event);
 }
 
@@ -167,39 +146,62 @@ void NContentDialog::resizeEvent(QResizeEvent* event) { QDialog::resizeEvent(eve
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool NContentDialog::nativeEvent(const QByteArray& eventType, void* message, qintptr* result)
 #else
-bool NContentDialog::nativeEvent(const QByteArray& eventType, void* message, long* result)
+bool ElaContentDialog::nativeEvent(const QByteArray& eventType, void* message, long* result)
 #endif
 {
     Q_D(NContentDialog);
-
-    if (eventType != "windows_generic_MSG" || !message) {
+    if ((eventType != "windows_generic_MSG") || !message) {
         return false;
     }
-
     const auto msg  = static_cast<const MSG*>(message);
     const HWND hwnd = msg->hwnd;
     if (!hwnd || !msg) {
         return false;
     }
-
     d->_currentWinID    = (qint64) hwnd;
     const UINT   uMsg   = msg->message;
     const WPARAM wParam = msg->wParam;
     const LPARAM lParam = msg->lParam;
-
     switch (uMsg) {
-        case WM_NCACTIVATE:
+        case WM_WINDOWPOSCHANGING: {
+            WINDOWPOS* wp = reinterpret_cast<WINDOWPOS*>(lParam);
+            if (wp != nullptr && (wp->flags & SWP_NOSIZE) == 0) {
+                wp->flags |= SWP_NOCOPYBITS;
+                *result = ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
+                return true;
+            }
+            return false;
+        }
+        case WM_NCACTIVATE: {
             *result = TRUE;
             return true;
-
-        case WM_NCCALCSIZE:
+        }
+        case WM_NCCALCSIZE: {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 3) && QT_VERSION <= QT_VERSION_CHECK(6, 6, 1))
             if (wParam == FALSE) {
                 return false;
             }
+            if (::IsZoomed(hwnd)) {
+                setContentsMargins(8, 8, 8, 8);
+            } else {
+                setContentsMargins(0, 0, 0, 0);
+            }
             *result = 0;
             return true;
+#else
+            if (wParam == FALSE) {
+                return false;
+            }
+            RECT* clientRect = &((NCCALCSIZE_PARAMS*) (lParam))->rgrc[0];
+            if (!::IsZoomed(hwnd)) {
+                clientRect->top -= 1;
+                clientRect->bottom -= 1;
+            }
+            *result = WVR_REDRAW;
+            return true;
+#endif
+        }
     }
-
     return QDialog::nativeEvent(eventType, message, result);
 }
 #endif
