@@ -403,7 +403,7 @@ void NInfoBarPrivate::_drawIconWithCircle(QPainter*              painter,
                                           const QColor&          circleBgColor) {
     Q_Q(NInfoBar);
     painter->save();
-    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 : q->height() / 2;
+    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 + 2 : q->height() / 2;
 
     QPainterPath textPath;
     textPath.addEllipse(QPoint(_leftPadding + _iconSize, iconY), 9, 9);
@@ -425,7 +425,7 @@ void NInfoBarPrivate::_drawIconWithCircle(QPainter*             painter,
                                           const QColor&         circleBgColor) {
     Q_Q(NInfoBar);
     painter->save();
-    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 : q->height() / 2;
+    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 + 2 : q->height() / 2;
 
     QPainterPath textPath;
     textPath.addEllipse(QPoint(_leftPadding + _iconSize, iconY), 9, 9);
@@ -473,7 +473,7 @@ void NInfoBarPrivate::_drawInformation(QPainter* painter) {
     int iconSize = _iconSize * 2;
 
     // 计算图标垂直位置，与标题保持一致
-    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 : q->height() / 2;
+    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 + 2 : q->height() / 2;
 
     painter->drawPixmap(
         _leftPadding,
