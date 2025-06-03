@@ -70,7 +70,7 @@ class NInfoBarPrivate : public QObject {
 
     // 位置数据
     int _leftPadding{20}; // 左边框到图标中心
-    int _iconSize{12};
+    int _iconSize{14};
     int _titleLeftSpacing{30};           // 图标中心到Title左侧
     int _textLeftSpacing{15};            // Title右侧到Text左侧
     int _closeButtonLeftRightMargin{20}; // closeButton左右总Margin
@@ -116,6 +116,7 @@ class NInfoBarPrivate : public QObject {
     // 绘制函数
     void _drawCommonBackground(QPainter* painter, const QColor& bgColor);
     void _drawIconWithCircle(QPainter* painter, NRegularIconType::Icon iconType, const QColor& circleBgColor);
+    void _drawIconWithCircle(QPainter* painter, NFilledIconType::Icon iconType, const QColor& circleBgColor);
     void _drawSuccess(QPainter* painter);
     void _drawWarning(QPainter* painter);
     void _drawInformation(QPainter* painter);

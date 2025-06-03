@@ -403,8 +403,6 @@ void NInfoBarPrivate::_drawIconWithCircle(QPainter*              painter,
                                           const QColor&          circleBgColor) {
     Q_Q(NInfoBar);
     painter->save();
-
-    // 计算图标垂直位置，与标题保持一致
     int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 : q->height() / 2;
 
     QPainterPath textPath;
@@ -422,6 +420,28 @@ void NInfoBarPrivate::_drawIconWithCircle(QPainter*              painter,
     painter->restore();
 }
 
+void NInfoBarPrivate::_drawIconWithCircle(QPainter*             painter,
+                                          NFilledIconType::Icon iconType,
+                                          const QColor&         circleBgColor) {
+    Q_Q(NInfoBar);
+    painter->save();
+    int iconY = _isLongMessage ? 15 + q->fontMetrics().height() / 2 : q->height() / 2;
+
+    QPainterPath textPath;
+    textPath.addEllipse(QPoint(_leftPadding + _iconSize, iconY), 9, 9);
+    painter->setClipPath(textPath);
+    QColor iconColor = nTheme->isDarkMode() ? NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light)
+                                            : NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    painter->fillPath(textPath, circleBgColor);
+
+    painter->drawPixmap(_leftPadding + _iconSize / 2,
+                        iconY - _iconSize / 2,
+                        _iconSize,
+                        _iconSize,
+                        nIcon->fromFilled(iconType, _iconSize, iconColor).pixmap(_iconSize, _iconSize));
+    painter->restore();
+}
+
 void NInfoBarPrivate::_drawSuccess(QPainter* painter) {
     _drawCommonBackground(painter, NThemeColor(NFluentColorKey::SystemFillColorSuccessBackground, _themeMode));
     _drawIconWithCircle(painter,
@@ -432,15 +452,14 @@ void NInfoBarPrivate::_drawSuccess(QPainter* painter) {
 
 void NInfoBarPrivate::_drawWarning(QPainter* painter) {
     _drawCommonBackground(painter, NThemeColor(NFluentColorKey::SystemFillColorCautionBackground, _themeMode));
-    _drawIconWithCircle(painter,
-                        NRegularIconType::Important12Regular,
-                        NThemeColor(NFluentColorKey::SystemFillColorCaution, _themeMode));
+    _drawIconWithCircle(
+        painter, NFilledIconType::Important12Filled, NThemeColor(NFluentColorKey::SystemFillColorCaution, _themeMode));
     painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode));
 }
 
 void NInfoBarPrivate::_drawInformation(QPainter* painter) {
     Q_Q(NInfoBar);
-    QColor bgColor = NThemeColor(NFluentColorKey::SystemFillColorAttentionBackground, _themeMode);
+    QColor bgColor = NThemeColor(NFluentColorKey::SystemFillColorSolidAttentionBackground, _themeMode);
     QRect  foregroundRect(_shadowBorderWidth,
                          _shadowBorderWidth,
                          q->width() - 2 * _shadowBorderWidth,
@@ -597,7 +616,7 @@ void NInfoBarPrivate::_drawText(QPainter* painter) {
             messageWidth -= (widgetsWidth + 10);
         }
 
-        painter->drawText(QRect(messageX, titleY, messageWidth, painter->fontMetrics().height()),
+        painter->drawText(QRect(messageX, titleY + 1, messageWidth, painter->fontMetrics().height()),
                           Qt::AlignLeft | Qt::AlignVCenter,
                           _message);
     }
