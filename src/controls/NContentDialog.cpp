@@ -127,10 +127,20 @@ void NContentDialog::paintEvent(QPaintEvent* event) {
     } else {
         bgColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorQuarternary, NThemeType::Light);
     }
-
     painter.setPen(Qt::NoPen);
     painter.setBrush(bgColor);
+#ifdef Q_OS_WIN
     painter.drawRect(rect());
+#endif
+
+#ifdef Q_OS_MACOS
+    QPainterPath path;
+    path.addRoundedRect(rect(), d->_pBorderRadius, d->_pBorderRadius);
+    painter.drawPath(path);
+#endif
+
+    painter.setPen(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, d->_themeMode));
+    painter.drawLine(rect().x(), height() - 60, rect().right(), height() - 60);
 
     painter.setBrush(NThemeColor(NFluentColorKey::SolidBackgroundFillColorBase, nTheme->themeMode()));
     painter.setPen(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, d->_themeMode));
