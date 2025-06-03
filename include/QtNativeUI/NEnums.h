@@ -38,6 +38,29 @@ Q_ENUM_CREATE(ThemeMode)
 
 Q_END_ENUM_CREATE(NThemeType)
 
+Q_BEGIN_ENUM_CREATE(NInfoBarType)
+enum PositionPolicy {
+    Top,         // 顶部居中
+    TopLeft,     // 左上角
+    TopRight,    // 右上角
+    Bottom,      // 底部居中
+    BottomLeft,  // 左下角
+    BottomRight, // 右下角
+    Left,        // 左侧居中
+    Right        // 右侧居中
+};
+
+Q_ENUM_CREATE(PositionPolicy)
+enum InfoMode {
+    Information, // 信息
+    Success,     // 成功
+    Warning,     // 警告
+    Error        // 错误
+};
+Q_ENUM_CREATE(InfoMode)
+
+Q_END_ENUM_CREATE(NInfoBarType)
+
 // 设计令牌枚举
 Q_BEGIN_ENUM_CREATE(NDesignTokenKey)
 enum Key {

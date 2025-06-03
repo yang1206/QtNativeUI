@@ -56,14 +56,12 @@ void NContentDialogPrivate::initialize() {
 
     _titleLabel     = new QLabel(q);
     QFont titleFont = _titleLabel->font();
-    _titleLabel->setStyleSheet("font: 20px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';");
     titleFont.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeTitle).toInt());
     titleFont.setBold(true);
     _titleLabel->setFont(titleFont);
 
     _contentLabel     = new QLabel(q);
     QFont contentFont = _contentLabel->font();
-    _contentLabel->setStyleSheet("font: 14px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';");
     contentFont.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeBody).toInt());
     _contentLabel->setFont(contentFont);
     _contentLabel->setWordWrap(true);
@@ -75,7 +73,6 @@ void NContentDialogPrivate::initialize() {
     _buttonWidget = new QWidget(q);
     _buttonWidget->setFixedHeight(60);
     _buttonLayout = new QHBoxLayout(_buttonWidget);
-    _buttonLayout->setContentsMargins(24, 0, 24, 24);
     _buttonLayout->setSpacing(8);
 
     _leftButton = new NPushButton("cancel", q);
@@ -165,8 +162,6 @@ void NContentDialogPrivate::setupContentLayout() {
 
 void NContentDialogPrivate::doCloseAnimation() {
     Q_Q(NContentDialog);
-
-    // 确保遮罩也被隐藏
     if (_maskWidget) {
         _maskWidget->doMaskAnimation(0);
     }
