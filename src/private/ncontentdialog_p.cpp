@@ -56,14 +56,12 @@ void NContentDialogPrivate::initialize() {
 
     _titleLabel     = new QLabel(q);
     QFont titleFont = _titleLabel->font();
-    _titleLabel->setStyleSheet("font: 20px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';");
     titleFont.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeTitle).toInt());
     titleFont.setBold(true);
     _titleLabel->setFont(titleFont);
 
     _contentLabel     = new QLabel(q);
     QFont contentFont = _contentLabel->font();
-    _contentLabel->setStyleSheet("font: 14px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';");
     contentFont.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeBody).toInt());
     _contentLabel->setFont(contentFont);
     _contentLabel->setWordWrap(true);
