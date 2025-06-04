@@ -63,7 +63,7 @@ Q_END_ENUM_CREATE(NInfoBarType)
 
 // 设计令牌枚举
 Q_BEGIN_ENUM_CREATE(NDesignTokenKey)
-enum Key {
+enum Radius {
     // 圆角大小
     CornerRadiusNone,
     CornerRadiusSmall,
@@ -71,7 +71,10 @@ enum Key {
     CornerRadiusMedium,
     CornerRadiusLarge,
     CornerRadiusCircular,
+};
+Q_ENUM_CREATE(Radius)
 
+enum Spacing {
     // 间距
     SpacingNone,
     SpacingXS,
@@ -81,7 +84,10 @@ enum Key {
     SpacingXL,
     SpacingXXL,
     SpacingXXXL,
+};
+Q_ENUM_CREATE(Spacing)
 
+enum FontSize {
     // 字体大小
     FontSizeCaption,
     FontSizeBody,
@@ -90,35 +96,45 @@ enum Key {
     FontSizeTitleLarge,
     FontSizeHeader,
     FontSizeHeaderLarge,
+};
+Q_ENUM_CREATE(FontSize)
 
+enum FontWeight {
     // 字重
     FontWeightRegular,
     FontWeightMedium,
     FontWeightSemibold,
     FontWeightBold,
+};
 
+Q_ENUM_CREATE(FontWeight)
+
+enum Elevation {
     // 阴影层级
     ElevationNone,
     ElevationRest,
     ElevationHover,
     ElevationFlyout,
     ElevationDialog,
+};
 
+Q_ENUM_CREATE(Elevation)
+
+enum Animation {
     // 动效时长
     AnimationFast,
     AnimationNormal,
     AnimationSlow,
     AnimationVerySlow,
+};
+Q_ENUM_CREATE(Animation)
 
-    // 缓动曲线
+enum Easing {
     EasingStandard,
     EasingAccelerate,
     EasingDecelerate,
     EasingLinear,
-
-    Count // 用于计数和边界检查
 };
-Q_ENUM_CREATE(Key)
 Q_END_ENUM_CREATE(NDesignTokenKey)
 
 #endif // QTNATIVEUI_NENUMS_H

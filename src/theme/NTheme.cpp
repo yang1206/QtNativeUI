@@ -27,7 +27,7 @@ NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)
 #else
     connect(qApp, &QApplication::paletteChanged, this, [this]() {
         updateThemeState();
-        if (d_ptr->_themeMode == ThemeMode::System) {
+        if (d_ptr->_themeMode == NThemeType::ThemeMode::System) {
             emit themeModeChanged(d_ptr->_themeMode);
         }
         if (d_ptr->_useSystemAccentColor) {
@@ -237,26 +237,107 @@ QMap<NFluentColorKey::Key, QColor> NTheme::getAllColors() const {
     return result;
 }
 
-QVariant NTheme::getToken(NDesignTokenKey::Key key) const {
+// 泛型设计令牌方法实现
+template <typename T>
+QVariant NTheme::getToken(const T& key) const {
     Q_D(const NTheme);
     return d->resolveToken(key);
 }
 
-void NTheme::setToken(NDesignTokenKey::Key key, const QVariant& value) {
-    Q_D(NTheme);
-    d->_customTokens[key] = value;
+template <typename T>
+void NTheme::setToken(const T& key, const QVariant& value) {
+    // 这里不实现，让特化实现具体功能
 }
 
-void NTheme::drawEffectShadow(QPainter*            painter,
-                              QRect                widgetRect,
-                              int                  shadowBorderWidth,
-                              int                  borderRadius,
-                              NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest) {
+// 特定类型的设计令牌获取方法
+QVariant NTheme::getRadius(NDesignTokenKey::Radius key) const {
+    Q_D(const NTheme);
+    return d->resolveToken(key);
+}
+
+QVariant NTheme::getSpacing(NDesignTokenKey::Spacing key) const {
+    Q_D(const NTheme);
+    return d->resolveToken(key);
+}
+
+QVariant NTheme::getFontSize(NDesignTokenKey::FontSize key) const {
+    Q_D(const NTheme);
+    return d->resolveToken(key);
+}
+
+QVariant NTheme::getFontWeight(NDesignTokenKey::FontWeight key) const {
+    Q_D(const NTheme);
+    return d->resolveToken(key);
+}
+
+QVariant NTheme::getElevation(NDesignTokenKey::Elevation key) const {
+    Q_D(const NTheme);
+    return d->resolveToken(key);
+}
+
+QVariant NTheme::getAnimation(NDesignTokenKey::Animation key) const {
+    Q_D(const NTheme);
+    return d->resolveToken(key);
+}
+
+QVariant NTheme::getEasing(NDesignTokenKey::Easing key) const {
+    Q_D(const NTheme);
+    return d->resolveToken(key);
+}
+
+// 特定类型的设计令牌设置方法 - 需要特化
+template <>
+void NTheme::setToken(const NDesignTokenKey::Radius& key, const QVariant& value) {
+    Q_D(NTheme);
+    d->_customRadiusTokens[key] = value;
+}
+
+template <>
+void NTheme::setToken(const NDesignTokenKey::Spacing& key, const QVariant& value) {
+    Q_D(NTheme);
+    d->_customSpacingTokens[key] = value;
+}
+
+template <>
+void NTheme::setToken(const NDesignTokenKey::FontSize& key, const QVariant& value) {
+    Q_D(NTheme);
+    d->_customFontSizeTokens[key] = value;
+}
+
+template <>
+void NTheme::setToken(const NDesignTokenKey::FontWeight& key, const QVariant& value) {
+    Q_D(NTheme);
+    d->_customFontWeightTokens[key] = value;
+}
+
+template <>
+void NTheme::setToken(const NDesignTokenKey::Elevation& key, const QVariant& value) {
+    Q_D(NTheme);
+    d->_customElevationTokens[key] = value;
+}
+
+template <>
+void NTheme::setToken(const NDesignTokenKey::Animation& key, const QVariant& value) {
+    Q_D(NTheme);
+    d->_customAnimationTokens[key] = value;
+}
+
+template <>
+void NTheme::setToken(const NDesignTokenKey::Easing& key, const QVariant& value) {
+    Q_D(NTheme);
+    d->_customEasingTokens[key] = value;
+}
+
+void NTheme::drawEffectShadow(QPainter*                  painter,
+                              QRect                      widgetRect,
+                              int                        shadowBorderWidth,
+                              int                        borderRadius,
+                              NDesignTokenKey::Elevation elevationKey) {
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing);
 
     // 获取阴影层级设置
-    QVariantMap elevation   = getToken(elevationKey).toMap();
+    QVariantMap elevation   = getElevation(elevationKey).toMap();
     int         yOffset     = elevation["yOffset"].toInt();
     QColor      shadowColor = elevation["color"].value<QColor>();
 
@@ -288,5 +369,21 @@ void NTheme::drawEffectShadow(QPainter*            painter,
 void NTheme::resetToDefaults() {
     Q_D(NTheme);
     d->_customColors.clear();
-    d->_customTokens.clear();
+
+    // 清理所有自定义令牌
+    d->_customRadiusTokens.clear();
+    d->_customSpacingTokens.clear();
+    d->_customFontSizeTokens.clear();
+    d->_customFontWeightTokens.clear();
+    d->_customElevationTokens.clear();
+    d->_customAnimationTokens.clear();
+    d->_customEasingTokens.clear();
 }
+
+template QVariant NTheme::getToken<NDesignTokenKey::Radius>(const NDesignTokenKey::Radius& key) const;
+template QVariant NTheme::getToken<NDesignTokenKey::Spacing>(const NDesignTokenKey::Spacing& key) const;
+template QVariant NTheme::getToken<NDesignTokenKey::FontSize>(const NDesignTokenKey::FontSize& key) const;
+template QVariant NTheme::getToken<NDesignTokenKey::FontWeight>(const NDesignTokenKey::FontWeight& key) const;
+template QVariant NTheme::getToken<NDesignTokenKey::Elevation>(const NDesignTokenKey::Elevation& key) const;
+template QVariant NTheme::getToken<NDesignTokenKey::Animation>(const NDesignTokenKey::Animation& key) const;
+template QVariant NTheme::getToken<NDesignTokenKey::Easing>(const NDesignTokenKey::Easing& key) const;

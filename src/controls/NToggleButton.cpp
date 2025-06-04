@@ -183,7 +183,7 @@ void NToggleButton::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing | QPainter::TextAntialiasing);
 
-    NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
+    NDesignTokenKey::Elevation elevationKey = NDesignTokenKey::ElevationRest;
     if (!isEnabled()) {
         elevationKey = NDesignTokenKey::ElevationNone;
     } else if (d->_isPressed) {

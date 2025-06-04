@@ -12,7 +12,6 @@
 #define NThemeColor(key, themeMode) nTheme->getColorForTheme(key, themeMode)
 #define NAccentColor(type) getAccentColor(type)
 #define NDesignToken(key) nTheme->getToken(key)
-// 使用宏创建d指针
 class NThemePrivate;
 /**
  * @brief Theme management class for Qt applications
@@ -132,15 +131,27 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     // 获取所有当前主题颜色
     QMap<NFluentColorKey::Key, QColor> getAllColors() const;
 
-    // 设计令牌
-    QVariant getToken(NDesignTokenKey::Key key) const;
-    void     setToken(NDesignTokenKey::Key key, const QVariant& value);
+    // 设计令牌 - 通用方法
+    template <typename T>
+    QVariant getToken(const T& key) const;
 
-    void drawEffectShadow(QPainter*            painter,
-                          QRect                widgetRect,
-                          int                  shadowBorderWidth,
-                          int                  borderRadius,
-                          NDesignTokenKey::Key elevationKey);
+    template <typename T>
+    void setToken(const T& key, const QVariant& value);
+
+    // 设计令牌
+    QVariant getRadius(NDesignTokenKey::Radius key) const;
+    QVariant getSpacing(NDesignTokenKey::Spacing key) const;
+    QVariant getFontSize(NDesignTokenKey::FontSize key) const;
+    QVariant getFontWeight(NDesignTokenKey::FontWeight key) const;
+    QVariant getElevation(NDesignTokenKey::Elevation key) const;
+    QVariant getAnimation(NDesignTokenKey::Animation key) const;
+    QVariant getEasing(NDesignTokenKey::Easing key) const;
+
+    void drawEffectShadow(QPainter*                  painter,
+                          QRect                      widgetRect,
+                          int                        shadowBorderWidth,
+                          int                        borderRadius,
+                          NDesignTokenKey::Elevation elevationKey);
 
     // 重置为默认值
     void resetToDefaults();

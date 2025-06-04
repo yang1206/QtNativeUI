@@ -146,7 +146,7 @@ void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
 
     if (!d->_pTransparentBackground) {
         // 根据按钮状态选择阴影层级
-        NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
+        NDesignTokenKey::Elevation elevationKey = NDesignTokenKey::ElevationRest;
         if (!isEnabled()) {
             elevationKey = NDesignTokenKey::ElevationNone;
         } else if (d->_isPressed) {
