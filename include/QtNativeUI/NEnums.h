@@ -120,21 +120,23 @@ enum Elevation {
 
 Q_ENUM_CREATE(Elevation)
 
-enum Animation {
+enum AnimationDuration {
     // 动效时长
     AnimationFast,
     AnimationNormal,
     AnimationSlow,
     AnimationVerySlow,
 };
-Q_ENUM_CREATE(Animation)
+Q_ENUM_CREATE(AnimationDuration)
 
-enum Easing {
+enum AnimationEasing {
     EasingStandard,
     EasingAccelerate,
     EasingDecelerate,
     EasingLinear,
 };
+Q_ENUM_CREATE(AnimationEasing)
+
 Q_END_ENUM_CREATE(NDesignTokenKey)
 
 #endif // QTNATIVEUI_NENUMS_H

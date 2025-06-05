@@ -77,16 +77,16 @@ void NThemePrivate::initDesignTokens() {
         QVariantMap({{"blurRadius", 32}, {"xOffset", 0}, {"yOffset", 16}, {"color", QColor(0, 0, 0, 51)}});
 
     // 动效时长 (AnimationDuration)
-    _animationTokens[NDesignTokenKey::AnimationFast]     = 100;
-    _animationTokens[NDesignTokenKey::AnimationNormal]   = 200;
-    _animationTokens[NDesignTokenKey::AnimationSlow]     = 400;
-    _animationTokens[NDesignTokenKey::AnimationVerySlow] = 600;
+    _animationDurationTokens[NDesignTokenKey::AnimationFast]     = 100;
+    _animationDurationTokens[NDesignTokenKey::AnimationNormal]   = 200;
+    _animationDurationTokens[NDesignTokenKey::AnimationSlow]     = 400;
+    _animationDurationTokens[NDesignTokenKey::AnimationVerySlow] = 600;
 
     // 缓动曲线 (EasingCurve)
-    _easingTokens[NDesignTokenKey::EasingStandard]   = QEasingCurve(QEasingCurve::OutCubic);
-    _easingTokens[NDesignTokenKey::EasingAccelerate] = QEasingCurve(QEasingCurve::InCubic);
-    _easingTokens[NDesignTokenKey::EasingDecelerate] = QEasingCurve(QEasingCurve::OutCubic);
-    _easingTokens[NDesignTokenKey::EasingLinear]     = QEasingCurve(QEasingCurve::Linear);
+    _animationEasingTokens[NDesignTokenKey::EasingStandard]   = QEasingCurve(QEasingCurve::OutCubic);
+    _animationEasingTokens[NDesignTokenKey::EasingAccelerate] = QEasingCurve(QEasingCurve::InCubic);
+    _animationEasingTokens[NDesignTokenKey::EasingDecelerate] = QEasingCurve(QEasingCurve::OutCubic);
+    _animationEasingTokens[NDesignTokenKey::EasingLinear]     = QEasingCurve(QEasingCurve::Linear);
 }
 
 // 初始化亮色主题颜色
@@ -162,7 +162,7 @@ QColor NThemePrivate::resolveColor(NFluentColorKey::Key key) const {
 }
 
 // 令牌解析模板特化
-template<>
+template <>
 QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Radius& key) const {
     if (_customRadiusTokens.contains(key)) {
         return _customRadiusTokens[key];
@@ -173,7 +173,7 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Radius& key) const {
     return QVariant();
 }
 
-template<>
+template <>
 QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Spacing& key) const {
     if (_customSpacingTokens.contains(key)) {
         return _customSpacingTokens[key];
@@ -184,7 +184,7 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Spacing& key) const 
     return QVariant();
 }
 
-template<>
+template <>
 QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontSize& key) const {
     if (_customFontSizeTokens.contains(key)) {
         return _customFontSizeTokens[key];
@@ -195,7 +195,7 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontSize& key) const
     return QVariant();
 }
 
-template<>
+template <>
 QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontWeight& key) const {
     if (_customFontWeightTokens.contains(key)) {
         return _customFontWeightTokens[key];
@@ -206,7 +206,7 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontWeight& key) con
     return QVariant();
 }
 
-template<>
+template <>
 QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Elevation& key) const {
     if (_customElevationTokens.contains(key)) {
         return _customElevationTokens[key];
@@ -217,24 +217,24 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Elevation& key) cons
     return QVariant();
 }
 
-template<>
-QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Animation& key) const {
-    if (_customAnimationTokens.contains(key)) {
-        return _customAnimationTokens[key];
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::AnimationDuration& key) const {
+    if (_customAnimationDurationTokens.contains(key)) {
+        return _customAnimationDurationTokens[key];
     }
-    if (_animationTokens.contains(key)) {
-        return _animationTokens[key];
+    if (_animationDurationTokens.contains(key)) {
+        return _animationDurationTokens[key];
     }
     return QVariant();
 }
 
-template<>
-QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Easing& key) const {
-    if (_customEasingTokens.contains(key)) {
-        return _customEasingTokens[key];
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::AnimationEasing& key) const {
+    if (_customAnimationEasingTokens.contains(key)) {
+        return _customAnimationEasingTokens[key];
     }
-    if (_easingTokens.contains(key)) {
-        return _easingTokens[key];
+    if (_animationEasingTokens.contains(key)) {
+        return _animationEasingTokens[key];
     }
     return QVariant();
 }

@@ -275,17 +275,16 @@ QVariant NTheme::getElevation(NDesignTokenKey::Elevation key) const {
     return d->resolveToken(key);
 }
 
-QVariant NTheme::getAnimation(NDesignTokenKey::Animation key) const {
+QVariant NTheme::getAnimationDuration(NDesignTokenKey::AnimationDuration key) const {
     Q_D(const NTheme);
     return d->resolveToken(key);
 }
 
-QVariant NTheme::getEasing(NDesignTokenKey::Easing key) const {
+QVariant NTheme::getAnimationEasing(NDesignTokenKey::AnimationEasing key) const {
     Q_D(const NTheme);
     return d->resolveToken(key);
 }
 
-// 特定类型的设计令牌设置方法 - 需要特化
 template <>
 void NTheme::setToken(const NDesignTokenKey::Radius& key, const QVariant& value) {
     Q_D(NTheme);
@@ -317,15 +316,15 @@ void NTheme::setToken(const NDesignTokenKey::Elevation& key, const QVariant& val
 }
 
 template <>
-void NTheme::setToken(const NDesignTokenKey::Animation& key, const QVariant& value) {
+void NTheme::setToken(const NDesignTokenKey::AnimationDuration& key, const QVariant& value) {
     Q_D(NTheme);
-    d->_customAnimationTokens[key] = value;
+    d->_customAnimationDurationTokens[key] = value;
 }
 
 template <>
-void NTheme::setToken(const NDesignTokenKey::Easing& key, const QVariant& value) {
+void NTheme::setToken(const NDesignTokenKey::AnimationEasing& key, const QVariant& value) {
     Q_D(NTheme);
-    d->_customEasingTokens[key] = value;
+    d->_customAnimationEasingTokens[key] = value;
 }
 
 void NTheme::drawEffectShadow(QPainter*                  painter,
@@ -376,8 +375,8 @@ void NTheme::resetToDefaults() {
     d->_customFontSizeTokens.clear();
     d->_customFontWeightTokens.clear();
     d->_customElevationTokens.clear();
-    d->_customAnimationTokens.clear();
-    d->_customEasingTokens.clear();
+    d->_customAnimationDurationTokens.clear();
+    d->_customAnimationEasingTokens.clear();
 }
 
 template QVariant NTheme::getToken<NDesignTokenKey::Radius>(const NDesignTokenKey::Radius& key) const;
@@ -385,5 +384,6 @@ template QVariant NTheme::getToken<NDesignTokenKey::Spacing>(const NDesignTokenK
 template QVariant NTheme::getToken<NDesignTokenKey::FontSize>(const NDesignTokenKey::FontSize& key) const;
 template QVariant NTheme::getToken<NDesignTokenKey::FontWeight>(const NDesignTokenKey::FontWeight& key) const;
 template QVariant NTheme::getToken<NDesignTokenKey::Elevation>(const NDesignTokenKey::Elevation& key) const;
-template QVariant NTheme::getToken<NDesignTokenKey::Animation>(const NDesignTokenKey::Animation& key) const;
-template QVariant NTheme::getToken<NDesignTokenKey::Easing>(const NDesignTokenKey::Easing& key) const;
+template QVariant
+NTheme::getToken<NDesignTokenKey::AnimationDuration>(const NDesignTokenKey::AnimationDuration& key) const;
+template QVariant NTheme::getToken<NDesignTokenKey::AnimationEasing>(const NDesignTokenKey::AnimationEasing& key) const;

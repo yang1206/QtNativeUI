@@ -3,12 +3,10 @@
 #include "../private/nmaskwidget_p.h"
 
 #include <QApplication>
-#include <QPainter>
 #include <QPainterPath>
 #include <QResizeEvent>
 #include <QScreen>
 #include <QStyle>
-#include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NTheme.h"
 #ifdef Q_OS_WIN
 #include <Windows.h>

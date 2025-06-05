@@ -24,7 +24,7 @@ void NCalendarWidget::init() {
     setFixedSize(305, 340);
     setObjectName("NCalendarWidget");
     d->q_ptr          = this;
-    d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+    d->_pBorderRadius = NRadiusToken(NDesignTokenKey::CornerRadiusDefault).toInt();
 
     // 日历标题
     d->_calendarTitleView = new NBaseListView(this);

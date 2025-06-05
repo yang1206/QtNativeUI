@@ -12,6 +12,13 @@
 #define NThemeColor(key, themeMode) nTheme->getColorForTheme(key, themeMode)
 #define NAccentColor(type) getAccentColor(type)
 #define NDesignToken(key) nTheme->getToken(key)
+#define NRadiusToken(key) nTheme->getRadius(key)
+#define NSpacingToken(key) nTheme->getSpacing(key)
+#define NFontSizeToken(key) nTheme->getFontSize(key)
+#define NFontWeightToken(key) nTheme->getFontWeight(key)
+#define NElevationToken(key) nTheme->getElevation(key)
+#define NAnimationToken(key) nTheme->getAnimationDuration(key)
+#define NAnimationEasingToken(key) nTheme->getAnimationEasing(key)
 class NThemePrivate;
 /**
  * @brief Theme management class for Qt applications
@@ -144,8 +151,8 @@ class QTNATIVEUI_EXPORT NTheme : public QObject {
     QVariant getFontSize(NDesignTokenKey::FontSize key) const;
     QVariant getFontWeight(NDesignTokenKey::FontWeight key) const;
     QVariant getElevation(NDesignTokenKey::Elevation key) const;
-    QVariant getAnimation(NDesignTokenKey::Animation key) const;
-    QVariant getEasing(NDesignTokenKey::Easing key) const;
+    QVariant getAnimationDuration(NDesignTokenKey::AnimationDuration key) const;
+    QVariant getAnimationEasing(NDesignTokenKey::AnimationEasing key) const;
 
     void drawEffectShadow(QPainter*                  painter,
                           QRect                      widgetRect,

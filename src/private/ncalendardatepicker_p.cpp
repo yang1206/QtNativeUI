@@ -9,7 +9,7 @@
 
 NCalendarDatePickerPrivate::NCalendarDatePickerPrivate(NCalendarDatePicker* q)
     : QObject(q), q_ptr(q), button(nullptr), contentWidget(nullptr), dateLabel(nullptr), iconLabel(nullptr) {
-    _pBorderRadius    = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+    _pBorderRadius    = NRadiusToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     _themeMode        = nTheme->themeMode();
     _isDark           = nTheme->isDarkMode();
     _pSelectedDate    = QDate();
@@ -46,7 +46,7 @@ void NCalendarDatePickerPrivate::initUi() {
     // 设置布局，左侧日期，右侧图标
     QHBoxLayout* layout = new QHBoxLayout(contentWidget);
     layout->setContentsMargins(10, 0, 10, 0);
-    layout->setSpacing(8);
+    layout->setSpacing(NSpacingToken(NDesignTokenKey::SpacingM).toInt());
     layout->addWidget(dateLabel, 1);
     layout->addStretch();
     layout->addWidget(iconLabel);
