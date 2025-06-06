@@ -1444,10 +1444,7 @@ QWidget* ControlsExample::createLabels() {
     // 6. Title Large 样式
     row += 2;
     NLabel* titleLargeExample = new NLabel("Title Large", NLabelType::TitleLarge, container);
-    titleLargeExample->setType(NLabelType::Title);
-    QFont titleLargeFont = titleLargeExample->font();
-    titleLargeFont.setPointSize(titleLargeFont.pointSize());
-    titleLargeExample->setFont(titleLargeFont);
+    titleLargeExample->setType(NLabelType::TitleLarge);
     NLabel* titleLargeFontLabel = new NLabel("Display, SemiBold", NLabelType::Body, container);
     NLabel* titleLargeSize      = new NLabel("40/52 epx", NLabelType::Body, container);
 
