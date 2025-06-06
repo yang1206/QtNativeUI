@@ -1,5 +1,4 @@
 ﻿#include "controls.h"
-#include <QComboBox>
 #include <QGroupBox>
 #include <QVBoxLayout>
 #include <QtNativeUI/NCheckBox.h>
@@ -13,6 +12,7 @@
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NComboBox.h"
 #include "QtNativeUI/NDoubleSpinBox.h"
+#include "QtNativeUI/NLabel.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
 #include "QtNativeUI/NProgressRing.h"
@@ -42,6 +42,7 @@ void ControlsExample::initUI() {
     contentLayout->setSpacing(24);
 
     // 添加各个控件区域
+    contentLayout->addWidget(new ExampleSection("Label", createLabels()));
     contentLayout->addWidget(new ExampleSection("CheckBox", createCheckBoxes()));
     contentLayout->addWidget(new ExampleSection("ToggleSwitch", createToggleSwitches()));
     contentLayout->addWidget(new ExampleSection("LineEdit", createLineEdits()));
@@ -1076,7 +1077,7 @@ QWidget* ControlsExample::createCalendarWidgets() {
     QHBoxLayout* localeLayout = new QHBoxLayout();
     QLabel*      localeLabel  = new QLabel("设置语言:", container);
 
-    QComboBox* localeCombo = new QComboBox(container);
+    NComboBox* localeCombo = new NComboBox(container);
     localeCombo->addItem("中文", QLocale::Chinese);
     localeCombo->addItem("英文", QLocale::English);
     localeCombo->addItem("法文", QLocale::French);
@@ -1349,5 +1350,138 @@ QWidget* ControlsExample::createCalendarDatePickers() {
     layout->addLayout(limitLayout);
 
     layout->addStretch();
+    return container;
+}
+
+QWidget* ControlsExample::createLabels() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    // 创建表格式布局
+    QGridLayout* gridLayout = new QGridLayout();
+    gridLayout->setHorizontalSpacing(24);
+    gridLayout->setVerticalSpacing(0);
+    // 添加表头
+    NLabel* exampleHeader = new NLabel("示例", NLabelType::BodyStrong, container);
+    NLabel* fontHeader    = new NLabel("字体", NLabelType::BodyStrong, container);
+    NLabel* sizeHeader    = new NLabel("大小/行高", NLabelType::BodyStrong, container);
+    gridLayout->addWidget(exampleHeader, 0, 0);
+    gridLayout->addWidget(fontHeader, 0, 1);
+    gridLayout->addWidget(sizeHeader, 0, 2);
+
+    // 1. Caption 样式
+    int     row            = 1;
+    NLabel* captionExample = new NLabel("Caption", NLabelType::Caption, container);
+    NLabel* captionFont    = new NLabel("Small, Regular", NLabelType::Body, container);
+    NLabel* captionSize    = new NLabel("12/16 epx", NLabelType::Body, container);
+    gridLayout->addWidget(captionExample, row, 0);
+    gridLayout->addWidget(captionFont, row, 1);
+    gridLayout->addWidget(captionSize, row, 2);
+    // 添加行分隔器
+    QFrame* captionSeparator = new QFrame(container);
+    captionSeparator->setFrameShape(QFrame::HLine);
+    captionSeparator->setFrameShadow(QFrame::Plain);
+    captionSeparator->setStyleSheet("background-color: #f0f0f0;");
+    captionSeparator->setFixedHeight(1);
+    gridLayout->addWidget(captionSeparator, row + 1, 0, 1, 4);
+    // 2. Body 样式
+    row += 2;
+    NLabel* bodyExample = new NLabel("Body", NLabelType::Body, container);
+    NLabel* bodyFont    = new NLabel("Text, Regular", NLabelType::Body, container);
+    NLabel* bodySize    = new NLabel("14/20 epx", NLabelType::Body, container);
+    gridLayout->addWidget(bodyExample, row, 0);
+    gridLayout->addWidget(bodyFont, row, 1);
+    gridLayout->addWidget(bodySize, row, 2);
+    QFrame* bodySeparator = new QFrame(container);
+    bodySeparator->setFrameShape(QFrame::HLine);
+    bodySeparator->setFrameShadow(QFrame::Plain);
+    bodySeparator->setStyleSheet("background-color: #f0f0f0;");
+    bodySeparator->setFixedHeight(1);
+    gridLayout->addWidget(bodySeparator, row + 1, 0, 1, 4);
+    // 3. Body Strong 样式
+    row += 2;
+    NLabel* bodyStrongExample = new NLabel("Body Strong", NLabelType::BodyStrong, container);
+    NLabel* bodyStrongFont    = new NLabel("Text, SemiBold", NLabelType::Body, container);
+    NLabel* bodyStrongSize    = new NLabel("14/20 epx", NLabelType::Body, container);
+    gridLayout->addWidget(bodyStrongExample, row, 0);
+    gridLayout->addWidget(bodyStrongFont, row, 1);
+    gridLayout->addWidget(bodyStrongSize, row, 2);
+    QFrame* bodyStrongSeparator = new QFrame(container);
+    bodyStrongSeparator->setFrameShape(QFrame::HLine);
+    bodyStrongSeparator->setFrameShadow(QFrame::Plain);
+    bodyStrongSeparator->setStyleSheet("background-color: #f0f0f0;");
+    bodyStrongSeparator->setFixedHeight(1);
+    gridLayout->addWidget(bodyStrongSeparator, row + 1, 0, 1, 4);
+    // 4. Subtitle 样式
+    row += 2;
+    NLabel* subtitleExample = new NLabel("Subtitle", NLabelType::Subtitle, container);
+    NLabel* subtitleFont    = new NLabel("Display, SemiBold", NLabelType::Body, container);
+    NLabel* subtitleSize    = new NLabel("20/28 epx", NLabelType::Body, container);
+    gridLayout->addWidget(subtitleExample, row, 0);
+    gridLayout->addWidget(subtitleFont, row, 1);
+    gridLayout->addWidget(subtitleSize, row, 2);
+    QFrame* subtitleSeparator = new QFrame(container);
+    subtitleSeparator->setFrameShape(QFrame::HLine);
+    subtitleSeparator->setFrameShadow(QFrame::Plain);
+    subtitleSeparator->setStyleSheet("background-color: #f0f0f0;");
+    subtitleSeparator->setFixedHeight(1);
+    gridLayout->addWidget(subtitleSeparator, row + 1, 0, 1, 4);
+    // 5. Title 样式
+    row += 2;
+    NLabel* titleExample = new NLabel("Title", NLabelType::Title, container);
+    NLabel* titleFont    = new NLabel("Display, SemiBold", NLabelType::Body, container);
+    NLabel* titleSize    = new NLabel("28/36 epx", NLabelType::Body, container);
+    gridLayout->addWidget(titleExample, row, 0);
+    gridLayout->addWidget(titleFont, row, 1);
+    gridLayout->addWidget(titleSize, row, 2);
+    QFrame* titleSeparator = new QFrame(container);
+    titleSeparator->setFrameShape(QFrame::HLine);
+    titleSeparator->setFrameShadow(QFrame::Plain);
+    titleSeparator->setStyleSheet("background-color: #f0f0f0;");
+    titleSeparator->setFixedHeight(1);
+    gridLayout->addWidget(titleSeparator, row + 1, 0, 1, 4);
+    // 6. Title Large 样式
+    row += 2;
+    NLabel* titleLargeExample = new NLabel("Title Large", NLabelType::TitleLarge, container);
+    titleLargeExample->setType(NLabelType::Title);
+    QFont titleLargeFont = titleLargeExample->font();
+    titleLargeFont.setPointSize(titleLargeFont.pointSize());
+    titleLargeExample->setFont(titleLargeFont);
+    NLabel* titleLargeFontLabel = new NLabel("Display, SemiBold", NLabelType::Body, container);
+    NLabel* titleLargeSize      = new NLabel("40/52 epx", NLabelType::Body, container);
+
+    gridLayout->addWidget(titleLargeExample, row, 0);
+    gridLayout->addWidget(titleLargeFontLabel, row, 1);
+    gridLayout->addWidget(titleLargeSize, row, 2);
+    QFrame* titleLargeSeparator = new QFrame(container);
+    titleLargeSeparator->setFrameShape(QFrame::HLine);
+    titleLargeSeparator->setFrameShadow(QFrame::Plain);
+    titleLargeSeparator->setStyleSheet("background-color: #f0f0f0;");
+    titleLargeSeparator->setFixedHeight(1);
+    gridLayout->addWidget(titleLargeSeparator, row + 1, 0, 1, 4);
+    // 7. Display 样式
+    row += 2;
+    NLabel* displayExample = new NLabel("Display", NLabelType::Display, container);
+    NLabel* displayFont    = new NLabel("Display, SemiBold", NLabelType::Body, container);
+    NLabel* displaySize    = new NLabel("68/92 epx", NLabelType::Body, container);
+    gridLayout->addWidget(displayExample, row, 0);
+    gridLayout->addWidget(displayFont, row, 1);
+    gridLayout->addWidget(displaySize, row, 2);
+    // 设置列宽度比例
+    gridLayout->setColumnStretch(0, 2);
+    gridLayout->setColumnStretch(1, 1);
+    gridLayout->setColumnStretch(2, 1);
+    gridLayout->setColumnStretch(3, 2);
+
+    // 设置行高
+    for (int i = 0; i <= row; i += 2) {
+        gridLayout->setRowMinimumHeight(i, 48);
+    }
+
+    // 添加到主布局
+    layout->addLayout(gridLayout);
+    layout->addStretch();
+
     return container;
 }

@@ -10,23 +10,23 @@ class ControlsExample : public QWidget {
     explicit ControlsExample(QWidget* parent = nullptr);
 
   private:
-    void     initUI();
-    QWidget* createCheckBoxes();
-    QWidget* createToggleSwitches();
-    QWidget* createLineEdits();
-    QWidget* createTextEdits();
-    QWidget* createPlainTextEdits();
-    QWidget* createSpinBoxes();
-    QWidget* createDoubleSpinBoxes();
-    QWidget* createSliders();
-    QWidget* createToolTips();
-    QWidget* createProgressBars();
-    QWidget* createProgressRings();
-    QWidget* createScrollAreas();
-    QWidget* createCalendarWidgets();
-    QWidget* createComboBoxes();
-    QWidget* createCalendarDatePickers();
-
+    void         initUI();
+    QWidget*     createCheckBoxes();
+    QWidget*     createToggleSwitches();
+    QWidget*     createLineEdits();
+    QWidget*     createTextEdits();
+    QWidget*     createPlainTextEdits();
+    QWidget*     createSpinBoxes();
+    QWidget*     createDoubleSpinBoxes();
+    QWidget*     createSliders();
+    QWidget*     createToolTips();
+    QWidget*     createProgressBars();
+    QWidget*     createProgressRings();
+    QWidget*     createScrollAreas();
+    QWidget*     createCalendarWidgets();
+    QWidget*     createComboBoxes();
+    QWidget*     createCalendarDatePickers();
+    QWidget*     createLabels();
     NScrollArea* m_scrollArea;
 };
 

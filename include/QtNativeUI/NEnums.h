@@ -91,11 +91,10 @@ enum FontSize {
     // 字体大小
     FontSizeCaption,
     FontSizeBody,
-    FontSizeBodyLarge,
+    FontSizeSubTitle,
     FontSizeTitle,
     FontSizeTitleLarge,
-    FontSizeHeader,
-    FontSizeHeaderLarge,
+    FontSizeDisplay,
 };
 Q_ENUM_CREATE(FontSize)
 
@@ -138,5 +137,19 @@ enum AnimationEasing {
 Q_ENUM_CREATE(AnimationEasing)
 
 Q_END_ENUM_CREATE(NDesignTokenKey)
+
+Q_BEGIN_ENUM_CREATE(NLabelType)
+enum Type {
+    Caption,    // 说明文本 (12px 常规)
+    Body,       // 正文文本 (14px 常规)
+    BodyStrong, // 强调正文 (14px 半粗体)
+    Subtitle,   // 副标题 (20px 半粗体)
+    Title,      // 标题 (28px 半粗体)
+    TitleLarge, // 大号标题 (40px 半粗体)
+    Display,    // 展示型标题 (68px 半粗体)
+    Default     // 默认样式 (使用系统默认)
+};
+Q_ENUM_CREATE(Type)
+Q_END_ENUM_CREATE(NLabelType)
 
 #endif // QTNATIVEUI_NENUMS_H

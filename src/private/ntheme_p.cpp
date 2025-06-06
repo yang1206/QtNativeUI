@@ -46,13 +46,12 @@ void NThemePrivate::initDesignTokens() {
     _spacingTokens[NDesignTokenKey::SpacingXXXL] = 24;
 
     // 字体大小 (FontSize)
-    _fontSizeTokens[NDesignTokenKey::FontSizeCaption]     = 12;
-    _fontSizeTokens[NDesignTokenKey::FontSizeBody]        = 14;
-    _fontSizeTokens[NDesignTokenKey::FontSizeBodyLarge]   = 16;
-    _fontSizeTokens[NDesignTokenKey::FontSizeTitle]       = 18;
-    _fontSizeTokens[NDesignTokenKey::FontSizeTitleLarge]  = 20;
-    _fontSizeTokens[NDesignTokenKey::FontSizeHeader]      = 24;
-    _fontSizeTokens[NDesignTokenKey::FontSizeHeaderLarge] = 28;
+    _fontSizeTokens[NDesignTokenKey::FontSizeCaption]    = 12;
+    _fontSizeTokens[NDesignTokenKey::FontSizeBody]       = 14;
+    _fontSizeTokens[NDesignTokenKey::FontSizeSubTitle]   = 20;
+    _fontSizeTokens[NDesignTokenKey::FontSizeTitle]      = 28;
+    _fontSizeTokens[NDesignTokenKey::FontSizeTitleLarge] = 40;
+    _fontSizeTokens[NDesignTokenKey::FontSizeDisplay]    = 68;
 
     // 字重 (FontWeight)
     _fontWeightTokens[NDesignTokenKey::FontWeightRegular]  = 400;
