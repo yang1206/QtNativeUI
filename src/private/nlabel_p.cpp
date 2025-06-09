@@ -39,6 +39,14 @@ void NLabelPrivate::updateFont() {
             fontSize   = NFontSizeToken(NDesignTokenKey::FontSizeBody).toInt();
             fontWeight = NFontWeightToken(NDesignTokenKey::FontWeightSemibold).toInt();
             break;
+        case NLabelType::BodyLarge:
+            fontSize   = NFontSizeToken(NDesignTokenKey::FontSizeBodyLarge).toInt();
+            fontWeight = NFontWeightToken(NDesignTokenKey::FontWeightRegular).toInt();
+            break;
+        case NLabelType::BodyStrongLarge:
+            fontSize   = NFontSizeToken(NDesignTokenKey::FontSizeBodyLarge).toInt();
+            fontWeight = NFontWeightToken(NDesignTokenKey::FontWeightSemibold).toInt();
+            break;
         case NLabelType::Subtitle:
             fontSize   = NFontSizeToken(NDesignTokenKey::FontSizeSubTitle).toInt();
             fontWeight = NFontWeightToken(NDesignTokenKey::FontWeightSemibold).toInt();
