@@ -31,7 +31,7 @@ void NCheckBox::init() {
     Q_D(NCheckBox);
     d->q_ptr = this;
 
-    d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
+    d->_pBorderRadius = NRadiusToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_themeMode     = nTheme->themeMode();
     d->_isDark        = nTheme->isDarkMode();
 
@@ -81,7 +81,7 @@ void NCheckBox::init() {
         update();
     });
     d->_checkIcon.size = 12;
-    d->_spacing        = NDesignToken(NDesignTokenKey::SpacingM).toInt();
+    d->_spacing        = NSpacingToken(NDesignTokenKey::SpacingM).toInt();
     setTristate(false);
 }
 

@@ -28,65 +28,65 @@ NThemePrivate::~NThemePrivate() {}
 
 void NThemePrivate::initDesignTokens() {
     // 圆角大小 (CornerRadius)
-    _designTokens[NDesignTokenKey::CornerRadiusNone]     = 0.0;
-    _designTokens[NDesignTokenKey::CornerRadiusSmall]    = 2.0;
-    _designTokens[NDesignTokenKey::CornerRadiusDefault]  = 4.0;
-    _designTokens[NDesignTokenKey::CornerRadiusMedium]   = 8.0;
-    _designTokens[NDesignTokenKey::CornerRadiusLarge]    = 12.0;
-    _designTokens[NDesignTokenKey::CornerRadiusCircular] = 999.0; // 实际应用时需计算为宽度的50%
+    _radiusTokens[NDesignTokenKey::CornerRadiusNone]     = 0.0;
+    _radiusTokens[NDesignTokenKey::CornerRadiusSmall]    = 2.0;
+    _radiusTokens[NDesignTokenKey::CornerRadiusDefault]  = 4.0;
+    _radiusTokens[NDesignTokenKey::CornerRadiusMedium]   = 8.0;
+    _radiusTokens[NDesignTokenKey::CornerRadiusLarge]    = 12.0;
+    _radiusTokens[NDesignTokenKey::CornerRadiusCircular] = 999.0; // 实际应用时需计算为宽度的50%
 
     // 间距 (Spacing)
-    _designTokens[NDesignTokenKey::SpacingNone] = 0;
-    _designTokens[NDesignTokenKey::SpacingXS]   = 2;
-    _designTokens[NDesignTokenKey::SpacingS]    = 4;
-    _designTokens[NDesignTokenKey::SpacingM]    = 8;
-    _designTokens[NDesignTokenKey::SpacingL]    = 12;
-    _designTokens[NDesignTokenKey::SpacingXL]   = 16;
-    _designTokens[NDesignTokenKey::SpacingXXL]  = 20;
-    _designTokens[NDesignTokenKey::SpacingXXXL] = 24;
+    _spacingTokens[NDesignTokenKey::SpacingNone] = 0;
+    _spacingTokens[NDesignTokenKey::SpacingXS]   = 2;
+    _spacingTokens[NDesignTokenKey::SpacingS]    = 4;
+    _spacingTokens[NDesignTokenKey::SpacingM]    = 8;
+    _spacingTokens[NDesignTokenKey::SpacingL]    = 12;
+    _spacingTokens[NDesignTokenKey::SpacingXL]   = 16;
+    _spacingTokens[NDesignTokenKey::SpacingXXL]  = 20;
+    _spacingTokens[NDesignTokenKey::SpacingXXXL] = 24;
 
     // 字体大小 (FontSize)
-    _designTokens[NDesignTokenKey::FontSizeCaption]     = 12;
-    _designTokens[NDesignTokenKey::FontSizeBody]        = 14;
-    _designTokens[NDesignTokenKey::FontSizeBodyLarge]   = 16;
-    _designTokens[NDesignTokenKey::FontSizeTitle]       = 18;
-    _designTokens[NDesignTokenKey::FontSizeTitleLarge]  = 20;
-    _designTokens[NDesignTokenKey::FontSizeHeader]      = 24;
-    _designTokens[NDesignTokenKey::FontSizeHeaderLarge] = 28;
+    _fontSizeTokens[NDesignTokenKey::FontSizeCaption]    = 12;
+    _fontSizeTokens[NDesignTokenKey::FontSizeBody]       = 14;
+    _fontSizeTokens[NDesignTokenKey::FontSizeBodyLarge]  = 18;
+    _fontSizeTokens[NDesignTokenKey::FontSizeSubTitle]   = 20;
+    _fontSizeTokens[NDesignTokenKey::FontSizeTitle]      = 28;
+    _fontSizeTokens[NDesignTokenKey::FontSizeTitleLarge] = 40;
+    _fontSizeTokens[NDesignTokenKey::FontSizeDisplay]    = 68;
 
     // 字重 (FontWeight)
-    _designTokens[NDesignTokenKey::FontWeightRegular]  = 400;
-    _designTokens[NDesignTokenKey::FontWeightMedium]   = 500;
-    _designTokens[NDesignTokenKey::FontWeightSemibold] = 600;
-    _designTokens[NDesignTokenKey::FontWeightBold]     = 700;
+    _fontWeightTokens[NDesignTokenKey::FontWeightRegular]  = 400;
+    _fontWeightTokens[NDesignTokenKey::FontWeightMedium]   = 500;
+    _fontWeightTokens[NDesignTokenKey::FontWeightSemibold] = 600;
+    _fontWeightTokens[NDesignTokenKey::FontWeightBold]     = 700;
 
     // 阴影层级 - 存储为 QGraphicsEffect 参数或自定义结构
-    _designTokens[NDesignTokenKey::ElevationNone] =
+    _elevationTokens[NDesignTokenKey::ElevationNone] =
         QVariantMap({{"blurRadius", 0}, {"xOffset", 0}, {"yOffset", 0}, {"color", QColor(0, 0, 0, 0)}});
 
-    _designTokens[NDesignTokenKey::ElevationRest] =
+    _elevationTokens[NDesignTokenKey::ElevationRest] =
         QVariantMap({{"blurRadius", 4}, {"xOffset", 0}, {"yOffset", 2}, {"color", QColor(0, 0, 0, 30)}});
 
-    _designTokens[NDesignTokenKey::ElevationHover] =
+    _elevationTokens[NDesignTokenKey::ElevationHover] =
         QVariantMap({{"blurRadius", 8}, {"xOffset", 0}, {"yOffset", 4}, {"color", QColor(0, 0, 0, 36)}});
 
-    _designTokens[NDesignTokenKey::ElevationFlyout] =
+    _elevationTokens[NDesignTokenKey::ElevationFlyout] =
         QVariantMap({{"blurRadius", 16}, {"xOffset", 0}, {"yOffset", 8}, {"color", QColor(0, 0, 0, 41)}});
 
-    _designTokens[NDesignTokenKey::ElevationDialog] =
+    _elevationTokens[NDesignTokenKey::ElevationDialog] =
         QVariantMap({{"blurRadius", 32}, {"xOffset", 0}, {"yOffset", 16}, {"color", QColor(0, 0, 0, 51)}});
 
     // 动效时长 (AnimationDuration)
-    _designTokens[NDesignTokenKey::AnimationFast]     = 100;
-    _designTokens[NDesignTokenKey::AnimationNormal]   = 200;
-    _designTokens[NDesignTokenKey::AnimationSlow]     = 400;
-    _designTokens[NDesignTokenKey::AnimationVerySlow] = 600;
+    _animationDurationTokens[NDesignTokenKey::AnimationFast]     = 100;
+    _animationDurationTokens[NDesignTokenKey::AnimationNormal]   = 200;
+    _animationDurationTokens[NDesignTokenKey::AnimationSlow]     = 400;
+    _animationDurationTokens[NDesignTokenKey::AnimationVerySlow] = 600;
 
     // 缓动曲线 (EasingCurve)
-    _designTokens[NDesignTokenKey::EasingStandard]   = QEasingCurve(QEasingCurve::OutCubic);
-    _designTokens[NDesignTokenKey::EasingAccelerate] = QEasingCurve(QEasingCurve::InCubic);
-    _designTokens[NDesignTokenKey::EasingDecelerate] = QEasingCurve(QEasingCurve::OutCubic);
-    _designTokens[NDesignTokenKey::EasingLinear]     = QEasingCurve(QEasingCurve::Linear);
+    _animationEasingTokens[NDesignTokenKey::EasingStandard]   = QEasingCurve(QEasingCurve::OutCubic);
+    _animationEasingTokens[NDesignTokenKey::EasingAccelerate] = QEasingCurve(QEasingCurve::InCubic);
+    _animationEasingTokens[NDesignTokenKey::EasingDecelerate] = QEasingCurve(QEasingCurve::OutCubic);
+    _animationEasingTokens[NDesignTokenKey::EasingLinear]     = QEasingCurve(QEasingCurve::Linear);
 }
 
 // 初始化亮色主题颜色
@@ -161,18 +161,80 @@ QColor NThemePrivate::resolveColor(NFluentColorKey::Key key) const {
     return QColor(128, 128, 128);
 }
 
-// 解析设计令牌
-QVariant NThemePrivate::resolveToken(NDesignTokenKey::Key key) const {
-    // 首先检查自定义令牌
-    if (_customTokens.contains(key)) {
-        return _customTokens[key];
+// 令牌解析模板特化
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Radius& key) const {
+    if (_customRadiusTokens.contains(key)) {
+        return _customRadiusTokens[key];
     }
-
-    // 然后检查默认令牌
-    if (_designTokens.contains(key)) {
-        return _designTokens[key];
+    if (_radiusTokens.contains(key)) {
+        return _radiusTokens[key];
     }
+    return QVariant();
+}
 
-    // 如果找不到令牌，返回空值
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Spacing& key) const {
+    if (_customSpacingTokens.contains(key)) {
+        return _customSpacingTokens[key];
+    }
+    if (_spacingTokens.contains(key)) {
+        return _spacingTokens[key];
+    }
+    return QVariant();
+}
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontSize& key) const {
+    if (_customFontSizeTokens.contains(key)) {
+        return _customFontSizeTokens[key];
+    }
+    if (_fontSizeTokens.contains(key)) {
+        return _fontSizeTokens[key];
+    }
+    return QVariant();
+}
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontWeight& key) const {
+    if (_customFontWeightTokens.contains(key)) {
+        return _customFontWeightTokens[key];
+    }
+    if (_fontWeightTokens.contains(key)) {
+        return _fontWeightTokens[key];
+    }
+    return QVariant();
+}
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Elevation& key) const {
+    if (_customElevationTokens.contains(key)) {
+        return _customElevationTokens[key];
+    }
+    if (_elevationTokens.contains(key)) {
+        return _elevationTokens[key];
+    }
+    return QVariant();
+}
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::AnimationDuration& key) const {
+    if (_customAnimationDurationTokens.contains(key)) {
+        return _customAnimationDurationTokens[key];
+    }
+    if (_animationDurationTokens.contains(key)) {
+        return _animationDurationTokens[key];
+    }
+    return QVariant();
+}
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::AnimationEasing& key) const {
+    if (_customAnimationEasingTokens.contains(key)) {
+        return _customAnimationEasingTokens[key];
+    }
+    if (_animationEasingTokens.contains(key)) {
+        return _animationEasingTokens[key];
+    }
     return QVariant();
 }

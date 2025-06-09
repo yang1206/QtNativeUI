@@ -157,7 +157,7 @@ void NToolButton::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing | QPainter::TextAntialiasing);
     if (!d->_pTransparentBackground) {
-        NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
+        NDesignTokenKey::Elevation elevationKey = NDesignTokenKey::ElevationRest;
         if (!isEnabled()) {
             elevationKey = NDesignTokenKey::ElevationNone;
         } else if (d->_isPressed) {
@@ -249,13 +249,8 @@ void NToolButton::drawBackground(QPainter* painter) {
         painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
-    if ((!d->_isPressed)) {
+    if ((!d->_isPressed) && (!d->_isHovered) && (!d->_pTransparentBackground)) {
         if (d->_buttonType == NToolButtonPrivate::Accent) {
-            painter->restore();
-            return;
-        }
-
-        if (d->_pTransparentBackground && !d->_isHovered) {
             painter->restore();
             return;
         }

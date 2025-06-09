@@ -146,7 +146,7 @@ void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
 
     if (!d->_pTransparentBackground) {
         // 根据按钮状态选择阴影层级
-        NDesignTokenKey::Key elevationKey = NDesignTokenKey::ElevationRest;
+        NDesignTokenKey::Elevation elevationKey = NDesignTokenKey::ElevationRest;
         if (!isEnabled()) {
             elevationKey = NDesignTokenKey::ElevationNone;
         } else if (d->_isPressed) {
@@ -240,13 +240,8 @@ void NPushButton::drawBackground(QPainter* painter) {
         painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
-    if ((!d->_isPressed)) {
+    if ((!d->_isPressed) && (!d->_isHovered) && (!d->_pTransparentBackground)) {
         if (d->_buttonType == NPushButtonPrivate::Accent) {
-            painter->restore();
-            return;
-        }
-
-        if (d->_pTransparentBackground && !d->_isHovered) {
             painter->restore();
             return;
         }

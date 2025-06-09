@@ -16,7 +16,7 @@ void NConfig::initialize() {
     // qApp->setStyle("Fusion");
 
     QFont font = qApp->font();
-    font.setPixelSize(13);
+    font.setFamilies(QStringList() << "Segoe UI Variable" << "Microsoft YaHei" << "PingFang SC");
     font.setHintingPreference(QFont::PreferNoHinting);
     qApp->setFont(font);
 #endif

@@ -56,13 +56,14 @@ void NContentDialogPrivate::initialize() {
 
     _titleLabel     = new QLabel(q);
     QFont titleFont = _titleLabel->font();
-    titleFont.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeTitle).toInt());
+    titleFont.setPixelSize(NFontSizeToken(NDesignTokenKey::FontSizeTitle).toInt());
+    titleFont.setWeight(static_cast<QFont::Weight>(NFontWeightToken(NDesignTokenKey::FontWeightBold).toInt()));
     titleFont.setBold(true);
     _titleLabel->setFont(titleFont);
 
     _contentLabel     = new QLabel(q);
     QFont contentFont = _contentLabel->font();
-    contentFont.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeBody).toInt());
+    contentFont.setPixelSize(NFontSizeToken(NDesignTokenKey::FontSizeBody).toInt());
     _contentLabel->setFont(contentFont);
     _contentLabel->setWordWrap(true);
 
@@ -73,7 +74,7 @@ void NContentDialogPrivate::initialize() {
     _buttonWidget = new QWidget(q);
     _buttonWidget->setFixedHeight(60);
     _buttonLayout = new QHBoxLayout(_buttonWidget);
-    _buttonLayout->setSpacing(8);
+    _buttonLayout->setSpacing(NSpacingToken(NDesignTokenKey::SpacingM).toInt());
 
     _leftButton = new NPushButton("cancel", q);
     QObject::connect(_leftButton, &NPushButton::clicked, q, [this, q]() {

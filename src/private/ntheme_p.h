@@ -28,9 +28,23 @@ class NThemePrivate {
     QMap<NFluentColorKey::Key, QColor> _darkColors;
     QMap<NFluentColorKey::Key, QColor> _customColors;
 
-    // 设计令牌
-    QHash<NDesignTokenKey::Key, QVariant> _designTokens;
-    QHash<NDesignTokenKey::Key, QVariant> _customTokens;
+    // 设计令牌 - 按类别存储
+    QHash<NDesignTokenKey::Radius, QVariant>            _radiusTokens;
+    QHash<NDesignTokenKey::Spacing, QVariant>           _spacingTokens;
+    QHash<NDesignTokenKey::FontSize, QVariant>          _fontSizeTokens;
+    QHash<NDesignTokenKey::FontWeight, QVariant>        _fontWeightTokens;
+    QHash<NDesignTokenKey::Elevation, QVariant>         _elevationTokens;
+    QHash<NDesignTokenKey::AnimationDuration, QVariant> _animationDurationTokens;
+    QHash<NDesignTokenKey::AnimationEasing, QVariant>   _animationEasingTokens;
+
+    // 自定义令牌 - 按类别存储
+    QHash<NDesignTokenKey::Radius, QVariant>            _customRadiusTokens;
+    QHash<NDesignTokenKey::Spacing, QVariant>           _customSpacingTokens;
+    QHash<NDesignTokenKey::FontSize, QVariant>          _customFontSizeTokens;
+    QHash<NDesignTokenKey::FontWeight, QVariant>        _customFontWeightTokens;
+    QHash<NDesignTokenKey::Elevation, QVariant>         _customElevationTokens;
+    QHash<NDesignTokenKey::AnimationDuration, QVariant> _customAnimationDurationTokens;
+    QHash<NDesignTokenKey::AnimationEasing, QVariant>   _customAnimationEasingTokens;
 
     // 初始化方法
     void initLightColors();
@@ -45,8 +59,35 @@ class NThemePrivate {
     // 颜色解析
     QColor resolveColor(NFluentColorKey::Key key) const;
 
-    // 令牌解析
-    QVariant resolveToken(NDesignTokenKey::Key key) const;
+    // 令牌解析 - 泛型方法
+    template <typename T>
+    QVariant resolveToken(const T& key) const;
 };
+
+template <typename T>
+QVariant NThemePrivate::resolveToken(const T& key) const {
+    return QVariant();
+}
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Radius& key) const;
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Spacing& key) const;
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontSize& key) const;
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontWeight& key) const;
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Elevation& key) const;
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::AnimationDuration& key) const;
+
+template <>
+QVariant NThemePrivate::resolveToken(const NDesignTokenKey::AnimationEasing& key) const;
 
 #endif // QTNATIVEUI_NTHEME_P_H
