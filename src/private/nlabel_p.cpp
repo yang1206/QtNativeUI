@@ -70,7 +70,7 @@ void NLabelPrivate::updateFont() {
     }
 
     if (_type != NLabelType::Default) {
-        font.setPointSize(fontSize);
+        font.setPixelSize(fontSize);
         font.setWeight(static_cast<QFont::Weight>(fontWeight));
     }
 

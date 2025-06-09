@@ -1386,8 +1386,8 @@ QWidget* ControlsExample::createLabels() {
 
     for (const auto& style : styles) {
         NLabel* exampleLabel = new NLabel(style.exampleText, style.labelType, container);
-        NLabel* fontLabel    = new NLabel(style.fontDescription, NLabelType::Body, container);
-        NLabel* sizeLabel    = new NLabel(style.sizeDescription, NLabelType::Body, container);
+        NLabel* fontLabel    = new NLabel(style.fontDescription, NLabelType::Caption, container);
+        NLabel* sizeLabel    = new NLabel(style.sizeDescription, NLabelType::Caption, container);
 
         gridLayout->addWidget(exampleLabel, row, 0);
         gridLayout->addWidget(fontLabel, row, 1);
