@@ -249,13 +249,8 @@ void NToolButton::drawBackground(QPainter* painter) {
         painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
-    if ((!d->_isPressed)) {
+    if ((!d->_isPressed) && (!d->_isHovered) && (!d->_pTransparentBackground)) {
         if (d->_buttonType == NToolButtonPrivate::Accent) {
-            painter->restore();
-            return;
-        }
-
-        if (d->_pTransparentBackground && !d->_isHovered) {
             painter->restore();
             return;
         }

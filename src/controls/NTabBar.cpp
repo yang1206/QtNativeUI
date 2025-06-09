@@ -69,9 +69,8 @@ void NTabBar::init() {
     setMouseTracking(true);
     setUsesScrollButtons(true);
     d->_pLightItemHeaderBackground =
-        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
-    d->_pDarkItemHeaderBackground =
-        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Dark);
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Light);
+    d->_pDarkItemHeaderBackground = NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Dark);
     d->_pLightItemHeaderBackgroundSelected =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTertiary, NThemeType::Light);
     d->_pDarkItemHeaderBackgroundSelected =
@@ -81,9 +80,9 @@ void NTabBar::init() {
     d->_pDarkItemHeaderBackgroundPointerOver =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, NThemeType::Dark);
     d->_pLightItemHeaderBackgroundPressed =
-        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Light);
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
     d->_pDarkItemHeaderBackgroundPressed =
-        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Dark);
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Dark);
     d->_pLightItemHeaderBackgroundDisabled =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
     d->_pDarkItemHeaderBackgroundDisabled =
