@@ -258,9 +258,10 @@ void NPushButton::drawBackground(QPainter* painter) {
 
 void NPushButton::drawBorder(QPainter* painter) {
     Q_D(NPushButton);
-
-    if (d->_pTransparentBackground && !d->_isHovered && !d->_isPressed &&
-        d->_buttonType != NPushButtonPrivate::Accent) {
+    if (d->_pTransparentBackground) {
+        return;
+    }
+    if (!d->_isHovered && !d->_isPressed && d->_buttonType != NPushButtonPrivate::Accent) {
         return;
     }
 

@@ -69,8 +69,9 @@ void NTabBar::init() {
     setMouseTracking(true);
     setUsesScrollButtons(true);
     d->_pLightItemHeaderBackground =
-        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Light);
-    d->_pDarkItemHeaderBackground = NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Dark);
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
+    d->_pDarkItemHeaderBackground =
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Dark);
     d->_pLightItemHeaderBackgroundSelected =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTertiary, NThemeType::Light);
     d->_pDarkItemHeaderBackgroundSelected =
@@ -80,9 +81,9 @@ void NTabBar::init() {
     d->_pDarkItemHeaderBackgroundPointerOver =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorSecondary, NThemeType::Dark);
     d->_pLightItemHeaderBackgroundPressed =
-        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Light);
     d->_pDarkItemHeaderBackgroundPressed =
-        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Dark);
+        NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorDefault, NThemeType::Dark);
     d->_pLightItemHeaderBackgroundDisabled =
         NThemeColor(NFluentColorKey::LayerOnMicaBaseAltFillColorTransparent, NThemeType::Light);
     d->_pDarkItemHeaderBackgroundDisabled =
@@ -207,10 +208,13 @@ void NTabBar::setupCustomCloseButton(int index) {
 
     // 创建关闭按钮
     NPushButton* closeBtn = new NPushButton(this);
-    closeBtn->setFluentIcon(NRegularIconType::Dismiss12Regular, 16);
+    closeBtn->setFluentIcon(NRegularIconType::Dismiss20Regular, 12);
     closeBtn->setTransparentBackground(true);
     closeBtn->setObjectName("tabCloseButton");
-
+    closeBtn->setLightPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light));
+    closeBtn->setDarkPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark));
+    closeBtn->setLightHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light));
+    closeBtn->setDarkHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark));
     if (isVertical) {
         QWidget*     container = new QWidget(this);
         QHBoxLayout* layout    = new QHBoxLayout(container);

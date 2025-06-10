@@ -267,8 +267,10 @@ void NToolButton::drawBackground(QPainter* painter) {
 
 void NToolButton::drawBorder(QPainter* painter) {
     Q_D(NToolButton);
-    if (d->_pTransparentBackground && !d->_isHovered && !d->_isPressed &&
-        d->_buttonType != NToolButtonPrivate::Accent) {
+    if (d->_pTransparentBackground) {
+        return;
+    }
+    if (!d->_isHovered && !d->_isPressed && d->_buttonType != NToolButtonPrivate::Accent) {
         return;
     }
 
