@@ -2,14 +2,17 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QtNativeUI/NIcon.h>
+#include <QtNativeUI/NNavigationBar.h>
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NTabBar.h>
 #include <QtNativeUI/NTabWidget.h>
 #include <QtNativeUI/NToolButton.h>
 
 #include "QtNativeUI/NScrollArea.h"
+#include "QtNativeUI/NSpinBox.h"
 #include "widgets/ExampleSection.h"
 
 NavigationExample::NavigationExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -31,6 +34,9 @@ void NavigationExample::initUI() {
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
     contentLayout->setContentsMargins(32, 32, 32, 32);
     contentLayout->setSpacing(24);
+
+    // 添加NavigationBar示例
+    contentLayout->addWidget(new ExampleSection("NavigationBar", createNavigationBars()));
 
     contentLayout->addWidget(new ExampleSection("TabBar", createTabBars()));
 
@@ -275,6 +281,82 @@ QWidget* NavigationExample::createTabWidgets() {
         sectionLayout->addWidget(rightContainer, 1);
 
         layout->addWidget(section);
+    }
+
+    return container;
+}
+
+QWidget* NavigationExample::createNavigationBars() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 1. 基本导航栏示例
+    {
+        QWidget*     demoSection   = new QWidget;
+        QHBoxLayout* sectionLayout = new QHBoxLayout(demoSection);
+        sectionLayout->setContentsMargins(0, 0, 0, 16);
+
+        // 创建导航栏
+        NNavigationBar* navigationBar = new NNavigationBar(demoSection);
+
+        // 创建一些内容页面
+        QWidget*     homePage   = new QWidget;
+        QVBoxLayout* homeLayout = new QVBoxLayout(homePage);
+        homeLayout->addWidget(new QLabel("Home Page Content"));
+
+        QWidget*     documentsPage   = new QWidget;
+        QVBoxLayout* documentsLayout = new QVBoxLayout(documentsPage);
+        documentsLayout->addWidget(new QLabel("Documents Page Content"));
+
+        QWidget*     settingsPage   = new QWidget;
+        QVBoxLayout* settingsLayout = new QVBoxLayout(settingsPage);
+        settingsLayout->addWidget(new QLabel("Settings Page Content"));
+
+        QWidget*     profilePage   = new QWidget;
+        QVBoxLayout* profileLayout = new QVBoxLayout(profilePage);
+        profileLayout->addWidget(new QLabel("Profile Page Content"));
+
+        // 创建内容显示区
+        QStackedWidget* contentStack = new QStackedWidget(demoSection);
+        contentStack->addWidget(homePage);
+        contentStack->addWidget(documentsPage);
+        contentStack->addWidget(settingsPage);
+        contentStack->addWidget(profilePage);
+
+        // 添加导航节点
+        QString expanderKey;
+        navigationBar->addExpanderNode("System", expanderKey, NRegularIconType::Settings24Regular);
+
+        // 添加页面节点
+        navigationBar->addPageNode("Home", homePage, NRegularIconType::Home24Regular);
+        navigationBar->addPageNode("Documents", documentsPage, NRegularIconType::Document24Regular);
+        navigationBar->addPageNode("Settings", settingsPage, expanderKey, NRegularIconType::Settings24Regular);
+
+        // 添加页脚节点
+        QString footerKey;
+        navigationBar->addFooterNode("Profile", profilePage, footerKey, 0, NRegularIconType::Person24Regular);
+
+        // 连接导航事件
+        connect(navigationBar,
+                &NNavigationBar::navigationNodeClicked,
+                [contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey) {
+                    if (nodeKey.contains("Home")) {
+                        contentStack->setCurrentIndex(0);
+                    } else if (nodeKey.contains("Documents")) {
+                        contentStack->setCurrentIndex(1);
+                    } else if (nodeKey.contains("Settings")) {
+                        contentStack->setCurrentIndex(2);
+                    } else if (nodeKey.contains("Profile")) {
+                        contentStack->setCurrentIndex(3);
+                    }
+                });
+
+        sectionLayout->addWidget(navigationBar);
+        sectionLayout->addWidget(contentStack, 1);
+
+        layout->addWidget(new QLabel("Standard Navigation Bar:"));
+        layout->addWidget(demoSection);
     }
 
     return container;

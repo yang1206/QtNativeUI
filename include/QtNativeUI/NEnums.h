@@ -155,4 +155,44 @@ enum Type {
 Q_ENUM_CREATE(Type)
 Q_END_ENUM_CREATE(NLabelType)
 
+// 导航相关枚举
+Q_BEGIN_ENUM_CREATE(NNavigationType)
+
+enum NavigationDisplayMode {
+    Auto,    // 自动模式，根据窗口大小自动调整显示模式
+    Minimal, // 最小化模式，导航栏隐藏
+    Compact, // 紧凑模式，只显示图标
+    Maximal  // 最大化模式，显示完整导航栏
+};
+Q_ENUM_CREATE(NavigationDisplayMode)
+
+enum NavigationNodeType {
+    PageNode,  // 页面节点
+    FooterNode // 页脚节点
+};
+Q_ENUM_CREATE(NavigationNodeType)
+
+enum NodeOperateReturnType {
+    Success,             // 操作成功
+    PageInvalid,         // 页面无效
+    TargetNodeInvalid,   // 目标节点无效
+    TargetNodeTypeError, // 目标节点类型错误
+    TargetNodeDepthLimit // 目标节点深度超限
+};
+Q_ENUM_CREATE(NodeOperateReturnType)
+
+Q_END_ENUM_CREATE(NNavigationType)
+
+// 导航路由相关枚举
+Q_BEGIN_ENUM_CREATE(NNavigationRouterType)
+
+enum NavigationRouteType {
+    Success,            // 操作成功
+    ObjectInvalid,      // 对象无效
+    FunctionNameInvalid // 函数名无效
+};
+Q_ENUM_CREATE(NavigationRouteType)
+
+Q_END_ENUM_CREATE(NNavigationRouterType)
+
 #endif // QTNATIVEUI_NENUMS_H
