@@ -19,7 +19,7 @@ class NFooterModel : public QAbstractListModel {
                   QString&               footerKey,
                   bool                   isHasFooterPage,
                   int                    keyPoints = 0,
-                  NRegularIconType::Icon icon      = NRegularIconType::Home12Regular); // 使用Home作为默认图标
+                  NRegularIconType::Icon icon      = NRegularIconType::None);
 
     int              getFooterNodeCount() const;
     NNavigationNode* getNavigationNode(QString footerKey);

@@ -97,29 +97,29 @@ void NNavigationStyle::drawPrimitive(PrimitiveElement    element,
 
                 // 设置颜色（这里需要使用你的主题系统来获取颜色）
                 QColor background;
-                if (_themeMode == NThemeType::Light) {
-                    if (vopt->state & QStyle::State_Selected) {
-                        background = index == _pPressIndex
-                                         ? QColor(238, 238, 238)
-                                         : (vopt->state & QStyle::State_MouseOver ? QColor(242, 242, 242)
-                                                                                  : QColor(245, 245, 245));
+                if (vopt->state & QStyle::State_Selected) {
+                    // 选中状态
+                    if (index == _pPressIndex) {
+                        // Pressed
+                        background = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode);
+                    } else if (vopt->state & QStyle::State_MouseOver) {
+                        // Hover
+                        background = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, _themeMode);
                     } else {
-                        background = index == _pPressIndex
-                                         ? QColor(238, 238, 238)
-                                         : (vopt->state & QStyle::State_MouseOver ? QColor(245, 245, 245)
-                                                                                  : QColor(255, 255, 255, 0));
+                        // Default selected
+                        background = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode);
                     }
                 } else {
-                    if (vopt->state & QStyle::State_Selected) {
-                        background =
-                            index == _pPressIndex
-                                ? QColor(56, 56, 56)
-                                : (vopt->state & QStyle::State_MouseOver ? QColor(51, 51, 51) : QColor(46, 46, 46));
+                    // 未选中状态
+                    if (index == _pPressIndex) {
+                        // Pressed
+                        background = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, _themeMode);
+                    } else if (vopt->state & QStyle::State_MouseOver) {
+                        // Hover
+                        background = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode);
                     } else {
-                        background =
-                            index == _pPressIndex
-                                ? QColor(56, 56, 56)
-                                : (vopt->state & QStyle::State_MouseOver ? QColor(46, 46, 46) : QColor(30, 30, 30, 0));
+                        // Default
+                        background = NThemeColor(NFluentColorKey::SubtleFillColorTransparent, _themeMode);
                     }
                 }
 
@@ -198,7 +198,14 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 }
 
                 // 设置文字颜色
-                QColor textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
+                QColor textColor;
+                if (!(vopt->state & QStyle::State_Enabled)) {
+                    textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, _themeMode);
+                } else if (vopt->state & QStyle::State_Selected) {
+                    textColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, _themeMode);
+                } else {
+                    textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
+                }
 
                 // 图标绘制
                 painter->setPen(vopt->index == _pPressIndex ? textColor.darker(120) : textColor);
@@ -286,12 +293,12 @@ void NNavigationStyle::drawControl(ControlElement      element,
                             // KeyPoints
                             painter->save();
                             painter->setPen(Qt::NoPen);
+                            // 添加白色背景圆
+                            painter->setBrush(Qt::white);
+                            painter->drawEllipse(QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 10, 10);
+                            // 红色前景圆
                             painter->setBrush(NThemeColor(NFluentColorKey::SystemFillColorCritical, _themeMode));
-                            painter->drawEllipse(
-                                QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 10, 10);
-                            painter->setBrush(QColor(232, 17, 35)); // 通知红色
-                            painter->drawEllipse(
-                                QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 9, 9);
+                            painter->drawEllipse(QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 9, 9);
                             painter->setPen(QPen(Qt::white, 2));
                             QFont font = painter->font();
                             font.setBold(true);
@@ -311,6 +318,11 @@ void NNavigationStyle::drawControl(ControlElement      element,
                         }
                     }
                 }
+
+                // 添加边框绘制
+                QPen borderPen(NThemeColor(NFluentColorKey::SubtleFillColorTransparent, _themeMode));
+                painter->setPen(borderPen);
+
                 painter->restore();
             }
             return;

@@ -9,7 +9,6 @@
 
 class NNavigationNode;
 class QPropertyAnimation;
-class QAbstractItemView;
 
 class NFooterDelegate : public QStyledItemDelegate {
     Q_OBJECT

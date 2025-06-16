@@ -6,6 +6,7 @@
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 
+class NBaseListView;
 class QLayout;
 class QMenu;
 class QVBoxLayout;
@@ -17,7 +18,7 @@ class NNavigationNode;
 class NNavigationModel;
 class NNavigationView;
 
-class QAbstractItemView;
+class QListView;
 class NFooterModel;
 class NFooterDelegate;
 class NToolButton;
@@ -49,14 +50,14 @@ class NNavigationBarPrivate : public QObject {
     QVBoxLayout*                      _navigationButtonLayout{nullptr};
     QHBoxLayout*                      _navigationSuggestLayout{nullptr};
 
-    NToolButton*       _navigationButton{nullptr};
-    NToolButton*       _searchButton{nullptr};
-    NNavigationModel*  _navigationModel{nullptr};
-    NNavigationView*   _navigationView{nullptr};
-    QAbstractItemView* _footerView{nullptr};
-    NFooterModel*      _footerModel{nullptr};
-    NFooterDelegate*   _footerDelegate{nullptr};
-    NLineEdit*         _navigationSuggestBox{nullptr}; // 临时替代NSuggestBox
+    NToolButton*      _navigationButton{nullptr};
+    NToolButton*      _searchButton{nullptr};
+    NNavigationModel* _navigationModel{nullptr};
+    NNavigationView*  _navigationView{nullptr};
+    NBaseListView*    _footerView{nullptr};
+    NFooterModel*     _footerModel{nullptr};
+    NFooterDelegate*  _footerDelegate{nullptr};
+    NLineEdit*        _navigationSuggestBox{nullptr}; // 临时替代NSuggestBox
 
     QList<NNavigationNode*> _lastExpandedNodesList;
 

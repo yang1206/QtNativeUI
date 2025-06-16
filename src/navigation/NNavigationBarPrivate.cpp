@@ -8,6 +8,7 @@
 #include "NFooterModel.h"
 #include "NNavigationModel.h"
 #include "NNavigationNode.h"
+#include "NNavigationRouter.h"
 #include "NNavigationView.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NNavigationBar.h"
@@ -105,8 +106,8 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
                         }
                     }
                     routeData.insert("NPageKey", pageKey);
-                    // 这里应该使用NavigationRouter，暂时保留空实现
-                    // NNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRouteBack", routeData);
+                    // 使用 NNavigationRouter 记录路由
+                    NNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRouteBack", routeData);
                 }
 
                 Q_EMIT q->navigationNodeClicked(NNavigationType::PageNode, node->getNodeKey());
@@ -162,9 +163,11 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
 void NNavigationBarPrivate::onFooterViewClicked(const QModelIndex& index, bool isLogRoute) {
     Q_Q(NNavigationBar);
     NNavigationNode* node = index.data(Qt::UserRole).value<NNavigationNode*>();
+    if (!node) return;
+    
     if (node->getKeyPoints()) {
         node->setKeyPoints(0);
-        _navigationView->update();
+        _footerView->viewport()->update();
     }
 
     NNavigationNode* selectedNode = _footerModel->getSelectedNode();
@@ -182,8 +185,8 @@ void NNavigationBarPrivate::onFooterViewClicked(const QModelIndex& index, bool i
                 }
             }
             routeData.insert("NPageKey", pageKey);
-            // 这里应该使用NavigationRouter，暂时保留空实现
-            // NNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRouteBack", routeData);
+            // 使用 NNavigationRouter 记录路由
+            NNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRouteBack", routeData);
         }
 
         Q_EMIT q->navigationNodeClicked(NNavigationType::FooterNode, node->getNodeKey());
@@ -193,9 +196,9 @@ void NNavigationBarPrivate::onFooterViewClicked(const QModelIndex& index, bool i
                 QVariantMap mainPostData = QVariantMap();
                 mainPostData.insert("SelectMarkChanged", true);
                 mainPostData.insert("LastSelectedNode",
-                                    QVariant::fromValue(_navigationModel->getSelectedExpandedNode()
-                                                            ? _navigationModel->getSelectedExpandedNode()
-                                                            : _navigationModel->getSelectedNode()));
+                                   QVariant::fromValue(_navigationModel->getSelectedExpandedNode()
+                                                         ? _navigationModel->getSelectedExpandedNode()
+                                                         : _navigationModel->getSelectedNode()));
                 mainPostData.insert("SelectedNode", QVariant::fromValue(nullptr));
                 _navigationView->clearSelection();
                 _navigationView->navigationNodeStateChange(mainPostData);
@@ -309,25 +312,18 @@ void NNavigationBarPrivate::_addStackedPage(QWidget* page, QString pageKey) {
     // _suggestKeyMap.insert(pageKey, suggestKey);
 }
 
-void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footKey) {
+void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footerKey) {
     Q_Q(NNavigationBar);
-    Q_EMIT q->navigationNodeAdded(NNavigationType::FooterNode, footKey, page);
+    Q_EMIT q->navigationNodeAdded(NNavigationType::FooterNode, footerKey, page);
 
     if (page) {
-        page->setProperty("NPageKey", footKey);
+        page->setProperty("NPageKey", footerKey);
     }
 
-    // 如果有_footerView，更新其高度
-    // _footerView->setFixedHeight(40 * _footerModel->getFooterNodeCount());
+    // 恢复 Footer 视图高度计算
+    _footerView->setFixedHeight(40 * _footerModel->getFooterNodeCount());
 
-    NNavigationNode* node = _footerModel->getNavigationNode(footKey);
-
-    // 如果有建议框功能，这里应该添加建议
-    // QVariantMap suggestData;
-    // suggestData.insert("NNodeType", "Footer");
-    // suggestData.insert("NPageKey", footKey);
-    // QString suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
-    // _suggestKeyMap.insert(footKey, suggestKey);
+    // 添加建议搜索功能相关代码已省略，按照要求
 }
 
 void NNavigationBarPrivate::_raiseNavigationBar() {

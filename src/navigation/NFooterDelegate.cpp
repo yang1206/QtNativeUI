@@ -11,7 +11,8 @@
 NFooterDelegate::NFooterDelegate(QObject* parent) : QStyledItemDelegate{parent} {
     _pListView = nullptr;
     _themeMode = nTheme->themeMode();
-    connect(nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) { _themeMode = themeMode; });
+    connect(
+        nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) { _themeMode = themeMode; });
 
     setProperty("lastSelectMarkTop", 10.0);
     setProperty("lastSelectMarkBottom", 10.0);
@@ -20,7 +21,7 @@ NFooterDelegate::NFooterDelegate(QObject* parent) : QStyledItemDelegate{parent} 
 
     // Mark向上
     _lastSelectMarkTopAnimation = new QPropertyAnimation(this, "lastSelectMarkTop");
-    connect(_lastSelectMarkTopAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
+    connect(_lastSelectMarkTopAnimation, &QPropertyAnimation::valueChanged, this, [this](const QVariant& value) {
         _lastSelectMarkTop = value.toReal();
         if (_pListView)
             _pListView->viewport()->update();
@@ -29,14 +30,14 @@ NFooterDelegate::NFooterDelegate(QObject* parent) : QStyledItemDelegate{parent} 
     _lastSelectMarkTopAnimation->setEasingCurve(QEasingCurve::InOutSine);
 
     _selectMarkBottomAnimation = new QPropertyAnimation(this, "selectMarkBottom");
-    connect(_selectMarkBottomAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
+    connect(_selectMarkBottomAnimation, &QPropertyAnimation::valueChanged, this, [this](const QVariant& value) {
         _selectMarkBottom = value.toReal();
         if (_pListView)
             _pListView->viewport()->update();
     });
     _selectMarkBottomAnimation->setDuration(300);
     _selectMarkBottomAnimation->setEasingCurve(QEasingCurve::InOutSine);
-    connect(_lastSelectMarkTopAnimation, &QPropertyAnimation::finished, this, [=]() {
+    connect(_lastSelectMarkTopAnimation, &QPropertyAnimation::finished, this, [this]() {
         _isSelectMarkDisplay = true;
         _lastSelectedNode    = nullptr;
         _selectMarkBottomAnimation->setStartValue(0);
@@ -46,7 +47,7 @@ NFooterDelegate::NFooterDelegate(QObject* parent) : QStyledItemDelegate{parent} 
 
     // Mark向下
     _lastSelectMarkBottomAnimation = new QPropertyAnimation(this, "lastSelectMarkBottom");
-    connect(_lastSelectMarkBottomAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
+    connect(_lastSelectMarkBottomAnimation, &QPropertyAnimation::valueChanged, this, [this](const QVariant& value) {
         _lastSelectMarkBottom = value.toReal();
         if (_pListView)
             _pListView->viewport()->update();
@@ -55,14 +56,14 @@ NFooterDelegate::NFooterDelegate(QObject* parent) : QStyledItemDelegate{parent} 
     _lastSelectMarkBottomAnimation->setEasingCurve(QEasingCurve::InOutSine);
 
     _selectMarkTopAnimation = new QPropertyAnimation(this, "selectMarkTop");
-    connect(_selectMarkTopAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
+    connect(_selectMarkTopAnimation, &QPropertyAnimation::valueChanged, this, [this](const QVariant& value) {
         _selectMarkTop = value.toReal();
         if (_pListView)
             _pListView->viewport()->update();
     });
     _selectMarkTopAnimation->setDuration(300);
     _selectMarkTopAnimation->setEasingCurve(QEasingCurve::InOutSine);
-    connect(_lastSelectMarkBottomAnimation, &QPropertyAnimation::finished, this, [=]() {
+    connect(_lastSelectMarkBottomAnimation, &QPropertyAnimation::finished, this, [this]() {
         _isSelectMarkDisplay = true;
         _lastSelectedNode    = nullptr;
         _selectMarkTopAnimation->setStartValue(0);
@@ -119,40 +120,28 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     QPainterPath path;
     path.addRoundedRect(itemRect, 8, 8);
 
-    // 根据主题和状态设置颜色
-    QColor background;
-    QColor textColor;
-
-    if (_themeMode == NThemeType::Light) {
-        textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
-        if (option.state & QStyle::State_Selected) {
-            background = index == _pPressIndex
-                             ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light)
-                             : NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
+    // 简化背景色逻辑，使用与Ela一致的实现
+    if (option.state & QStyle::State_Selected) {
+        if (index == _pPressIndex) {
+            // 选中时点击
+            painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
         } else {
-            background = index == _pPressIndex
-                             ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light)
-                             : (option.state & QStyle::State_MouseOver
-                                    ? NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light)
-                                    : NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light));
+            if (option.state & QStyle::State_MouseOver) {
+                // 选中时覆盖
+                painter->fillPath(path, NThemeColor(NFluentColorKey::ControlFillColorSecondary, _themeMode));
+            } else {
+                // 选中
+                painter->fillPath(path, NThemeColor(NFluentColorKey::ControlFillColorDefault, _themeMode));
+            }
         }
     } else {
-        textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
-        if (option.state & QStyle::State_Selected) {
-            background = index == _pPressIndex
-                             ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark)
-                             : NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
+        if (index == _pPressIndex) {
+            painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
         } else {
-            background = index == _pPressIndex
-                             ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark)
-                             : (option.state & QStyle::State_MouseOver
-                                    ? NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark)
-                                    : NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark));
+            if (option.state & QStyle::State_MouseOver) {
+                painter->fillPath(path, NThemeColor(NFluentColorKey::ControlFillColorSecondary, _themeMode));
+            }
         }
-    }
-
-    if (background.alpha() > 0) {
-        painter->fillPath(path, background);
     }
     painter->restore();
 
@@ -160,14 +149,15 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::TextAntialiasing);
     itemRect = option.rect;
 
-    // 顶边线绘制
     if (index.row() == 0) {
-        painter->setPen(_themeMode == NThemeType::Light ? QColor(230, 230, 230) : QColor(50, 50, 50));
+        painter->setPen(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, _themeMode));
         painter->drawLine(option.rect.x(), itemRect.y() + 1, option.rect.x() + option.rect.width(), itemRect.y() + 1);
     }
 
-    // 图标绘制
-    painter->setPen(textColor);
+    QColor textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
+    painter->setPen(index == _pPressIndex ? NThemeColor(NFluentColorKey::TextFillColorSecondary, _themeMode)
+                                          : textColor);
+
     NRegularIconType::Icon icon = node->getIcon();
     if (icon != NRegularIconType::Home12Regular) {
         QIcon iconObj = nIcon->fromRegular(icon);
@@ -178,13 +168,15 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
 
     int keyPoints = node->getKeyPoints();
     if (keyPoints) {
-        // KeyPoints
         painter->save();
         painter->setPen(Qt::NoPen);
-        painter->setBrush(NThemeColor(NFluentColorKey::SystemFillColorCritical, _themeMode));
+
+        painter->setBrush(Qt::white);
         painter->drawEllipse(QPoint(255, itemRect.y() + itemRect.height() / 2), 10, 10);
-        painter->setBrush(QColor(232, 17, 35)); // 通知红色
+
+        painter->setBrush(NThemeColor(NFluentColorKey::SystemFillColorCritical, _themeMode));
         painter->drawEllipse(QPoint(255, itemRect.y() + itemRect.height() / 2), 9, 9);
+
         painter->setPen(QPen(Qt::white, 2));
         QFont font = painter->font();
         font.setBold(true);
@@ -202,11 +194,10 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
         painter->restore();
     }
 
-    // 文字绘制
-    painter->setPen(textColor);
+    painter->setPen(index == _pPressIndex ? NThemeColor(NFluentColorKey::TextFillColorSecondary, _themeMode)
+                                          : textColor);
     QRect textRect;
-    if (icon != NRegularIconType::Home12Regular) // 使用某个默认值替代None
-    {
+    if (icon != NRegularIconType::Home12Regular) {
         textRect = QRect(itemRect.x() + _iconAreaWidth,
                          itemRect.y(),
                          itemRect.width() - _textRightSpacing - _indicatorIconAreaWidth - _iconAreaWidth,
@@ -220,8 +211,8 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     QString text = painter->fontMetrics().elidedText(node->getNodeTitle(), Qt::ElideRight, textRect.width());
     painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
 
-    // 选中特效
     QColor accentColor = nTheme->isDarkMode() ? nTheme->accentColor().dark() : nTheme->accentColor().light();
+
     if (_isSelectMarkDisplay && (node == model->getSelectedNode())) {
         painter->setPen(Qt::NoPen);
         painter->setBrush(accentColor);

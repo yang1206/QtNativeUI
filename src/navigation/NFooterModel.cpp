@@ -24,7 +24,7 @@ NNavigationType::NodeOperateReturnType NFooterModel::addFooterNode(QString      
                                                                    int                    keyPoints,
                                                                    NRegularIconType::Icon icon) {
     if (_footerNodeList.count() >= 3) {
-        return NNavigationType::TargetNodeInvalid;
+        return NNavigationType::FooterUpperLimit;
     }
 
     NNavigationNode* node = new NNavigationNode(footerTitle);
@@ -57,7 +57,6 @@ void NFooterModel::removeNavigationNode(QString footerKey) {
     for (auto node : _footerNodeList) {
         if (node->getNodeKey() == footerKey) {
             _footerNodeList.removeOne(node);
-            delete node;
             break;
         }
     }

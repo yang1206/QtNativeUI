@@ -1,12 +1,11 @@
 #include "QtNativeUI/NNavigationBar.h"
 
-#include <QEvent>
-#include <QMenu>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPropertyAnimation>
 #include <QResizeEvent>
 #include <QVBoxLayout>
+#include "../navigation/NFooterDelegate.h"
 #include "../navigation/NFooterModel.h"
 #include "../navigation/NNavigationBarPrivate.h"
 #include "../navigation/NNavigationModel.h"
@@ -14,6 +13,7 @@
 #include "../navigation/NNavigationView.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolButton.h"
+#include "nbaselistview.h"
 
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NMenu.h"
@@ -67,11 +67,23 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     d->_navigationSuggestLayout->addLayout(d->_navigationButtonLayout);
     d->_navigationSuggestLayout->addWidget(d->_navigationSuggestBox);
 
-    // 页脚
+    // 页脚视图
     d->_footerModel = new NFooterModel(this);
-    // 这里需要创建和设置_footerView和_footerDelegate
-    // 暂时跳过，等实现完整的导航栏后再添加
+    d->_footerView  = new NBaseListView(this);
+    d->_footerView->setFrameShape(QFrame::NoFrame);
+    d->_footerView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    d->_footerView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    d->_footerView->setSelectionMode(QAbstractItemView::SingleSelection);
+    d->_footerView->setFixedHeight(0);
+    d->_footerView->setModel(d->_footerModel);
 
+    d->_footerDelegate = new NFooterDelegate(this);
+    d->_footerDelegate->setListView(d->_footerView);
+
+    connect(
+        d->_footerView, &QListView::clicked, this, [=](const QModelIndex& index) { d->onFooterViewClicked(index); });
+
+    // 布局设置
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setAlignment(Qt::AlignLeft);
     mainLayout->setSpacing(0);
@@ -79,7 +91,7 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     mainLayout->addLayout(d->_navigationSuggestLayout);
     mainLayout->addSpacing(4);
     mainLayout->addWidget(d->_navigationView);
-    // 添加页脚视图 mainLayout->addWidget(d->_footerView);
+    mainLayout->addWidget(d->_footerView);
 
     // 主题设置
     d->_themeMode = nTheme->themeMode();
@@ -277,16 +289,14 @@ void NNavigationBar::removeNavigationNode(QString nodeKey) {
     if (!node) {
         node = d->_footerModel->getNavigationNode(nodeKey);
     }
-
     if (!node) {
         return;
     }
-
     if (node->getIsFooterNode()) {
         Q_EMIT navigationNodeRemoved(NNavigationType::FooterNode, nodeKey);
         d->_footerModel->removeNavigationNode(nodeKey);
-        // 如果有_footerView，需要更新其高度
-        // d->_footerView->setFixedHeight(40 * d->_footerModel->getFooterNodeCount());
+        // 更新 Footer 视图高度
+        d->_footerView->setFixedHeight(40 * d->_footerModel->getFooterNodeCount());
     } else {
         QStringList removeKeyList = d->_navigationModel->removeNavigationNode(nodeKey);
         d->_initNodeModelIndex(QModelIndex());
@@ -295,8 +305,11 @@ void NNavigationBar::removeNavigationNode(QString nodeKey) {
         }
     }
 
-    // 如果使用了建议框，需要移除建议
-    // d->_navigationSuggestBox->removeSuggestion(d->_suggestKeyMap.value(nodeKey));
+    // 处理搜索建议
+    // if (_navigationSuggestBox && d->_suggestKeyMap.contains(nodeKey)) {
+    //     _navigationSuggestBox->removeSuggestion(d->_suggestKeyMap.value(nodeKey));
+    //     d->_suggestKeyMap.remove(nodeKey);
+    // }
 }
 
 void NNavigationBar::setNodeKeyPoints(QString nodeKey, int keyPoints) {
@@ -371,13 +384,8 @@ void NNavigationBar::paintEvent(QPaintEvent* event) {
     if (!d->_pIsTransparent) {
         QPainter painter(this);
         painter.save();
-
-        // 获取主题颜色
-        QColor borderColor     = d->_themeMode == NThemeType::Light ? QColor(230, 230, 230) : QColor(50, 50, 50);
-        QColor backgroundColor = d->_themeMode == NThemeType::Light ? QColor(255, 255, 255) : QColor(32, 32, 32);
-
-        painter.setPen(borderColor);
-        painter.setBrush(backgroundColor);
+        painter.setPen(NThemeColor(NFluentColorKey::SurfaceStrokeColorDefault, d->_themeMode));
+        painter.setBrush(NThemeColor(NFluentColorKey::LayerFillColorDefault, d->_themeMode));
 
         QRect baseRect = this->rect();
         baseRect.adjust(-1, 0, -1, 0);
@@ -389,10 +397,8 @@ void NNavigationBar::paintEvent(QPaintEvent* event) {
         path.arcTo(QRectF(baseRect.right() - 16, baseRect.bottom() - 16, 16, 16), 0, -90);
         path.lineTo(baseRect.bottomLeft());
         path.closeSubpath();
-
         painter.drawPath(path);
         painter.restore();
     }
-
     QWidget::paintEvent(event);
 }

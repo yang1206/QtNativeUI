@@ -39,6 +39,7 @@
 // Regular Icons
 Q_BEGIN_ENUM_CREATE(NRegularIconType)
 enum Icon {
+    None = 0x0000,
     AccessTime20Regular = 0xe000,
     AccessTime24Regular = 0xf101,
     Accessibility16Regular = 0xf102,

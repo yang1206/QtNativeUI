@@ -173,11 +173,12 @@ enum NavigationNodeType {
 Q_ENUM_CREATE(NavigationNodeType)
 
 enum NodeOperateReturnType {
-    Success,             // 操作成功
-    PageInvalid,         // 页面无效
-    TargetNodeInvalid,   // 目标节点无效
-    TargetNodeTypeError, // 目标节点类型错误
-    TargetNodeDepthLimit // 目标节点深度超限
+    Success,              // 操作成功
+    PageInvalid,          // 页面无效
+    TargetNodeInvalid,    // 目标节点无效
+    TargetNodeTypeError,  // 目标节点类型错误
+    TargetNodeDepthLimit, // 目标节点深度超限
+    FooterUpperLimit,
 };
 Q_ENUM_CREATE(NodeOperateReturnType)
 
