@@ -8,6 +8,8 @@
 #include "NNavigationModel.h"
 #include "NNavigationNode.h"
 #include "NNavigationView.h"
+#include "QtNativeUI/NFluentColors.h"
+#include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
 
 NNavigationStyle::NNavigationStyle(QStyle* style) : QProxyStyle(style) {
@@ -171,7 +173,8 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 }
 
                 // 选中特效
-                QColor accentColor = QColor(0, 120, 212); // 主题强调色
+                QColor accentColor =
+                    nTheme->isDarkMode() ? nTheme->accentColor().dark() : nTheme->accentColor().light();
                 if (_isSelectMarkDisplay &&
                     (node == model->getSelectedNode() || node == model->getSelectedExpandedNode())) {
                     painter->setPen(Qt::NoPen);
@@ -195,7 +198,7 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 }
 
                 // 设置文字颜色
-                QColor textColor = _themeMode == NThemeType::Light ? QColor(0, 0, 0) : QColor(255, 255, 255);
+                QColor textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
 
                 // 图标绘制
                 painter->setPen(vopt->index == _pPressIndex ? textColor.darker(120) : textColor);
@@ -205,12 +208,17 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 if (icon != NRegularIconType::Home12Regular) // 使用某个默认值替代None
                 {
                     painter->save();
-                    QFont iconFont = QFont("Regular"); // 使用你的图标字体
-                    iconFont.setPixelSize(17);
-                    painter->setFont(iconFont);
-                    painter->drawText(QRect(itemRect.x(), itemRect.y(), _iconAreaWidth, itemRect.height()),
+                    if (icon != NRegularIconType::Home12Regular) {
+                        QIcon iconObj = nIcon->fromRegular(icon);
+                        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2,
+                                       itemRect.y() + (itemRect.height() - 17) / 2,
+                                       17,
+                                       17);
+                        iconObj.paint(painter,
+                                      iconRect,
                                       Qt::AlignCenter,
-                                      QChar(static_cast<ushort>(icon)));
+                                      vopt->state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
+                    }
                     painter->restore();
                 }
 
@@ -238,13 +246,12 @@ void NNavigationStyle::drawControl(ControlElement      element,
                     // 展开图标 KeyPoints
                     if (node->getIsExpanderNode()) {
                         if (node->getIsHasChild()) {
-                            QRectF expandIconRect(
+                            QRect expandIconRect(
                                 itemRect.right() - _indicatorIconAreaWidth, itemRect.y(), 17, itemRect.height());
 
                             painter->save();
-                            QFont iconFont = QFont("Regular"); // 使用你的图标字体
-                            iconFont.setPixelSize(17);
-                            painter->setFont(iconFont);
+                            QIcon downIcon = nIcon->fromRegular(NRegularIconType::ChevronDown24Regular);
+                            QRect downRect = expandIconRect;
                             painter->translate(expandIconRect.x() + (qreal) expandIconRect.width() / 2,
                                                expandIconRect.y() + (qreal) expandIconRect.height() / 2);
                             if (node == _expandAnimationTargetNode) {
@@ -258,13 +265,12 @@ void NNavigationStyle::drawControl(ControlElement      element,
                                     painter->rotate(0);
                                 }
                             }
-                            painter->translate(-expandIconRect.x() - (qreal) expandIconRect.width() / 2 + 1,
+                            painter->translate(-expandIconRect.x() - (qreal) expandIconRect.width() / 2,
                                                -expandIconRect.y() - (qreal) expandIconRect.height() / 2);
-
-                            // 使用向下箭头图标绘制
-                            painter->drawText(expandIconRect,
-                                              Qt::AlignVCenter,
-                                              QChar(0xE70D)); // Unicode编码示例，应该使用你的图标字体对应的编码
+                            downIcon.paint(painter,
+                                           downRect,
+                                           Qt::AlignCenter,
+                                           vopt->state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
                             painter->restore();
                         }
                         if (node->getIsChildHasKeyPoints()) {
@@ -280,7 +286,7 @@ void NNavigationStyle::drawControl(ControlElement      element,
                             // KeyPoints
                             painter->save();
                             painter->setPen(Qt::NoPen);
-                            painter->setBrush(Qt::white);
+                            painter->setBrush(NThemeColor(NFluentColorKey::SystemFillColorCritical, _themeMode));
                             painter->drawEllipse(
                                 QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 10, 10);
                             painter->setBrush(QColor(232, 17, 35)); // 通知红色

@@ -123,26 +123,31 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     QColor background;
     QColor textColor;
 
-    // 设置颜色（这里需要使用你的主题系统来获取颜色）
     if (_themeMode == NThemeType::Light) {
+        textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
         if (option.state & QStyle::State_Selected) {
-            background = index == _pPressIndex ? QColor(238, 238, 238) : QColor(245, 245, 245);
-            textColor  = QColor(0, 0, 0);
-        } else {
-            background = index == _pPressIndex ? QColor(238, 238, 238)
-                                               : (option.state & QStyle::State_MouseOver ? QColor(245, 245, 245)
-                                                                                         : QColor(255, 255, 255, 0));
-            textColor  = QColor(0, 0, 0);
-        }
-    } else {
-        if (option.state & QStyle::State_Selected) {
-            background = index == _pPressIndex ? QColor(56, 56, 56) : QColor(46, 46, 46);
-            textColor  = QColor(255, 255, 255);
+            background = index == _pPressIndex
+                             ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light)
+                             : NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
         } else {
             background = index == _pPressIndex
-                             ? QColor(56, 56, 56)
-                             : (option.state & QStyle::State_MouseOver ? QColor(46, 46, 46) : QColor(30, 30, 30, 0));
-            textColor  = QColor(255, 255, 255);
+                             ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light)
+                             : (option.state & QStyle::State_MouseOver
+                                    ? NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light)
+                                    : NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light));
+        }
+    } else {
+        textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+        if (option.state & QStyle::State_Selected) {
+            background = index == _pPressIndex
+                             ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark)
+                             : NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark);
+        } else {
+            background = index == _pPressIndex
+                             ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark)
+                             : (option.state & QStyle::State_MouseOver
+                                    ? NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Dark)
+                                    : NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark));
         }
     }
 
@@ -164,16 +169,11 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     // 图标绘制
     painter->setPen(textColor);
     NRegularIconType::Icon icon = node->getIcon();
-    if (icon != NRegularIconType::Home12Regular) // 使用某个默认值替代None
-    {
-        painter->save();
-        QFont iconFont = QFont("Regular"); // 使用你的图标字体
-        iconFont.setPixelSize(17);
-        painter->setFont(iconFont);
-        painter->drawText(QRect(itemRect.x(), itemRect.y(), _iconAreaWidth, itemRect.height()),
-                          Qt::AlignCenter,
-                          QChar(static_cast<ushort>(icon)));
-        painter->restore();
+    if (icon != NRegularIconType::Home12Regular) {
+        QIcon iconObj = nIcon->fromRegular(icon);
+        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
+        iconObj.paint(
+            painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
     }
 
     int keyPoints = node->getKeyPoints();
@@ -181,7 +181,7 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
         // KeyPoints
         painter->save();
         painter->setPen(Qt::NoPen);
-        painter->setBrush(Qt::white);
+        painter->setBrush(NThemeColor(NFluentColorKey::SystemFillColorCritical, _themeMode));
         painter->drawEllipse(QPoint(255, itemRect.y() + itemRect.height() / 2), 10, 10);
         painter->setBrush(QColor(232, 17, 35)); // 通知红色
         painter->drawEllipse(QPoint(255, itemRect.y() + itemRect.height() / 2), 9, 9);
@@ -221,7 +221,7 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
 
     // 选中特效
-    QColor accentColor = QColor(0, 120, 212); // 主题强调色
+    QColor accentColor = nTheme->isDarkMode() ? nTheme->accentColor().dark() : nTheme->accentColor().light();
     if (_isSelectMarkDisplay && (node == model->getSelectedNode())) {
         painter->setPen(Qt::NoPen);
         painter->setBrush(accentColor);
