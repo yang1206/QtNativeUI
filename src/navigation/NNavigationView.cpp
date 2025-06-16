@@ -29,14 +29,14 @@ NNavigationView::NNavigationView(QWidget* parent) : QTreeView(parent) {
 
     // 滚动条设置
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    // 使用NScrollBar替换默认滚动条
+    //
     NScrollBar* vScrollBar = new NScrollBar(this);
+    connect(vScrollBar, &NScrollBar::rangeAnimationFinished, this, [=]() { doItemsLayout(); });
     setVerticalScrollBar(vScrollBar);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    NScrollBar* floatVScrollBar = new NScrollBar(Qt::Vertical, this);
+    NScrollBar* floatVScrollBar = new NScrollBar(verticalScrollBar(), this);
     floatVScrollBar->installEventFilter(this);
 
     _navigationStyle = new NNavigationStyle(this->style());
@@ -67,9 +67,7 @@ NNavigationView::NNavigationView(QWidget* parent) : QTreeView(parent) {
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &NNavigationView::customContextMenuRequested, this, &NNavigationView::onCustomContextMenuRequested);
 
-    // 使用NToolTip创建提示框
     _compactToolTip = new NToolTip();
-    _compactToolTip->hide();
 }
 
 NNavigationView::~NNavigationView() {}

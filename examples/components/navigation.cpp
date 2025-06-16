@@ -299,7 +299,7 @@ QWidget* NavigationExample::createNavigationBars() {
 
         // 创建导航栏
         NNavigationBar* navigationBar = new NNavigationBar(demoSection);
-        navigationBar->setFixedHeight(500);
+        navigationBar->setFixedHeight(200);
 
         // 创建一些内容页面
         QWidget*     homePage   = new QWidget;

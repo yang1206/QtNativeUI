@@ -42,11 +42,17 @@ class NScrollBarPrivate : public QObject {
     bool                  isDark{false};
     NThemeType::ThemeMode themeMode;
 
-    QStyle::SubControl hoveredSubControl{QStyle::SC_None};
-    QStyle::SubControl pressedSubControl{QStyle::SC_None};
+    QStyle::SubControl   hoveredSubControl{QStyle::SC_None};
+    QStyle::SubControl   pressedSubControl{QStyle::SC_None};
+    QScrollBar*          _originScrollBar{nullptr};
+    QAbstractScrollArea* _originScrollArea{nullptr};
 
     void updateStyle();
     void initScrollBarStyle();
+    void _initAllConfig();
+    void _handleScrollBarValueChanged(QScrollBar* scrollBar, int value);
+    void _handleScrollBarRangeChanged(int min, int max);
+    void _handleScrollBarGeometry();
 };
 
 #endif // NSCROLLBAR_P_H
