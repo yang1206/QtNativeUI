@@ -3,6 +3,7 @@ import os
 import re
 from pathlib import Path
 
+
 def parse_css_file(css_path):
     """解析本地 CSS 文件内容，提取图标名称和 Unicode"""
     if not os.path.exists(css_path):
@@ -23,6 +24,7 @@ def parse_css_file(css_path):
         icons.append((name, unicode_value))
 
     return sorted(icons, key=lambda x: x[0])
+
 
 def generate_enum_header(regular_icons, filled_icons):
     """生成包含两个枚举的头文件内容"""
@@ -67,6 +69,7 @@ def generate_enum_header(regular_icons, filled_icons):
 // Regular Icons
 Q_BEGIN_ENUM_CREATE(NRegularIconType)
 enum Icon {
+    None = 0x0000,
 """
     # 添加 Regular 图标
     for name, unicode in regular_icons:
@@ -79,6 +82,7 @@ Q_END_ENUM_CREATE(NRegularIconType)
 // Filled Icons
 Q_BEGIN_ENUM_CREATE(NFilledIconType)
 enum Icon {
+    None = 0x0000,
 """
     # 添加 Filled 图标
     for name, unicode in filled_icons:
@@ -91,6 +95,7 @@ Q_END_ENUM_CREATE(NFilledIconType)
 #endif // QTNATIVEUI_NICONENUMS_H
 """
     return header
+
 
 def main():
     tools_dir = Path(__file__).parent
@@ -125,6 +130,7 @@ def main():
 
     print(f"Generated {output_file}")
     print(f"Total icons: {len(regular_icons) + len(filled_icons)}")
+
 
 if __name__ == "__main__":
     main()
