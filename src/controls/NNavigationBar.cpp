@@ -22,8 +22,10 @@ Q_PROPERTY_CREATE_Q_CPP(NNavigationBar, bool, IsTransparent)
 
 NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNavigationBarPrivate()) {
     Q_D(NNavigationBar);
-    d->q_ptr = this;
-
+    d->q_ptr      = this;
+    d->_themeMode = nTheme->themeMode();
+    connect(
+        nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) { d->_themeMode = themeMode; });
     setFixedWidth(300);
     d->_pIsTransparent = true;
 
@@ -111,11 +113,6 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     mainLayout->addSpacing(4);
     mainLayout->addWidget(d->_navigationView);
     mainLayout->addWidget(d->_footerView);
-
-    // 主题设置
-    d->_themeMode = nTheme->themeMode();
-    connect(
-        nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) { d->_themeMode = themeMode; });
 }
 
 NNavigationBar::~NNavigationBar() {}
