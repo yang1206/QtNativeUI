@@ -19,6 +19,9 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
     explicit NNavigationBar(QWidget* parent = nullptr);
     ~NNavigationBar();
 
+    void     setHeaderWidget(QWidget* widget);
+    QWidget* headerWidget() const;
+
     // 导航节点操作函数
     NNavigationType::NodeOperateReturnType
     addExpanderNode(QString expanderTitle, QString& expanderKey, NRegularIconType::Icon icon);

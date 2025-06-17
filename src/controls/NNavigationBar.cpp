@@ -29,6 +29,11 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     setFixedWidth(300);
     d->_pIsTransparent = true;
 
+    d->_headerLayout = new QVBoxLayout();
+    d->_headerLayout->setContentsMargins(0, 0, 0, 0);
+    d->_headerLayout->setSpacing(0);
+    d->_headerWidget = nullptr;
+
     // 导航模型
     d->_navigationModel = new NNavigationModel(this);
     d->_navigationView  = new NNavigationView(this);
@@ -109,6 +114,7 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     mainLayout->setAlignment(Qt::AlignLeft);
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 10, 5, 0);
+    mainLayout->addLayout(d->_headerLayout);
     mainLayout->addLayout(d->_navigationSuggestLayout);
     mainLayout->addSpacing(4);
     mainLayout->addWidget(d->_navigationView);
@@ -116,6 +122,26 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
 }
 
 NNavigationBar::~NNavigationBar() {}
+
+void NNavigationBar::setHeaderWidget(QWidget* widget) {
+    Q_D(NNavigationBar);
+    if (d->_headerWidget) {
+        d->_headerLayout->removeWidget(d->_headerWidget);
+        d->_headerWidget->setParent(nullptr);
+    }
+    d->_headerWidget = widget;
+
+    if (widget) {
+        d->_headerLayout->addWidget(widget);
+
+        widget->setVisible(d->_currentDisplayMode == NNavigationType::Maximal);
+    }
+}
+
+QWidget* NNavigationBar::headerWidget() const {
+    Q_D(const NNavigationBar);
+    return d->_headerWidget;
+}
 
 NNavigationType::NodeOperateReturnType
 NNavigationBar::addExpanderNode(QString expanderTitle, QString& expanderKey, NRegularIconType::Icon icon) {

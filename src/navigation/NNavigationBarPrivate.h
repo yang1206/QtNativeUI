@@ -50,6 +50,8 @@ class NNavigationBarPrivate : public QObject {
     QVBoxLayout*                      _navigationButtonLayout{nullptr};
     QHBoxLayout*                      _navigationSuggestLayout{nullptr};
 
+    QWidget*          _headerWidget{nullptr};
+    QVBoxLayout*      _headerLayout{nullptr};
     NToolButton*      _navigationButton{nullptr};
     NToolButton*      _searchButton{nullptr};
     NNavigationModel* _navigationModel{nullptr};
@@ -70,7 +72,6 @@ class NNavigationBarPrivate : public QObject {
 
     void _addStackedPage(QWidget* page, QString pageKey);
     void _addFooterPage(QWidget* page, QString footKey);
-
     void _raiseNavigationBar();
 
     void _doComponentAnimation(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation);

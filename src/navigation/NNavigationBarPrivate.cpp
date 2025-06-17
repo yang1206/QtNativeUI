@@ -363,6 +363,9 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
                 _navigationSuggestBox->setVisible(false);
                 _handleNavigationExpandState(true);
             }
+            if (_headerWidget) {
+                _headerWidget->setVisible(false);
+            }
             _currentDisplayMode = displayMode;
             break;
         }
@@ -376,6 +379,9 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
                 _navigationSuggestBox->setVisible(false);
                 _handleNavigationExpandState(true);
             }
+            if (_headerWidget) {
+                _headerWidget->setVisible(false);
+            }
             _currentDisplayMode = displayMode;
             break;
         }
@@ -388,6 +394,9 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
             _navigationSuggestBox->setVisible(true);
             _currentDisplayMode = displayMode;
             _handleNavigationExpandState(false);
+            if (_headerWidget) {
+                _headerWidget->setVisible(true);
+            }
             break;
         }
         default: {
@@ -419,6 +428,9 @@ void NNavigationBarPrivate::_handleMaximalToCompactLayout() {
     }
     _navigationButtonLayout->addSpacing(40);
     _navigationSuggestLayout->addStretch();
+    if (_headerWidget) {
+        _headerWidget->setVisible(false);
+    }
 }
 
 void NNavigationBarPrivate::_handleCompactToMaximalLayout() {
@@ -428,6 +440,9 @@ void NNavigationBarPrivate::_handleCompactToMaximalLayout() {
     }
     _navigationButtonLayout->addSpacing(38);
     _navigationSuggestLayout->insertSpacing(0, 46);
+    if (_headerWidget) {
+        _headerWidget->setVisible(true);
+    }
 }
 
 void NNavigationBarPrivate::_resetLayout() {
@@ -443,6 +458,9 @@ void NNavigationBarPrivate::_resetLayout() {
     }
     _navigationSuggestLayout->addLayout(_navigationButtonLayout);
     _navigationSuggestLayout->addWidget(_navigationSuggestBox);
+    if (_headerWidget) {
+        _headerWidget->setVisible(true);
+    }
 }
 
 void NNavigationBarPrivate::_doNavigationBarWidthAnimation(NNavigationType::NavigationDisplayMode displayMode,

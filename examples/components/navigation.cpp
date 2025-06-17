@@ -11,6 +11,7 @@
 #include <QtNativeUI/NTabWidget.h>
 #include <QtNativeUI/NToolButton.h>
 
+#include "QtNativeUI/NLabel.h"
 #include "QtNativeUI/NScrollArea.h"
 #include "QtNativeUI/NSpinBox.h"
 #include "widgets/ExampleSection.h"
@@ -299,6 +300,7 @@ QWidget* NavigationExample::createNavigationBars() {
 
         // 创建导航栏
         NNavigationBar* navigationBar = new NNavigationBar(demoSection);
+        navigationBar->setHeaderWidget(new NLabel("头部组件", NLabelType::Subtitle));
         navigationBar->setMinimumHeight(400);
 
         // 创建一些内容页面
