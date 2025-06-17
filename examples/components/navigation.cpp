@@ -299,7 +299,7 @@ QWidget* NavigationExample::createNavigationBars() {
 
         // 创建导航栏
         NNavigationBar* navigationBar = new NNavigationBar(demoSection);
-        navigationBar->setFixedHeight(200);
+        navigationBar->setMinimumHeight(400);
 
         // 创建一些内容页面
         QWidget*     homePage   = new QWidget;
@@ -325,6 +325,20 @@ QWidget* NavigationExample::createNavigationBars() {
         contentStack->addWidget(settingsPage);
         contentStack->addWidget(profilePage);
 
+        m_pageKeyMap.clear();
+
+        connect(navigationBar,
+                &NNavigationBar::navigationNodeAdded,
+                [this, contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey, QWidget* page) {
+                    for (int i = 0; i < contentStack->count(); ++i) {
+                        if (contentStack->widget(i) == page) {
+                            m_pageKeyMap[nodeKey] = i;
+                            qDebug() << "Mapped node" << nodeKey << "to page index" << i;
+                            break;
+                        }
+                    }
+                });
+
         // 添加导航节点
         QString expanderKey;
         navigationBar->addExpanderNode("System", expanderKey, NRegularIconType::Settings24Regular);
@@ -338,19 +352,13 @@ QWidget* NavigationExample::createNavigationBars() {
         QString footerKey;
         navigationBar->addFooterNode("Profile", profilePage, footerKey, 0, NRegularIconType::Person24Regular);
 
-        // 连接导航事件
+        // 连接导航事件，使用映射表切换页面
         connect(navigationBar,
                 &NNavigationBar::navigationNodeClicked,
-                [contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey) {
+                [this, contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey) {
                     qDebug() << "Navigation node clicked: " << nodeType << ", " << nodeKey;
-                    if (nodeKey.contains("Home")) {
-                        contentStack->setCurrentIndex(0);
-                    } else if (nodeKey.contains("Documents")) {
-                        contentStack->setCurrentIndex(1);
-                    } else if (nodeKey.contains("Settings")) {
-                        contentStack->setCurrentIndex(2);
-                    } else if (nodeKey.contains("Profile")) {
-                        contentStack->setCurrentIndex(3);
+                    if (m_pageKeyMap.contains(nodeKey)) {
+                        contentStack->setCurrentIndex(m_pageKeyMap[nodeKey]);
                     }
                 });
 

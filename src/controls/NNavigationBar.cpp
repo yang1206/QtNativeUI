@@ -250,11 +250,10 @@ NNavigationType::NodeOperateReturnType NNavigationBar::addFooterNode(QString    
                                                                      QString&               footerKey,
                                                                      int                    keyPoints,
                                                                      NRegularIconType::Icon icon) {
-    Q_D(NNavigationBar);
     NNavigationType::NodeOperateReturnType returnType =
-        d->_footerModel->addFooterNode(footerTitle, footerKey, page ? true : false, keyPoints, icon);
+        d_ptr->_footerModel->addFooterNode(footerTitle, footerKey, page ? true : false, keyPoints, icon);
     if (returnType == NNavigationType::Success) {
-        d->_addFooterPage(page, footerKey);
+        d_ptr->_addFooterPage(page, footerKey);
     }
     return returnType;
 }

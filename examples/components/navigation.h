@@ -17,7 +17,8 @@ class NavigationExample : public QWidget {
     QWidget* createNavigationBars();
 
   private:
-    NScrollArea* m_scrollArea;
+    NScrollArea*       m_scrollArea;
+    QMap<QString, int> m_pageKeyMap;
 };
 
 #endif // NAVIGATION_EXAMPLE_H
