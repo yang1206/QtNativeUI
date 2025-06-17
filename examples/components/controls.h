@@ -14,6 +14,7 @@ class ControlsExample : public QWidget {
     QWidget*     createCheckBoxes();
     QWidget*     createToggleSwitches();
     QWidget*     createLineEdits();
+    QWidget*     createSuggestBoxes();
     QWidget*     createTextEdits();
     QWidget*     createPlainTextEdits();
     QWidget*     createSpinBoxes();
