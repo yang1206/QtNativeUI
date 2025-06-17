@@ -9,6 +9,7 @@
 #include <QWidget>
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/NIconEnums.h"
+#include "QtNativeUI/NSuggestBox.h"
 #include "QtNativeUI/stdafx.h"
 
 class NSuggestion : public QObject {
@@ -25,10 +26,9 @@ class NSuggestion : public QObject {
 
 class QVBoxLayout;
 class NLineEdit;
-class QListView;
+class NBaseListView;
 class NSuggestModel;
 class NSuggestDelegate;
-class NSuggestBox;
 class QWidget;
 class QPropertyAnimation;
 
@@ -71,7 +71,7 @@ class NSuggestBoxPrivate : public QObject {
     NThemeType::ThemeMode _themeMode{NThemeType::Light};
     NLineEdit*            _lineEdit{nullptr};
     NSuggestPopup*        _popup{nullptr};
-    QListView*            _listView{nullptr};
+    NBaseListView*        _listView{nullptr};
     NSuggestModel*        _model{nullptr};
     NSuggestDelegate*     _delegate{nullptr};
     QVBoxLayout*          _popupLayout{nullptr};

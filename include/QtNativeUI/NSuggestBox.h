@@ -5,7 +5,6 @@
 #include <QWidget>
 
 #include "NIconEnums.h"
-#include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 
 class NSuggestBoxPrivate;

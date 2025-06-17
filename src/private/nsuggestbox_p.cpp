@@ -1,7 +1,6 @@
 #include "nsuggestbox_p.h"
 
 #include <QApplication>
-#include <QListView>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPropertyAnimation>
@@ -15,6 +14,7 @@
 #include "QtNativeUI/NScrollBar.h"
 #include "QtNativeUI/NSuggestBox.h"
 #include "QtNativeUI/NTheme.h"
+#include "nbaselistview.h"
 #include "nsuggestmodel.h"
 
 // NSuggestion 实现
@@ -82,7 +82,7 @@ void NSuggestBoxPrivate::setupUI() {
     _lineEdit->setClearButtonEnabled(true);
 
     // 创建搜索图标，使用 NLineEdit 的 addAction 方法
-    _lineEdit->addAction(NRegularIconType::Search16Regular, NLineEdit::LeadingPosition);
+    _lineEdit->addAction(NRegularIconType::Search16Regular, NLineEdit::TrailingPosition);
 
     // 创建布局
     QVBoxLayout* layout = new QVBoxLayout(q);
@@ -94,7 +94,7 @@ void NSuggestBoxPrivate::setupUI() {
     _popup = new NSuggestPopup(q->window());
 
     // 创建列表视图
-    _listView = new QListView(_popup);
+    _listView = new NBaseListView(_popup);
     _listView->setFrameShape(QFrame::NoFrame);
     _listView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     _listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
