@@ -21,7 +21,6 @@ class NNavigationView : public QTreeView {
 
   signals:
     void navigationClicked(const QModelIndex& index);
-    void navigationOpenNewWindow(QString nodeKey);
 
   protected:
     virtual void mouseMoveEvent(QMouseEvent* event) override;

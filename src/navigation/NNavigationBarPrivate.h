@@ -6,6 +6,7 @@
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 
+class NMenu;
 class NBaseListView;
 class QLayout;
 class QMenu;
@@ -35,7 +36,6 @@ class NNavigationBarPrivate : public QObject {
     ~NNavigationBarPrivate() override;
 
     Q_SLOT void      onNavigationButtonClicked();
-    Q_SLOT void      onNavigationOpenNewWindow(QString nodeKey);
     Q_INVOKABLE void onNavigationRouteBack(QVariantMap routeData);
 
     // 核心跳转逻辑
@@ -46,7 +46,7 @@ class NNavigationBarPrivate : public QObject {
     NThemeType::ThemeMode             _themeMode;
     QMap<QString, QString>            _suggestKeyMap;
     QMap<QString, const QMetaObject*> _pageMetaMap;
-    QMap<NNavigationNode*, QMenu*>    _compactMenuMap;
+    QMap<NNavigationNode*, NMenu*>    _compactMenuMap;
     QVBoxLayout*                      _navigationButtonLayout{nullptr};
     QHBoxLayout*                      _navigationSuggestLayout{nullptr};
 
@@ -63,9 +63,10 @@ class NNavigationBarPrivate : public QObject {
 
     NNavigationType::NavigationDisplayMode _currentDisplayMode{NNavigationType::NavigationDisplayMode::Maximal};
 
+    void _initNodeModelIndex(const QModelIndex& parentIndex);
     void _resetNodeSelected();
     void _expandSelectedNodeParent();
-    void _initNodeModelIndex(const QModelIndex& parentIndex);
+    void _expandOrCollpaseExpanderNode(NNavigationNode* node, bool isExpand);
 
     void _addStackedPage(QWidget* page, QString pageKey);
     void _addFooterPage(QWidget* page, QString footKey);

@@ -10,7 +10,7 @@
 class NNavigationBarPrivate;
 class NNavigationNode;
 
-class NNavigationBar : public QWidget {
+class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
     Q_OBJECT
     Q_Q_CREATE(NNavigationBar)
     Q_PROPERTY_CREATE_Q_H(bool, IsTransparent)
@@ -43,7 +43,11 @@ class NNavigationBar : public QWidget {
     NNavigationType::NodeOperateReturnType
     addFooterNode(QString footerTitle, QWidget* page, QString& footerKey, int keyPoints, NRegularIconType::Icon icon);
 
+    bool getNavigationNodeIsExpanded(QString expanderKey) const;
+    void expandNavigationNode(QString expanderKey);
+    void collpaseNavigationNode(QString expanderKey);
     void removeNavigationNode(QString nodeKey);
+
     void setNodeKeyPoints(QString nodeKey, int keyPoints);
     int  getNodeKeyPoints(QString nodeKey) const;
 

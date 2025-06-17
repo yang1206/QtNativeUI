@@ -11,6 +11,7 @@
 #include "NNavigationRouter.h"
 #include "NNavigationView.h"
 #include "QtNativeUI/NLineEdit.h"
+#include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NNavigationBar.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolButton.h"
@@ -25,21 +26,6 @@ void NNavigationBarPrivate::onNavigationButtonClicked() {
         q->setDisplayMode(NNavigationType::Maximal);
     } else {
         q->setDisplayMode(NNavigationType::Compact);
-    }
-}
-
-void NNavigationBarPrivate::onNavigationOpenNewWindow(QString nodeKey) {
-    Q_Q(NNavigationBar);
-    const QMetaObject* meta = _pageMetaMap.value(nodeKey);
-    if (!meta) {
-        return;
-    }
-
-    QWidget* widget = static_cast<QWidget*>(meta->newInstance());
-    if (widget) {
-        // 这里可以创建一个新窗口并设置widget作为其中心部件
-        // 暂时简化处理
-        widget->show();
     }
 }
 
@@ -163,8 +149,9 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
 void NNavigationBarPrivate::onFooterViewClicked(const QModelIndex& index, bool isLogRoute) {
     Q_Q(NNavigationBar);
     NNavigationNode* node = index.data(Qt::UserRole).value<NNavigationNode*>();
-    if (!node) return;
-    
+    if (!node)
+        return;
+
     if (node->getKeyPoints()) {
         node->setKeyPoints(0);
         _footerView->viewport()->update();
@@ -196,9 +183,9 @@ void NNavigationBarPrivate::onFooterViewClicked(const QModelIndex& index, bool i
                 QVariantMap mainPostData = QVariantMap();
                 mainPostData.insert("SelectMarkChanged", true);
                 mainPostData.insert("LastSelectedNode",
-                                   QVariant::fromValue(_navigationModel->getSelectedExpandedNode()
-                                                         ? _navigationModel->getSelectedExpandedNode()
-                                                         : _navigationModel->getSelectedNode()));
+                                    QVariant::fromValue(_navigationModel->getSelectedExpandedNode()
+                                                            ? _navigationModel->getSelectedExpandedNode()
+                                                            : _navigationModel->getSelectedNode()));
                 mainPostData.insert("SelectedNode", QVariant::fromValue(nullptr));
                 _navigationView->clearSelection();
                 _navigationView->navigationNodeStateChange(mainPostData);
@@ -284,6 +271,39 @@ void NNavigationBarPrivate::_expandSelectedNodeParent() {
     }
 }
 
+void NNavigationBarPrivate::_expandOrCollpaseExpanderNode(NNavigationNode* node, bool isExpand) {
+    if (_currentDisplayMode == NNavigationType::Compact) {
+        if (node->getIsHasPageChild()) {
+            // 展开菜单
+            NMenu* menu = _compactMenuMap.value(node);
+            if (menu) {
+                QPoint nodeTopRight =
+                    _navigationView->mapToGlobal(_navigationView->visualRect(node->getModelIndex()).topRight());
+                menu->popup(QPoint(nodeTopRight.x() + 10, nodeTopRight.y()));
+            }
+        }
+    } else {
+        QModelIndex index      = node->getModelIndex();
+        bool        isExpanded = _navigationView->isExpanded(index);
+        if (node->getIsHasChild() && isExpand != isExpanded) {
+            QVariantMap data;
+            if (isExpanded) {
+                // 收起
+                data.insert("Collapse", QVariant::fromValue(node));
+                node->setIsExpanded(isExpand);
+                _navigationView->navigationNodeStateChange(data);
+                _navigationView->collapse(index);
+            } else {
+                // 展开
+                data.insert("Expand", QVariant::fromValue(node));
+                node->setIsExpanded(true);
+                _navigationView->navigationNodeStateChange(data);
+                _navigationView->expand(index);
+            }
+        }
+    }
+}
+
 void NNavigationBarPrivate::_initNodeModelIndex(const QModelIndex& parentIndex) {
     int rowCount = _navigationModel->rowCount(parentIndex);
     for (int row = 0; row < rowCount; ++row) {
@@ -319,11 +339,13 @@ void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footerKey) {
     if (page) {
         page->setProperty("NPageKey", footerKey);
     }
-
-    // 恢复 Footer 视图高度计算
     _footerView->setFixedHeight(40 * _footerModel->getFooterNodeCount());
-
-    // 添加建议搜索功能相关代码已省略，按照要求
+    NNavigationNode* node = _footerModel->getNavigationNode(footerKey);
+    QVariantMap      suggestData;
+    suggestData.insert("NNodeType", "Footer");
+    suggestData.insert("NPageKey", footerKey);
+    // QString suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
+    // _suggestKeyMap.insert(footerKey, suggestKey);
 }
 
 void NNavigationBarPrivate::_raiseNavigationBar() {
@@ -499,7 +521,7 @@ void NNavigationBarPrivate::_doNavigationButtonAnimation(bool isCompact, bool is
 void NNavigationBarPrivate::_doSearchButtonAnimation(bool isCompact, bool isAnimation) {
     if (isCompact) {
         QPoint navigationButtonPos = _navigationButton->pos();
-        // 搜索按钮
+
         QPropertyAnimation* searchButtonAnimation = new QPropertyAnimation(_searchButton, "pos");
         searchButtonAnimation->setStartValue(QPoint(200, navigationButtonPos.y()));
         searchButtonAnimation->setEndValue(QPoint(0, navigationButtonPos.y() + 38));

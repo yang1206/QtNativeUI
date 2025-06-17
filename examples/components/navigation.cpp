@@ -342,6 +342,7 @@ QWidget* NavigationExample::createNavigationBars() {
         connect(navigationBar,
                 &NNavigationBar::navigationNodeClicked,
                 [contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey) {
+                    qDebug() << "Navigation node clicked: " << nodeType << ", " << nodeKey;
                     if (nodeKey.contains("Home")) {
                         contentStack->setCurrentIndex(0);
                     } else if (nodeKey.contains("Documents")) {
@@ -355,8 +356,6 @@ QWidget* NavigationExample::createNavigationBars() {
 
         sectionLayout->addWidget(navigationBar);
         sectionLayout->addWidget(contentStack, 1);
-
-        layout->addWidget(new QLabel("Standard Navigation Bar:"));
         layout->addWidget(demoSection);
     }
 

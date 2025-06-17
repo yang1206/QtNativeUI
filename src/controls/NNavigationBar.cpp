@@ -34,10 +34,6 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     connect(d->_navigationView, &NNavigationView::navigationClicked, this, [=](const QModelIndex& index) {
         d->onTreeViewClicked(index);
     });
-    connect(d->_navigationView,
-            &NNavigationView::navigationOpenNewWindow,
-            d,
-            &NNavigationBarPrivate::onNavigationOpenNewWindow);
 
     // 导航按钮组
     d->_navigationButton = new NToolButton(this);
@@ -165,22 +161,12 @@ NNavigationBar::addPageNode(QString pageTitle, QWidget* page, QString targetExpa
         NNavigationNode* originalNode = node->getOriginalNode();
 
         if (d->_compactMenuMap.contains(originalNode)) {
-            QMenu*   menu   = d->_compactMenuMap.value(originalNode);
-            QAction* action = menu->addAction(node->getNodeTitle());
-            // 设置图标，如果有的话
-            if (node->getIcon() != NRegularIconType::Home12Regular) {
-                // 这里需要将Icon转换为QIcon，具体实现可能需要根据实际情况调整
-                // action->setIcon(iconFromEnum(node->getIcon()));
-            }
+            NMenu*   menu   = d->_compactMenuMap.value(originalNode);
+            QAction* action = menu->addItem(node->getNodeTitle(), icon);
             connect(action, &QAction::triggered, this, [=]() { d->onTreeViewClicked(node->getModelIndex()); });
         } else {
-            QMenu*   menu   = new QMenu(this);
-            QAction* action = menu->addAction(node->getNodeTitle());
-            // 设置图标，如果有的话
-            if (node->getIcon() != NRegularIconType::Home12Regular) {
-                // 这里需要将Icon转换为QIcon，具体实现可能需要根据实际情况调整
-                // action->setIcon(iconFromEnum(node->getIcon()));
-            }
+            NMenu*   menu   = new NMenu(this);
+            QAction* action = menu->addItem(node->getNodeTitle(), icon);
             connect(action, &QAction::triggered, this, [=]() { d->onTreeViewClicked(node->getModelIndex()); });
             d->_compactMenuMap.insert(originalNode, menu);
         }
@@ -236,22 +222,12 @@ NNavigationType::NodeOperateReturnType NNavigationBar::addPageNode(QString      
         NNavigationNode* originalNode = node->getOriginalNode();
 
         if (d->_compactMenuMap.contains(originalNode)) {
-            QMenu*   menu   = d->_compactMenuMap.value(originalNode);
-            QAction* action = menu->addAction(node->getNodeTitle());
-            // 设置图标，如果有的话
-            if (node->getIcon() != NRegularIconType::Home12Regular) {
-                // 这里需要将Icon转换为QIcon
-                // action->setIcon(iconFromEnum(node->getIcon()));
-            }
+            NMenu*   menu   = d->_compactMenuMap.value(originalNode);
+            QAction* action = menu->addItem(node->getNodeTitle(), icon);
             connect(action, &QAction::triggered, this, [=]() { d->onTreeViewClicked(node->getModelIndex()); });
         } else {
-            QMenu*   menu   = new QMenu(this);
-            QAction* action = menu->addAction(node->getNodeTitle());
-            // 设置图标，如果有的话
-            if (node->getIcon() != NRegularIconType::Home12Regular) {
-                // 这里需要将Icon转换为QIcon
-                // action->setIcon(iconFromEnum(node->getIcon()));
-            }
+            NMenu*   menu   = new NMenu(this);
+            QAction* action = menu->addAction(node->getNodeTitle(), icon);
             connect(action, &QAction::triggered, this, [=]() { d->onTreeViewClicked(node->getModelIndex()); });
             d->_compactMenuMap.insert(originalNode, menu);
         }
@@ -283,6 +259,35 @@ NNavigationType::NodeOperateReturnType NNavigationBar::addFooterNode(QString    
     return returnType;
 }
 
+bool NNavigationBar::getNavigationNodeIsExpanded(QString expanderKey) const {
+    Q_D(const NNavigationBar);
+    NNavigationNode* node = d->_navigationModel->getNavigationNode(expanderKey);
+    if (!node || !node->getIsExpanderNode()) {
+        return false;
+    }
+    return d->_navigationView->isExpanded(node->getModelIndex());
+}
+
+void NNavigationBar::expandNavigationNode(QString expanderKey) {
+    Q_D(NNavigationBar);
+    NNavigationNode* node = d->_navigationModel->getNavigationNode(expanderKey);
+    if (!node || !node->getIsExpanderNode()) {
+        return;
+    }
+    d->_expandOrCollpaseExpanderNode(node, true);
+    d->_resetNodeSelected();
+}
+
+void NNavigationBar::collpaseNavigationNode(QString expanderKey) {
+    Q_D(NNavigationBar);
+    NNavigationNode* node = d->_navigationModel->getNavigationNode(expanderKey);
+    if (!node || !node->getIsExpanderNode()) {
+        return;
+    }
+    d->_expandOrCollpaseExpanderNode(node, false);
+    d->_resetNodeSelected();
+}
+
 void NNavigationBar::removeNavigationNode(QString nodeKey) {
     Q_D(NNavigationBar);
     NNavigationNode* node = d->_navigationModel->getNavigationNode(nodeKey);
@@ -295,12 +300,12 @@ void NNavigationBar::removeNavigationNode(QString nodeKey) {
     if (node->getIsFooterNode()) {
         Q_EMIT navigationNodeRemoved(NNavigationType::FooterNode, nodeKey);
         d->_footerModel->removeNavigationNode(nodeKey);
-        // 更新 Footer 视图高度
         d->_footerView->setFixedHeight(40 * d->_footerModel->getFooterNodeCount());
     } else {
         QStringList removeKeyList = d->_navigationModel->removeNavigationNode(nodeKey);
         d->_initNodeModelIndex(QModelIndex());
         for (const auto& removeKey : removeKeyList) {
+            d->_pageMetaMap.remove(removeKey);
             Q_EMIT navigationNodeRemoved(NNavigationType::PageNode, removeKey);
         }
     }

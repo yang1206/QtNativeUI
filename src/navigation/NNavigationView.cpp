@@ -1,12 +1,9 @@
 #include "NNavigationView.h"
 
-#include <QDebug>
 #include <QHeaderView>
 #include <QMenu>
 #include <QModelIndex>
 #include <QMouseEvent>
-#include <QPainter>
-#include <QScrollBar>
 #include <QScroller>
 
 #include "NNavigationModel.h"
@@ -27,11 +24,10 @@ NNavigationView::NNavigationView(QWidget* parent) : QTreeView(parent) {
     setMouseTracking(true);
     setSelectionMode(QAbstractItemView::NoSelection);
 
-    // 滚动条设置
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    //
+
     NScrollBar* vScrollBar = new NScrollBar(this);
-    connect(vScrollBar, &NScrollBar::rangeAnimationFinished, this, [=]() { doItemsLayout(); });
+    connect(vScrollBar, &NScrollBar::rangeAnimationFinished, this, [this]() { doItemsLayout(); });
     setVerticalScrollBar(vScrollBar);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -43,7 +39,6 @@ NNavigationView::NNavigationView(QWidget* parent) : QTreeView(parent) {
     _navigationStyle->setNavigationView(this);
     setStyle(_navigationStyle);
 
-    // 设置滚动手势
     QScroller::grabGesture(this->viewport(), QScroller::LeftMouseButtonGesture);
     QScroller*          scroller   = QScroller::scroller(this->viewport());
     QScrollerProperties properties = scroller->scrollerProperties();
@@ -83,13 +78,13 @@ void NNavigationView::onCustomContextMenuRequested(const QPoint& pos) {
     }
 
     NNavigationNode* posNode = static_cast<NNavigationNode*>(posIndex.internalPointer());
-    if (!posNode->getIsExpanderNode()) {
-        QMenu    menu(this);
-        QAction* openAction = menu.addAction("在新窗口中打开");
-        connect(
-            openAction, &QAction::triggered, this, [=]() { Q_EMIT navigationOpenNewWindow(posNode->getNodeKey()); });
-        menu.exec(mapToGlobal(pos));
-    }
+    // if (!posNode->getIsExpanderNode()) {
+    //     QMenu    menu(this);
+    //     QAction* openAction = menu.addAction("在新窗口中打开");
+    //     connect(
+    //         openAction, &QAction::triggered, this, [=]() { Q_EMIT navigationOpenNewWindow(posNode->getNodeKey()); });
+    //     menu.exec(mapToGlobal(pos));
+    // }
 }
 
 void NNavigationView::mouseMoveEvent(QMouseEvent* event) {
