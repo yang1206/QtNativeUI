@@ -212,29 +212,23 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 NRegularIconType::Icon icon = node->getIcon();
 
                 // 如果有图标
-                if (icon != NRegularIconType::Home12Regular) // 使用某个默认值替代None
-                {
-                    painter->save();
-                    if (icon != NRegularIconType::Home12Regular) {
-                        QIcon iconObj = nIcon->fromRegular(icon);
-                        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2,
-                                       itemRect.y() + (itemRect.height() - 17) / 2,
-                                       17,
-                                       17);
-                        iconObj.paint(painter,
-                                      iconRect,
-                                      Qt::AlignCenter,
-                                      vopt->state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
-                    }
-                    painter->restore();
+                painter->save();
+                if (icon != NRegularIconType::None) {
+                    QIcon iconObj = nIcon->fromRegular(icon);
+                    QRect iconRect(
+                        itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
+                    iconObj.paint(painter,
+                                  iconRect,
+                                  Qt::AlignCenter,
+                                  vopt->state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
                 }
+                painter->restore();
 
                 int viewWidth = widget->width();
                 // 文字绘制
                 painter->setPen(vopt->index == _pPressIndex ? textColor.darker(120) : textColor);
                 QRect textRect;
-                if (icon != NRegularIconType::Home12Regular) // 使用某个默认值替代None
-                {
+                if (icon != NRegularIconType::None) {
                     textRect = QRect(itemRect.x() + _iconAreaWidth,
                                      itemRect.y(),
                                      itemRect.width() - _textRightSpacing - _indicatorIconAreaWidth - _iconAreaWidth,
@@ -295,10 +289,12 @@ void NNavigationStyle::drawControl(ControlElement      element,
                             painter->setPen(Qt::NoPen);
                             // 添加白色背景圆
                             painter->setBrush(Qt::white);
-                            painter->drawEllipse(QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 10, 10);
+                            painter->drawEllipse(
+                                QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 10, 10);
                             // 红色前景圆
                             painter->setBrush(NThemeColor(NFluentColorKey::SystemFillColorCritical, _themeMode));
-                            painter->drawEllipse(QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 9, 9);
+                            painter->drawEllipse(
+                                QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 9, 9);
                             painter->setPen(QPen(Qt::white, 2));
                             QFont font = painter->font();
                             font.setBold(true);

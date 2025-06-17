@@ -120,26 +120,24 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     QPainterPath path;
     path.addRoundedRect(itemRect, 8, 8);
 
-    // 简化背景色逻辑，使用与Ela一致的实现
     if (option.state & QStyle::State_Selected) {
         if (index == _pPressIndex) {
-            // 选中时点击
             painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
         } else {
             if (option.state & QStyle::State_MouseOver) {
                 // 选中时覆盖
-                painter->fillPath(path, NThemeColor(NFluentColorKey::ControlFillColorSecondary, _themeMode));
+                painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorTertiary, _themeMode));
             } else {
                 // 选中
-                painter->fillPath(path, NThemeColor(NFluentColorKey::ControlFillColorDefault, _themeMode));
+                painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
             }
         }
     } else {
         if (index == _pPressIndex) {
-            painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
+            painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorTertiary, _themeMode));
         } else {
             if (option.state & QStyle::State_MouseOver) {
-                painter->fillPath(path, NThemeColor(NFluentColorKey::ControlFillColorSecondary, _themeMode));
+                painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
             }
         }
     }
@@ -159,7 +157,7 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
                                           : textColor);
 
     NRegularIconType::Icon icon = node->getIcon();
-    if (icon != NRegularIconType::Home12Regular) {
+    if (icon != NRegularIconType::None) {
         QIcon iconObj = nIcon->fromRegular(icon);
         QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
         iconObj.paint(
@@ -197,7 +195,7 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     painter->setPen(index == _pPressIndex ? NThemeColor(NFluentColorKey::TextFillColorSecondary, _themeMode)
                                           : textColor);
     QRect textRect;
-    if (icon != NRegularIconType::Home12Regular) {
+    if (icon != NRegularIconType::None) {
         textRect = QRect(itemRect.x() + _iconAreaWidth,
                          itemRect.y(),
                          itemRect.width() - _textRightSpacing - _indicatorIconAreaWidth - _iconAreaWidth,

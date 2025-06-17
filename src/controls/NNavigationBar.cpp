@@ -38,11 +38,25 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     // 导航按钮组
     d->_navigationButton = new NToolButton(this);
     d->_navigationButton->setFixedSize(40, 38);
+    d->_navigationButton->setTransparentBackground(true);
+    d->_navigationButton->setLightHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_themeMode));
+    d->_navigationButton->setDarkHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_themeMode));
+    d->_navigationButton->setLightPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode));
+    d->_navigationButton->setDarkPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode));
+    d->_navigationButton->setLightBorderColor(Qt::transparent);
+    d->_navigationButton->setDarkBorderColor(Qt::transparent);
     d->_navigationButton->setIcon(nIcon->fromRegular(NRegularIconType::Navigation16Regular));
     connect(d->_navigationButton, &NToolButton::clicked, d, &NNavigationBarPrivate::onNavigationButtonClicked);
 
     d->_searchButton = new NToolButton(this);
     d->_searchButton->setFixedSize(40, 38);
+    d->_searchButton->setTransparentBackground(true);
+    d->_searchButton->setLightHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_themeMode));
+    d->_searchButton->setDarkHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_themeMode));
+    d->_searchButton->setLightPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode));
+    d->_searchButton->setDarkPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode));
+    d->_searchButton->setLightBorderColor(Qt::transparent);
+    d->_searchButton->setDarkBorderColor(Qt::transparent);
     d->_searchButton->setIcon(nIcon->fromRegular(NRegularIconType::Search16Regular));
     d->_searchButton->setVisible(false);
 
@@ -64,20 +78,29 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     d->_navigationSuggestLayout->addWidget(d->_navigationSuggestBox);
 
     // 页脚视图
-    d->_footerModel = new NFooterModel(this);
-    d->_footerView  = new NBaseListView(this);
-    d->_footerView->setFrameShape(QFrame::NoFrame);
-    d->_footerView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    d->_footerView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    d->_footerView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    d->_footerView = new NBaseListView(this);
     d->_footerView->setFixedHeight(0);
+    d->_footerModel = new NFooterModel(this);
     d->_footerView->setModel(d->_footerModel);
-
     d->_footerDelegate = new NFooterDelegate(this);
+    d->_footerView->setItemDelegate(d->_footerDelegate);
     d->_footerDelegate->setListView(d->_footerView);
-
-    connect(
-        d->_footerView, &QListView::clicked, this, [=](const QModelIndex& index) { d->onFooterViewClicked(index); });
+    connect(d->_footerView, &NBaseListView::mousePress, this, [=](const QModelIndex& index) {
+        d->_footerDelegate->setPressIndex(index);
+        d->_footerView->viewport()->update();
+    });
+    connect(d->_footerView, &NBaseListView::mouseDoubleClick, this, [=](const QModelIndex& index) {
+        d->_footerDelegate->setPressIndex(index);
+        d->_footerView->viewport()->update();
+    });
+    connect(d->_footerView, &NBaseListView::mouseRelease, this, [=](const QModelIndex& index) {
+        d->_footerDelegate->setPressIndex(QModelIndex());
+        d->_footerView->viewport()->update();
+    });
+    connect(d->_footerView, &NBaseListView::clicked, this, [=](const QModelIndex& index) {
+        d->onFooterViewClicked(index);
+    });
 
     // 布局设置
     QVBoxLayout* mainLayout = new QVBoxLayout(this);

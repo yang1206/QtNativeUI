@@ -77,7 +77,7 @@ void NNavigationView::onCustomContextMenuRequested(const QPoint& pos) {
         return;
     }
 
-    NNavigationNode* posNode = static_cast<NNavigationNode*>(posIndex.internalPointer());
+    // NNavigationNode* posNode = static_cast<NNavigationNode*>(posIndex.internalPointer());
     // if (!posNode->getIsExpanderNode()) {
     //     QMenu    menu(this);
     //     QAction* openAction = menu.addAction("在新窗口中打开");
