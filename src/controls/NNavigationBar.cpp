@@ -11,6 +11,7 @@
 #include "../navigation/NNavigationModel.h"
 #include "../navigation/NNavigationNode.h"
 #include "../navigation/NNavigationView.h"
+#include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolButton.h"
 #include "nbaselistview.h"
@@ -67,7 +68,7 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     d->_searchButton->setIcon(nIcon->fromRegular(NRegularIconType::Search16Regular));
     d->_searchButton->setVisible(false);
 
-    d->_navigationSuggestBox = new NLineEdit(this);
+    d->_navigationSuggestBox = new NAutoSuggestBox(this);
     d->_navigationSuggestBox->setMinimumWidth(0);
     d->_navigationSuggestBox->setPlaceholderText("搜索...");
 

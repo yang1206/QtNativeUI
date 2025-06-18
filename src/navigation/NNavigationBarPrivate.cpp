@@ -10,6 +10,7 @@
 #include "NNavigationNode.h"
 #include "NNavigationRouter.h"
 #include "NNavigationView.h"
+#include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NNavigationBar.h"
@@ -92,7 +93,7 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
                         }
                     }
                     routeData.insert("NPageKey", pageKey);
-                    // 使用 NNavigationRouter 记录路由
+
                     NNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRouteBack", routeData);
                 }
 
@@ -172,7 +173,7 @@ void NNavigationBarPrivate::onFooterViewClicked(const QModelIndex& index, bool i
                 }
             }
             routeData.insert("NPageKey", pageKey);
-            // 使用 NNavigationRouter 记录路由
+
             NNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRouteBack", routeData);
         }
 
@@ -324,12 +325,11 @@ void NNavigationBarPrivate::_addStackedPage(QWidget* page, QString pageKey) {
 
     NNavigationNode* node = _navigationModel->getNavigationNode(pageKey);
 
-    // 如果有建议框功能，这里应该添加建议
-    // QVariantMap suggestData;
-    // suggestData.insert("NNodeType", "Stacked");
-    // suggestData.insert("NPageKey", pageKey);
-    // QString suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
-    // _suggestKeyMap.insert(pageKey, suggestKey);
+    QVariantMap suggestData;
+    suggestData.insert("NNodeType", "Stacked");
+    suggestData.insert("NPageKey", pageKey);
+    QString suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
+    _suggestKeyMap.insert(pageKey, suggestKey);
 }
 
 void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footerKey) {
@@ -344,8 +344,8 @@ void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footerKey) {
     QVariantMap      suggestData;
     suggestData.insert("NNodeType", "Footer");
     suggestData.insert("NPageKey", footerKey);
-    // QString suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
-    // _suggestKeyMap.insert(footerKey, suggestKey);
+    QString suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
+    _suggestKeyMap.insert(footerKey, suggestKey);
 }
 
 void NNavigationBarPrivate::_raiseNavigationBar() {

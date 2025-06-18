@@ -6,10 +6,10 @@
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 
+class NAutoSuggestBox;
 class NMenu;
 class NBaseListView;
 class QLayout;
-class QMenu;
 class QVBoxLayout;
 class QHBoxLayout;
 class QLinearGradient;
@@ -23,7 +23,6 @@ class QListView;
 class NFooterModel;
 class NFooterDelegate;
 class NToolButton;
-class NLineEdit; // 临时替代NSuggestBox
 
 class NNavigationBarPrivate : public QObject {
     Q_OBJECT
@@ -59,7 +58,7 @@ class NNavigationBarPrivate : public QObject {
     NBaseListView*    _footerView{nullptr};
     NFooterModel*     _footerModel{nullptr};
     NFooterDelegate*  _footerDelegate{nullptr};
-    NLineEdit*        _navigationSuggestBox{nullptr}; // 临时替代NSuggestBox
+    NAutoSuggestBox*  _navigationSuggestBox{nullptr};
 
     QList<NNavigationNode*> _lastExpandedNodesList;
 
