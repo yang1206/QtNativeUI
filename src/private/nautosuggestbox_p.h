@@ -54,6 +54,7 @@ class NAutoSuggestBoxPrivate : public QObject {
   public:
     explicit NAutoSuggestBoxPrivate(QObject* parent = nullptr);
     ~NAutoSuggestBoxPrivate();
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
   public slots:
     void onTextChanged(const QString& text);
@@ -61,6 +62,10 @@ class NAutoSuggestBoxPrivate : public QObject {
 
   private:
     void setupUI();
+    void selectNextSuggestion();
+    void selectPreviousSuggestion();
+    void applySelectedSuggestion();
+
     void _startSizeAnimation(QSize oldSize, QSize newSize);
     void _startExpandAnimation();
     void _startCloseAnimation();
@@ -78,6 +83,9 @@ class NAutoSuggestBoxPrivate : public QObject {
     QSize _lastSize;
     bool  _isExpandAnimationFinished{true};
     bool  _isCloseAnimationFinished{true};
+
+    NAutoSuggestBox::FilterMode _filterMode{NAutoSuggestBox::Contains};
+    int                         _currentIndex{-1};
 };
 
 #endif // NSUGGESTBOXPRIVATE_H

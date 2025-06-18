@@ -17,6 +17,31 @@ NAutoSuggestBox::NAutoSuggestBox(QWidget* parent) : QWidget(parent), d_ptr(new N
 
 NAutoSuggestBox::~NAutoSuggestBox() {}
 
+void NAutoSuggestBox::setFilterMode(FilterMode mode) {
+    Q_D(NAutoSuggestBox);
+    d->_filterMode = mode;
+}
+
+NAutoSuggestBox::FilterMode NAutoSuggestBox::filterMode() const {
+    Q_D(const NAutoSuggestBox);
+    return d->_filterMode;
+}
+
+QString NAutoSuggestBox::text() const {
+    Q_D(const NAutoSuggestBox);
+    return d->_lineEdit->text();
+}
+
+void NAutoSuggestBox::setText(const QString& text) {
+    Q_D(NAutoSuggestBox);
+    d->_lineEdit->setText(text);
+}
+
+void NAutoSuggestBox::clear() {
+    Q_D(NAutoSuggestBox);
+    d->_lineEdit->clear();
+}
+
 void NAutoSuggestBox::setPlaceholderText(const QString& placeholderText) {
     Q_D(NAutoSuggestBox);
     d->_lineEdit->setPlaceholderText(placeholderText);

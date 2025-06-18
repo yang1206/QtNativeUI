@@ -1,6 +1,7 @@
 #include "nautosuggestbox_p.h"
 
 #include <QApplication>
+#include <QKeyEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPropertyAnimation>
@@ -65,7 +66,7 @@ void NAutoSuggestBoxPrivate::setupUI() {
     _lineEdit->setPlaceholderText("查找功能");
     _lineEdit->setClearButtonEnabled(true);
     _lineEdit->addAction(NRegularIconType::Search16Regular, NLineEdit::TrailingPosition);
-
+    _lineEdit->installEventFilter(this);
     // 创建布局
     QVBoxLayout* mainLayout = new QVBoxLayout(q);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -88,6 +89,7 @@ void NAutoSuggestBoxPrivate::setupUI() {
     _listView->setModel(_model);
     _listView->setItemDelegate(_delegate);
     _listView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    _listView->installEventFilter(this);
     _popup->hide();
     // 连接信号
     connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
@@ -105,10 +107,29 @@ void NAutoSuggestBoxPrivate::onTextChanged(const QString& text) {
 
     QVector<NAutoSuggestion*> suggestionVector;
     for (NAutoSuggestion* suggestion : _suggestions) {
-        if (suggestion->getText().contains(text, _pCaseSensitivity)) {
+        bool match = false;
+
+        switch (_filterMode) {
+            case NAutoSuggestBox::Contains:
+                match = suggestion->getText().contains(text, _pCaseSensitivity);
+                break;
+            case NAutoSuggestBox::StartsWith:
+                match = suggestion->getText().startsWith(text, _pCaseSensitivity);
+                break;
+            case NAutoSuggestBox::EndsWith:
+                match = suggestion->getText().endsWith(text, _pCaseSensitivity);
+                break;
+            case NAutoSuggestBox::Equals:
+                match = (suggestion->getText().compare(text, _pCaseSensitivity) == 0);
+                break;
+        }
+
+        if (match) {
             suggestionVector.append(suggestion);
         }
     }
+
+    _currentIndex = -1;
 
     if (!suggestionVector.isEmpty()) {
         _model->setSuggestions(suggestionVector);
@@ -137,11 +158,15 @@ void NAutoSuggestBoxPrivate::onTextChanged(const QString& text) {
 
 void NAutoSuggestBoxPrivate::onSuggestionSelected(const QModelIndex& index) {
     Q_Q(NAutoSuggestBox);
-    _lineEdit->clear();
     _listView->clearSelection();
     if (!index.isValid()) {
         return;
     }
+    NAutoSuggestion* suggestion = _model->getSuggestion(index.row());
+    if (!suggestion)
+        return;
+
+    _lineEdit->setText(suggestion->getText());
     NAutoSuggestion* suggest = _model->getSuggestion(index.row());
     Q_EMIT q->suggestionClicked(suggest->getText(), suggest->getData());
     _startCloseAnimation();
@@ -154,11 +179,7 @@ void NAutoSuggestBoxPrivate::_startSizeAnimation(QSize oldSize, QSize newSize) {
     _popupLayout->removeWidget(_listView);
     QPropertyAnimation* expandAnimation = new QPropertyAnimation(_popup, "size");
     connect(expandAnimation, &QPropertyAnimation::valueChanged, this, [=]() { _listView->resize(_popup->size()); });
-    connect(expandAnimation, &QPropertyAnimation::finished, this, [=]() {
-        _popupLayout->addWidget(_listView);
-        qDebug() << "Popup height:" << _popup->height() << "ListView height:" << _listView->height()
-                 << "Item count:" << _model->rowCount();
-    });
+    connect(expandAnimation, &QPropertyAnimation::finished, this, [=]() { _popupLayout->addWidget(_listView); });
     expandAnimation->setDuration(300);
     expandAnimation->setEasingCurve(QEasingCurve::InOutSine);
     expandAnimation->setStartValue(oldSize);
@@ -209,4 +230,110 @@ void NAutoSuggestBoxPrivate::_startCloseAnimation() {
     closeAnimation->setEndValue(QPoint(_listView->pos().x(), -_listView->height()));
     closeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
     _lastSize = baseWidgetsAnimation->endValue().toSize();
+}
+
+bool NAutoSuggestBoxPrivate::eventFilter(QObject* watched, QEvent* event) {
+    Q_Q(NAutoSuggestBox);
+    // 处理LineEdit的键盘事件
+    if (watched == _lineEdit && event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        if (_popup->isVisible()) {
+            if (keyEvent->key() == Qt::Key_Down) {
+                selectNextSuggestion();
+                return true; // 阻止事件传播
+            } else if (keyEvent->key() == Qt::Key_Up) {
+                selectPreviousSuggestion();
+                return true; // 阻止事件传播
+            } else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+                if (_currentIndex >= 0 && _currentIndex < _model->rowCount()) {
+                    applySelectedSuggestion();
+                } else {
+                    Q_EMIT q->querySubmitted(_lineEdit->text());
+                    _startCloseAnimation();
+                }
+                return true;
+            } else if (keyEvent->key() == Qt::Key_Escape) {
+                _startCloseAnimation();
+                return true;
+            }
+        } else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+            Q_EMIT q->querySubmitted(_lineEdit->text());
+            return true;
+        }
+    }
+    if (watched == _listView && event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+
+        if (keyEvent->key() == Qt::Key_Down) {
+            selectNextSuggestion();
+            return true;
+        } else if (keyEvent->key() == Qt::Key_Up) {
+            selectPreviousSuggestion();
+            return true;
+        } else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+            applySelectedSuggestion();
+            return true;
+        } else if (keyEvent->key() == Qt::Key_Escape) {
+            _startCloseAnimation();
+            return true;
+        }
+    }
+
+    return QObject::eventFilter(watched, event);
+}
+
+void NAutoSuggestBoxPrivate::selectNextSuggestion() {
+    int count = _model->rowCount();
+    if (count == 0)
+        return;
+    _currentIndex++;
+    if (_currentIndex >= count) {
+        _currentIndex = 0;
+    }
+    QModelIndex index = _model->index(_currentIndex, 0);
+    _listView->setCurrentIndex(index);
+    _listView->selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+    _listView->scrollTo(index);
+
+    NAutoSuggestion* suggestion = _model->getSuggestion(_currentIndex);
+    if (suggestion) {
+        disconnect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
+        _lineEdit->setText(suggestion->getText());
+        connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
+    }
+
+    _listView->viewport()->update();
+}
+
+void NAutoSuggestBoxPrivate::selectPreviousSuggestion() {
+    int count = _model->rowCount();
+    if (count == 0)
+        return;
+
+    _currentIndex--;
+    if (_currentIndex < 0) {
+        _currentIndex = count - 1;
+    }
+
+    QModelIndex index = _model->index(_currentIndex, 0);
+    _listView->setCurrentIndex(index);
+    _listView->selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+    _listView->scrollTo(index);
+    NAutoSuggestion* suggestion = _model->getSuggestion(_currentIndex);
+    if (suggestion) {
+        disconnect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
+        _lineEdit->setText(suggestion->getText());
+        connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
+    }
+
+    _listView->viewport()->update();
+}
+
+void NAutoSuggestBoxPrivate::applySelectedSuggestion() {
+    if (_currentIndex >= 0 && _currentIndex < _model->rowCount()) {
+        QModelIndex index = _model->index(_currentIndex, 0);
+        _listView->selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+        _listView->viewport()->update();
+        onSuggestionSelected(index);
+    }
 }

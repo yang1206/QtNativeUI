@@ -19,7 +19,21 @@ class QTNATIVEUI_EXPORT NAutoSuggestBox : public QWidget {
   public:
     explicit NAutoSuggestBox(QWidget* parent = nullptr);
     ~NAutoSuggestBox();
+    enum FilterMode {
+        Contains,   // 默认，包含搜索文本
+        StartsWith, // 以搜索文本开头
+        EndsWith,   // 以搜索文本结尾
+        Equals      // 完全匹配
+    };
+    Q_ENUM(FilterMode)
 
+    // 设置过滤模式
+    void       setFilterMode(FilterMode mode);
+    FilterMode filterMode() const;
+    // 获取/设置当前输入文本
+    QString text() const;
+    void    setText(const QString& text);
+    void    clear();
     // 设置提示文本
     void    setPlaceholderText(const QString& placeholderText);
     QString placeholderText() const;
@@ -33,6 +47,7 @@ class QTNATIVEUI_EXPORT NAutoSuggestBox : public QWidget {
 
   signals:
     void suggestionClicked(QString text, QVariantMap data);
+    void querySubmitted(const QString& query);
 };
 
 #endif // NAUTOSUGGESTBOX_H
