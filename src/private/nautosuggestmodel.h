@@ -8,32 +8,32 @@
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 
-class NSuggestion;
+class NAutoSuggestion;
 
-class NSuggestModel : public QAbstractListModel {
+class NAutoSuggestModel : public QAbstractListModel {
     Q_OBJECT
 
   public:
-    explicit NSuggestModel(QObject* parent = nullptr);
-    ~NSuggestModel();
+    explicit NAutoSuggestModel(QObject* parent = nullptr);
+    ~NAutoSuggestModel();
 
     int      rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role) const override;
 
-    void         setSuggestions(const QVector<NSuggestion*>& suggestions);
-    void         clearSuggestions();
-    NSuggestion* getSuggestion(int row) const;
+    void             setSuggestions(const QVector<NAutoSuggestion*>& suggestions);
+    void             clearSuggestions();
+    NAutoSuggestion* getSuggestion(int row) const;
 
   private:
-    QVector<NSuggestion*> _suggestions;
+    QVector<NAutoSuggestion*> _suggestions;
 };
 
-class NSuggestDelegate : public QStyledItemDelegate {
+class NAutoSuggestDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
   public:
-    explicit NSuggestDelegate(QObject* parent = nullptr);
-    ~NSuggestDelegate();
+    explicit NAutoSuggestDelegate(QObject* parent = nullptr);
+    ~NAutoSuggestDelegate();
 
     void  paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;

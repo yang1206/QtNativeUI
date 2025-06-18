@@ -1,5 +1,5 @@
-#include "nsuggestmodel.h"
-#include "nsuggestbox_p.h"
+#include "nautosuggestmodel.h"
+#include "nautosuggestbox_p.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -7,17 +7,16 @@
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
 
-// NSuggestModel 实现
-NSuggestModel::NSuggestModel(QObject* parent) : QAbstractListModel(parent) {}
+NAutoSuggestModel::NAutoSuggestModel(QObject* parent) : QAbstractListModel(parent) {}
 
-NSuggestModel::~NSuggestModel() {}
+NAutoSuggestModel::~NAutoSuggestModel() {}
 
-int NSuggestModel::rowCount(const QModelIndex& parent) const {
+int NAutoSuggestModel::rowCount(const QModelIndex& parent) const {
     Q_UNUSED(parent);
     return _suggestions.count();
 }
 
-QVariant NSuggestModel::data(const QModelIndex& index, int role) const {
+QVariant NAutoSuggestModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || index.row() >= _suggestions.count())
         return QVariant();
 
@@ -30,51 +29,49 @@ QVariant NSuggestModel::data(const QModelIndex& index, int role) const {
     return QVariant();
 }
 
-void NSuggestModel::setSuggestions(const QVector<NSuggestion*>& suggestions) {
+void NAutoSuggestModel::setSuggestions(const QVector<NAutoSuggestion*>& suggestions) {
     beginResetModel();
     _suggestions = suggestions;
     endResetModel();
 }
 
-void NSuggestModel::clearSuggestions() {
+void NAutoSuggestModel::clearSuggestions() {
     beginResetModel();
     _suggestions.clear();
     endResetModel();
 }
 
-NSuggestion* NSuggestModel::getSuggestion(int row) const {
+NAutoSuggestion* NAutoSuggestModel::getSuggestion(int row) const {
     if (row < 0 || row >= _suggestions.count())
         return nullptr;
     return _suggestions[row];
 }
 
-// NSuggestDelegate 实现
-NSuggestDelegate::NSuggestDelegate(QObject* parent) : QStyledItemDelegate(parent) {
+NAutoSuggestDelegate::NAutoSuggestDelegate(QObject* parent) : QStyledItemDelegate(parent) {
     _themeMode = nTheme->themeMode();
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode mode) { _themeMode = mode; });
 }
 
-NSuggestDelegate::~NSuggestDelegate() {}
+NAutoSuggestDelegate::~NAutoSuggestDelegate() {}
 
-void NSuggestDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
-    if (!index.isValid())
-        return;
+void NAutoSuggestDelegate::paint(QPainter*                   painter,
+                                 const QStyleOptionViewItem& option,
+                                 const QModelIndex&          index) const {
+    int                  margin = 2;
+    QStyleOptionViewItem viewOption(option);
+    initStyleOption(&viewOption, index);
+    NAutoSuggestModel* model      = dynamic_cast<NAutoSuggestModel*>(const_cast<QAbstractItemModel*>(index.model()));
+    NAutoSuggestion*   suggestion = model->getSuggestion(index.row());
+    if (option.state.testFlag(QStyle::State_HasFocus)) {
+        viewOption.state &= ~QStyle::State_HasFocus;
+    }
 
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-
-    // 获取建议项
-    NSuggestion* suggestion = index.data(Qt::UserRole).value<NSuggestion*>();
-    if (!suggestion) {
-        painter->restore();
-        return;
-    }
-
-    // 绘制背景
     QPainterPath path;
-    QRect        itemRect = option.rect;
-    itemRect.adjust(4, 2, -4, -2);
-    path.addRoundedRect(itemRect, 6, 6);
+    QRect        optionRect = option.rect;
+    optionRect.adjust(margin * 2, margin, -margin * 2, -margin);
+    path.addRoundedRect(optionRect, 8, 8);
 
     if (option.state & QStyle::State_Selected) {
         if (option.state & QStyle::State_MouseOver) {
@@ -90,22 +87,22 @@ void NSuggestDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     NRegularIconType::Icon icon = suggestion->getIcon();
     if (icon != NRegularIconType::None) {
         QIcon iconObj = nIcon->fromRegular(icon);
-        QRect iconRect(itemRect.x() + 8, itemRect.y() + (itemRect.height() - 16) / 2, 16, 16);
+        QRect iconRect(optionRect.x() + 8, optionRect.y() + (optionRect.height() - 16) / 2, 16, 16);
         iconObj.paint(
             painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
     }
 
     // 绘制文字
     painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode));
-    QRect textRect = itemRect;
-    textRect.setLeft(icon != NRegularIconType::None ? itemRect.left() + 32 : itemRect.left() + 10);
+    QRect textRect = optionRect;
+    textRect.setLeft(icon != NRegularIconType::None ? optionRect.left() + 32 : optionRect.left() + 10);
     painter->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, suggestion->getText());
 
     painter->restore();
 }
 
-QSize NSuggestDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
-    Q_UNUSED(option);
-    Q_UNUSED(index);
-    return QSize(200, 40);
+QSize NAutoSuggestDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    QSize size = QStyledItemDelegate::sizeHint(option, index);
+    size.setHeight(40);
+    return size;
 }

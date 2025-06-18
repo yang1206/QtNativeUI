@@ -8,6 +8,7 @@
 #include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NToggleSwitch.h>
 
+#include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NCalendarDatePicker.h"
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NComboBox.h"
@@ -17,7 +18,6 @@
 #include "QtNativeUI/NProgressBar.h"
 #include "QtNativeUI/NProgressRing.h"
 #include "QtNativeUI/NScrollArea.h"
-#include "QtNativeUI/NSuggestBox.h"
 #include "QtNativeUI/NTextEdit.h"
 #include "QtNativeUI/NToolTip.h"
 #include "widgets/ExampleSection.h"
@@ -204,7 +204,7 @@ QWidget* ControlsExample::createSuggestBoxes() {
     basicLabel->setFont(labelFont);
     layout->addWidget(basicLabel);
 
-    NSuggestBox* basicSuggestBox = new NSuggestBox(container);
+    NAutoSuggestBox* basicSuggestBox = new NAutoSuggestBox(container);
     basicSuggestBox->setPlaceholderText("搜索...");
     basicSuggestBox->setMinimumWidth(250);
     // 添加一些建议项
@@ -214,7 +214,7 @@ QWidget* ControlsExample::createSuggestBoxes() {
     basicSuggestBox->addSuggestion("草莓");
     basicSuggestBox->addSuggestion("葡萄");
     QLabel* basicResultLabel = new QLabel("选择结果: 无", container);
-    connect(basicSuggestBox, &NSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
+    connect(basicSuggestBox, &NAutoSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
         basicResultLabel->setText("选择结果: " + text);
     });
     layout->addWidget(basicSuggestBox);
@@ -226,7 +226,7 @@ QWidget* ControlsExample::createSuggestBoxes() {
     iconLabel->setFont(labelFont);
     layout->addWidget(iconLabel);
 
-    NSuggestBox* iconSuggestBox = new NSuggestBox(container);
+    NAutoSuggestBox* iconSuggestBox = new NAutoSuggestBox(container);
     iconSuggestBox->setPlaceholderText("搜索文件...");
     iconSuggestBox->setMinimumWidth(250);
     // 添加带图标的建议项
@@ -236,7 +236,7 @@ QWidget* ControlsExample::createSuggestBoxes() {
     iconSuggestBox->addSuggestion(NRegularIconType::Table16Regular, "表格.xlsx");
     iconSuggestBox->addSuggestion(NRegularIconType::Video16Regular, "视频.mp4");
     QLabel* iconResultLabel = new QLabel("选择结果: 无", container);
-    connect(iconSuggestBox, &NSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
+    connect(iconSuggestBox, &NAutoSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
         iconResultLabel->setText("选择结果: " + text);
     });
     layout->addWidget(iconSuggestBox);
@@ -248,7 +248,7 @@ QWidget* ControlsExample::createSuggestBoxes() {
     dataLabel->setFont(labelFont);
     layout->addWidget(dataLabel);
 
-    NSuggestBox* dataSuggestBox = new NSuggestBox(container);
+    NAutoSuggestBox* dataSuggestBox = new NAutoSuggestBox(container);
     dataSuggestBox->setPlaceholderText("搜索城市...");
     dataSuggestBox->setMinimumWidth(250);
     // 添加带自定义数据的建议项
@@ -269,7 +269,7 @@ QWidget* ControlsExample::createSuggestBoxes() {
     shenzhenData["population"] = 12590000;
     dataSuggestBox->addSuggestion(NRegularIconType::Location16Regular, "深圳", shenzhenData);
     QLabel* dataResultLabel = new QLabel("选择结果: 无", container);
-    connect(dataSuggestBox, &NSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
+    connect(dataSuggestBox, &NAutoSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
         QString result = QString("选择结果: %1 (代码: %2, 人口: %3)")
                              .arg(text, data["code"].toString(), QString::number(data["population"].toInt()));
         dataResultLabel->setText(result);
@@ -283,15 +283,19 @@ QWidget* ControlsExample::createSuggestBoxes() {
     dynamicLabel->setFont(labelFont);
     layout->addWidget(dynamicLabel);
 
-    NSuggestBox* dynamicSuggestBox = new NSuggestBox(container);
+    NAutoSuggestBox* dynamicSuggestBox = new NAutoSuggestBox(container);
     dynamicSuggestBox->setPlaceholderText("搜索编程语言...");
     dynamicSuggestBox->setMinimumWidth(250);
     // 添加初始建议项
-    QString cppKey             = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "C++");
-    QString javaKey            = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "Java");
-    QString pythonKey          = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "Python");
+    QString cppKey    = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "C++");
+    QString csharpKey = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "C#");
+    QString cKey      = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "C");
+    QString javaKey   = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "Java");
+    QString pythonKey = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "Python");
+    QString phpKey    = dynamicSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "PHP");
+
     QLabel* dynamicResultLabel = new QLabel("选择结果: 无", container);
-    connect(dynamicSuggestBox, &NSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
+    connect(dynamicSuggestBox, &NAutoSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
         dynamicResultLabel->setText("选择结果: " + text);
     });
     // 控制按钮

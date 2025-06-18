@@ -3,16 +3,14 @@
 
 #include <QModelIndex>
 #include <QObject>
-#include <QVariantMap>
 #include <QVector>
 
-#include <QWidget>
+#include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/NIconEnums.h"
-#include "QtNativeUI/NSuggestBox.h"
 #include "QtNativeUI/stdafx.h"
 
-class NSuggestion : public QObject {
+class NAutoSuggestion : public QObject {
     Q_OBJECT
     Q_PROPERTY_CREATE(NRegularIconType::Icon, Icon)
     Q_PROPERTY_CREATE(QString, Text)
@@ -20,25 +18,25 @@ class NSuggestion : public QObject {
     Q_PROPERTY_CREATE(QVariantMap, Data)
 
   public:
-    explicit NSuggestion(QObject* parent = nullptr);
-    ~NSuggestion();
+    explicit NAutoSuggestion(QObject* parent = nullptr);
+    ~NAutoSuggestion();
 };
 
 class QVBoxLayout;
 class NLineEdit;
 class NBaseListView;
-class NSuggestModel;
-class NSuggestDelegate;
+class NAutoSuggestModel;
+class NAutoSuggestDelegate;
 class QWidget;
 class QPropertyAnimation;
 
 // 下拉列表容器
-class NSuggestPopup : public QWidget {
+class NAutoSuggestPopup : public QWidget {
     Q_OBJECT
 
   public:
-    explicit NSuggestPopup(QWidget* parent = nullptr);
-    ~NSuggestPopup();
+    explicit NAutoSuggestPopup(QWidget* parent = nullptr);
+    ~NAutoSuggestPopup();
 
   protected:
     void paintEvent(QPaintEvent* event) override;
@@ -47,45 +45,39 @@ class NSuggestPopup : public QWidget {
     NThemeType::ThemeMode _themeMode{NThemeType::Light};
 };
 
-class NSuggestBoxPrivate : public QObject {
+class NAutoSuggestBoxPrivate : public QObject {
     Q_OBJECT
-    Q_D_CREATE(NSuggestBox)
+    Q_D_CREATE(NAutoSuggestBox)
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(Qt::CaseSensitivity, CaseSensitivity)
 
   public:
-    explicit NSuggestBoxPrivate(QObject* parent = nullptr);
-    ~NSuggestBoxPrivate();
+    explicit NAutoSuggestBoxPrivate(QObject* parent = nullptr);
+    ~NAutoSuggestBoxPrivate();
 
   public slots:
     void onTextChanged(const QString& text);
-    void onFocusChanged();
     void onSuggestionSelected(const QModelIndex& index);
 
   private:
     void setupUI();
-    void updatePopupPosition();
-    void startExpandAnimation();
-    void startCollapseAnimation();
+    void _startSizeAnimation(QSize oldSize, QSize newSize);
+    void _startExpandAnimation();
+    void _startCloseAnimation();
 
     NThemeType::ThemeMode _themeMode{NThemeType::Light};
     NLineEdit*            _lineEdit{nullptr};
-    NSuggestPopup*        _popup{nullptr};
+    NAutoSuggestPopup*    _popup{nullptr};
     NBaseListView*        _listView{nullptr};
-    NSuggestModel*        _model{nullptr};
-    NSuggestDelegate*     _delegate{nullptr};
+    NAutoSuggestModel*    _model{nullptr};
+    NAutoSuggestDelegate* _delegate{nullptr};
     QVBoxLayout*          _popupLayout{nullptr};
 
-    QVector<NSuggestion*> _suggestions;
-    QVector<NSuggestion*> _filteredSuggestions;
+    QVector<NAutoSuggestion*> _suggestions;
 
-    bool                _isAnimating{false};
-    QSize               _lastSize;
-    QPropertyAnimation* _sizeAnimation{nullptr};
-    QPropertyAnimation* _posAnimation{nullptr};
-
-    bool _isExpandAnimationFinished{true};
-    bool _isCollapseAnimationFinished{true};
+    QSize _lastSize;
+    bool  _isExpandAnimationFinished{true};
+    bool  _isCloseAnimationFinished{true};
 };
 
 #endif // NSUGGESTBOXPRIVATE_H
