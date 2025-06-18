@@ -96,6 +96,7 @@ void NAutoSuggestBoxPrivate::setupUI() {
     connect(_lineEdit, &NLineEdit::focusIn, this, &NAutoSuggestBoxPrivate::onTextChanged);
     connect(_lineEdit, &NLineEdit::focusOut, this, [this]() { _startCloseAnimation(); });
     connect(_listView, &QListView::clicked, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
+    connect(_listView, &NBaseListView::mouseRelease, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
 }
 
 void NAutoSuggestBoxPrivate::onTextChanged(const QString& text) {
@@ -162,13 +163,14 @@ void NAutoSuggestBoxPrivate::onSuggestionSelected(const QModelIndex& index) {
     if (!index.isValid()) {
         return;
     }
+    
     NAutoSuggestion* suggestion = _model->getSuggestion(index.row());
-    if (!suggestion)
+    if (!suggestion) {
         return;
+    }
 
     _lineEdit->setText(suggestion->getText());
-    NAutoSuggestion* suggest = _model->getSuggestion(index.row());
-    Q_EMIT q->suggestionClicked(suggest->getText(), suggest->getData());
+    Q_EMIT q->suggestionClicked(suggestion->getText(), suggestion->getData());
     _startCloseAnimation();
 }
 
