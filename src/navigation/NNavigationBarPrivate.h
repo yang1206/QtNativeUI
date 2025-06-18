@@ -46,8 +46,7 @@ class NNavigationBarPrivate : public QObject {
     QMap<QString, QString>            _suggestKeyMap;
     QMap<QString, const QMetaObject*> _pageMetaMap;
     QMap<NNavigationNode*, NMenu*>    _compactMenuMap;
-    QVBoxLayout*                      _navigationButtonLayout{nullptr};
-    QHBoxLayout*                      _navigationSuggestLayout{nullptr};
+    QVBoxLayout*                      _navigationLayout{nullptr};
 
     QWidget*          _headerWidget{nullptr};
     QVBoxLayout*      _headerLayout{nullptr};
@@ -64,6 +63,11 @@ class NNavigationBarPrivate : public QObject {
 
     NNavigationType::NavigationDisplayMode _currentDisplayMode{NNavigationType::NavigationDisplayMode::Maximal};
 
+    bool _isAnimating{false};
+
+    QVBoxLayout* _navigationButtonLayout{nullptr};   // 导航按钮布局
+    QVBoxLayout* _navigationSuggestLayout{nullptr};  // 搜索框布局
+
     void _initNodeModelIndex(const QModelIndex& parentIndex);
     void _resetNodeSelected();
     void _expandSelectedNodeParent();
@@ -75,14 +79,9 @@ class NNavigationBarPrivate : public QObject {
 
     void _doComponentAnimation(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation);
     void _handleNavigationExpandState(bool isSave);
-    void _handleMaximalToCompactLayout();
-    void _handleCompactToMaximalLayout();
-    void _resetLayout();
 
     void _doNavigationBarWidthAnimation(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation);
     void _doNavigationViewWidthAnimation(bool isAnimation);
-    void _doNavigationButtonAnimation(bool isCompact, bool isAnimation);
-    void _doSearchButtonAnimation(bool isCompact, bool isAnimation);
 };
 
 #endif // NNAVIGATIONBARPRIVATE_H

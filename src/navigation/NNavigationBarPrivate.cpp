@@ -353,57 +353,60 @@ void NNavigationBarPrivate::_raiseNavigationBar() {
     q->raise();
 }
 
-void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDisplayMode displayMode,
-                                                  bool                                   isAnimation) {
+void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation) {
+    // 设置动画状态，防止多次调用
+    if (_isAnimating)
+        return;
+        
+    _isAnimating = true;
+    
     switch (displayMode) {
         case NNavigationType::Minimal: {
+            // 隐藏搜索按钮和搜索框
+            _searchButton->setVisible(false);
+            _navigationSuggestBox->setVisible(false);
+            
+            // 执行动画
             _doNavigationBarWidthAnimation(displayMode, isAnimation);
             if (_currentDisplayMode == NNavigationType::Maximal) {
-                _searchButton->setVisible(true);
-                _navigationSuggestBox->setVisible(false);
                 _handleNavigationExpandState(true);
-            }
-            if (_headerWidget) {
-                _headerWidget->setVisible(false);
             }
             _currentDisplayMode = displayMode;
             break;
         }
         case NNavigationType::Compact: {
+            // 首先调整组件可见性
+            _navigationSuggestBox->setVisible(false);
+            _searchButton->setVisible(true);
+            
+            // 执行宽度动画
             _doNavigationBarWidthAnimation(displayMode, isAnimation);
             _doNavigationViewWidthAnimation(isAnimation);
+            
             if (_currentDisplayMode != NNavigationType::Minimal) {
-                _handleMaximalToCompactLayout();
-                _doNavigationButtonAnimation(true, isAnimation);
-                _doSearchButtonAnimation(true, isAnimation);
-                _navigationSuggestBox->setVisible(false);
                 _handleNavigationExpandState(true);
             }
-            if (_headerWidget) {
-                _headerWidget->setVisible(false);
-            }
+            
             _currentDisplayMode = displayMode;
             break;
         }
         case NNavigationType::Maximal: {
-            _resetLayout();
-            _handleCompactToMaximalLayout();
-            _doNavigationBarWidthAnimation(displayMode, isAnimation);
-            _doNavigationButtonAnimation(false, isAnimation);
-            _doSearchButtonAnimation(false, isAnimation);
+            // 调整组件可见性
+            _searchButton->setVisible(false);
             _navigationSuggestBox->setVisible(true);
+            
+            // 执行宽度动画
+            _doNavigationBarWidthAnimation(displayMode, isAnimation);
+            
             _currentDisplayMode = displayMode;
             _handleNavigationExpandState(false);
-            if (_headerWidget) {
-                _headerWidget->setVisible(true);
-            }
             break;
         }
         default: {
+            _isAnimating = false;
             break;
         }
     }
-    qDebug() << _headerWidget->isVisible();
 }
 
 void NNavigationBarPrivate::_handleNavigationExpandState(bool isSave) {
@@ -422,46 +425,18 @@ void NNavigationBarPrivate::_handleNavigationExpandState(bool isSave) {
     }
 }
 
-void NNavigationBarPrivate::_handleMaximalToCompactLayout() {
-    // 动画过程布局
-    while (_navigationButtonLayout->count()) {
-        _navigationButtonLayout->takeAt(0);
-    }
-    _navigationButtonLayout->addSpacing(40);
-    _navigationSuggestLayout->addStretch();
-}
-
-void NNavigationBarPrivate::_handleCompactToMaximalLayout() {
-    // 动画过程布局
-    while (_navigationButtonLayout->count()) {
-        _navigationButtonLayout->takeAt(0);
-    }
-    _navigationButtonLayout->addSpacing(38);
-    _navigationSuggestLayout->insertSpacing(0, 46);
-}
-
-void NNavigationBarPrivate::_resetLayout() {
-    // 恢复初始布局
-    while (_navigationButtonLayout->count()) {
-        _navigationButtonLayout->takeAt(0);
-    }
-    _navigationButtonLayout->addWidget(_navigationButton);
-    _navigationButtonLayout->addWidget(_searchButton);
-
-    while (_navigationSuggestLayout->count()) {
-        _navigationSuggestLayout->takeAt(0);
-    }
-    _navigationSuggestLayout->addLayout(_navigationButtonLayout);
-    _navigationSuggestLayout->addWidget(_navigationSuggestBox);
-}
-
-void NNavigationBarPrivate::_doNavigationBarWidthAnimation(NNavigationType::NavigationDisplayMode displayMode,
-                                                           bool                                   isAnimation) {
+void NNavigationBarPrivate::_doNavigationBarWidthAnimation(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation) {
     Q_Q(NNavigationBar);
     QPropertyAnimation* navigationBarWidthAnimation = new QPropertyAnimation(q, "maximumWidth");
     navigationBarWidthAnimation->setEasingCurve(QEasingCurve::OutCubic);
     navigationBarWidthAnimation->setStartValue(q->width());
     navigationBarWidthAnimation->setDuration(isAnimation ? 285 : 0);
+    
+    // 添加动画完成时的回调
+    connect(navigationBarWidthAnimation, &QPropertyAnimation::finished, this, [=]() {
+        _isAnimating = false;
+    });
+    
     switch (displayMode) {
         case NNavigationType::Minimal: {
             connect(navigationBarWidthAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
@@ -478,7 +453,6 @@ void NNavigationBarPrivate::_doNavigationBarWidthAnimation(NNavigationType::Navi
             break;
         }
         case NNavigationType::Maximal: {
-            connect(navigationBarWidthAnimation, &QPropertyAnimation::finished, this, [=]() { _resetLayout(); });
             connect(navigationBarWidthAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
                 q->setFixedWidth(value.toInt());
             });
@@ -503,43 +477,4 @@ void NNavigationBarPrivate::_doNavigationViewWidthAnimation(bool isAnimation) {
     navigationViewWidthAnimation->setEndValue(40);
     navigationViewWidthAnimation->setDuration(isAnimation ? 285 : 0);
     navigationViewWidthAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationBarPrivate::_doNavigationButtonAnimation(bool isCompact, bool isAnimation) {
-    if (isCompact) {
-        // 导航按钮
-        QPropertyAnimation* navigationButtonAnimation = new QPropertyAnimation(_navigationButton, "pos");
-        connect(navigationButtonAnimation, &QPropertyAnimation::finished, this, [=]() { _resetLayout(); });
-
-        QPoint navigationButtonPos = _navigationButton->pos();
-        navigationButtonAnimation->setStartValue(navigationButtonPos);
-        navigationButtonAnimation->setEndValue(QPoint(0, 10));
-        navigationButtonAnimation->setEasingCurve(QEasingCurve::OutCubic);
-        navigationButtonAnimation->setDuration(isAnimation ? 285 : 0);
-        navigationButtonAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-    } else {
-        QPropertyAnimation* navigationButtonAnimation = new QPropertyAnimation(_navigationButton, "pos");
-        QPoint              navigationButtonPos       = _navigationButton->pos();
-        navigationButtonAnimation->setStartValue(navigationButtonPos);
-        navigationButtonAnimation->setEndValue(QPoint(0, 10));
-        navigationButtonAnimation->setEasingCurve(QEasingCurve::InOutSine);
-        navigationButtonAnimation->setDuration(isAnimation ? 130 : 0);
-        navigationButtonAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-    }
-}
-
-void NNavigationBarPrivate::_doSearchButtonAnimation(bool isCompact, bool isAnimation) {
-    if (isCompact) {
-        QPoint navigationButtonPos = _navigationButton->pos();
-
-        QPropertyAnimation* searchButtonAnimation = new QPropertyAnimation(_searchButton, "pos");
-        searchButtonAnimation->setStartValue(QPoint(200, navigationButtonPos.y()));
-        searchButtonAnimation->setEndValue(QPoint(0, navigationButtonPos.y() + 38));
-        searchButtonAnimation->setEasingCurve(QEasingCurve::OutCubic);
-        searchButtonAnimation->setDuration(isAnimation ? 285 : 0);
-        searchButtonAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-        _searchButton->setVisible(true);
-    } else {
-        _searchButton->setVisible(false);
-    }
 }

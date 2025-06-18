@@ -25,8 +25,10 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     Q_D(NNavigationBar);
     d->q_ptr      = this;
     d->_themeMode = nTheme->themeMode();
-    connect(
-        nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) { d->_themeMode = themeMode; });
+    connect(nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) {
+        d->_themeMode = themeMode;
+        update();
+    });
     setFixedWidth(300);
     d->_pIsTransparent = true;
 
@@ -47,10 +49,10 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     d->_navigationButton = new NToolButton(this);
     d->_navigationButton->setFixedSize(40, 38);
     d->_navigationButton->setTransparentBackground(true);
-    d->_navigationButton->setLightHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_themeMode));
-    d->_navigationButton->setDarkHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_themeMode));
-    d->_navigationButton->setLightPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode));
-    d->_navigationButton->setDarkPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode));
+    d->_navigationButton->setLightHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light));
+    d->_navigationButton->setDarkHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Dark));
+    d->_navigationButton->setLightPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light));
+    d->_navigationButton->setDarkPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark));
     d->_navigationButton->setLightBorderColor(Qt::transparent);
     d->_navigationButton->setDarkBorderColor(Qt::transparent);
     d->_navigationButton->setIcon(nIcon->fromRegular(NRegularIconType::Navigation16Regular));
@@ -59,10 +61,10 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     d->_searchButton = new NToolButton(this);
     d->_searchButton->setFixedSize(40, 38);
     d->_searchButton->setTransparentBackground(true);
-    d->_searchButton->setLightHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_themeMode));
-    d->_searchButton->setDarkHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_themeMode));
-    d->_searchButton->setLightPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode));
-    d->_searchButton->setDarkPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode));
+    d->_searchButton->setLightHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light));
+    d->_searchButton->setDarkHoverColor(NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Dark));
+    d->_searchButton->setLightPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Light));
+    d->_searchButton->setDarkPressColor(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark));
     d->_searchButton->setLightBorderColor(Qt::transparent);
     d->_searchButton->setDarkBorderColor(Qt::transparent);
     d->_searchButton->setIcon(nIcon->fromRegular(NRegularIconType::Search16Regular));
@@ -70,20 +72,23 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
 
     d->_navigationSuggestBox = new NAutoSuggestBox(this);
     d->_navigationSuggestBox->setMinimumWidth(0);
-    d->_navigationSuggestBox->setPlaceholderText("搜索...");
+    d->_navigationSuggestBox->setPlaceholderText(tr("search"));
 
-    // 布局设置
     d->_navigationButtonLayout = new QVBoxLayout();
     d->_navigationButtonLayout->setContentsMargins(0, 0, 0, 0);
     d->_navigationButtonLayout->setSpacing(0);
     d->_navigationButtonLayout->addWidget(d->_navigationButton);
     d->_navigationButtonLayout->addWidget(d->_searchButton);
 
-    d->_navigationSuggestLayout = new QHBoxLayout();
-    d->_navigationSuggestLayout->setContentsMargins(0, 0, 10, 0);
-    d->_navigationSuggestLayout->setSpacing(6);
-    d->_navigationSuggestLayout->addLayout(d->_navigationButtonLayout);
+    d->_navigationSuggestLayout = new QVBoxLayout();
+    d->_navigationSuggestLayout->setContentsMargins(10, 0, 0, 0);
     d->_navigationSuggestLayout->addWidget(d->_navigationSuggestBox);
+
+    d->_navigationLayout = new QVBoxLayout();
+    d->_navigationLayout->setContentsMargins(0, 0, 0, 0);
+    d->_navigationLayout->setSpacing(4);
+    d->_navigationLayout->addLayout(d->_navigationButtonLayout);
+    d->_navigationLayout->addLayout(d->_navigationSuggestLayout);
 
     // 页脚视图
 
@@ -116,7 +121,7 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 10, 5, 0);
     mainLayout->addLayout(d->_headerLayout);
-    mainLayout->addLayout(d->_navigationSuggestLayout);
+    mainLayout->addLayout(d->_navigationLayout);
     mainLayout->addSpacing(4);
     mainLayout->addWidget(d->_navigationView);
     mainLayout->addWidget(d->_footerView);
@@ -134,8 +139,6 @@ void NNavigationBar::setHeaderWidget(QWidget* widget) {
 
     if (widget) {
         d->_headerLayout->addWidget(widget);
-
-        widget->setVisible(d->_currentDisplayMode == NNavigationType::Maximal);
     }
 }
 
