@@ -87,10 +87,11 @@ void NAutoSuggestBoxPrivate::setupUI() {
     _delegate = new NAutoSuggestDelegate(q);
     _listView->setModel(_model);
     _listView->setItemDelegate(_delegate);
+    _listView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     _popup->hide();
     // 连接信号
     connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
-    // connect(_lineEdit, &NLineEdit::focusIn, this, &NAutoSuggestBoxPrivate::onFocusChanged);
+    connect(_lineEdit, &NLineEdit::focusIn, this, &NAutoSuggestBoxPrivate::onTextChanged);
     connect(_lineEdit, &NLineEdit::focusOut, this, [this]() { _startCloseAnimation(); });
     connect(_listView, &QListView::clicked, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
 }
@@ -153,7 +154,11 @@ void NAutoSuggestBoxPrivate::_startSizeAnimation(QSize oldSize, QSize newSize) {
     _popupLayout->removeWidget(_listView);
     QPropertyAnimation* expandAnimation = new QPropertyAnimation(_popup, "size");
     connect(expandAnimation, &QPropertyAnimation::valueChanged, this, [=]() { _listView->resize(_popup->size()); });
-    connect(expandAnimation, &QPropertyAnimation::finished, this, [=]() { _popupLayout->addWidget(_listView); });
+    connect(expandAnimation, &QPropertyAnimation::finished, this, [=]() {
+        _popupLayout->addWidget(_listView);
+        qDebug() << "Popup height:" << _popup->height() << "ListView height:" << _listView->height()
+                 << "Item count:" << _model->rowCount();
+    });
     expandAnimation->setDuration(300);
     expandAnimation->setEasingCurve(QEasingCurve::InOutSine);
     expandAnimation->setStartValue(oldSize);
