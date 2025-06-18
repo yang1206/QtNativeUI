@@ -403,6 +403,7 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
             break;
         }
     }
+    qDebug() << _headerWidget->isVisible();
 }
 
 void NNavigationBarPrivate::_handleNavigationExpandState(bool isSave) {
@@ -428,9 +429,6 @@ void NNavigationBarPrivate::_handleMaximalToCompactLayout() {
     }
     _navigationButtonLayout->addSpacing(40);
     _navigationSuggestLayout->addStretch();
-    if (_headerWidget) {
-        _headerWidget->setVisible(false);
-    }
 }
 
 void NNavigationBarPrivate::_handleCompactToMaximalLayout() {
@@ -440,9 +438,6 @@ void NNavigationBarPrivate::_handleCompactToMaximalLayout() {
     }
     _navigationButtonLayout->addSpacing(38);
     _navigationSuggestLayout->insertSpacing(0, 46);
-    if (_headerWidget) {
-        _headerWidget->setVisible(true);
-    }
 }
 
 void NNavigationBarPrivate::_resetLayout() {
@@ -458,9 +453,6 @@ void NNavigationBarPrivate::_resetLayout() {
     }
     _navigationSuggestLayout->addLayout(_navigationButtonLayout);
     _navigationSuggestLayout->addWidget(_navigationSuggestBox);
-    if (_headerWidget) {
-        _headerWidget->setVisible(true);
-    }
 }
 
 void NNavigationBarPrivate::_doNavigationBarWidthAnimation(NNavigationType::NavigationDisplayMode displayMode,
