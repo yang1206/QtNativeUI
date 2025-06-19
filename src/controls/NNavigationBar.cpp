@@ -84,6 +84,24 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     d->_navigationSuggestLayout->setContentsMargins(10, 0, 0, 0);
     d->_navigationSuggestLayout->addWidget(d->_navigationSuggestBox);
 
+    connect(d->_navigationSuggestBox,
+            &NAutoSuggestBox::suggestionClicked,
+            this,
+            [=](QString suggestText, QVariantMap suggestData) {
+                NNavigationNode* node = nullptr;
+                if (suggestData.value("NNodeType").toString() == "Stacked") {
+                    node = d->_navigationModel->getNavigationNode(suggestData.value("NPageKey").toString());
+                    if (node) {
+                        d->onTreeViewClicked(node->getModelIndex());
+                    }
+                } else {
+                    node = d->_footerModel->getNavigationNode(suggestData.value("NPageKey").toString());
+                    if (node) {
+                        d->onFooterViewClicked(node->getModelIndex());
+                    }
+                }
+            });
+
     d->_navigationLayout = new QVBoxLayout();
     d->_navigationLayout->setContentsMargins(0, 0, 0, 0);
     d->_navigationLayout->setSpacing(4);
@@ -359,11 +377,10 @@ void NNavigationBar::removeNavigationNode(QString nodeKey) {
         }
     }
 
-    // 处理搜索建议
-    // if (_navigationSuggestBox && d->_suggestKeyMap.contains(nodeKey)) {
-    //     _navigationSuggestBox->removeSuggestion(d->_suggestKeyMap.value(nodeKey));
-    //     d->_suggestKeyMap.remove(nodeKey);
-    // }
+    if (d->_navigationSuggestBox && d->_suggestKeyMap.contains(nodeKey)) {
+        d->_navigationSuggestBox->removeSuggestion(d->_suggestKeyMap.value(nodeKey));
+        d->_suggestKeyMap.remove(nodeKey);
+    }
 }
 
 void NNavigationBar::setNodeKeyPoints(QString nodeKey, int keyPoints) {
