@@ -58,7 +58,6 @@ NAutoSuggestBoxPrivate::~NAutoSuggestBoxPrivate() {}
 
 void NAutoSuggestBoxPrivate::setupUI() {
     Q_Q(NAutoSuggestBox);
-    q->setFixedSize(206, 35);
 
     // 创建输入框
     _lineEdit = new NLineEdit(q);
@@ -94,7 +93,7 @@ void NAutoSuggestBoxPrivate::setupUI() {
     connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
     connect(_lineEdit, &NLineEdit::focusIn, this, &NAutoSuggestBoxPrivate::onTextChanged);
     connect(_lineEdit, &NLineEdit::focusOut, this, [this]() { _startCloseAnimation(); });
-    connect(_listView, &NBaseListView::clicked, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
+    connect(_listView, &NBaseListView::pressed, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
 }
 
 void NAutoSuggestBoxPrivate::onTextChanged(const QString& text) {
