@@ -58,7 +58,7 @@ NAutoSuggestBoxPrivate::~NAutoSuggestBoxPrivate() {}
 
 void NAutoSuggestBoxPrivate::setupUI() {
     Q_Q(NAutoSuggestBox);
-    q->setFixedHeight(35);
+    q->setFixedSize(206, 35);
 
     // 创建输入框
     _lineEdit = new NLineEdit(q);
@@ -88,15 +88,13 @@ void NAutoSuggestBoxPrivate::setupUI() {
     _delegate = new NAutoSuggestDelegate(q);
     _listView->setModel(_model);
     _listView->setItemDelegate(_delegate);
-    _listView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     _listView->installEventFilter(this);
     _popup->hide();
     // 连接信号
     connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
     connect(_lineEdit, &NLineEdit::focusIn, this, &NAutoSuggestBoxPrivate::onTextChanged);
     connect(_lineEdit, &NLineEdit::focusOut, this, [this]() { _startCloseAnimation(); });
-    connect(_listView, &QListView::clicked, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
-    connect(_listView, &NBaseListView::mouseRelease, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
+    connect(_listView, &NBaseListView::clicked, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
 }
 
 void NAutoSuggestBoxPrivate::onTextChanged(const QString& text) {
@@ -130,8 +128,6 @@ void NAutoSuggestBoxPrivate::onTextChanged(const QString& text) {
         }
     }
 
-    _currentIndex = -1;
-
     if (!suggestionVector.isEmpty()) {
         _model->setSuggestions(suggestionVector);
         int rowCount = suggestionVector.count();
@@ -163,7 +159,7 @@ void NAutoSuggestBoxPrivate::onSuggestionSelected(const QModelIndex& index) {
     if (!index.isValid()) {
         return;
     }
-    
+
     NAutoSuggestion* suggestion = _model->getSuggestion(index.row());
     if (!suggestion) {
         return;

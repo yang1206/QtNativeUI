@@ -353,19 +353,21 @@ void NNavigationBarPrivate::_raiseNavigationBar() {
     q->raise();
 }
 
-void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation) {
+void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDisplayMode displayMode,
+                                                  bool                                   isAnimation) {
+    Q_Q(NNavigationBar);
     // 设置动画状态，防止多次调用
     if (_isAnimating)
         return;
-        
+
     _isAnimating = true;
-    
+
     switch (displayMode) {
         case NNavigationType::Minimal: {
             // 隐藏搜索按钮和搜索框
             _searchButton->setVisible(false);
             _navigationSuggestBox->setVisible(false);
-            
+
             // 执行动画
             _doNavigationBarWidthAnimation(displayMode, isAnimation);
             if (_currentDisplayMode == NNavigationType::Maximal) {
@@ -378,15 +380,15 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
             // 首先调整组件可见性
             _navigationSuggestBox->setVisible(false);
             _searchButton->setVisible(true);
-            
+
             // 执行宽度动画
             _doNavigationBarWidthAnimation(displayMode, isAnimation);
             _doNavigationViewWidthAnimation(isAnimation);
-            
+
             if (_currentDisplayMode != NNavigationType::Minimal) {
                 _handleNavigationExpandState(true);
             }
-            
+
             _currentDisplayMode = displayMode;
             break;
         }
@@ -394,10 +396,10 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
             // 调整组件可见性
             _searchButton->setVisible(false);
             _navigationSuggestBox->setVisible(true);
-            
+
             // 执行宽度动画
             _doNavigationBarWidthAnimation(displayMode, isAnimation);
-            
+
             _currentDisplayMode = displayMode;
             _handleNavigationExpandState(false);
             break;
@@ -407,6 +409,8 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
             break;
         }
     }
+
+    Q_EMIT q->displayModeChange(displayMode);
 }
 
 void NNavigationBarPrivate::_handleNavigationExpandState(bool isSave) {
@@ -425,18 +429,17 @@ void NNavigationBarPrivate::_handleNavigationExpandState(bool isSave) {
     }
 }
 
-void NNavigationBarPrivate::_doNavigationBarWidthAnimation(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation) {
+void NNavigationBarPrivate::_doNavigationBarWidthAnimation(NNavigationType::NavigationDisplayMode displayMode,
+                                                           bool                                   isAnimation) {
     Q_Q(NNavigationBar);
     QPropertyAnimation* navigationBarWidthAnimation = new QPropertyAnimation(q, "maximumWidth");
     navigationBarWidthAnimation->setEasingCurve(QEasingCurve::OutCubic);
     navigationBarWidthAnimation->setStartValue(q->width());
     navigationBarWidthAnimation->setDuration(isAnimation ? 285 : 0);
-    
+
     // 添加动画完成时的回调
-    connect(navigationBarWidthAnimation, &QPropertyAnimation::finished, this, [=]() {
-        _isAnimating = false;
-    });
-    
+    connect(navigationBarWidthAnimation, &QPropertyAnimation::finished, this, [=]() { _isAnimating = false; });
+
     switch (displayMode) {
         case NNavigationType::Minimal: {
             connect(navigationBarWidthAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {

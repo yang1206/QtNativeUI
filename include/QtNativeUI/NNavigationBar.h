@@ -61,6 +61,7 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
     void navigationNodeClicked(NNavigationType::NavigationNodeType nodeType, QString nodeKey);
     void navigationNodeAdded(NNavigationType::NavigationNodeType nodeType, QString nodeKey, QWidget* page);
     void navigationNodeRemoved(NNavigationType::NavigationNodeType nodeType, QString nodeKey);
+    void displayModeChange(NNavigationType::NavigationDisplayMode displayMode);
 
   protected:
     void paintEvent(QPaintEvent* event) override;

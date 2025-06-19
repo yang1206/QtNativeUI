@@ -330,6 +330,11 @@ QWidget* NavigationExample::createNavigationBars() {
         m_pageKeyMap.clear();
 
         connect(navigationBar,
+                &NNavigationBar::displayModeChange,
+                this,
+                [](NNavigationType::NavigationDisplayMode mode) { qDebug() << "displayModeChange:" << mode; });
+
+        connect(navigationBar,
                 &NNavigationBar::navigationNodeAdded,
                 [this, contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey, QWidget* page) {
                     for (int i = 0; i < contentStack->count(); ++i) {

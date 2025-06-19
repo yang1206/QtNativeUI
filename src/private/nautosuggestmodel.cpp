@@ -16,18 +16,7 @@ int NAutoSuggestModel::rowCount(const QModelIndex& parent) const {
     return _suggestions.count();
 }
 
-QVariant NAutoSuggestModel::data(const QModelIndex& index, int role) const {
-    if (!index.isValid() || index.row() >= _suggestions.count())
-        return QVariant();
-
-    if (role == Qt::DisplayRole)
-        return _suggestions[index.row()]->getText();
-
-    if (role == Qt::UserRole)
-        return QVariant::fromValue(_suggestions[index.row()]);
-
-    return QVariant();
-}
+QVariant NAutoSuggestModel::data(const QModelIndex& index, int role) const { return QVariant(); }
 
 void NAutoSuggestModel::setSuggestions(const QVector<NAutoSuggestion*>& suggestions) {
     beginResetModel();

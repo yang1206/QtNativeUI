@@ -1,7 +1,9 @@
 #include "QtNativeUI/NAutoSuggestBox.h"
+
 #include "../private//nautosuggestmodel.h"
 #include "../private/nautosuggestbox_p.h"
 #include "QtNativeUI/NLineEdit.h"
+#include "nbaselistview.h"
 
 Q_PROPERTY_CREATE_Q_CPP(NAutoSuggestBox, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NAutoSuggestBox, Qt::CaseSensitivity, CaseSensitivity)
