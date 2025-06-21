@@ -1,4 +1,4 @@
-#include "NNavigationModel.h"
+#include "nnavigationmodel_p.h"
 
 NNavigationModel::NNavigationModel(QObject* parent) : QAbstractItemModel{parent} {
     _rootNode = new NNavigationNode("root");
@@ -231,6 +231,180 @@ NNavigationType::NodeOperateReturnType NNavigationModel::addPageNode(QString    
     NNavigationNode* node = new NNavigationNode(pageTitle, parentNode);
     node->setDepth(parentNode->getDepth() + 1);
     node->setIcon(icon);
+    node->setKeyPoints(keyPoints);
+
+    if (parentNode->getIsVisible() && parentNode->getIsExpanded()) {
+        node->setIsVisible(true);
+    }
+
+    beginInsertRows(
+        parentNode->getModelIndex(), parentNode->getChildrenNodes().count(), parentNode->getChildrenNodes().count());
+    parentNode->appendChildNode(node);
+    _nodesMap.insert(node->getNodeKey(), node);
+    endInsertRows();
+
+    pageKey = node->getNodeKey();
+    if (!_pSelectedNode) {
+        _pSelectedNode = node;
+    }
+
+    return NNavigationType::Success;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationModel::addExpanderNode(QString expanderTitle, QString& expanderKey, NFilledIconType::Icon icon) {
+    NNavigationNode* node = new NNavigationNode(expanderTitle, _rootNode);
+    node->setDepth(1);
+    node->setIsVisible(true);
+    node->setIsExpanderNode(true);
+    node->setFilledIcon(icon);
+
+    beginInsertRows(QModelIndex(), _rootNode->getChildrenNodes().count(), _rootNode->getChildrenNodes().count());
+    _rootNode->appendChildNode(node);
+    _nodesMap.insert(node->getNodeKey(), node);
+    endInsertRows();
+
+    expanderKey = node->getNodeKey();
+    return NNavigationType::Success;
+}
+
+NNavigationType::NodeOperateReturnType NNavigationModel::addExpanderNode(QString               expanderTitle,
+                                                                         QString&              expanderKey,
+                                                                         QString               targetExpanderKey,
+                                                                         NFilledIconType::Icon icon) {
+    if (!_nodesMap.contains(targetExpanderKey)) {
+        return NNavigationType::TargetNodeInvalid;
+    }
+
+    NNavigationNode* parentNode = _nodesMap.value(targetExpanderKey);
+    if (!parentNode->getIsExpanderNode()) {
+        return NNavigationType::TargetNodeTypeError;
+    }
+
+    if (parentNode->getDepth() > 10) {
+        return NNavigationType::TargetNodeDepthLimit;
+    }
+
+    NNavigationNode* node = new NNavigationNode(expanderTitle, parentNode);
+    node->setDepth(parentNode->getDepth() + 1);
+    node->setIsExpanderNode(true);
+    node->setFilledIcon(icon);
+
+    if (parentNode->getIsVisible() && parentNode->getIsExpanded()) {
+        node->setIsVisible(true);
+    }
+
+    beginInsertRows(
+        parentNode->getModelIndex(), parentNode->getChildrenNodes().count(), parentNode->getChildrenNodes().count());
+    parentNode->appendChildNode(node);
+    _nodesMap.insert(node->getNodeKey(), node);
+    endInsertRows();
+
+    expanderKey = node->getNodeKey();
+    return NNavigationType::Success;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationModel::addPageNode(QString pageTitle, QString& pageKey, NFilledIconType::Icon icon) {
+    NNavigationNode* node = new NNavigationNode(pageTitle, _rootNode);
+    node->setFilledIcon(icon);
+    node->setDepth(1);
+    node->setIsVisible(true);
+
+    beginInsertRows(QModelIndex(), _rootNode->getChildrenNodes().count(), _rootNode->getChildrenNodes().count());
+    _rootNode->appendChildNode(node);
+    _nodesMap.insert(node->getNodeKey(), node);
+    endInsertRows();
+
+    pageKey = node->getNodeKey();
+    if (!_pSelectedNode) {
+        _pSelectedNode = node;
+    }
+
+    return NNavigationType::Success;
+}
+
+NNavigationType::NodeOperateReturnType NNavigationModel::addPageNode(QString               pageTitle,
+                                                                     QString&              pageKey,
+                                                                     QString               targetExpanderKey,
+                                                                     NFilledIconType::Icon icon) {
+    if (!_nodesMap.contains(targetExpanderKey)) {
+        return NNavigationType::TargetNodeInvalid;
+    }
+
+    NNavigationNode* parentNode = _nodesMap.value(targetExpanderKey);
+    if (!parentNode->getIsExpanderNode()) {
+        return NNavigationType::TargetNodeTypeError;
+    }
+
+    if (parentNode->getDepth() > 10) {
+        return NNavigationType::TargetNodeDepthLimit;
+    }
+
+    NNavigationNode* node = new NNavigationNode(pageTitle, parentNode);
+    node->setDepth(parentNode->getDepth() + 1);
+    node->setFilledIcon(icon);
+
+    if (parentNode->getIsVisible() && parentNode->getIsExpanded()) {
+        node->setIsVisible(true);
+    }
+
+    beginInsertRows(
+        parentNode->getModelIndex(), parentNode->getChildrenNodes().count(), parentNode->getChildrenNodes().count());
+    parentNode->appendChildNode(node);
+    _nodesMap.insert(node->getNodeKey(), node);
+    endInsertRows();
+
+    pageKey = node->getNodeKey();
+    if (!_pSelectedNode) {
+        _pSelectedNode = node;
+    }
+
+    return NNavigationType::Success;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationModel::addPageNode(QString pageTitle, QString& pageKey, int keyPoints, NFilledIconType::Icon icon) {
+    NNavigationNode* node = new NNavigationNode(pageTitle, _rootNode);
+    node->setFilledIcon(icon);
+    node->setDepth(1);
+    node->setIsVisible(true);
+    node->setKeyPoints(keyPoints);
+
+    beginInsertRows(QModelIndex(), _rootNode->getChildrenNodes().count(), _rootNode->getChildrenNodes().count());
+    _rootNode->appendChildNode(node);
+    _nodesMap.insert(node->getNodeKey(), node);
+    endInsertRows();
+
+    pageKey = node->getNodeKey();
+    if (!_pSelectedNode) {
+        _pSelectedNode = node;
+    }
+
+    return NNavigationType::Success;
+}
+
+NNavigationType::NodeOperateReturnType NNavigationModel::addPageNode(QString               pageTitle,
+                                                                     QString&              pageKey,
+                                                                     QString               targetExpanderKey,
+                                                                     int                   keyPoints,
+                                                                     NFilledIconType::Icon icon) {
+    if (!_nodesMap.contains(targetExpanderKey)) {
+        return NNavigationType::TargetNodeInvalid;
+    }
+
+    NNavigationNode* parentNode = _nodesMap.value(targetExpanderKey);
+    if (!parentNode->getIsExpanderNode()) {
+        return NNavigationType::TargetNodeTypeError;
+    }
+
+    if (parentNode->getDepth() > 10) {
+        return NNavigationType::TargetNodeDepthLimit;
+    }
+
+    NNavigationNode* node = new NNavigationNode(pageTitle, parentNode);
+    node->setDepth(parentNode->getDepth() + 1);
+    node->setFilledIcon(icon);
     node->setKeyPoints(keyPoints);
 
     if (parentNode->getIsVisible() && parentNode->getIsExpanded()) {

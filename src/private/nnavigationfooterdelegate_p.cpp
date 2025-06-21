@@ -1,14 +1,14 @@
-#include "NFooterDelegate.h"
+#include "nnavigationfooterdelegate_p.h"
 
 #include <QPainter>
 #include <QPainterPath>
 #include <QPropertyAnimation>
 
-#include "NFooterModel.h"
-#include "NNavigationNode.h"
 #include "QtNativeUI/NTheme.h"
+#include "nnavigationfootermodel_p.h"
+#include "nnavigationnode_p.h"
 
-NFooterDelegate::NFooterDelegate(QObject* parent) : QStyledItemDelegate{parent} {
+NNavigationFooterDelegate::NNavigationFooterDelegate(QObject* parent) : QStyledItemDelegate{parent} {
     _pListView = nullptr;
     _themeMode = nTheme->themeMode();
     connect(
@@ -72,9 +72,9 @@ NFooterDelegate::NFooterDelegate(QObject* parent) : QStyledItemDelegate{parent} 
     });
 }
 
-NFooterDelegate::~NFooterDelegate() {}
+NNavigationFooterDelegate::~NNavigationFooterDelegate() {}
 
-void NFooterDelegate::navigationNodeStateChange(QVariantMap data) {
+void NNavigationFooterDelegate::navigationNodeStateChange(QVariantMap data) {
     if (data.contains("SelectMarkChanged")) {
         _lastSelectedNode             = data.value("LastSelectedNode").value<NNavigationNode*>();
         NNavigationNode* selectedNode = data.value("SelectedNode").value<NNavigationNode*>();
@@ -101,11 +101,14 @@ void NFooterDelegate::navigationNodeStateChange(QVariantMap data) {
     }
 }
 
-void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+void NNavigationFooterDelegate::paint(QPainter*                   painter,
+                                      const QStyleOptionViewItem& option,
+                                      const QModelIndex&          index) const {
     QStyleOptionViewItem viewOption(option);
     initStyleOption(&viewOption, index);
-    NFooterModel*    model = dynamic_cast<NFooterModel*>(const_cast<QAbstractItemModel*>(index.model()));
-    NNavigationNode* node  = index.data(Qt::UserRole).value<NNavigationNode*>();
+    NNavigationFooterModel* model =
+        dynamic_cast<NNavigationFooterModel*>(const_cast<QAbstractItemModel*>(index.model()));
+    NNavigationNode* node = index.data(Qt::UserRole).value<NNavigationNode*>();
     if (option.state.testFlag(QStyle::State_HasFocus)) {
         viewOption.state &= ~QStyle::State_HasFocus;
     }
@@ -156,9 +159,15 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     painter->setPen(index == _pPressIndex ? NThemeColor(NFluentColorKey::TextFillColorSecondary, _themeMode)
                                           : textColor);
 
-    NRegularIconType::Icon icon = node->getIcon();
-    if (icon != NRegularIconType::None) {
-        QIcon iconObj = nIcon->fromRegular(icon);
+    NRegularIconType::Icon regularIcon = node->getIcon();
+    NFilledIconType::Icon  filledIcon  = node->getFilledIcon();
+    if (regularIcon != NRegularIconType::None) {
+        QIcon iconObj = nIcon->fromRegular(regularIcon);
+        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
+        iconObj.paint(
+            painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
+    } else if (filledIcon != NFilledIconType::None) {
+        QIcon iconObj = nIcon->fromFilled(filledIcon);
         QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
         iconObj.paint(
             painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
@@ -195,7 +204,7 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     painter->setPen(index == _pPressIndex ? NThemeColor(NFluentColorKey::TextFillColorSecondary, _themeMode)
                                           : textColor);
     QRect textRect;
-    if (icon != NRegularIconType::None) {
+    if (regularIcon != NRegularIconType::None || filledIcon != NFilledIconType::None) {
         textRect = QRect(itemRect.x() + _iconAreaWidth,
                          itemRect.y(),
                          itemRect.width() - _textRightSpacing - _indicatorIconAreaWidth - _iconAreaWidth,
@@ -234,13 +243,13 @@ void NFooterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
     painter->restore();
 }
 
-QSize NFooterDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
+QSize NNavigationFooterDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
     QSize size = QStyledItemDelegate::sizeHint(option, index);
     size.setHeight(40);
     return size;
 }
 
-bool NFooterDelegate::_compareItemY(NNavigationNode* node1, NNavigationNode* node2) {
+bool NNavigationFooterDelegate::_compareItemY(NNavigationNode* node1, NNavigationNode* node2) {
     if (!node1) {
         return true;
     }

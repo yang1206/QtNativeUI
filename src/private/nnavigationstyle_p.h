@@ -7,7 +7,7 @@
 #include "QtNativeUI/stdafx.h"
 
 class NNavigationNode;
-class NNavigationView;
+class NNavigationTreeView;
 class QPropertyAnimation;
 
 class NNavigationStyle : public QProxyStyle {
@@ -15,7 +15,7 @@ class NNavigationStyle : public QProxyStyle {
     Q_PROPERTY_CREATE(qreal, Opacity)
     Q_PROPERTY_CREATE(qreal, Rotate)
     Q_PROPERTY_CREATE(int, ItemHeight)
-    Q_PRIVATE_CREATE(NNavigationView*, NavigationView)
+    Q_PRIVATE_CREATE(NNavigationTreeView*, NavigationView)
     Q_PROPERTY_CREATE(qreal, LastSelectMarkTop)
     Q_PROPERTY_CREATE(qreal, LastSelectMarkBottom)
     Q_PROPERTY_CREATE(qreal, SelectMarkTop)

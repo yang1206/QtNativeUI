@@ -46,6 +46,24 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
     NNavigationType::NodeOperateReturnType
     addFooterNode(QString footerTitle, QWidget* page, QString& footerKey, int keyPoints, NRegularIconType::Icon icon);
 
+    NNavigationType::NodeOperateReturnType
+    addExpanderNode(QString expanderTitle, QString& expanderKey, NFilledIconType::Icon icon);
+    NNavigationType::NodeOperateReturnType
+    addExpanderNode(QString expanderTitle, QString& expanderKey, QString targetExpanderKey, NFilledIconType::Icon icon);
+
+    NNavigationType::NodeOperateReturnType addPageNode(QString pageTitle, QWidget* page, NFilledIconType::Icon icon);
+    NNavigationType::NodeOperateReturnType
+    addPageNode(QString pageTitle, QWidget* page, QString targetExpanderKey, NFilledIconType::Icon icon);
+    NNavigationType::NodeOperateReturnType
+    addPageNode(QString pageTitle, QWidget* page, int keyPoints, NFilledIconType::Icon icon);
+    NNavigationType::NodeOperateReturnType
+    addPageNode(QString pageTitle, QWidget* page, QString targetExpanderKey, int keyPoints, NFilledIconType::Icon icon);
+
+    NNavigationType::NodeOperateReturnType
+    addFooterNode(QString footerTitle, QString& footerKey, int keyPoints, NFilledIconType::Icon icon);
+    NNavigationType::NodeOperateReturnType
+    addFooterNode(QString footerTitle, QWidget* page, QString& footerKey, int keyPoints, NFilledIconType::Icon icon);
+
     bool getNavigationNodeIsExpanded(QString expanderKey) const;
     void expandNavigationNode(QString expanderKey);
     void collpaseNavigationNode(QString expanderKey);

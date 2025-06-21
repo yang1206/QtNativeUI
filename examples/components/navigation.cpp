@@ -316,6 +316,10 @@ QWidget* NavigationExample::createNavigationBars() {
         QVBoxLayout* settingsLayout = new QVBoxLayout(settingsPage);
         settingsLayout->addWidget(new QLabel("Settings Page Content"));
 
+        QWidget*     aboutPage   = new QWidget;
+        QVBoxLayout* aboutLayout = new QVBoxLayout(aboutPage);
+        aboutLayout->addWidget(new QLabel("About Page Content"));
+
         QWidget*     profilePage   = new QWidget;
         QVBoxLayout* profileLayout = new QVBoxLayout(profilePage);
         profileLayout->addWidget(new QLabel("Profile Page Content"));
@@ -326,6 +330,7 @@ QWidget* NavigationExample::createNavigationBars() {
         contentStack->addWidget(documentsPage);
         contentStack->addWidget(settingsPage);
         contentStack->addWidget(profilePage);
+        contentStack->addWidget(aboutPage);
 
         m_pageKeyMap.clear();
 
@@ -354,6 +359,7 @@ QWidget* NavigationExample::createNavigationBars() {
         navigationBar->addPageNode("Home", homePage, NRegularIconType::Home24Regular);
         navigationBar->addPageNode("Documents", documentsPage, NRegularIconType::Document24Regular);
         navigationBar->addPageNode("Settings", settingsPage, expanderKey, NRegularIconType::Settings24Regular);
+        navigationBar->addPageNode("About", aboutPage, NFilledIconType::Info24Filled);
 
         // 添加页脚节点
         QString footerKey;

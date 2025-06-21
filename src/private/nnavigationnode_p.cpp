@@ -1,4 +1,4 @@
-#include "NNavigationNode.h"
+#include "nnavigationnode_p.h"
 #include <QUuid>
 
 NNavigationNode::NNavigationNode(QString nodeTitle, NNavigationNode* parent) : QObject(parent) {

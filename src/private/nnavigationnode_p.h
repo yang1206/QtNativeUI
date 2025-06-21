@@ -11,6 +11,7 @@ class NNavigationNode : public QObject {
     Q_PROPERTY_CREATE(QList<NNavigationNode*>, ChildrenNodes)
     Q_PRIVATE_CREATE(NNavigationNode*, ParentNode)
     Q_PROPERTY_CREATE(NRegularIconType::Icon, Icon)
+    Q_PROPERTY_CREATE(NFilledIconType::Icon, FilledIcon)
     Q_PROPERTY_CREATE(QModelIndex, ModelIndex)
     Q_PROPERTY_CREATE(int, KeyPoints)
     Q_PROPERTY_CREATE(int, Depth)

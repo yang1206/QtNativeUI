@@ -1,16 +1,16 @@
-#include "NNavigationStyle.h"
+#include "nnavigationstyle_p.h"
 
 #include <QPainter>
 #include <QPainterPath>
 #include <QPropertyAnimation>
 #include <QStyleOption>
 
-#include "NNavigationModel.h"
-#include "NNavigationNode.h"
-#include "NNavigationView.h"
 #include "QtNativeUI/NFluentColors.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
+#include "nnavigationmodel_p.h"
+#include "nnavigationnode_p.h"
+#include "nnavigationtreeview_p.h"
 
 NNavigationStyle::NNavigationStyle(QStyle* style) : QProxyStyle(style) {
     _pOpacity              = 1;
@@ -213,8 +213,18 @@ void NNavigationStyle::drawControl(ControlElement      element,
 
                 // 如果有图标
                 painter->save();
-                if (icon != NRegularIconType::None) {
-                    QIcon iconObj = nIcon->fromRegular(icon);
+                NRegularIconType::Icon regularIcon = node->getIcon();
+                NFilledIconType::Icon  filledIcon  = node->getFilledIcon();
+                if (regularIcon != NRegularIconType::None) {
+                    QIcon iconObj = nIcon->fromRegular(regularIcon);
+                    QRect iconRect(
+                        itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
+                    iconObj.paint(painter,
+                                  iconRect,
+                                  Qt::AlignCenter,
+                                  vopt->state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
+                } else if (filledIcon != NFilledIconType::None) {
+                    QIcon iconObj = nIcon->fromFilled(filledIcon);
                     QRect iconRect(
                         itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
                     iconObj.paint(painter,
@@ -228,7 +238,7 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 // 文字绘制
                 painter->setPen(vopt->index == _pPressIndex ? textColor.darker(120) : textColor);
                 QRect textRect;
-                if (icon != NRegularIconType::None) {
+                if (icon != NRegularIconType::None || filledIcon != NFilledIconType::None) {
                     textRect = QRect(itemRect.x() + _iconAreaWidth,
                                      itemRect.y(),
                                      itemRect.width() - _textRightSpacing - _indicatorIconAreaWidth - _iconAreaWidth,

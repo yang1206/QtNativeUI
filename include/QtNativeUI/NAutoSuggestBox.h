@@ -39,6 +39,7 @@ class QTNATIVEUI_EXPORT NAutoSuggestBox : public QWidget {
     QString placeholderText() const;
     QString addSuggestion(const QString& text, const QVariantMap& data = {});
     QString addSuggestion(NRegularIconType::Icon icon, const QString& text, const QVariantMap& data = {});
+    QString addSuggestion(NFilledIconType::Icon icon, const QString& text, const QVariantMap& data = {});
     void    removeSuggestion(const QString& key);
     void    removeSuggestion(int index);
 

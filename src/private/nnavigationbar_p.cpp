@@ -1,21 +1,21 @@
-#include "NNavigationBarPrivate.h"
+#include "nnavigationbar_p.h"
 
 #include <QLayout>
 #include <QPropertyAnimation>
 
 #include <QMenu>
-#include "NFooterDelegate.h"
-#include "NFooterModel.h"
-#include "NNavigationModel.h"
-#include "NNavigationNode.h"
-#include "NNavigationRouter.h"
-#include "NNavigationView.h"
 #include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NNavigationBar.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolButton.h"
+#include "nnavigationfooterdelegate_p.h"
+#include "nnavigationfootermodel_p.h"
+#include "nnavigationmodel_p.h"
+#include "nnavigationnode_p.h"
+#include "nnavigationrouter.h"
+#include "nnavigationtreeview_p.h"
 
 NNavigationBarPrivate::NNavigationBarPrivate(QObject* parent) : QObject{parent} {}
 
@@ -328,7 +328,14 @@ void NNavigationBarPrivate::_addStackedPage(QWidget* page, QString pageKey) {
     QVariantMap suggestData;
     suggestData.insert("NNodeType", "Stacked");
     suggestData.insert("NPageKey", pageKey);
-    QString suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
+    QString suggestKey;
+    if (node->getIcon() != NRegularIconType::None) {
+        suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
+    } else if (node->getFilledIcon() != NFilledIconType::None) {
+        suggestKey = _navigationSuggestBox->addSuggestion(node->getFilledIcon(), node->getNodeTitle(), suggestData);
+    } else {
+        suggestKey = _navigationSuggestBox->addSuggestion(node->getNodeTitle(), suggestData);
+    }
     _suggestKeyMap.insert(pageKey, suggestKey);
 }
 
@@ -344,7 +351,14 @@ void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footerKey) {
     QVariantMap      suggestData;
     suggestData.insert("NNodeType", "Footer");
     suggestData.insert("NPageKey", footerKey);
-    QString suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
+    QString suggestKey;
+    if (node->getIcon() != NRegularIconType::None) {
+        suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
+    } else if (node->getFilledIcon() != NFilledIconType::None) {
+        suggestKey = _navigationSuggestBox->addSuggestion(node->getFilledIcon(), node->getNodeTitle(), suggestData);
+    } else {
+        suggestKey = _navigationSuggestBox->addSuggestion(node->getNodeTitle(), suggestData);
+    }
     _suggestKeyMap.insert(footerKey, suggestKey);
 }
 

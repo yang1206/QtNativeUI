@@ -1,23 +1,23 @@
-#ifndef NFOOTERDELEGATE_H
-#define NFOOTERDELEGATE_H
+#ifndef NNavigationFooterDelegate_H
+#define NNavigationFooterDelegate_H
 
 #include <QModelIndex>
 #include <QStyledItemDelegate>
-#include "../private/nbaselistview.h"
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
+#include "nbaselistview.h"
 
 class NNavigationNode;
 class QPropertyAnimation;
 
-class NFooterDelegate : public QStyledItemDelegate {
+class NNavigationFooterDelegate : public QStyledItemDelegate {
     Q_OBJECT
     Q_PRIVATE_CREATE(NBaseListView*, ListView)
     Q_PRIVATE_CREATE(QModelIndex, PressIndex)
 
   public:
-    explicit NFooterDelegate(QObject* parent = nullptr);
-    ~NFooterDelegate();
+    explicit NNavigationFooterDelegate(QObject* parent = nullptr);
+    ~NNavigationFooterDelegate();
 
     void navigationNodeStateChange(QVariantMap data);
 
@@ -44,4 +44,4 @@ class NFooterDelegate : public QStyledItemDelegate {
     bool                  _compareItemY(NNavigationNode* node1, NNavigationNode* node2);
 };
 
-#endif // NFOOTERDELEGATE_H
+#endif // NNavigationFooterDelegate_H

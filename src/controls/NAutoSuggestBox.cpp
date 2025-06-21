@@ -73,6 +73,16 @@ QString NAutoSuggestBox::addSuggestion(NRegularIconType::Icon icon, const QStrin
     return suggestion->getKey();
 }
 
+QString NAutoSuggestBox::addSuggestion(NFilledIconType::Icon icon, const QString& text, const QVariantMap& data) {
+    Q_D(NAutoSuggestBox);
+    NAutoSuggestion* suggestion = new NAutoSuggestion(this);
+    suggestion->setFilledIcon(icon);
+    suggestion->setText(text);
+    suggestion->setData(data);
+    d->_suggestions.append(suggestion);
+    return suggestion->getKey();
+}
+
 void NAutoSuggestBox::removeSuggestion(const QString& key) {
     Q_D(NAutoSuggestBox);
     for (int i = 0; i < d->_suggestions.size(); ++i) {

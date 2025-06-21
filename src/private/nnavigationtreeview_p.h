@@ -1,5 +1,5 @@
-#ifndef NNAVIGATIONVIEW_H
-#define NNAVIGATIONVIEW_H
+#ifndef NNavigationTreeView_H
+#define NNavigationTreeView_H
 
 #include <QTreeView>
 
@@ -7,12 +7,12 @@ class NNavigationStyle;
 class NToolTip;
 class NScrollBar;
 
-class NNavigationView : public QTreeView {
+class NNavigationTreeView : public QTreeView {
     Q_OBJECT
 
   public:
-    explicit NNavigationView(QWidget* parent = nullptr);
-    ~NNavigationView();
+    explicit NNavigationTreeView(QWidget* parent = nullptr);
+    ~NNavigationTreeView();
 
     void navigationNodeStateChange(QVariantMap data);
 
@@ -33,4 +33,4 @@ class NNavigationView : public QTreeView {
     NToolTip*         _compactToolTip{nullptr};
 };
 
-#endif // NNAVIGATIONVIEW_H
+#endif // NNavigationTreeView_H

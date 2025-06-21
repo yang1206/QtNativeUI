@@ -17,11 +17,11 @@ class QLinearGradient;
 class NNavigationBar;
 class NNavigationNode;
 class NNavigationModel;
-class NNavigationView;
+class NNavigationTreeView;
 
 class QListView;
-class NFooterModel;
-class NFooterDelegate;
+class NNavigationFooterModel;
+class NNavigationFooterDelegate;
 class NToolButton;
 
 class NNavigationBarPrivate : public QObject {
@@ -53,10 +53,10 @@ class NNavigationBarPrivate : public QObject {
     NToolButton*      _navigationButton{nullptr};
     NToolButton*      _searchButton{nullptr};
     NNavigationModel* _navigationModel{nullptr};
-    NNavigationView*  _navigationView{nullptr};
+    NNavigationTreeView*  _navigationView{nullptr};
     NBaseListView*    _footerView{nullptr};
-    NFooterModel*     _footerModel{nullptr};
-    NFooterDelegate*  _footerDelegate{nullptr};
+    NNavigationFooterModel*     _footerModel{nullptr};
+    NNavigationFooterDelegate*  _footerDelegate{nullptr};
     NAutoSuggestBox*  _navigationSuggestBox{nullptr};
 
     QList<NNavigationNode*> _lastExpandedNodesList;

@@ -1,4 +1,4 @@
-#include "NNavigationRouter.h"
+#include "nnavigationrouter.h"
 
 Q_SINGLETON_CREATE_CPP(NNavigationRouter)
 

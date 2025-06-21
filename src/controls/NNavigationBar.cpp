@@ -5,12 +5,12 @@
 #include <QPropertyAnimation>
 #include <QResizeEvent>
 #include <QVBoxLayout>
-#include "../navigation/NFooterDelegate.h"
-#include "../navigation/NFooterModel.h"
-#include "../navigation/NNavigationBarPrivate.h"
-#include "../navigation/NNavigationModel.h"
-#include "../navigation/NNavigationNode.h"
-#include "../navigation/NNavigationView.h"
+#include "../private/nnavigationbar_p.h"
+#include "../private/nnavigationfooterdelegate_p.h"
+#include "../private/nnavigationfootermodel_p.h"
+#include "../private/nnavigationmodel_p.h"
+#include "../private/nnavigationnode_p.h"
+#include "../private/nnavigationtreeview_p.h"
 #include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolButton.h"
@@ -39,9 +39,9 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
 
     // 导航模型
     d->_navigationModel = new NNavigationModel(this);
-    d->_navigationView  = new NNavigationView(this);
+    d->_navigationView  = new NNavigationTreeView(this);
     d->_navigationView->setModel(d->_navigationModel);
-    connect(d->_navigationView, &NNavigationView::navigationClicked, this, [=](const QModelIndex& index) {
+    connect(d->_navigationView, &NNavigationTreeView::navigationClicked, this, [=](const QModelIndex& index) {
         d->onTreeViewClicked(index);
     });
 
@@ -112,9 +112,9 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
 
     d->_footerView = new NBaseListView(this);
     d->_footerView->setFixedHeight(0);
-    d->_footerModel = new NFooterModel(this);
+    d->_footerModel = new NNavigationFooterModel(this);
     d->_footerView->setModel(d->_footerModel);
-    d->_footerDelegate = new NFooterDelegate(this);
+    d->_footerDelegate = new NNavigationFooterDelegate(this);
     d->_footerView->setItemDelegate(d->_footerDelegate);
     d->_footerDelegate->setListView(d->_footerView);
     connect(d->_footerView, &NBaseListView::mousePress, this, [=](const QModelIndex& index) {
@@ -318,6 +318,167 @@ NNavigationType::NodeOperateReturnType NNavigationBar::addFooterNode(QString    
                                                                      QString&               footerKey,
                                                                      int                    keyPoints,
                                                                      NRegularIconType::Icon icon) {
+    NNavigationType::NodeOperateReturnType returnType =
+        d_ptr->_footerModel->addFooterNode(footerTitle, footerKey, page ? true : false, keyPoints, icon);
+    if (returnType == NNavigationType::Success) {
+        d_ptr->_addFooterPage(page, footerKey);
+    }
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationBar::addExpanderNode(QString expanderTitle, QString& expanderKey, NFilledIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addExpanderNode(expanderTitle, expanderKey, icon);
+    if (returnType == NNavigationType::Success) {
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType NNavigationBar::addExpanderNode(QString               expanderTitle,
+                                                                       QString&              expanderKey,
+                                                                       QString               targetExpanderKey,
+                                                                       NFilledIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addExpanderNode(expanderTitle, expanderKey, targetExpanderKey, icon);
+    if (returnType == NNavigationType::Success) {
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationBar::addPageNode(QString pageTitle, QWidget* page, NFilledIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    if (!page) {
+        return NNavigationType::PageInvalid;
+    }
+
+    QString                                pageKey;
+    NNavigationType::NodeOperateReturnType returnType = d->_navigationModel->addPageNode(pageTitle, pageKey, icon);
+    if (returnType == NNavigationType::Success) {
+        d->_pageMetaMap.insert(pageKey, page->metaObject());
+        d->_addStackedPage(page, pageKey);
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationBar::addPageNode(QString pageTitle, QWidget* page, QString targetExpanderKey, NFilledIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    if (!page) {
+        return NNavigationType::PageInvalid;
+    }
+
+    if (targetExpanderKey.isEmpty()) {
+        return NNavigationType::TargetNodeInvalid;
+    }
+
+    QString                                pageKey;
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addPageNode(pageTitle, pageKey, targetExpanderKey, icon);
+    if (returnType == NNavigationType::Success) {
+        d->_pageMetaMap.insert(pageKey, page->metaObject());
+        NNavigationNode* node         = d->_navigationModel->getNavigationNode(pageKey);
+        NNavigationNode* originalNode = node->getOriginalNode();
+
+        if (d->_compactMenuMap.contains(originalNode)) {
+            NMenu*   menu   = d->_compactMenuMap.value(originalNode);
+            QAction* action = menu->addItem(node->getNodeTitle(), icon);
+            connect(action, &QAction::triggered, this, [=]() { d->onTreeViewClicked(node->getModelIndex()); });
+        } else {
+            NMenu*   menu   = new NMenu(this);
+            QAction* action = menu->addItem(node->getNodeTitle(), icon);
+            connect(action, &QAction::triggered, this, [=]() { d->onTreeViewClicked(node->getModelIndex()); });
+            d->_compactMenuMap.insert(originalNode, menu);
+        }
+
+        d->_addStackedPage(page, pageKey);
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationBar::addPageNode(QString pageTitle, QWidget* page, int keyPoints, NFilledIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    if (!page) {
+        return NNavigationType::PageInvalid;
+    }
+
+    QString                                pageKey;
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addPageNode(pageTitle, pageKey, keyPoints, icon);
+    if (returnType == NNavigationType::Success) {
+        d->_pageMetaMap.insert(pageKey, page->metaObject());
+        d->_addStackedPage(page, pageKey);
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType NNavigationBar::addPageNode(QString               pageTitle,
+                                                                   QWidget*              page,
+                                                                   QString               targetExpanderKey,
+                                                                   int                   keyPoints,
+                                                                   NFilledIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    if (!page) {
+        return NNavigationType::PageInvalid;
+    }
+
+    if (targetExpanderKey.isEmpty()) {
+        return NNavigationType::TargetNodeInvalid;
+    }
+
+    QString                                pageKey;
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addPageNode(pageTitle, pageKey, targetExpanderKey, keyPoints, icon);
+    if (returnType == NNavigationType::Success) {
+        d->_pageMetaMap.insert(pageKey, page->metaObject());
+        NNavigationNode* node         = d->_navigationModel->getNavigationNode(pageKey);
+        NNavigationNode* originalNode = node->getOriginalNode();
+
+        if (d->_compactMenuMap.contains(originalNode)) {
+            NMenu*   menu   = d->_compactMenuMap.value(originalNode);
+            QAction* action = menu->addItem(node->getNodeTitle(), icon);
+            connect(action, &QAction::triggered, this, [=]() { d->onTreeViewClicked(node->getModelIndex()); });
+        } else {
+            NMenu*   menu   = new NMenu(this);
+            QAction* action = menu->addAction(node->getNodeTitle(), icon);
+            connect(action, &QAction::triggered, this, [=]() { d->onTreeViewClicked(node->getModelIndex()); });
+            d->_compactMenuMap.insert(originalNode, menu);
+        }
+
+        d->_addStackedPage(page, pageKey);
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationBar::addFooterNode(QString footerTitle, QString& footerKey, int keyPoints, NFilledIconType::Icon icon) {
+    return addFooterNode(footerTitle, nullptr, footerKey, keyPoints, icon);
+}
+
+NNavigationType::NodeOperateReturnType NNavigationBar::addFooterNode(QString               footerTitle,
+                                                                     QWidget*              page,
+                                                                     QString&              footerKey,
+                                                                     int                   keyPoints,
+                                                                     NFilledIconType::Icon icon) {
     NNavigationType::NodeOperateReturnType returnType =
         d_ptr->_footerModel->addFooterNode(footerTitle, footerKey, page ? true : false, keyPoints, icon);
     if (returnType == NNavigationType::Success) {

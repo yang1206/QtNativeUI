@@ -13,6 +13,7 @@
 class NAutoSuggestion : public QObject {
     Q_OBJECT
     Q_PROPERTY_CREATE(NRegularIconType::Icon, Icon)
+    Q_PROPERTY_CREATE(NFilledIconType::Icon, FilledIcon)
     Q_PROPERTY_CREATE(QString, Text)
     Q_PROPERTY_CREATE(QString, Key)
     Q_PROPERTY_CREATE(QVariantMap, Data)

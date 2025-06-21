@@ -1,4 +1,4 @@
-#include "NNavigationView.h"
+#include "nnavigationtreeview_p.h"
 
 #include <QHeaderView>
 #include <QMenu>
@@ -6,16 +6,16 @@
 #include <QMouseEvent>
 #include <QScroller>
 
-#include "NNavigationModel.h"
-#include "NNavigationNode.h"
-#include "NNavigationStyle.h"
 #include "QtNativeUI/NScrollBar.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolTip.h"
+#include "nnavigationmodel_p.h"
+#include "nnavigationnode_p.h"
+#include "nnavigationstyle_p.h"
 
-NNavigationView::NNavigationView(QWidget* parent) : QTreeView(parent) {
-    setObjectName("NNavigationView");
-    setStyleSheet("#NNavigationView{background-color:transparent;}");
+NNavigationTreeView::NNavigationTreeView(QWidget* parent) : QTreeView(parent) {
+    setObjectName("NNavigationTreeView");
+    setStyleSheet("#NNavigationTreeView{background-color:transparent;}");
     setAnimated(true);
     setHeaderHidden(true);
     setRootIsDecorated(false);
@@ -60,18 +60,18 @@ NNavigationView::NNavigationView(QWidget* parent) : QTreeView(parent) {
     });
 
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &NNavigationView::customContextMenuRequested, this, &NNavigationView::onCustomContextMenuRequested);
+    connect(this, &NNavigationTreeView::customContextMenuRequested, this, &NNavigationTreeView::onCustomContextMenuRequested);
 
     _compactToolTip = new NToolTip();
 }
 
-NNavigationView::~NNavigationView() {}
+NNavigationTreeView::~NNavigationTreeView() {}
 
-void NNavigationView::navigationNodeStateChange(QVariantMap data) {
+void NNavigationTreeView::navigationNodeStateChange(QVariantMap data) {
     this->_navigationStyle->navigationNodeStateChange(data);
 }
 
-void NNavigationView::onCustomContextMenuRequested(const QPoint& pos) {
+void NNavigationTreeView::onCustomContextMenuRequested(const QPoint& pos) {
     QModelIndex posIndex = indexAt(pos);
     if (!posIndex.isValid()) {
         return;
@@ -87,7 +87,7 @@ void NNavigationView::onCustomContextMenuRequested(const QPoint& pos) {
     // }
 }
 
-void NNavigationView::mouseMoveEvent(QMouseEvent* event) {
+void NNavigationTreeView::mouseMoveEvent(QMouseEvent* event) {
     if (width() <= 60) {
         QModelIndex posIndex = indexAt(event->pos());
         if (!posIndex.isValid()) {
@@ -106,13 +106,13 @@ void NNavigationView::mouseMoveEvent(QMouseEvent* event) {
     QTreeView::mouseMoveEvent(event);
 }
 
-void NNavigationView::mouseDoubleClickEvent(QMouseEvent* event) {
+void NNavigationTreeView::mouseDoubleClickEvent(QMouseEvent* event) {
     _navigationStyle->setPressIndex(indexAt(event->pos()));
     viewport()->update();
     QTreeView::mouseDoubleClickEvent(event);
 }
 
-void NNavigationView::mouseReleaseEvent(QMouseEvent* event) {
+void NNavigationTreeView::mouseReleaseEvent(QMouseEvent* event) {
     QTreeView::mouseReleaseEvent(event);
 
     if (event->button() == Qt::LeftButton) {
@@ -125,7 +125,7 @@ void NNavigationView::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
-bool NNavigationView::eventFilter(QObject* watched, QEvent* event) {
+bool NNavigationTreeView::eventFilter(QObject* watched, QEvent* event) {
     switch (event->type()) {
         case QEvent::MouseMove:
         case QEvent::HoverMove: {
