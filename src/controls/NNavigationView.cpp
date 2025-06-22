@@ -10,7 +10,6 @@ NNavigationView::NNavigationView(QWidget* parent) : QWidget(parent), d_ptr(new N
     d->q_ptr = this;
     d->setupUI();
 
-    // 设置默认属性
     setMinimumWidth(300);
     setMinimumHeight(200);
 }
