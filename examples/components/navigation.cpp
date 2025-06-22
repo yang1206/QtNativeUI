@@ -2,18 +2,16 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QtNativeUI/NIcon.h>
 #include <QtNativeUI/NNavigationBar.h>
 #include <QtNativeUI/NPushButton.h>
+#include <QtNativeUI/NStackedWidget.h>
 #include <QtNativeUI/NTabBar.h>
 #include <QtNativeUI/NTabWidget.h>
 #include <QtNativeUI/NToolButton.h>
-
 #include "QtNativeUI/NLabel.h"
 #include "QtNativeUI/NScrollArea.h"
-#include "QtNativeUI/NSpinBox.h"
 #include "widgets/ExampleSection.h"
 
 NavigationExample::NavigationExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -290,13 +288,13 @@ QWidget* NavigationExample::createTabWidgets() {
 QWidget* NavigationExample::createNavigationBars() {
     QWidget*     container = new QWidget;
     QVBoxLayout* layout    = new QVBoxLayout(container);
-    layout->setSpacing(16);
+    // layout->setSpacing(16);
 
     // 1. 基本导航栏示例
     {
         QWidget*     demoSection   = new QWidget;
         QHBoxLayout* sectionLayout = new QHBoxLayout(demoSection);
-        sectionLayout->setContentsMargins(0, 0, 0, 16);
+        // sectionLayout->setContentsMargins(0, 0, 0, 16);
 
         // 创建导航栏
         NNavigationBar* navigationBar = new NNavigationBar(demoSection);
@@ -325,7 +323,7 @@ QWidget* NavigationExample::createNavigationBars() {
         profileLayout->addWidget(new QLabel("Profile Page Content"));
 
         // 创建内容显示区
-        QStackedWidget* contentStack = new QStackedWidget(demoSection);
+        NStackedWidget* contentStack = new NStackedWidget(demoSection);
         contentStack->addWidget(homePage);
         contentStack->addWidget(documentsPage);
         contentStack->addWidget(settingsPage);
