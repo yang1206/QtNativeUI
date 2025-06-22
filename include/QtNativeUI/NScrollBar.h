@@ -9,6 +9,7 @@
 #include "NColor.h"
 #include "stdafx.h"
 
+class QAbstractScrollArea;
 class NScrollBarPrivate;
 class QTNATIVEUI_EXPORT NScrollBar : public QScrollBar {
     Q_OBJECT
@@ -36,7 +37,11 @@ class QTNATIVEUI_EXPORT NScrollBar : public QScrollBar {
   public:
     explicit NScrollBar(QWidget* parent = nullptr);
     explicit NScrollBar(Qt::Orientation orientation, QWidget* parent = nullptr);
+    explicit NScrollBar(QScrollBar* originScrollBar, QAbstractScrollArea* parent = nullptr);
     ~NScrollBar();
+
+  signals:
+    void rangeAnimationFinished();
 
   protected:
     void enterEvent(QEnterEvent* event) override;
@@ -45,6 +50,7 @@ class QTNATIVEUI_EXPORT NScrollBar : public QScrollBar {
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void changeEvent(QEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
   private:
     void init();

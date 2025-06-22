@@ -2,14 +2,18 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QtNativeUI/NIcon.h>
+#include <QtNativeUI/NNavigationBar.h>
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NTabBar.h>
 #include <QtNativeUI/NTabWidget.h>
 #include <QtNativeUI/NToolButton.h>
 
+#include "QtNativeUI/NLabel.h"
 #include "QtNativeUI/NScrollArea.h"
+#include "QtNativeUI/NSpinBox.h"
 #include "widgets/ExampleSection.h"
 
 NavigationExample::NavigationExample(QWidget* parent) : QWidget(parent) { initUI(); }
@@ -31,6 +35,9 @@ void NavigationExample::initUI() {
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
     contentLayout->setContentsMargins(32, 32, 32, 32);
     contentLayout->setSpacing(24);
+
+    // 添加NavigationBar示例
+    contentLayout->addWidget(new ExampleSection("NavigationBar", createNavigationBars()));
 
     contentLayout->addWidget(new ExampleSection("TabBar", createTabBars()));
 
@@ -275,6 +282,102 @@ QWidget* NavigationExample::createTabWidgets() {
         sectionLayout->addWidget(rightContainer, 1);
 
         layout->addWidget(section);
+    }
+
+    return container;
+}
+
+QWidget* NavigationExample::createNavigationBars() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 1. 基本导航栏示例
+    {
+        QWidget*     demoSection   = new QWidget;
+        QHBoxLayout* sectionLayout = new QHBoxLayout(demoSection);
+        sectionLayout->setContentsMargins(0, 0, 0, 16);
+
+        // 创建导航栏
+        NNavigationBar* navigationBar = new NNavigationBar(demoSection);
+        navigationBar->setHeaderWidget(new NLabel("头部组件", NLabelType::Subtitle));
+        navigationBar->setMinimumHeight(400);
+
+        // 创建一些内容页面
+        QWidget*     homePage   = new QWidget;
+        QVBoxLayout* homeLayout = new QVBoxLayout(homePage);
+        homeLayout->addWidget(new QLabel("Home Page Content"));
+
+        QWidget*     documentsPage   = new QWidget;
+        QVBoxLayout* documentsLayout = new QVBoxLayout(documentsPage);
+        documentsLayout->addWidget(new QLabel("Documents Page Content"));
+
+        QWidget*     settingsPage   = new QWidget;
+        QVBoxLayout* settingsLayout = new QVBoxLayout(settingsPage);
+        settingsLayout->addWidget(new QLabel("Settings Page Content"));
+
+        QWidget*     aboutPage   = new QWidget;
+        QVBoxLayout* aboutLayout = new QVBoxLayout(aboutPage);
+        aboutLayout->addWidget(new QLabel("About Page Content"));
+
+        QWidget*     profilePage   = new QWidget;
+        QVBoxLayout* profileLayout = new QVBoxLayout(profilePage);
+        profileLayout->addWidget(new QLabel("Profile Page Content"));
+
+        // 创建内容显示区
+        QStackedWidget* contentStack = new QStackedWidget(demoSection);
+        contentStack->addWidget(homePage);
+        contentStack->addWidget(documentsPage);
+        contentStack->addWidget(settingsPage);
+        contentStack->addWidget(profilePage);
+        contentStack->addWidget(aboutPage);
+
+        m_pageKeyMap.clear();
+
+        connect(navigationBar,
+                &NNavigationBar::displayModeChange,
+                this,
+                [](NNavigationType::NavigationDisplayMode mode) { qDebug() << "displayModeChange:" << mode; });
+
+        connect(navigationBar,
+                &NNavigationBar::navigationNodeAdded,
+                [this, contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey, QWidget* page) {
+                    for (int i = 0; i < contentStack->count(); ++i) {
+                        if (contentStack->widget(i) == page) {
+                            m_pageKeyMap[nodeKey] = i;
+                            qDebug() << "Mapped node" << nodeKey << "to page index" << i;
+                            break;
+                        }
+                    }
+                });
+
+        // 添加导航节点
+        QString expanderKey;
+        navigationBar->addExpanderNode("System", expanderKey, NRegularIconType::Settings24Regular);
+
+        // 添加页面节点
+        navigationBar->addPageNode("Home", homePage, NRegularIconType::Home24Regular);
+        navigationBar->addPageNode("Documents", documentsPage, NRegularIconType::Document24Regular);
+        navigationBar->addPageNode("Settings", settingsPage, expanderKey, NRegularIconType::Settings24Regular);
+        navigationBar->addPageNode("About", aboutPage, NFilledIconType::Info24Filled);
+
+        // 添加页脚节点
+        QString footerKey;
+        navigationBar->addFooterNode("Profile", profilePage, footerKey, 0, NRegularIconType::Person24Regular);
+
+        // 连接导航事件，使用映射表切换页面
+        connect(navigationBar,
+                &NNavigationBar::navigationNodeClicked,
+                [this, contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey) {
+                    qDebug() << "Navigation node clicked: " << nodeType << ", " << nodeKey;
+                    if (m_pageKeyMap.contains(nodeKey)) {
+                        contentStack->setCurrentIndex(m_pageKeyMap[nodeKey]);
+                    }
+                });
+
+        sectionLayout->addWidget(navigationBar);
+        sectionLayout->addWidget(contentStack, 1);
+        layout->addWidget(demoSection);
     }
 
     return container;

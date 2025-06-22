@@ -3,6 +3,9 @@
 //
 
 #include "nscrollbar_p.h"
+
+#include <QAbstractScrollArea>
+
 #include "QtNativeUI/NTheme.h"
 
 NScrollBarPrivate::NScrollBarPrivate(QObject* parent) : QObject(parent) {
@@ -79,4 +82,36 @@ void NScrollBarPrivate::initScrollBarStyle() {
         q_ptr->setStyle(style);
     }
     updateStyle();
+}
+
+void NScrollBarPrivate::_handleScrollBarGeometry() {
+    Q_Q(NScrollBar);
+    q->raise();
+    q->setSingleStep(_originScrollBar->singleStep());
+    q->setPageStep(_originScrollBar->pageStep());
+
+    if (q->orientation() == Qt::Horizontal) {
+        q->setGeometry(0, _originScrollArea->height() - 10, _originScrollArea->width(), 10);
+    } else {
+        q->setGeometry(_originScrollArea->width() - 10, 0, 10, _originScrollArea->height());
+    }
+}
+
+void NScrollBarPrivate::_initAllConfig() {
+    Q_Q(NScrollBar);
+    _handleScrollBarRangeChanged(_originScrollBar->minimum(), _originScrollBar->maximum());
+    q->setSingleStep(_originScrollBar->singleStep());
+    q->setPageStep(_originScrollBar->pageStep());
+}
+
+void NScrollBarPrivate::_handleScrollBarValueChanged(QScrollBar* scrollBar, int value) { scrollBar->setValue(value); }
+
+void NScrollBarPrivate::_handleScrollBarRangeChanged(int min, int max) {
+    Q_Q(NScrollBar);
+    q->setRange(min, max);
+    if (max <= 0) {
+        q->setVisible(false);
+    } else {
+        q->setVisible(true);
+    }
 }

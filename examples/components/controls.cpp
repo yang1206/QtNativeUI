@@ -8,6 +8,7 @@
 #include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NToggleSwitch.h>
 
+#include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NCalendarDatePicker.h"
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NComboBox.h"
@@ -45,6 +46,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("CheckBox", createCheckBoxes()));
     contentLayout->addWidget(new ExampleSection("ToggleSwitch", createToggleSwitches()));
     contentLayout->addWidget(new ExampleSection("LineEdit", createLineEdits()));
+    contentLayout->addWidget(new ExampleSection("SuggestBox", createSuggestBoxes()));
     contentLayout->addWidget(new ExampleSection("TextEdit", createTextEdits()));
     contentLayout->addWidget(new ExampleSection("PlainTextEdit", createPlainTextEdits()));
     contentLayout->addWidget(new ExampleSection("ComboBox", createComboBoxes()));
@@ -179,6 +181,69 @@ QWidget* ControlsExample::createLineEdits() {
     clearableLineEdit->setMinimumWidth(200);
     layout->addWidget(clearableLineEdit);
 
+    return container;
+}
+
+QWidget* ControlsExample::createSuggestBoxes() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 添加标题
+    QLabel* titleLabel = new QLabel("建议框控件演示", container);
+    QFont   titleFont  = titleLabel->font();
+    titleFont.setBold(true);
+    titleFont.setPointSize(titleFont.pointSize() + 1);
+    titleLabel->setFont(titleFont);
+    layout->addWidget(titleLabel);
+
+    // 1. 基本建议框
+    QLabel* basicLabel = new QLabel("基本建议框:", container);
+    QFont   labelFont  = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    NAutoSuggestBox* basicSuggestBox = new NAutoSuggestBox(container);
+    basicSuggestBox->setPlaceholderText("搜索...");
+    basicSuggestBox->setMinimumWidth(250);
+    // 添加一些建议项
+    basicSuggestBox->addSuggestion("a");
+    basicSuggestBox->addSuggestion("aa");
+    basicSuggestBox->addSuggestion("aaa");
+    basicSuggestBox->addSuggestion("aaaa");
+    basicSuggestBox->addSuggestion("aaaaa");
+    QLabel* basicResultLabel = new QLabel("选择结果: 无", container);
+    connect(basicSuggestBox, &NAutoSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
+        basicResultLabel->setText("选择结果: " + text);
+    });
+    layout->addWidget(basicSuggestBox);
+    layout->addWidget(basicResultLabel);
+    layout->addSpacing(16);
+
+    // 2. 带图标的建议框
+    QLabel* iconLabel = new QLabel("带图标的建议框:", container);
+    iconLabel->setFont(labelFont);
+    layout->addWidget(iconLabel);
+
+    NAutoSuggestBox* iconSuggestBox = new NAutoSuggestBox(container);
+    iconSuggestBox->setPlaceholderText("搜索文件...");
+    iconSuggestBox->setMinimumWidth(250);
+    // 添加带图标的建议项
+    iconSuggestBox->addSuggestion(NRegularIconType::Document16Regular, "文档.docx");
+    iconSuggestBox->addSuggestion(NRegularIconType::Power20Regular, "演示.ppt");
+    iconSuggestBox->addSuggestion(NRegularIconType::Image16Regular, "图片.jpg");
+    iconSuggestBox->addSuggestion(NRegularIconType::Code16Regular, "代码.cpp");
+    iconSuggestBox->addSuggestion(NRegularIconType::Table16Regular, "表格.xlsx");
+    iconSuggestBox->addSuggestion(NRegularIconType::Video16Regular, "视频.mp4");
+    QLabel* iconResultLabel = new QLabel("选择结果: 无", container);
+    connect(iconSuggestBox, &NAutoSuggestBox::suggestionClicked, [=](QString text, QVariantMap data) {
+        iconResultLabel->setText("选择结果: " + text);
+    });
+    layout->addWidget(iconSuggestBox);
+    layout->addWidget(iconResultLabel);
+    layout->addSpacing(16);
+    layout->addStretch();
     return container;
 }
 

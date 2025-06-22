@@ -2,6 +2,7 @@
 // Created by Yang1206 on 2025/4/6.
 //
 
+#include <QAbstractScrollArea>
 #include <QEnterEvent>
 #include <QStyleOptionSlider>
 #include <QtNativeUI/NScrollBar.h>
@@ -39,6 +40,37 @@ NScrollBar::NScrollBar(Qt::Orientation orientation, QWidget* parent)
     Q_D(NScrollBar);
     d->q_ptr = this;
     init();
+}
+
+NScrollBar::NScrollBar(QScrollBar* originScrollBar, QAbstractScrollArea* parent) : NScrollBar(parent) {
+    Q_D(NScrollBar);
+    d->q_ptr = this;
+    init();
+    if (!originScrollBar || !parent) {
+        qCritical() << "Invalid origin or parent!";
+        return;
+    }
+    d->_originScrollArea        = parent;
+    Qt::Orientation orientation = originScrollBar->orientation();
+    setOrientation(orientation);
+    // 隐藏原始滚动条
+    orientation == Qt::Horizontal ? parent->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff)
+                                  : parent->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    parent->installEventFilter(this);
+    d->_originScrollBar = originScrollBar;
+    d->_initAllConfig();
+    // 连接信号
+    connect(d->_originScrollBar, &QScrollBar::valueChanged, this, [=](int value) {
+        d->_handleScrollBarValueChanged(this, value);
+    });
+
+    connect(this, &QScrollBar::valueChanged, this, [=](int value) {
+        d->_handleScrollBarValueChanged(d->_originScrollBar, value);
+    });
+
+    connect(d->_originScrollBar, &QScrollBar::rangeChanged, this, [=](int min, int max) {
+        d->_handleScrollBarRangeChanged(min, max);
+    });
 }
 
 NScrollBar::~NScrollBar() {}
@@ -153,4 +185,18 @@ void NScrollBar::changeEvent(QEvent* event) {
         Q_D(NScrollBar);
         d->updateStyle();
     }
+}
+
+bool NScrollBar::eventFilter(QObject* watched, QEvent* event) {
+    Q_D(NScrollBar);
+    switch (event->type()) {
+        case QEvent::Show:
+        case QEvent::Resize:
+        case QEvent::LayoutRequest:
+            d->_handleScrollBarGeometry();
+            break;
+        default:
+            break;
+    }
+    return QScrollBar::eventFilter(watched, event);
 }
