@@ -11,6 +11,7 @@
 #include <QtNativeUI/NTabWidget.h>
 #include <QtNativeUI/NToolButton.h>
 #include "QtNativeUI/NLabel.h"
+#include "QtNativeUI/NNavigationView.h"
 #include "QtNativeUI/NScrollArea.h"
 #include "widgets/ExampleSection.h"
 
@@ -34,12 +35,9 @@ void NavigationExample::initUI() {
     contentLayout->setContentsMargins(32, 32, 32, 32);
     contentLayout->setSpacing(24);
 
-    // 添加NavigationBar示例
+    contentLayout->addWidget(new ExampleSection("NavigationView", createNavigationViews()));
     contentLayout->addWidget(new ExampleSection("NavigationBar", createNavigationBars()));
-
     contentLayout->addWidget(new ExampleSection("TabBar", createTabBars()));
-
-    // 添加TabWidget示例
     contentLayout->addWidget(new ExampleSection("TabWidget", createTabWidgets()));
 
     contentLayout->addStretch();
@@ -376,6 +374,212 @@ QWidget* NavigationExample::createNavigationBars() {
         sectionLayout->addWidget(navigationBar);
         sectionLayout->addWidget(contentStack, 1);
         layout->addWidget(demoSection);
+    }
+
+    return container;
+}
+
+QWidget* NavigationExample::createNavigationViews() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    // 创建一个说明标签
+    NLabel* descriptionLabel = new NLabel(
+        "NNavigationView 组合了 NNavigationBar 和 NStackedWidget，提供了完整的导航和页面切换功能，并支持过渡动画。",
+        NLabelType::Caption);
+    descriptionLabel->setWordWrap(true);
+    layout->addWidget(descriptionLabel);
+
+    // 1. 创建基本的 NavigationView 示例
+    {
+        QWidget*     demoSection   = new QWidget;
+        QVBoxLayout* sectionLayout = new QVBoxLayout(demoSection);
+        sectionLayout->setContentsMargins(0, 0, 0, 16);
+
+        sectionLayout->addWidget(new NLabel("基本 NavigationView 示例", NLabelType::Subtitle));
+
+        // 创建 NavigationView
+        NNavigationView* navigationView = new NNavigationView(demoSection);
+        navigationView->setMinimumHeight(400);
+        navigationView->setPageTransitionType(NNavigationType::SlideVertical);
+
+        // 设置头部组件
+        navigationView->setHeaderWidget(new NLabel("导航示例", NLabelType::Subtitle));
+
+        // 创建一些内容页面
+        QWidget*     homePage   = new QWidget;
+        QVBoxLayout* homeLayout = new QVBoxLayout(homePage);
+        homeLayout->addWidget(new NLabel("首页内容", NLabelType::Title));
+        homeLayout->addWidget(new NLabel("这是首页的详细内容展示区域", NLabelType::Body));
+
+        QWidget*     documentsPage   = new QWidget;
+        QVBoxLayout* documentsLayout = new QVBoxLayout(documentsPage);
+        documentsLayout->addWidget(new NLabel("文档页面", NLabelType::Title));
+        documentsLayout->addWidget(new NLabel("这里展示文档相关内容", NLabelType::Body));
+
+        QWidget*     settingsPage   = new QWidget;
+        QVBoxLayout* settingsLayout = new QVBoxLayout(settingsPage);
+        settingsLayout->addWidget(new NLabel("设置页面", NLabelType::Title));
+        settingsLayout->addWidget(new NLabel("系统设置选项将在此处显示", NLabelType::Body));
+
+        QWidget*     profilePage   = new QWidget;
+        QVBoxLayout* profileLayout = new QVBoxLayout(profilePage);
+        profileLayout->addWidget(new NLabel("个人资料", NLabelType::Title));
+        profileLayout->addWidget(new NLabel("用户个人资料信息", NLabelType::Body));
+
+        // 添加导航节点
+        QString expanderKey;
+        navigationView->addExpanderNode("系统", expanderKey, NRegularIconType::Settings24Regular);
+
+        // 添加页面节点 - 使用 Regular 图标
+        navigationView->addPageNode("首页", homePage, NRegularIconType::Home24Regular);
+        navigationView->addPageNode("文档", documentsPage, NRegularIconType::Document24Regular);
+        navigationView->addPageNode("设置", settingsPage, expanderKey, NRegularIconType::Settings24Regular);
+
+        // 添加页脚节点
+        QString footerKey;
+        navigationView->addFooterNode("个人资料", profilePage, footerKey, 0, NRegularIconType::Person24Regular);
+
+        // 连接信号
+        connect(navigationView,
+                &NNavigationView::navigationNodeClicked,
+                [](NNavigationType::NavigationNodeType nodeType, QString nodeKey) {
+                    qDebug() << "节点被点击:" << nodeType << nodeKey;
+                });
+
+        connect(navigationView, &NNavigationView::currentChanged, [](int index) {
+            qDebug() << "当前页面索引变更为:" << index;
+        });
+
+        sectionLayout->addWidget(navigationView);
+        layout->addWidget(demoSection);
+    }
+
+    // 2. 创建使用 Filled 图标的 NavigationView 示例
+    {
+        QWidget*     demoSection   = new QWidget;
+        QVBoxLayout* sectionLayout = new QVBoxLayout(demoSection);
+        sectionLayout->setContentsMargins(0, 0, 0, 16);
+
+        sectionLayout->addWidget(new NLabel("使用 Filled 图标的 NavigationView", NLabelType::Subtitle));
+
+        // 创建 NavigationView
+        NNavigationView* navigationView = new NNavigationView(demoSection);
+        navigationView->setMinimumHeight(400);
+        navigationView->setDisplayMode(NNavigationType::Compact); // 设置为紧凑模式
+
+        // 设置头部组件
+        navigationView->setHeaderWidget(new NLabel("Filled 图标", NLabelType::Subtitle));
+
+        // 创建内容页面
+        QWidget*     dashboardPage   = new QWidget;
+        QVBoxLayout* dashboardLayout = new QVBoxLayout(dashboardPage);
+        dashboardLayout->addWidget(new NLabel("仪表盘", NLabelType::Title));
+        dashboardLayout->addWidget(new NLabel("数据概览和统计信息", NLabelType::Body));
+
+        QWidget*     mailPage   = new QWidget;
+        QVBoxLayout* mailLayout = new QVBoxLayout(mailPage);
+        mailLayout->addWidget(new NLabel("邮件", NLabelType::Title));
+        mailLayout->addWidget(new NLabel("收件箱和邮件管理", NLabelType::Body));
+
+        QWidget*     calendarPage   = new QWidget;
+        QVBoxLayout* calendarLayout = new QVBoxLayout(calendarPage);
+        calendarLayout->addWidget(new NLabel("日历", NLabelType::Title));
+        calendarLayout->addWidget(new NLabel("日程和事件管理", NLabelType::Body));
+
+        QWidget*     helpPage   = new QWidget;
+        QVBoxLayout* helpLayout = new QVBoxLayout(helpPage);
+        helpLayout->addWidget(new NLabel("帮助", NLabelType::Title));
+        helpLayout->addWidget(new NLabel("帮助文档和支持信息", NLabelType::Body));
+
+        // 添加页面节点 - 使用 Filled 图标
+        navigationView->addPageNode("仪表盘", dashboardPage, NFilledIconType::Dishwasher20Filled);
+        navigationView->addPageNode("邮件", mailPage, NFilledIconType::Mail24Filled);
+        navigationView->addPageNode("日历", calendarPage, NFilledIconType::Calendar24Filled);
+
+        // 添加页脚节点
+        QString helpKey;
+        navigationView->addFooterNode("帮助", helpPage, helpKey, 0, NFilledIconType::QuestionCircle24Filled);
+
+        // 设置页面切换动画时长
+        navigationView->setPageTransitionDuration(400);
+
+        sectionLayout->addWidget(navigationView);
+        layout->addWidget(demoSection);
+    }
+
+    // 3. 添加控制面板示例
+    {
+        QWidget*     controlSection = new QWidget;
+        QVBoxLayout* controlLayout  = new QVBoxLayout(controlSection);
+        controlLayout->setContentsMargins(0, 0, 0, 0);
+
+        controlLayout->addWidget(new NLabel("NavigationView 控制示例", NLabelType::Subtitle));
+
+        // 创建 NavigationView
+        NNavigationView* navigationView = new NNavigationView(controlSection);
+        navigationView->setMinimumHeight(300);
+
+        // 创建一些简单页面
+        QWidget*     page1   = new QWidget;
+        QVBoxLayout* layout1 = new QVBoxLayout(page1);
+        layout1->addWidget(new NLabel("页面 1", NLabelType::Title));
+
+        QWidget*     page2   = new QWidget;
+        QVBoxLayout* layout2 = new QVBoxLayout(page2);
+        layout2->addWidget(new NLabel("页面 2", NLabelType::Title));
+
+        QWidget*     page3   = new QWidget;
+        QVBoxLayout* layout3 = new QVBoxLayout(page3);
+        layout3->addWidget(new NLabel("页面 3", NLabelType::Title));
+
+        // 添加页面
+        QString key1, key2, key3;
+        navigationView->addPageNode("页面 1", page1, NRegularIconType::NumberCircle116Regular);
+        navigationView->addPageNode("页面 2", page2, NRegularIconType::NumberCircle216Regular);
+        navigationView->addPageNode("页面 3", page3, NRegularIconType::NumberCircle316Regular);
+
+        // 创建控制按钮
+        QWidget*     controlPanel = new QWidget;
+        QHBoxLayout* buttonLayout = new QHBoxLayout(controlPanel);
+        buttonLayout->setContentsMargins(0, 16, 0, 0);
+
+        // 显示模式控制
+        NLabel*      modeLabel  = new NLabel("显示模式:", NLabelType::Body);
+        NPushButton* minimalBtn = new NPushButton("最小化", controlPanel);
+        NPushButton* compactBtn = new NPushButton("紧凑", controlPanel);
+        NPushButton* maximalBtn = new NPushButton("最大化", controlPanel);
+        NPushButton* autoBtn    = new NPushButton("自动", controlPanel);
+
+        connect(minimalBtn, &NPushButton::clicked, [navigationView]() {
+            navigationView->setDisplayMode(NNavigationType::Minimal);
+        });
+
+        connect(compactBtn, &NPushButton::clicked, [navigationView]() {
+            navigationView->setDisplayMode(NNavigationType::Compact);
+        });
+
+        connect(maximalBtn, &NPushButton::clicked, [navigationView]() {
+            navigationView->setDisplayMode(NNavigationType::Maximal);
+        });
+
+        connect(autoBtn, &NPushButton::clicked, [navigationView]() {
+            navigationView->setDisplayMode(NNavigationType::Auto);
+        });
+
+        buttonLayout->addWidget(modeLabel);
+        buttonLayout->addWidget(minimalBtn);
+        buttonLayout->addWidget(compactBtn);
+        buttonLayout->addWidget(maximalBtn);
+        buttonLayout->addWidget(autoBtn);
+        buttonLayout->addStretch();
+
+        // 添加到布局
+        controlLayout->addWidget(navigationView);
+        controlLayout->addWidget(controlPanel);
+
+        layout->addWidget(controlSection);
     }
 
     return container;

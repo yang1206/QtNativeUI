@@ -182,6 +182,14 @@ enum NodeOperateReturnType {
 };
 Q_ENUM_CREATE(NodeOperateReturnType)
 
+enum PageTransitionType {
+    SlideVertical,   // 垂直滑动（默认，从下方滑入）
+    SlideHorizontal, // 水平滑动（从右侧滑入）
+    Fade,            // 淡入淡出
+    None             // 无动画
+};
+Q_ENUM_CREATE(PageTransitionType)
+
 Q_END_ENUM_CREATE(NNavigationType)
 
 // 导航路由相关枚举
