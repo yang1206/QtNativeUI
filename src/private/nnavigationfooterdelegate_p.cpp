@@ -163,12 +163,12 @@ void NNavigationFooterDelegate::paint(QPainter*                   painter,
     NFilledIconType::Icon  filledIcon  = node->getFilledIcon();
     if (regularIcon != NRegularIconType::None) {
         QIcon iconObj = nIcon->fromRegular(regularIcon);
-        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
+        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 15) / 2, 17, 17);
         iconObj.paint(
             painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
     } else if (filledIcon != NFilledIconType::None) {
         QIcon iconObj = nIcon->fromFilled(filledIcon);
-        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
+        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 15) / 2, 17, 17);
         iconObj.paint(
             painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
     }

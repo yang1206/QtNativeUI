@@ -9,19 +9,19 @@
 #include "components/navigation.h"
 
 MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
-    // setContentsMargins(0, 0, 0, 0);
     m_navigationView = new NNavigationView(this);
     setCentralWidget(m_navigationView);
-
-    m_navigationView->addPageNode("Button", new ButtonExample(this), NRegularIconType::Button16Regular);
-    m_navigationView->addPageNode("Controls", new ControlsExample(this), NRegularIconType::Accessibility16Regular);
-    m_navigationView->addPageNode("Menus", new MenuExample(this), NRegularIconType::MoreHorizontal16Regular);
-    m_navigationView->addPageNode("Dialogs", new DialogsExample(this), NRegularIconType::Flag16Regular);
-    m_navigationView->addPageNode("Navigation", new NavigationExample(this), NRegularIconType::Router20Regular);
-    m_navigationView->addPageNode("Colors", new ColorsExample(this), NRegularIconType::Color16Regular);
-    m_navigationView->addPageNode("Icons", new IconExample(this), NRegularIconType::Icons20Regular);
+    auto button = new ButtonExample(this);
+    button->setMainWindow(this);
+    // m_navigationView->addPageNode("Button", button, NRegularIconType::Button16Regular);
+    // m_navigationView->addPageNode("Controls", new ControlsExample(this), NRegularIconType::Accessibility16Regular);
+    // m_navigationView->addPageNode("Menus", new MenuExample(this), NRegularIconType::MoreHorizontal16Regular);
+    // m_navigationView->addPageNode("Dialogs", new DialogsExample(this), NRegularIconType::Flag16Regular);
+    // m_navigationView->addPageNode("Navigation", new NavigationExample(this), NRegularIconType::Router20Regular);
+    // m_navigationView->addPageNode("Colors", new ColorsExample(this), NRegularIconType::Color16Regular);
+    // m_navigationView->addPageNode("Icons", new IconExample(this), NRegularIconType::Icons20Regular);
 
     // 设置窗口属性
     setWindowTitle("QtNativeUI by Yang1206");
-    resize(900, 700);
+    resize(1200, 700);
 }
