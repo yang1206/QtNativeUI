@@ -240,13 +240,13 @@ void NPushButton::drawBackground(QPainter* painter) {
         painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
     }
 
-    if ((!d->_isPressed) && (!d->_isHovered) && (!d->_pTransparentBackground)) {
+    if ((!d->_isPressed) && (!d->_pTransparentBackground)) {
         if (d->_buttonType == NPushButtonPrivate::Accent) {
             painter->restore();
             return;
         }
 
-        painter->setPen(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, d->_themeMode));
+        painter->setPen(NThemeColor(NFluentColorKey::ControlStrokeColorSecondary, d->_themeMode));
         painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
                           height() - d->_shadowBorderWidth,
                           foregroundRect.width(),
@@ -261,7 +261,7 @@ void NPushButton::drawBorder(QPainter* painter) {
     if (d->_pTransparentBackground) {
         return;
     }
-    if (!d->_isHovered && !d->_isPressed && d->_buttonType != NPushButtonPrivate::Accent) {
+    if (d->_buttonType == NPushButtonPrivate::Accent) {
         return;
     }
 
