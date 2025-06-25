@@ -4,6 +4,8 @@
 #include <QPropertyAnimation>
 
 #include <QMenu>
+#include <QTimer>
+
 #include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NMenu.h"
@@ -393,7 +395,7 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
         case NNavigationType::Compact: {
             // 首先调整组件可见性
             _navigationSuggestBox->setVisible(false);
-            _searchButton->setVisible(true);
+            _searchButton->setVisible(_pIsSearchVisible);
 
             // 执行宽度动画
             _doNavigationBarWidthAnimation(displayMode, isAnimation);
@@ -409,7 +411,7 @@ void NNavigationBarPrivate::_doComponentAnimation(NNavigationType::NavigationDis
         case NNavigationType::Maximal: {
             // 调整组件可见性
             _searchButton->setVisible(false);
-            _navigationSuggestBox->setVisible(true);
+            _navigationSuggestBox->setVisible(_pIsSearchVisible);
 
             // 执行宽度动画
             _doNavigationBarWidthAnimation(displayMode, isAnimation);
@@ -439,6 +441,23 @@ void NNavigationBarPrivate::_handleNavigationExpandState(bool isSave) {
             // 修正动画覆盖
             _navigationView->resize(295, _navigationView->height());
             onTreeViewClicked(node->getModelIndex(), false);
+        }
+    }
+}
+
+void NNavigationBarPrivate::_showSearchAndFocus() {
+    Q_Q(NNavigationBar);
+
+    if (_currentDisplayMode != NNavigationType::Maximal) {
+        q->setDisplayMode(NNavigationType::Maximal, true);
+        QTimer::singleShot(0, this, [this]() {
+            if (_navigationSuggestBox) {
+                _navigationSuggestBox->setFocus();
+            }
+        });
+    } else {
+        if (_navigationSuggestBox) {
+            _navigationSuggestBox->setFocus();
         }
     }
 }

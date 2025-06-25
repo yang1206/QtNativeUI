@@ -46,6 +46,8 @@ class QTNATIVEUI_EXPORT NAutoSuggestBox : public QWidget {
     // 清空所有建议项
     void clearSuggestions();
 
+    void setFocus();
+
   signals:
     void suggestionClicked(QString text, QVariantMap data);
     void querySubmitted(const QString& query);

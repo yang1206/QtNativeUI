@@ -298,6 +298,7 @@ QWidget* NavigationExample::createNavigationBars() {
         NNavigationBar* navigationBar = new NNavigationBar(demoSection);
         navigationBar->setHeaderWidget(new NLabel("头部组件", NLabelType::Subtitle));
         navigationBar->setMinimumHeight(400);
+        navigationBar->setSearchVisible(false);
 
         // 创建一些内容页面
         QWidget*     homePage   = new QWidget;
@@ -403,6 +404,7 @@ QWidget* NavigationExample::createNavigationViews() {
         NNavigationView* navigationView = new NNavigationView(demoSection);
         navigationView->setMinimumHeight(400);
         navigationView->setPageTransitionType(NNavigationType::SlideVertical);
+        navigationView->setSearchVisible(false);
 
         // 设置头部组件
         navigationView->setHeaderWidget(new NLabel("导航示例", NLabelType::Subtitle));

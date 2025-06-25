@@ -24,6 +24,9 @@ class QTNATIVEUI_EXPORT NNavigationView : public QWidget {
     void     setHeaderWidget(QWidget* widget);
     QWidget* headerWidget() const;
 
+    void setSearchVisible(bool visible);
+    bool isSearchVisible() const;
+
     // 导航节点操作
     NNavigationType::NodeOperateReturnType
     addExpanderNode(QString expanderTitle, QString& expanderKey, NRegularIconType::Icon icon);

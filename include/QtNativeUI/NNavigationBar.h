@@ -14,7 +14,6 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
     Q_OBJECT
     Q_Q_CREATE(NNavigationBar)
     Q_PROPERTY_CREATE_Q_H(bool, IsTransparent)
-
   public:
     explicit NNavigationBar(QWidget* parent = nullptr);
     ~NNavigationBar();
@@ -71,6 +70,9 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
 
     void setNodeKeyPoints(QString nodeKey, int keyPoints);
     int  getNodeKeyPoints(QString nodeKey) const;
+
+    void setSearchVisible(bool visible);
+    bool isSearchVisible() const;
 
     void navigation(QString pageKey, bool isLogClicked = true);
     void setDisplayMode(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation = true);

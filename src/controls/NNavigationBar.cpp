@@ -30,9 +30,9 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
         update();
     });
     setFixedWidth(300);
-    d->_pIsTransparent = true;
-
-    d->_headerLayout = new QVBoxLayout();
+    d->_pIsTransparent   = true;
+    d->_pIsSearchVisible = true;
+    d->_headerLayout     = new QVBoxLayout();
     d->_headerLayout->setContentsMargins(0, 0, 0, 0);
     d->_headerLayout->setSpacing(0);
     d->_headerWidget = nullptr;
@@ -73,6 +73,7 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     d->_navigationSuggestBox = new NAutoSuggestBox(this);
     d->_navigationSuggestBox->setMinimumWidth(0);
     d->_navigationSuggestBox->setPlaceholderText(tr("search"));
+    d->_navigationSuggestBox->setVisible(d->_pIsSearchVisible);
 
     d->_navigationButtonLayout = new QVBoxLayout();
     d->_navigationButtonLayout->setContentsMargins(0, 0, 0, 0);
@@ -132,6 +133,7 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
     connect(d->_footerView, &NBaseListView::clicked, this, [=](const QModelIndex& index) {
         d->onFooterViewClicked(index);
     });
+    connect(d->_searchButton, &NToolButton::clicked, this, [d] { d->_showSearchAndFocus(); });
 
     // 布局设置
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
@@ -581,6 +583,22 @@ int NNavigationBar::getNodeKeyPoints(QString nodeKey) const {
     }
 
     return node->getKeyPoints();
+}
+
+void NNavigationBar::setSearchVisible(bool visible) {
+    Q_D(NNavigationBar);
+    if (d->_pIsSearchVisible != visible) {
+        d->_pIsSearchVisible = visible;
+
+        if (d->_currentDisplayMode == NNavigationType::Maximal) {
+            d->_navigationSuggestBox->setVisible(visible);
+        }
+    }
+}
+
+bool NNavigationBar::isSearchVisible() const {
+    Q_D(const NNavigationBar);
+    return d->_pIsSearchVisible;
 }
 
 void NNavigationBar::navigation(QString pageKey, bool isLogClicked) {

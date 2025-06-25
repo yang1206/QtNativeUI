@@ -26,6 +26,16 @@ QWidget* NNavigationView::headerWidget() const {
     return d->_navigationBar->headerWidget();
 }
 
+void NNavigationView::setSearchVisible(bool visible) {
+    Q_D(const NNavigationView);
+    d->_navigationBar->setSearchVisible(visible);
+}
+
+bool NNavigationView::isSearchVisible() const {
+    Q_D(const NNavigationView);
+    return d->_navigationBar->isSearchVisible();
+}
+
 NNavigationType::NodeOperateReturnType
 NNavigationView::addExpanderNode(QString expanderTitle, QString& expanderKey, NRegularIconType::Icon icon) {
     Q_D(NNavigationView);
