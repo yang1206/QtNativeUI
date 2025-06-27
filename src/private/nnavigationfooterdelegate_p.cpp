@@ -18,9 +18,7 @@ NNavigationFooterDelegate::NNavigationFooterDelegate(QObject* parent) : QStyledI
     setProperty("lastSelectMarkBottom", 10.0);
     setProperty("selectMarkTop", 10.0);
     setProperty("selectMarkBottom", 10.0);
-
-    // Mark向上
-    _lastSelectMarkTopAnimation = new QPropertyAnimation(this, "lastSelectMarkTop");
+ _lastSelectMarkTopAnimation = new QPropertyAnimation(this, "lastSelectMarkTop");
     connect(_lastSelectMarkTopAnimation, &QPropertyAnimation::valueChanged, this, [this](const QVariant& value) {
         _lastSelectMarkTop = value.toReal();
         if (_pListView)

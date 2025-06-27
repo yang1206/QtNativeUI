@@ -1,5 +1,4 @@
 #include <QEvent>
-#include <QHBoxLayout>
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QtNativeUI/NCalendarWidget.h>
@@ -66,7 +65,6 @@ void NCalendarWidget::init() {
     connect(
         d->_calendarView->verticalScrollBar(), &QScrollBar::valueChanged, d, [=]() { d->_updateSwitchButtonText(); });
 
-    // 翻页按钮
     d->_upButton = new NPushButton(this);
     d->_upButton->setTransparentBackground(true);
     d->_upButton->setFixedSize(36, 36);

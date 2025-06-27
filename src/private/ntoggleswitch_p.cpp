@@ -81,8 +81,6 @@ void NToggleSwitchPrivate::startThumbStretchAnimation(bool pressed) {
     _thumbStretchAnimation->stop();
     _thumbStretchAnimation->setStartValue(_thumbStretchFactor);
 
-    // 根据开关状态设置延展因子
-    // 按下时延展，释放时恢复圆形
     qreal targetFactor = pressed ? 1.8 : 1.0;
 
     _thumbStretchAnimation->setEndValue(targetFactor);

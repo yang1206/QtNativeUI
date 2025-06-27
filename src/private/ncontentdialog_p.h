@@ -1,7 +1,6 @@
 #ifndef QTNATIVEUI_NCONTENTDIALOG_P_H
 #define QTNATIVEUI_NCONTENTDIALOG_P_H
 
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QObject>
 #include <QVBoxLayout>
@@ -52,7 +51,6 @@ class NContentDialogPrivate : public QObject {
     NPushButton* _middleButton{nullptr}; // 对应次要按钮
     NPushButton* _rightButton{nullptr};  // 对应主要按钮
 
-    // 阴影和绘制参数
     int _shadowBorderWidth{3};
 };
 

@@ -2,10 +2,7 @@
 #include <QClipboard>
 #include <QGuiApplication>
 #include <QLayout>
-#include <QLineEdit>
 #include <QListView>
-#include <QPropertyAnimation>
-#include <QStyleOptionComboBox>
 #include <QtNativeUI/NAnimation.h>
 #include <QtNativeUI/NComboBox.h>
 #include <qevent.h>
@@ -70,7 +67,6 @@ void NComboBox::init() {
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
-    // 初始化各种颜色
     d->_pLightBackgroundColor         = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
     d->_pDarkBackgroundColor          = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
     d->_pLightBackgroundHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
@@ -117,7 +113,6 @@ void NComboBox::init() {
     d->_comboBoxStyle = new NComboBoxStyle(d, style());
     setStyle(d->_comboBoxStyle);
 
-    // 初始化箭头动画
     d->_arrowAnimation = new QtNativeUI::NTranslateYAnimation(this, 3.0);
     connect(d->_arrowAnimation, &QtNativeUI::NTranslateYAnimation::yChanged, this, [d](qreal value) {
         d->setArrowYOffset(value);
@@ -180,15 +175,12 @@ QLineEdit* NComboBox::getLineEdit() const { return lineEdit(); }
 void NComboBox::showPopup() {
     Q_D(NComboBox);
 
-    // 设置下拉状态
     d->_isDropdownVisible = true;
 
-    // 确保下拉时箭头保持向下位置
     if (d->_arrowAnimation) {
         d->_arrowAnimation->setY(3.0);
     }
 
-    // 原有代码保持不变
     bool oldAnimationEffects = qApp->isEffectEnabled(Qt::UI_AnimateCombo);
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, false);
     QComboBox::showPopup();
@@ -197,7 +189,7 @@ void NComboBox::showPopup() {
     if (count() > 0) {
         QWidget* container = this->findChild<QFrame*>();
         if (container) {
-            // 计算容器高度
+
             int containerHeight = 0;
             if (count() >= maxVisibleItems()) {
                 containerHeight = maxVisibleItems() * 35 + 8;
@@ -213,7 +205,6 @@ void NComboBox::showPopup() {
                 layout->takeAt(0);
             }
 
-            // 设置高度动画
             QPropertyAnimation* fixedSizeAnimation = new QPropertyAnimation(container, "maximumHeight");
             connect(fixedSizeAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
                 container->setFixedHeight(value.toUInt());
@@ -240,22 +231,18 @@ void NComboBox::showPopup() {
 void NComboBox::hidePopup() {
     Q_D(NComboBox);
 
-    // 更新下拉状态
     d->_isDropdownVisible = false;
 
-    // 确保箭头恢复原位
     if (d->_arrowAnimation) {
         d->_arrowAnimation->setY(0.0);
     }
 
-    // 调用父类实现
     QComboBox::hidePopup();
     d->_isDropdownVisible = false;
 }
 
 void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
     if (!isEditable()) {
-        // 对于不可编辑的ComboBox，使用默认菜单
         QComboBox::contextMenuEvent(event);
         return;
     }
@@ -318,21 +305,17 @@ void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
     menu->exec(event->globalPos());
 }
 
-// 修改mousePressEvent确保按下时触发动画
 void NComboBox::mousePressEvent(QMouseEvent* event) {
     Q_D(NComboBox);
     if (d->_arrowAnimation) {
-        d->_arrowAnimation->setY(3.0); // 按下时向下移动
+        d->_arrowAnimation->setY(3.0);
     }
     QComboBox::mousePressEvent(event);
 }
 
-// 修改mouseReleaseEvent确保释放时恢复动画
 void NComboBox::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NComboBox);
 
-    // 只有在非下拉状态时才恢复箭头位置
-    // 如果下拉菜单已经显示，由hidePopup处理恢复
     if (d->_arrowAnimation && !d->_isDropdownVisible) {
         d->_arrowAnimation->setY(0.0); // 释放时恢复原位
     }

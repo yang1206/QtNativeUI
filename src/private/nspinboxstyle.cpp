@@ -14,10 +14,9 @@ void NSpinBoxStyle::drawPrimitive(PrimitiveElement    element,
                                   const QStyleOption* option,
                                   QPainter*           painter,
                                   const QWidget*      widget) const {
-    // 完全阻止绘制焦点框
     if (element == PE_FrameFocusRect &&
         (qobject_cast<const NSpinBox*>(widget) || qobject_cast<const NDoubleSpinBox*>(widget))) {
-        return; // 不绘制任何内容
+        return;
     }
 
     QProxyStyle::drawPrimitive(element, option, painter, widget);
@@ -37,7 +36,6 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
         QRect frameRect = subControlRect(control, spinOpt, SC_SpinBoxFrame, widget);
         QRect upRect    = subControlRect(control, spinOpt, SC_SpinBoxUp, widget);
         QRect downRect  = subControlRect(control, spinOpt, SC_SpinBoxDown, widget);
-        // 添加阴影边距
         QRect foregroundRect(frameRect.x() + m_styleInterface->shadowBorderWidth(),
                              frameRect.y() + m_styleInterface->shadowBorderWidth(),
                              frameRect.width() - 2 * m_styleInterface->shadowBorderWidth(),
@@ -51,23 +49,19 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
         bool hasFocus  = spinOpt->state & QStyle::State_HasFocus;
         bool hasHover  = spinOpt->state & QStyle::State_MouseOver;
 
-        // 绘制背景
         QColor bgColor = m_styleInterface->backgroundColorForState(isDark, isEnabled, hasFocus, hasHover);
         painter->setPen(Qt::NoPen);
         painter->setBrush(bgColor);
         painter->drawRoundedRect(foregroundRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
-        // 绘制边框
         QColor borderColor = m_styleInterface->borderColorForState(isDark, isEnabled);
         painter->setPen(QPen(borderColor, m_styleInterface->borderWidth()));
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(foregroundRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
-        // 绘制底边线
         QColor bottomLineColor = m_styleInterface->bottomLineColorForState(isDark, isEnabled, hasFocus);
         int    bottomLineWidth = m_styleInterface->bottomLineWidth(hasFocus);
 
-        // 使用裁剪区域绘制底边线
         int          bottomRectHeight = bottomLineWidth + m_styleInterface->borderRadius() / 2;
         QRect        bottomRect       = foregroundRect;
         QPainterPath clipPath;
@@ -102,7 +96,6 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
 
             QColor downBgColor = m_styleInterface->buttonBackgroundColor(isDark, downEnabled, downHover, downPressed);
 
-            // 绘制减号按钮背景
             painter->save();
             painter->setPen(Qt::NoPen);
             painter->setBrush(downBgColor);
@@ -112,7 +105,6 @@ void NSpinBoxStyle::drawComplexControl(ComplexControl             control,
 
             painter->restore();
         }
-        // 设置文字颜色
         QColor textColor          = m_styleInterface->textColorForState(isDark, isEnabled);
         QColor selectionBgColor   = m_styleInterface->selectionBackgroundColor(isDark);
         QColor selectionTextColor = m_styleInterface->selectionTextColor(isDark);
@@ -174,7 +166,6 @@ QRect NSpinBoxStyle::subControlRect(ComplexControl             cc,
         int   spacing          = 8;
         int   totalButtonWidth = 2 * buttonWidth + spacing;
 
-        // 使用滚动条控件ID代替微调框控件ID
         if (sc == SC_SpinBoxUp || sc == SC_ScrollBarAddLine) {
             return QRect(spinBoxRect.right() - buttonWidth - margin * 2,
                          spinBoxRect.top() + (spinBoxRect.height() - buttonHeight) / 2,
@@ -199,7 +190,6 @@ QRect NSpinBoxStyle::subControlRect(ComplexControl             cc,
 }
 
 int NSpinBoxStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, const QWidget* widget) const {
-    // 默认边框宽度
     if (metric == PM_DefaultFrameWidth) {
         return 0;
     }
@@ -213,12 +203,10 @@ QStyle::SubControl NSpinBoxStyle::hitTestComplexControl(ComplexControl          
                                                         const QWidget*             widget) const {
     if (control == CC_SpinBox &&
         (qobject_cast<const NSpinBox*>(widget) || qobject_cast<const NDoubleSpinBox*>(widget))) {
-        // 获取按钮区域
         QRect upRect   = subControlRect(control, option, SC_SpinBoxUp, widget);
         QRect downRect = subControlRect(control, option, SC_SpinBoxDown, widget);
         QRect editRect = subControlRect(control, option, SC_SpinBoxEditField, widget);
 
-        // 首先检查是否在自定义按钮区域内
         if (upRect.contains(pos)) {
             return SC_SpinBoxUp;
         } else if (downRect.contains(pos)) {

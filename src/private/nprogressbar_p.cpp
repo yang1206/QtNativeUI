@@ -5,26 +5,22 @@
 #include "QtNativeUI/NTheme.h"
 
 NProgressBarPrivate::NProgressBarPrivate(QObject* parent) : QObject(parent) {
-    // 初始化动画
     _progressAnimation = new QPropertyAnimation(this, "progressPosition");
     _progressAnimation->setEasingCurve(QEasingCurve::OutQuad);
     _progressAnimation->setDuration(200);
 
-    // 短段动画
     _shortPosAnimation = new QPropertyAnimation(this, "shortPos");
     _shortPosAnimation->setDuration(833);
     _shortPosAnimation->setStartValue(0.0);
     _shortPosAnimation->setEndValue(1.45);
     _shortPosAnimation->setEasingCurve(QEasingCurve::Linear);
 
-    // 长段动画
     _longPosAnimation = new QPropertyAnimation(this, "longPos");
     _longPosAnimation->setDuration(1167);
     _longPosAnimation->setStartValue(0.0);
     _longPosAnimation->setEndValue(1.75);
     _longPosAnimation->setEasingCurve(QEasingCurve::OutQuad);
 
-    // 创建动画组
     _longAnimationGroup = new QSequentialAnimationGroup(this);
     _longAnimationGroup->addPause(785);
     _longAnimationGroup->addAnimation(_longPosAnimation);
@@ -32,12 +28,12 @@ NProgressBarPrivate::NProgressBarPrivate(QObject* parent) : QObject(parent) {
     _indeterminateAnimationGroup = new QParallelAnimationGroup(this);
     _indeterminateAnimationGroup->addAnimation(_shortPosAnimation);
     _indeterminateAnimationGroup->addAnimation(_longAnimationGroup);
-    _indeterminateAnimationGroup->setLoopCount(-1); // 无限循环
+    _indeterminateAnimationGroup->setLoopCount(-1);
 }
 
 NProgressBarPrivate::~NProgressBarPrivate() {
     delete _progressAnimation;
-    delete _indeterminateAnimationGroup; // 组会自动删除内部动画
+    delete _indeterminateAnimationGroup;
 }
 
 QColor NProgressBarPrivate::getTrackColor() const {
@@ -47,8 +43,7 @@ QColor NProgressBarPrivate::getTrackColor() const {
     } else {
         color = _isDark ? _pDarkTrackColor : _pLightTrackColor;
     }
-    
-    // 添加半透明效果
+
     color.setAlpha(155);
     return color;
 }
@@ -71,11 +66,9 @@ QRect NProgressBarPrivate::getTrackRect() const {
     QRect rect = q_ptr->rect();
     
     if (q_ptr->orientation() == Qt::Horizontal) {
-        // 对于水平进度条，高度设为轨道厚度，但y位置设为中心
         int y = rect.y() + (rect.height() - _pProgressThickness) / 2;
         return QRect(rect.x(), y, rect.width(), _pProgressThickness);
     } else {
-        // 对于垂直进度条，宽度设为轨道厚度，但x位置设为中心
         int x = rect.x() + (rect.width() - _pProgressThickness) / 2;
         return QRect(x, rect.y(), _pProgressThickness, rect.height());
     }
@@ -86,13 +79,12 @@ QRect NProgressBarPrivate::getProgressRect() const {
     
     if (q_ptr->orientation() == Qt::Horizontal) {
         int width = calculateProgressWidth();
-        // 使进度条高度是轨道厚度的两倍，确保可见性
+
         int yOffset = (q_ptr->height() - _pProgressThickness) / 2;
         return QRect(trackRect.x(), yOffset, width, _pProgressThickness);
     } else {
         int height = calculateProgressHeight();
         int y = trackRect.bottom() - height;
-        // 使进度条宽度是轨道厚度的两倍，确保可见性
         int xOffset = (q_ptr->width() - _pProgressThickness) / 2;
         return QRect(xOffset, y, _pProgressThickness, height);
     }
@@ -184,17 +176,15 @@ void NProgressBarPrivate::setPaused(bool paused) {
     _isPaused = paused;
 
     if (paused) {
-        // 暂停所有动画
         if (_progressAnimation->state() == QPropertyAnimation::Running)
             _progressAnimation->pause();
 
         if (_indeterminateAnimationGroup->state() == QAbstractAnimation::Running)
             _indeterminateAnimationGroup->pause();
-            
-        // 在暂停时保存当前状态，以便恢复时继续
+
         _pausedProgressPosition = _progressPosition;
     } else {
-        // 如果不在错误状态，则恢复动画
+
         if (!_isError) {
             if (_progressAnimation->state() == QPropertyAnimation::Paused)
                 _progressAnimation->resume();
@@ -216,11 +206,10 @@ void NProgressBarPrivate::setError(bool error) {
     _isError = error;
 
     if (error) {
-        // 停止所有动画
         _progressAnimation->stop();
         _indeterminateAnimationGroup->stop();
     } else {
-        // 恢复到正常状态
+
         if (!_isPaused && q_ptr) {
             updateAnimations();
         }

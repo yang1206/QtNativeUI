@@ -26,17 +26,11 @@ class NInfoBarManager : public QObject {
     ~NInfoBarManager();
 
   public:
-    // 请求事件堆栈调用
     void requestInfoBarEvent(NInfoBar* infoBar);
-    // 发布创建事件
     void postInfoBarCreateEvent(NInfoBar* infoBar);
-    // 发布终止事件
     void postInfoBarEndEvent(NInfoBar* infoBar);
-    // 强制发布终止事件
     void forcePostInfoBarEndEvent(NInfoBar* infoBar);
-    // 获取当前事件数量
-    int getInfoBarEventCount(NInfoBar* infoBar);
-    // 更新活动序列
+    int  getInfoBarEventCount(NInfoBar* infoBar);
     void updateActiveMap(NInfoBar* infoBar, bool isActive);
 
   private:
@@ -68,12 +62,11 @@ class NInfoBarPrivate : public QObject {
     NInfoBarType::InfoMode       _severity;
     qreal                        _createTime{0};
 
-    // 位置数据
-    int _leftPadding{20}; // 左边框到图标中心
+    int _leftPadding{20};
     int _iconSize{14};
-    int _titleLeftSpacing{30};           // 图标中心到Title左侧
-    int _textLeftSpacing{15};            // Title右侧到Text左侧
-    int _closeButtonLeftRightMargin{20}; // closeButton左右总Margin
+    int _titleLeftSpacing{30};
+    int _textLeftSpacing{15};
+    int _closeButtonLeftRightMargin{20};
     int _closeButtonWidth{30};
     int _messageBarHorizontalMargin{20};
     int _messageBarVerticalBottomMargin{20};
@@ -81,12 +74,10 @@ class NInfoBarPrivate : public QObject {
     int _messageBarSpacing{15};
     int _shadowBorderWidth{6};
 
-    // 布局相关
-    bool            _isLongMessage{false};   // 是否为长消息需要换行显示
-    QList<QWidget*> _additionalWidgets;      // 额外添加的控件
-    QBoxLayout*     _widgetsLayout{nullptr}; // 用于放置额外控件的布局
+    bool            _isLongMessage{false};
+    QList<QWidget*> _additionalWidgets;
+    QBoxLayout*     _widgetsLayout{nullptr};
 
-    // 逻辑数据
     bool             _isInfoBarCreateAnimationFinished{false};
     bool             _isReadyToEnd{false};
     bool             _isNormalDisplay{false};
@@ -95,25 +86,20 @@ class NInfoBarPrivate : public QObject {
     bool             _showCloseButton{true};
     Q_INVOKABLE void _infoBarCreate(int displayMsec);
 
-    // 初始坐标计算
     void _calculateInitialPos(int& startX, int& startY, int& endX, int& endY);
-    // 获取总高度和次序信息
+
     QList<int> _getOtherInfoBarTotalData(bool isJudgeCreateOrder = false);
-    // 计算目标坐标
+
     qreal _calculateTargetPosY();
 
-    // 创建次序判断
     bool _judgeCreateOrder(NInfoBar* otherInfoBar);
-    // 初始化普通InfoBar widget
+
     void _initializeInfoBar();
 
-    // 计算文本布局
     void _calculateTextLayout();
 
-    // 绘制文本
     void _drawText(QPainter* painter);
 
-    // 绘制函数
     void _drawCommonBackground(QPainter* painter, const QColor& bgColor);
     void _drawIconWithCircle(QPainter* painter, NRegularIconType::Icon iconType, const QColor& circleBgColor);
     void _drawIconWithCircle(QPainter* painter, NFilledIconType::Icon iconType, const QColor& circleBgColor);

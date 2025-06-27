@@ -49,8 +49,7 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
         if (node->getIsExpanderNode()) {
             if (_currentDisplayMode == NNavigationType::Compact) {
                 if (node->getIsHasPageChild()) {
-                    // 展开菜单
-                    QMenu* menu = _compactMenuMap.value(node);
+            QMenu* menu = _compactMenuMap.value(node);
                     if (menu) {
                         QPoint nodeTopRight =
                             _navigationView->mapToGlobal(_navigationView->visualRect(node->getModelIndex()).topRight());
@@ -61,14 +60,12 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
                 if (node->getIsHasChild()) {
                     QVariantMap data;
                     if (_navigationView->isExpanded(index)) {
-                        // 收起
-                        data.insert("Collapse", QVariant::fromValue(node));
+              data.insert("Collapse", QVariant::fromValue(node));
                         node->setIsExpanded(false);
                         _navigationView->navigationNodeStateChange(data);
                         _navigationView->collapse(index);
                     } else {
-                        // 展开
-                        data.insert("Expand", QVariant::fromValue(node));
+             data.insert("Expand", QVariant::fromValue(node));
                         node->setIsExpanded(true);
                         _navigationView->navigationNodeStateChange(data);
                         _navigationView->expand(index);
@@ -83,7 +80,6 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
 
             NNavigationNode* selectedNode = _navigationModel->getSelectedNode();
             if (selectedNode != node) {
-                // 记录跳转
                 if (isLogRoute) {
                     QVariantMap routeData = QVariantMap();
                     QString     pageKey;
@@ -163,8 +159,7 @@ void NNavigationBarPrivate::onFooterViewClicked(const QModelIndex& index, bool i
     NNavigationNode* selectedNode = _footerModel->getSelectedNode();
 
     if (selectedNode != node) {
-        // 记录跳转
-        if (isLogRoute && node->getIsHasFooterPage()) {
+       if (isLogRoute && node->getIsHasFooterPage()) {
             QVariantMap routeData = QVariantMap();
             QString     pageKey;
             if (selectedNode) {

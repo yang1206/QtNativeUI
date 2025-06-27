@@ -145,7 +145,6 @@ void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
     painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing | QPainter::TextAntialiasing);
 
     if (!d->_pTransparentBackground) {
-        // 根据按钮状态选择阴影层级
         NDesignTokenKey::Elevation elevationKey = NDesignTokenKey::ElevationRest;
         if (!isEnabled()) {
             elevationKey = NDesignTokenKey::ElevationNone;
@@ -154,9 +153,7 @@ void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
         } else if (d->_isHovered) {
             elevationKey = NDesignTokenKey::ElevationHover;
         }
-
-        // 绘制阴影
-        nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
+ nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
     }
 
     drawBackground(&painter);
@@ -293,19 +290,13 @@ void NPushButton::drawIcon(QPainter* painter) {
                          d->_shadowBorderWidth + margins.top(),
                          width() - 2 * d->_shadowBorderWidth - margins.left() - margins.right(),
                          height() - 2 * d->_shadowBorderWidth - margins.top() - margins.bottom());
-
-    // 检查是否有自定义内容区域
-    QVariant customRectVar = property("_nContentRect");
+ QVariant customRectVar = property("_nContentRect");
     if (customRectVar.isValid()) {
         foregroundRect = customRectVar.toRect();
     }
-
-    // 计算图标位置
-    QRect iconRect;
+ QRect iconRect;
     QSize iconSize = this->iconSize();
-
-    // 自定义文本间距
-    int iconTextSpacing = property("_nIconTextSpacing").isValid() ? property("_nIconTextSpacing").toInt() : 4;
+ int iconTextSpacing = property("_nIconTextSpacing").isValid() ? property("_nIconTextSpacing").toInt() : 4;
 
     if (text().isEmpty()) {
         iconRect = QRect(foregroundRect.x() + (foregroundRect.width() - iconSize.width()) / 2,
@@ -323,7 +314,6 @@ void NPushButton::drawIcon(QPainter* painter) {
                          iconSize.height());
     }
 
-    // 绘制图标
     qreal dpr        = devicePixelRatio();
     QSize pixmapSize = iconSize * dpr;
 
@@ -370,11 +360,9 @@ void NPushButton::drawText(QPainter* painter) {
 
     painter->setPen(textColor);
 
-    // 自定义文本间距
     int iconTextSpacing = property("_nIconTextSpacing").isValid() ? property("_nIconTextSpacing").toInt() : 4;
 
     if (!icon().isNull()) {
-        // 有图标时，文本需要右移
         QSize iconSize   = this->iconSize();
         int   textWidth  = painter->fontMetrics().horizontalAdvance(text());
         int   totalWidth = iconSize.width() + iconTextSpacing + textWidth;
@@ -385,7 +373,6 @@ void NPushButton::drawText(QPainter* painter) {
 
         painter->drawText(textRect, d->_pAlignment, text());
     } else {
-        // 无图标时居中显示
         painter->drawText(foregroundRect, d->_pAlignment, text());
     }
 
@@ -471,10 +458,8 @@ void NPushButton::updateFluentIcon() {
         return;
     }
 
-    // 确定图标颜色
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
-        // 如果没有自定义颜色，使用文本颜色
         if (d->_buttonType == NPushButtonPrivate::Accent) {
             if (!isEnabled()) {
                 iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
@@ -500,7 +485,6 @@ void NPushButton::updateFluentIcon() {
         iconColor = d->_fluentIcon.customColor;
     }
 
-    // 设置图标
     if (d->_fluentIcon.isRegular) {
         setIcon(nIcon->fromRegular(
             static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));

@@ -48,17 +48,14 @@ NSlider::~NSlider() {}
 void NSlider::init() {
     Q_D(NSlider);
 
-    // 设置主题和颜色
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
-    // 设置尺寸属性
     d->_pTrackHeight        = 5;
     d->_pThumbDiameter      = 20;
     d->_pThumbInnerDiameter = 10;
     d->_pTrackCornerRadius  = 2;
 
-    // 设置默认颜色
     d->_pLightTrackColor = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Light);
     d->_pDarkTrackColor  = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Dark);
 
@@ -68,7 +65,6 @@ void NSlider::init() {
     d->_pLightThumbOuterColor = NThemeColor(NFluentColorKey::ControlSolidFillColorDefault, NThemeType::Light);
     d->_pDarkThumbOuterColor  = NThemeColor(NFluentColorKey::ControlSolidFillColorDefault, NThemeType::Dark);
 
-    // 初始化刻度相关属性
     d->_pTickLength    = 5; // 刻度线长度
     d->_pTickThickness = 1; // 刻度线厚度
 
@@ -98,7 +94,6 @@ void NSlider::init() {
         update();
     });
 
-    // 连接强调色变化信号
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
         updateAccentColors();
         update();

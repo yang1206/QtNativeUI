@@ -29,7 +29,6 @@ void NMenu::init() {
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
-    // 初始化样式属性
     d->_pBorderRadius         = NDesignToken(NDesignTokenKey::CornerRadiusMedium).toInt();
     d->_pLightBackgroundColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Light);
     d->_pDarkBackgroundColor  = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Dark);
@@ -38,10 +37,8 @@ void NMenu::init() {
     d->_pLightSeparatorColor  = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Light);
     d->_pDarkSeparatorColor   = NThemeColor(NFluentColorKey::DividerStrokeColorDefault, NThemeType::Dark);
 
-    // 设置自定义样式
     d->_menuStyle = new NMenuPrivate::Style(d, style());
 
-    // 设置属性
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_NoSystemBackground);
     setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
@@ -58,13 +55,11 @@ void NMenu::init() {
     menuAction()->setIconVisibleInMenu(true);
     menuAction()->setShortcutVisibleInContextMenu(true);
 
-    // 对所有菜单项启用图标
     for (QAction* action : actions()) {
         action->setIconVisibleInMenu(true);
         action->setShortcutVisibleInContextMenu(true);
     }
 #endif
-    // 连接主题变化信号
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NMenu);
         d->_themeMode = themeMode;
@@ -186,7 +181,6 @@ void NMenu::paintEvent(QPaintEvent* event) {
 
 void NMenu::showEvent(QShowEvent* event) {
     Q_D(NMenu);
-    // 消除阴影偏移
     move(this->pos().x() - 6, this->pos().y());
     if (!d->_animationPix.isNull()) {
         d->_animationPix = QPixmap();

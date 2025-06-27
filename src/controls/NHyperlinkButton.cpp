@@ -16,11 +16,8 @@ NHyperlinkButton::NHyperlinkButton(QWidget* parent) : QPushButton(parent), d_ptr
     d->_isDark        = nTheme->isDarkMode();
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
 
-    // 只需要设置禁用状态的颜色
     d->_pDisabledColor =
         NThemeColor(NFluentColorKey::AccentTextFillColorDisabled, d->_isDark ? NThemeType::Dark : NThemeType::Light);
-
-    // 设置背景色
     d->_pBackgroundHoverColor =
         NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_isDark ? NThemeType::Dark : NThemeType::Light);
     d->_pBackgroundPressColor =
@@ -119,7 +116,6 @@ void NHyperlinkButton::drawText(QPainter* painter) {
     if (text().isEmpty())
         return;
 
-    // 文字颜色只需要判断是否禁用
     painter->setPen(isEnabled() ? nTheme->accentColor().normal() : d->_pDisabledColor);
     painter->drawText(rect(), Qt::AlignCenter, text());
 }

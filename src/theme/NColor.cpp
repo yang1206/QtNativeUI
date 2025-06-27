@@ -19,15 +19,12 @@ NAccentColor NAccentColor::fromColor(const QColor& color,
                                      double        lightestFactor) {
     QMap<QString, QColor> swatch;
 
-    // 创建暗色调
     swatch["darkest"] = NColorUtils::lerpColor(color, NColors::black, darkestFactor);
     swatch["darker"]  = NColorUtils::lerpColor(color, NColors::black, darkerFactor);
     swatch["dark"]    = NColorUtils::lerpColor(color, NColors::black, darkFactor);
 
-    // 基础色调
     swatch["normal"] = color;
 
-    // 创建亮色调
     swatch["light"]    = NColorUtils::lerpColor(color, NColors::white, lightFactor);
     swatch["lighter"]  = NColorUtils::lerpColor(color, NColors::white, lighterFactor);
     swatch["lightest"] = NColorUtils::lerpColor(color, NColors::white, lightestFactor);
@@ -92,7 +89,6 @@ NAccentColor NAccentColor::lerp(const NAccentColor& a, const NAccentColor& b, do
         keys.insert(it.key());
     }
 
-    // 对每个键进行插值
     for (const QString& key : keys) {
         if (a._swatch.contains(key) && b._swatch.contains(key)) {
             result[key] = NColorUtils::lerpColor(a._swatch[key], b._swatch[key], t);
@@ -103,7 +99,6 @@ NAccentColor NAccentColor::lerp(const NAccentColor& a, const NAccentColor& b, do
         }
     }
 
-    // 确保至少有 normal 键
     if (!result.contains("normal")) {
         result["normal"] = NColorUtils::lerpColor(a.normal(), b.normal(), t);
     }
@@ -266,9 +261,7 @@ const QList<NAccentColor> NColors::accentColors = {NColors::yellow,
                                                    NColors::teal,
                                                    NColors::green};
 
-// NColorUtils 实现
 QColor NColorUtils::contrastColor(const QColor& color, const QColor& darkColor, const QColor& lightColor) {
-    // 计算颜色的亮度 (使用相对亮度公式)
     double luminance = 0.299 * color.redF() + 0.587 * color.greenF() + 0.114 * color.blueF();
     return luminance < 0.5 ? lightColor : darkColor;
 }

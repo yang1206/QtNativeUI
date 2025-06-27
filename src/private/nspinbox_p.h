@@ -9,7 +9,7 @@
 
 class NSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     Q_OBJECT
-    // 背景颜色属性
+
     Q_PROPERTY_CREATE_D(QColor, LightBackgroundColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBackgroundColor)
     Q_PROPERTY_CREATE_D(QColor, LightBackgroundHoverColor)
@@ -19,23 +19,19 @@ class NSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     Q_PROPERTY_CREATE_D(QColor, LightBackgroundDisabledColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBackgroundDisabledColor)
 
-    // 文字颜色属性
     Q_PROPERTY_CREATE_D(QColor, LightTextColor)
     Q_PROPERTY_CREATE_D(QColor, DarkTextColor)
     Q_PROPERTY_CREATE_D(QColor, LightTextDisabledColor)
     Q_PROPERTY_CREATE_D(QColor, DarkTextDisabledColor)
 
-    // 边框颜色属性
     Q_PROPERTY_CREATE_D(QColor, LightBorderColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBorderColor)
     Q_PROPERTY_CREATE_D(QColor, LightBorderDisabledColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBorderDisabledColor)
 
-    // 底边线颜色
     Q_PROPERTY_CREATE_D(QColor, LightBottomLineColor)
     Q_PROPERTY_CREATE_D(QColor, DarkBottomLineColor)
 
-    // 按钮颜色属性
     Q_PROPERTY_CREATE_D(QColor, LightButtonBgColor)
     Q_PROPERTY_CREATE_D(QColor, DarkButtonBgColor)
     Q_PROPERTY_CREATE_D(QColor, LightButtonHoverColor)
@@ -50,7 +46,6 @@ class NSpinBoxPrivate : public QObject, public NSpinBoxStyleInterface {
     Q_PROPERTY_CREATE_D(QColor, LightSelectionTextColor)
     Q_PROPERTY_CREATE_D(QColor, DarkSelectionTextColor)
 
-    // 边框属性
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
 

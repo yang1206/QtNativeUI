@@ -18,28 +18,25 @@ NFlyout::NFlyout(QWidget* parent) : QWidget(parent), d_ptr(new NFlyoutPrivate())
     Q_D(NFlyout);
     d->q_ptr = this;
 
-    // 设置默认属性
+
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
     d->_pPlacement    = Qt::BottomEdge;
-    // 设置窗口属性
+
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::BypassWindowManagerHint);
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_DeleteOnClose, false);
 
-    // 设置最小尺寸
     setMinimumSize(100, 50);
 
-    // 设置鼠标追踪
     setMouseTracking(true);
 
-    // 初始化UI
+
     d->setupUI();
 
-    // 设置事件过滤器
+
     setupEventFilter();
 
-    // 连接主题变更信号
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NFlyout);
         d->_themeMode = themeMode;
@@ -110,7 +107,6 @@ void NFlyout::setLightDismissMode(LightDismissMode mode) {
     Q_D(NFlyout);
     d->_lightDismissMode = mode;
 
-    // 确保事件过滤器已正确安装
     setupEventFilter();
 }
 
@@ -136,7 +132,6 @@ NFlyout* NFlyout::createWithContent(QWidget*             content,
                                     NFlyoutAnimationType animType,
                                     bool                 isDeleteOnClose) {
     NFlyout* flyout = new NFlyout(parent);
-    // 配置属性
     flyout->setAnimationType(animType);
     flyout->setAttribute(Qt::WA_DeleteOnClose, isDeleteOnClose);
 
@@ -153,14 +148,11 @@ void NFlyout::showAt(QWidget* target) {
     d->_pTarget = target;
     emit opening();
 
-    // 根据placement属性计算位置
     QRect  rect = d->calculatePlacement(target, d->_pPlacement);
     QPoint pos  = rect.topLeft();
 
-    // 使用动画管理器执行动画
     exec(pos);
 
-    // 设置为打开状态
     d->_isOpen = true;
     emit opened();
 }
@@ -168,10 +160,8 @@ void NFlyout::showAt(QWidget* target) {
 void NFlyout::exec(const QPoint& pos) {
     Q_D(NFlyout);
 
-    // 确保窗口可见
     show();
 
-    // 使用动画管理器执行动画
     d->animationManager()->exec(pos);
 }
 
@@ -190,7 +180,6 @@ void NFlyout::hide() {
 void NFlyout::fadeOut() {
     Q_D(NFlyout);
 
-    // 创建淡出动画
     if (!d->_fadeOutAnimation) {
         d->_fadeOutAnimation = new QPropertyAnimation(this, "windowOpacity", this);
         d->_fadeOutAnimation->setDuration(120);
@@ -215,19 +204,15 @@ void NFlyout::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::TextAntialiasing);
 
-    // 根据当前主题选择颜色
     QColor backgroundColor = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
     QColor borderColor     = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-    // 绘制背景
     painter.setPen(Qt::NoPen);
     painter.setBrush(backgroundColor);
 
-    // 计算内容矩形
     QRect contentRect = rect().adjusted(1, 1, -1, -1);
 
     painter.drawRoundedRect(contentRect, d->_pBorderRadius, d->_pBorderRadius);
 
-    // 绘制边框
     painter.setPen(QPen(borderColor, d->_pBorderWidth));
     painter.setBrush(Qt::NoBrush);
     painter.drawRoundedRect(contentRect, d->_pBorderRadius, d->_pBorderRadius);
@@ -264,7 +249,6 @@ void NFlyout::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void NFlyout::keyPressEvent(QKeyEvent* event) {
-    // 如果按下Esc键，关闭Flyout
     if (event->key() == Qt::Key_Escape) {
         hide();
         event->accept();
@@ -294,7 +278,6 @@ bool NFlyout::eventFilter(QObject* watched, QEvent* event) {
         }
     }
 
-    // 调用基类方法继续处理其他事件
     return QWidget::eventFilter(watched, event);
 }
 
@@ -311,10 +294,8 @@ void NFlyout::updatePosition() {
 }
 
 void NFlyout::setupEventFilter() {
-    // 移除可能存在的旧过滤器
     QApplication::instance()->removeEventFilter(this);
 
-    // 重新安装全局应用程序事件过滤器
     QApplication::instance()->installEventFilter(this);
 }
 
@@ -332,9 +313,7 @@ void NFlyout::setContentsMargins(int left, int top, int right, int bottom) {
     if (d->_mainLayout) {
         d->_mainLayout->setContentsMargins(left, top, right, bottom);
 
-        // 确保内容组件也应用相同的边距设置
         if (d->_pContent && d->_pContent->layout()) {
-            // 如果内容有自己的布局，确保其边距为0
             d->_pContent->layout()->setContentsMargins(0, 0, 0, 0);
         }
 

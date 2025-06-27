@@ -12,7 +12,6 @@ class NDropDownButtonPrivate : public QObject {
     ~NDropDownButtonPrivate();
     Q_D_CREATE(NDropDownButton)
 
-    // 箭头的Y偏移量（用于动画）
     Q_PROPERTY(qreal arrowYOffset READ arrowYOffset WRITE setArrowYOffset)
     qreal arrowYOffset() const { return _arrowYOffset; }
     void setArrowYOffset(qreal offset) {
@@ -25,13 +24,12 @@ class NDropDownButtonPrivate : public QObject {
   private:
     NMenu* _menu{nullptr};
     bool   _menuVisible{false};
-    bool   _showArrow{true};    // 是否显示下拉箭头
-    int    _arrowSize{18};      // 下拉箭头大小
-    int    _horizontalPadding;  // 按钮左右两侧的内边距
-    int    _contentArrowSpacing{8}; // 文本/图标内容与下拉箭头之间的间距
-    int    _iconTextSpacing{4}; // 图标和文本之间的间距
-    qreal  _arrowYOffset{0};    // 箭头Y轴偏移量（用于动画）
-    QtNativeUI::NTranslateYAnimation* _arrowAnimation{nullptr}; // 箭头动画
+    bool   _showArrow{true};
+    int    _arrowSize{18};
+    int    _horizontalPadding;
+    int    _contentArrowSpacing{8};    int                               _iconTextSpacing{4};
+    qreal                             _arrowYOffset{0};
+    QtNativeUI::NTranslateYAnimation* _arrowAnimation{nullptr};
 };
 
 #endif // QTNATIVEUI_NDROPDOWNBUTTON_P_H

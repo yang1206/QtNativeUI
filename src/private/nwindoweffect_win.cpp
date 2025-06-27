@@ -18,7 +18,7 @@ NWindowEffectWin* NWindowEffectWin::getInstance() {
 NWindowEffectWin::NWindowEffectWin(QObject* parent) : QObject(parent) { initialize(); }
 
 NWindowEffectWin::~NWindowEffectWin() {
-    // 这里可以释放加载的库资源
+
 }
 
 bool NWindowEffectWin::initialize() {
@@ -26,7 +26,6 @@ bool NWindowEffectWin::initialize() {
         return true;
     }
 
-    // 获取Windows版本信息
     HMODULE ntdllModule = LoadLibraryW(L"ntdll.dll");
     if (ntdllModule) {
         auto rtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(GetProcAddress(ntdllModule, "RtlGetVersion"));
@@ -37,7 +36,6 @@ bool NWindowEffectWin::initialize() {
         FreeLibrary(ntdllModule);
     }
 
-    // 加载dwmapi.dll函数
     HMODULE dwmModule = LoadLibraryW(L"dwmapi.dll");
     if (dwmModule) {
         _dwmExtendFrameIntoClientArea = reinterpret_cast<DwmExtendFrameIntoClientAreaFunc>(
@@ -53,7 +51,7 @@ bool NWindowEffectWin::initialize() {
         return false;
     }
 
-    // 加载user32.dll函数
+
     HMODULE user32Module = LoadLibraryW(L"user32.dll");
     if (user32Module) {
         _setWindowCompositionAttribute = reinterpret_cast<SetWindowCompositionAttributeFunc>(
@@ -85,7 +83,6 @@ bool NWindowEffectWin::isWindows11_22H2OrGreater() const {
 }
 
 void NWindowEffectWin::_externWindowMargins(HWND hwnd) {
-    // 使用特殊值-1来扩展整个窗口区域
     const MARGINS margins = {-1, -1, -1, -1};
     _dwmExtendFrameIntoClientArea(hwnd, &margins);
 }
@@ -95,19 +92,18 @@ void NWindowEffectWin::extendFrameIntoClientArea(QWidget* window) {
         return;
     }
 
-    // 设置窗口背景透明，但不影响子控件
     window->setAttribute(Qt::WA_TranslucentBackground);
     QPalette pal = window->palette();
     pal.setColor(QPalette::Window, Qt::transparent);
     window->setPalette(pal);
 
-    // 扩展窗口框架到客户区
+
     const HWND hwnd = reinterpret_cast<HWND>(window->winId());
 
-    // 启用DPI感知
+
     EnableNonClientDpiScaling(hwnd);
 
-    // 扩展窗口边框
+
     _externWindowMargins(hwnd);
 }
 
@@ -118,7 +114,7 @@ bool NWindowEffectWin::setDarkMode(QWidget* window, bool isDark) {
 
     const HWND hwnd = reinterpret_cast<HWND>(window->winId());
 
-    // Windows 10 1809以上版本支持暗色模式
+
     if (isWindowsVersionOrGreater(10, 0, 17763)) {
         BOOL  darkMode  = isDark ? TRUE : FALSE;
         DWORD attribute = isWindowsVersionOrGreater(10, 0, 19041) ? DWMWA_USE_IMMERSIVE_DARK_MODE
@@ -138,7 +134,6 @@ bool NWindowEffectWin::setWindowEffect(QWidget* window, WindowBackdropType newTy
 
     const HWND hwnd = reinterpret_cast<HWND>(window->winId());
 
-    // 处理旧效果
     switch (oldType) {
         case Mica:
         case MicaAlt:
@@ -178,10 +173,9 @@ bool NWindowEffectWin::setWindowEffect(QWidget* window, WindowBackdropType newTy
             break;
     }
 
-    // 应用新效果
+
     switch (newType) {
         case None: {
-            // 禁用特殊效果，设置普通背景色
             window->setAttribute(Qt::WA_TranslucentBackground, false);
 
             QColor backgroundColor =
@@ -194,14 +188,12 @@ bool NWindowEffectWin::setWindowEffect(QWidget* window, WindowBackdropType newTy
             window->setPalette(pal);
             window->setAutoFillBackground(true);
 
-            // 恢复普通窗口边距
             const MARGINS margins = {0, 0, 0, 0};
             _dwmExtendFrameIntoClientArea(hwnd, &margins);
             return true;
         }
 
         case Mica: {
-            // 设置透明背景
             window->setAttribute(Qt::WA_TranslucentBackground);
             QPalette pal = window->palette();
             pal.setColor(QPalette::Window, Qt::transparent);
@@ -219,13 +211,11 @@ bool NWindowEffectWin::setWindowEffect(QWidget* window, WindowBackdropType newTy
                 HRESULT    hr      = _dwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &enabled, sizeof(enabled));
                 return SUCCEEDED(hr);
             }
-            // 如果不支持Mica，则回退到Acrylic
             newType = Acrylic;
             break;
         }
 
         case MicaAlt: {
-            // 设置透明背景
             window->setAttribute(Qt::WA_TranslucentBackground);
             QPalette pal = window->palette();
             pal.setColor(QPalette::Window, Qt::transparent);
@@ -238,13 +228,11 @@ bool NWindowEffectWin::setWindowEffect(QWidget* window, WindowBackdropType newTy
                     _dwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdropType, sizeof(backdropType));
                 return SUCCEEDED(hr);
             }
-            // 如果不支持MicaAlt，则回退到Mica
             newType = Mica;
             return setWindowEffect(window, Mica, oldType);
         }
 
         case Acrylic: {
-            // 设置透明背景
             window->setAttribute(Qt::WA_TranslucentBackground);
             QPalette pal = window->palette();
             pal.setColor(QPalette::Window, Qt::transparent);
@@ -260,17 +248,14 @@ bool NWindowEffectWin::setWindowEffect(QWidget* window, WindowBackdropType newTy
                 }
             }
 
-            // Windows 10回退方案
             if (_setWindowCompositionAttribute) {
-                // 获取主题色并调整透明度
                 QColor themeColor =
                     nTheme->isDarkMode()
                         ? nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Dark)
                         : nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Light);
 
-                themeColor.setAlpha(204); // 80%透明度
+                themeColor.setAlpha(204);
 
-                // ARGB格式
                 DWORD color = (themeColor.alpha() << 24) | (themeColor.red() << 16) | (themeColor.green() << 8) |
                               themeColor.blue();
 
@@ -279,20 +264,17 @@ bool NWindowEffectWin::setWindowEffect(QWidget* window, WindowBackdropType newTy
                 WINCOMPATTRDATA data = {WCA_ACCENT_POLICY, &accent, sizeof(accent)};
 
                 if (_setWindowCompositionAttribute(hwnd, &data)) {
-                    // 设置正确的窗口边距
                     const MARGINS margins = {0, 0, 1, 0}; // 只扩展顶部
                     _dwmExtendFrameIntoClientArea(hwnd, &margins);
                     return true;
                 }
             }
 
-            // 如果亚克力效果不可用，回退到DWM模糊
             newType = DWMBlur;
             break;
         }
 
         case DWMBlur: {
-            // 设置透明背景
             window->setAttribute(Qt::WA_TranslucentBackground);
             QPalette pal = window->palette();
             pal.setColor(QPalette::Window, Qt::transparent);

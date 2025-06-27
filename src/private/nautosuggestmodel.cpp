@@ -72,7 +72,7 @@ void NAutoSuggestDelegate::paint(QPainter*                   painter,
         painter->fillPath(path, NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
     }
 
-    // 绘制图标
+
     NRegularIconType::Icon icon = suggestion->getIcon();
     if (icon != NRegularIconType::None) {
         QIcon iconObj = nIcon->fromRegular(icon);
@@ -81,7 +81,7 @@ void NAutoSuggestDelegate::paint(QPainter*                   painter,
             painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
     }
 
-    // 绘制文字
+
     painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode));
     QRect textRect = optionRect;
     textRect.setLeft(icon != NRegularIconType::None ? optionRect.left() + 32 : optionRect.left() + 10);

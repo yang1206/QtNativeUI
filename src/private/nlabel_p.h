@@ -1,8 +1,6 @@
 ﻿#ifndef NLABEL_P_H
 #define NLABEL_P_H
 
-#include <QFont>
-#include <QObject>
 #include "QtNativeUI/NLabel.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -19,11 +17,9 @@ class NLabelPrivate {
     void updateFont();
     void updateColor();
 
-    // 属性
     NLabelType::Type _type   = NLabelType::Default;
     bool             _isDark = false;
 
-    // 原始字体
     QFont _originalFont;
 };
 

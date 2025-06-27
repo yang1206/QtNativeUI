@@ -148,19 +148,16 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
     if (d->_isAnimationFinished) {
         if (isCheckedOrPartial) {
             if (!isEnabled()) {
-                bgColor     = d->_accentDisabledColor;
-                borderColor = Qt::transparent;
+                bgColor = d->_accentDisabledColor;
             } else if (d->_isPressed) {
-                bgColor     = d->_accentPressColor;
-                borderColor = Qt::transparent;
+                bgColor = d->_accentPressColor;
             } else if (d->_isHovered) {
-                bgColor     = d->_accentHoverColor;
-                borderColor = Qt::transparent;
-            } else {
-                bgColor     = d->_accentDefaultColor;
-                borderColor = Qt::transparent;
-            }
+                bgColor = d->_accentHoverColor;
 
+            } else {
+                bgColor = d->_accentDefaultColor;
+            }
+            borderColor = Qt::transparent;
             painter->setPen(Qt::NoPen);
             painter->setBrush(bgColor);
             painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
@@ -205,7 +202,6 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
             borderColor      = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
         }
 
-        // 获取选中状态颜色
         QColor checkedBgColor;
         if (!isEnabled()) {
             checkedBgColor = d->_accentDisabledColor;

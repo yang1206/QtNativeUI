@@ -69,7 +69,6 @@ void NInfoBarManager::postInfoBarEndEvent(NInfoBar* infoBar) {
             QVariantMap functionData;
             functionData.insert("TargetPosY", otherInfoBar->d_ptr->_calculateTargetPosY());
             eventData.insert("EventFunctionData", functionData);
-            // 若处于创建动画阶段，则合并事件动画
             if (otherInfoBar->d_ptr->getWorkMode() == WorkStatus::CreateAnimation) {
                 while (eventList.count() > 1) {
                     eventList.removeLast();

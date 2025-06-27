@@ -6,7 +6,6 @@
 NLabelPrivate::NLabelPrivate(NLabel* q) : q_ptr(q) {
     _isDark = nTheme->isDarkMode();
 
-    // 初始化颜色
     _pLightTextColor         = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
     _pDarkTextColor          = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
     _pLightTextDisabledColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, NThemeType::Light);
@@ -20,12 +19,9 @@ void NLabelPrivate::updateFont() {
 
     QFont font = _originalFont;
 
-    // 字体大小
     int fontSize = 0;
-    // 字重
     int fontWeight = 0;
 
-    // 根据类型设置字体
     switch (_type) {
         case NLabelType::Caption:
             fontSize   = NFontSizeToken(NDesignTokenKey::FontSizeCaption).toInt();
@@ -65,7 +61,6 @@ void NLabelPrivate::updateFont() {
             break;
         case NLabelType::Default:
         default:
-            // 保留原始字体
             break;
     }
 

@@ -6,7 +6,7 @@
 #include "QtNativeUI/NEnums.h"
 
 class QParallelAnimationGroup;
-class NProgressRingPrivate;  // 前置声明
+class NProgressRingPrivate;
 
 class NProgressBarPrivate : public QObject {
     Q_OBJECT
@@ -32,15 +32,13 @@ class NProgressBarPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, LightErrorColor)
     Q_PROPERTY_CREATE_D(QColor, DarkErrorColor)
 
-    // 形状属性
+
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, ProgressThickness)
 
-    // 动画属性
     Q_PROPERTY_CREATE_D(bool, AnimationEnabled)
     Q_PROPERTY_CREATE_D(int, AnimationDuration)
 
-    // 添加友元声明
     friend class NProgressRingPrivate;
 
   public:
@@ -54,13 +52,12 @@ class NProgressBarPrivate : public QObject {
     QColor getProgressColor() const;
     QColor getTextColor() const;
 
-    // 位置计算辅助方法
     QRect getTrackRect() const;
     QRect getProgressRect() const;
     int   calculateProgressWidth() const;
     int   calculateProgressHeight() const;
 
-    // 动画相关属性和方法
+
     qreal progressPosition() const { return _progressPosition; }
     void  setProgressPosition(qreal position);
 
@@ -68,7 +65,6 @@ class NProgressBarPrivate : public QObject {
     void  setIndeterminateOffset(qreal offset);
 
     void startProgressAnimation(qreal endValue);
-    void startIndeterminateAnimation();
     void stopIndeterminateAnimation();
     void updateAnimations();
 
@@ -79,7 +75,7 @@ class NProgressBarPrivate : public QObject {
     qreal _indeterminateOffset{0.0};
     bool  _isAnimationRunning{false};
 
-    // 状态相关
+
     bool isPaused() const { return _isPaused; }
     void setPaused(bool paused);
 
@@ -94,7 +90,6 @@ class NProgressBarPrivate : public QObject {
     qreal longPos() const { return _longPos; }
     void  setLongPos(qreal pos);
 
-    // 启动双段式动画
     void startIndeterminateAnimations();
 
   private:
@@ -109,7 +104,7 @@ class NProgressBarPrivate : public QObject {
     qreal _shortPos{0.0};
     qreal _longPos{0.0};
 
-    qreal _pausedProgressPosition{0.0}; // 保存暂停时的进度位置
+    qreal _pausedProgressPosition{0.0};
 };
 
 #endif // QTNATIVEUI_NPROGRESSBAR_P_H

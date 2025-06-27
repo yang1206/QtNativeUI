@@ -57,8 +57,8 @@ class NTabBarPrivate : public QObject {
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark{false};
     int                   _hoverIndex{-1};
-    QPixmap               _lastDragPix;         // 保存拖拽的标签图像
-    bool                  _tabsClosable{false}; // 是否显示关闭按钮
+    QPixmap               _lastDragPix;
+    bool                  _tabsClosable{false};
 
     int       _tooltipTabIndex{-1};
     QTimer*   _tooltipTimer{nullptr};

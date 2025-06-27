@@ -13,7 +13,6 @@ class NSliderPrivate : public QObject {
     Q_OBJECT
     Q_PROPERTY(qreal thumbScale READ thumbScale WRITE setThumbScale)
 
-    // 颜色属性
     Q_PROPERTY_CREATE_D(QColor, LightTrackColor)
     Q_PROPERTY_CREATE_D(QColor, DarkTrackColor)
     Q_PROPERTY_CREATE_D(QColor, LightProgressColor)
@@ -25,7 +24,6 @@ class NSliderPrivate : public QObject {
     Q_PROPERTY_CREATE_D(QColor, LightThumbOuterColor)
     Q_PROPERTY_CREATE_D(QColor, DarkThumbOuterColor)
 
-    // 尺寸属性
     Q_PROPERTY_CREATE_D(int, TrackHeight)
     Q_PROPERTY_CREATE_D(int, ThumbDiameter)
     Q_PROPERTY_CREATE_D(int, ThumbInnerDiameter)
@@ -70,35 +68,30 @@ class NSliderPrivate : public QObject {
     ~NSliderPrivate();
     Q_D_CREATE(NSlider)
 
-    // 缩放属性访问器
+
     qreal thumbScale() const { return _thumbScale; }
     void  setThumbScale(qreal scale) {
         _thumbScale = scale;
         q_ptr->update();
     }
 
-    // 启动缩放动画
     void startThumbAnimation(qreal startScale, qreal endScale);
 
   public:
-    // 状态跟踪
     bool                  _isHovered  = false;
     bool                  _isPressed  = false;
     bool                  _isDragging = false;
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark = false;
 
-    // 动画
     qreal               _thumbScale     = 1.0;
     QPropertyAnimation* _thumbAnimation = nullptr;
 
-    // 强调色
     QColor _accentColor;
     QColor _accentHoverColor;
     QColor _accentPressedColor;
     QColor _accentDisabledColor;
-    
-    // 样式
+
     Style* _sliderStyle = nullptr;
 };
 

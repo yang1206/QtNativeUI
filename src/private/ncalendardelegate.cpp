@@ -76,7 +76,6 @@ void NCalendarDelegate::_drawYearOrMonth(QPainter*                   painter,
     NCalendarData data       = index.data(Qt::UserRole).value<NCalendarData>();
     qreal         baseRadius = _pItemWidth * 0.5;
 
-    // 当前日期绘制
     NCalendarType displayMode = _calendarModel->getDisplayMode();
     if ((displayMode == NCalendarType::YearMode && data.year == _nowDate.year()) ||
         (displayMode == NCalendarType::MonthMode && data.month == _nowDate.month() && data.year == _nowDate.year())) {
@@ -88,7 +87,7 @@ void NCalendarDelegate::_drawYearOrMonth(QPainter*                   painter,
         painter->setBrush(drawColor);
         painter->drawEllipse(itemRect.center(), baseRadius, baseRadius);
     } else {
-        // 悬停效果绘制
+
         if (option.state.testFlag(QStyle::State_MouseOver)) {
             painter->setPen(Qt::NoPen);
             QColor hoverColor = _isDark ? NThemeColor(NFluentColorKey::SubtleFillColorSecondary, NThemeType::Dark)
@@ -98,7 +97,7 @@ void NCalendarDelegate::_drawYearOrMonth(QPainter*                   painter,
         }
     }
 
-    // 文字绘制
+
     QColor textColor;
     if (isNow) {
         textColor = _isDark ? NThemeColor(NFluentColorKey::TextOnAccentFillColorPrimary, NThemeType::Dark)

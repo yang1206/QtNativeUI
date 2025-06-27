@@ -8,7 +8,6 @@ class NSpinBoxStyleInterface {
   public:
     virtual ~NSpinBoxStyleInterface() {}
 
-    // 文本框部分颜色
     virtual QColor backgroundColorForState(bool isDark, bool isEnabled, bool hasFocus, bool hasHover) const = 0;
     virtual QColor borderColorForState(bool isDark, bool isEnabled) const                                   = 0;
     virtual QColor bottomLineColorForState(bool isDark, bool isEnabled, bool hasFocus) const                = 0;

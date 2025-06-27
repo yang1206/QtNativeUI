@@ -17,7 +17,6 @@ void NSliderPrivate::Style::drawComplexControl(ComplexControl             contro
                                                const QWidget*             widget) const {
     if (control == CC_Slider) {
         if (const QStyleOptionSlider* sliderOption = qstyleoption_cast<const QStyleOptionSlider*>(option)) {
-            // 绘制轨道、进度、滑块和刻度
             drawTrack(sliderOption, painter, widget);
             drawProgress(sliderOption, painter, widget);
 
@@ -46,10 +45,8 @@ QStyle::SubControl NSliderPrivate::Style::hitTestComplexControl(ComplexControl  
                                                                 const QWidget*             widget) const {
     if (control == CC_Slider) {
         if (const QStyleOptionSlider* sliderOption = qstyleoption_cast<const QStyleOptionSlider*>(option)) {
-            // 计算滑块区域
             QRect handleRect;
 
-            // 获取滑块位置
             int sliderPos = sliderPositionFromValue(sliderOption->minimum,
                                                     sliderOption->maximum,
                                                     sliderOption->sliderPosition,
@@ -69,8 +66,6 @@ QStyle::SubControl NSliderPrivate::Style::hitTestComplexControl(ComplexControl  
                                    d->_pThumbDiameter,
                                    d->_pThumbDiameter);
             }
-
-            // 扩大点击区域，使其更容易点击
             int   extraMargin        = 4;
             QRect expandedHandleRect = handleRect.adjusted(-extraMargin, -extraMargin, extraMargin, extraMargin);
 
@@ -186,18 +181,15 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
         thumbCenter = QPointF(thumbX, thumbY);
     }
 
-    // 绘制外圆
     QColor outerColor = d->_isDark ? d->_pDarkThumbOuterColor : d->_pLightThumbOuterColor;
     painter->setPen(Qt::NoPen);
     painter->setBrush(outerColor);
 
-    // 使用QPainterPath绘制圆形，可以提高绘制质量
     QPainterPath outerPath;
     qreal        outerRadius = d->_pThumbDiameter / 2.0;
     outerPath.addEllipse(thumbCenter, outerRadius, outerRadius);
     painter->drawPath(outerPath);
 
-    // 绘制内圆
     QColor innerColor;
     if (!(option->state & QStyle::State_Enabled)) {
         innerColor = d->_accentDisabledColor;
@@ -209,7 +201,6 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
         innerColor = d->_accentColor;
     }
 
-    // 使用thumbScale属性控制内圆大小，恢复动画效果
     qreal innerRadius = (d->_pThumbInnerDiameter / 2.0) * d->_thumbScale;
 
     painter->setBrush(innerColor);

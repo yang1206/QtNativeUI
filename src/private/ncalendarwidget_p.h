@@ -1,9 +1,7 @@
 #ifndef QTNATIVEUI_NCALENDARWIDGET_P_H
 #define QTNATIVEUI_NCALENDARWIDGET_P_H
 
-#include <QDate>
 #include <QObject>
-#include <QPixmap>
 
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NEnums.h"
@@ -52,7 +50,6 @@ class NCalendarWidgetPrivate : public QObject {
     QList<QDate>                       _selectedDates;
     QPair<QDate, QDate>                _selectedDateRange;
 
-    // 处理日期选择的方法
     void handleDateSelection(const QDate& date);
     void updateDateSelection();
 

@@ -176,7 +176,6 @@ void NTabWidget::adjustContentMargins() {
 void NTabWidget::showEvent(QShowEvent* event) {
     QTabWidget::showEvent(event);
 
-    // 当控件首次显示时调整边距
     adjustContentMargins();
 }
 

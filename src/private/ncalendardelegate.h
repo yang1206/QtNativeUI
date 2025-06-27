@@ -1,7 +1,6 @@
 #ifndef QTNATIVEUI_NCALENDARDELEGATE_H
 #define QTNATIVEUI_NCALENDARDELEGATE_H
 
-#include <QDate>
 #include <QStyledItemDelegate>
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NEnums.h"

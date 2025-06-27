@@ -2,7 +2,6 @@
 #define NNAVIGATIONVIEW_P_H
 
 #include <QMap>
-#include <QObject>
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 

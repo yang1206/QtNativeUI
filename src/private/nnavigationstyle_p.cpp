@@ -19,9 +19,7 @@ NNavigationStyle::NNavigationStyle(QStyle* style) : QProxyStyle(style) {
     _pLastSelectMarkBottom = 10.0;
     _pSelectMarkTop        = 10.0;
     _pSelectMarkBottom     = 10.0;
-
-    // Mark向上
-    _lastSelectMarkTopAnimation = new QPropertyAnimation(this, "pLastSelectMarkTop");
+ _lastSelectMarkTopAnimation = new QPropertyAnimation(this, "pLastSelectMarkTop");
     connect(_lastSelectMarkTopAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
         if (_pNavigationView)
             _pNavigationView->viewport()->update();
@@ -43,9 +41,7 @@ NNavigationStyle::NNavigationStyle(QStyle* style) : QProxyStyle(style) {
         _selectMarkBottomAnimation->setEndValue(10);
         _selectMarkBottomAnimation->start();
     });
-
-    // Mark向下
-    _lastSelectMarkBottomAnimation = new QPropertyAnimation(this, "pLastSelectMarkBottom");
+ _lastSelectMarkBottomAnimation = new QPropertyAnimation(this, "pLastSelectMarkBottom");
     connect(_lastSelectMarkBottomAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
         if (_pNavigationView)
             _pNavigationView->viewport()->update();
@@ -80,7 +76,6 @@ void NNavigationStyle::drawPrimitive(PrimitiveElement    element,
                                      const QWidget*      widget) const {
     switch (element) {
         case QStyle::PE_PanelItemViewItem: {
-            // Item背景
             if (const QStyleOptionViewItem* vopt = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
                 painter->save();
                 QModelIndex      index = vopt->index;
@@ -94,31 +89,21 @@ void NNavigationStyle::drawPrimitive(PrimitiveElement    element,
                 itemRect.setBottom(itemRect.bottom() - 2);
                 QPainterPath path;
                 path.addRoundedRect(itemRect, 8, 8);
-
-                // 设置颜色（这里需要使用你的主题系统来获取颜色）
-                QColor background;
+ QColor background;
                 if (vopt->state & QStyle::State_Selected) {
-                    // 选中状态
                     if (index == _pPressIndex) {
-                        // Pressed
                         background = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode);
                     } else if (vopt->state & QStyle::State_MouseOver) {
-                        // Hover
                         background = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, _themeMode);
                     } else {
-                        // Default selected
                         background = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode);
                     }
                 } else {
-                    // 未选中状态
                     if (index == _pPressIndex) {
-                        // Pressed
                         background = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, _themeMode);
                     } else if (vopt->state & QStyle::State_MouseOver) {
-                        // Hover
                         background = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode);
                     } else {
-                        // Default
                         background = NThemeColor(NFluentColorKey::SubtleFillColorTransparent, _themeMode);
                     }
                 }
@@ -131,11 +116,9 @@ void NNavigationStyle::drawPrimitive(PrimitiveElement    element,
             return;
         }
         case QStyle::PE_PanelItemViewRow: {
-            // 行背景
             return;
         }
         case QStyle::PE_IndicatorBranch: {
-            // Branch指示器
             return;
         }
         default: {
@@ -151,15 +134,11 @@ void NNavigationStyle::drawControl(ControlElement      element,
                                    const QWidget*      widget) const {
     switch (element) {
         case QStyle::CE_ShapedFrame: {
-            // viewport视口外的其他区域背景
             return;
         }
         case QStyle::CE_ItemViewItem: {
             if (const QStyleOptionViewItem* vopt = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
-                // 背景绘制
                 this->drawPrimitive(QStyle::PE_PanelItemViewItem, option, painter, widget);
-
-                // 内容绘制
                 QRect itemRect = option->rect;
                 painter->save();
                 painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
@@ -171,8 +150,6 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 if (this->_opacityAnimationTargetNode && node->getParentNode() == this->_opacityAnimationTargetNode) {
                     painter->setOpacity(_pOpacity);
                 }
-
-                // 选中特效
                 QColor accentColor =
                     nTheme->isDarkMode() ? nTheme->accentColor().dark() : nTheme->accentColor().light();
                 if (_isSelectMarkDisplay &&
@@ -196,9 +173,7 @@ void NNavigationStyle::drawControl(ControlElement      element,
                                              3,
                                              3);
                 }
-
-                // 设置文字颜色
-                QColor textColor;
+ QColor textColor;
                 if (!(vopt->state & QStyle::State_Enabled)) {
                     textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, _themeMode);
                 } else if (vopt->state & QStyle::State_Selected) {
@@ -206,13 +181,9 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 } else {
                     textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
                 }
-
-                // 图标绘制
-                painter->setPen(vopt->index == _pPressIndex ? textColor.darker(120) : textColor);
+ painter->setPen(vopt->index == _pPressIndex ? textColor.darker(120) : textColor);
                 NRegularIconType::Icon icon = node->getIcon();
-
-                // 如果有图标
-                painter->save();
+ painter->save();
                 NRegularIconType::Icon regularIcon = node->getIcon();
                 NFilledIconType::Icon  filledIcon  = node->getFilledIcon();
                 if (regularIcon != NRegularIconType::None) {
@@ -235,7 +206,6 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 painter->restore();
 
                 int viewWidth = widget->width();
-                // 文字绘制
                 painter->setPen(vopt->index == _pPressIndex ? textColor.darker(120) : textColor);
                 QRect textRect;
                 if (icon != NRegularIconType::None || filledIcon != NFilledIconType::None) {
@@ -254,7 +224,6 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
 
                 if (viewWidth > 260) {
-                    // 展开图标 KeyPoints
                     if (node->getIsExpanderNode()) {
                         if (node->getIsHasChild()) {
                             QRect expandIconRect(
@@ -269,10 +238,8 @@ void NNavigationStyle::drawControl(ControlElement      element,
                                 painter->rotate(_pRotate);
                             } else {
                                 if (node->getIsExpanded()) {
-                                    // 展开
-                                    painter->rotate(-180);
+painter->rotate(-180);
                                 } else {
-                                    // 未展开
                                     painter->rotate(0);
                                 }
                             }
@@ -294,14 +261,11 @@ void NNavigationStyle::drawControl(ControlElement      element,
                     } else {
                         int keyPoints = node->getKeyPoints();
                         if (keyPoints) {
-                            // KeyPoints
                             painter->save();
                             painter->setPen(Qt::NoPen);
-                            // 添加白色背景圆
                             painter->setBrush(Qt::white);
                             painter->drawEllipse(
                                 QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 10, 10);
-                            // 红色前景圆
                             painter->setBrush(NThemeColor(NFluentColorKey::SystemFillColorCritical, _themeMode));
                             painter->drawEllipse(
                                 QPoint(itemRect.right() - 26, itemRect.y() + itemRect.height() / 2), 9, 9);
@@ -325,7 +289,6 @@ void NNavigationStyle::drawControl(ControlElement      element,
                     }
                 }
 
-                // 添加边框绘制
                 QPen borderPen(NThemeColor(NFluentColorKey::SubtleFillColorTransparent, _themeMode));
                 painter->setPen(borderPen);
 
@@ -444,14 +407,13 @@ void NNavigationStyle::navigationNodeStateChange(QVariantMap data) {
 }
 
 bool NNavigationStyle::_compareItemY(NNavigationNode* node1, NNavigationNode* node2) {
-    // 返回true 即node1 高于 node2
     if (!node1) {
         return false;
     }
     if (!node2) {
         return true;
     }
-    // 同一父节点
+
     if (node1->getParentNode() == node2->getParentNode()) {
         if (node1->getModelIndex().row() < node2->getModelIndex().row()) {
             return true;
@@ -461,11 +423,11 @@ bool NNavigationStyle::_compareItemY(NNavigationNode* node1, NNavigationNode* no
     } else {
         NNavigationNode* node1OriginalNode = node1->getOriginalNode();
         NNavigationNode* node2OriginalNode = node2->getOriginalNode();
-        // 不同父节点  相同起源节点
+
         if (node1OriginalNode == node2OriginalNode) {
             int node1Depth = node1->getDepth();
             int node2Depth = node2->getDepth();
-            // 相同深度
+
             if (node1Depth == node2Depth) {
                 NNavigationNode* node1ParentNode = node1->getParentNode();
                 NNavigationNode* node2ParentNode = node2->getParentNode();
@@ -480,7 +442,7 @@ bool NNavigationStyle::_compareItemY(NNavigationNode* node1, NNavigationNode* no
                     while (node2ParentNode->getDepth() != node1Depth) {
                         node2ParentNode = node2ParentNode->getParentNode();
                     }
-                    // 父子节点关系
+
                     if (node1 == node2ParentNode) {
                         return true;
                     }

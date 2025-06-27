@@ -37,17 +37,14 @@ void NLabel::setType(NLabelType::Type type) {
 void NLabel::init() {
     Q_D(NLabel);
 
-    // 保存原始字体，以便在设置类型时参考
     d->_originalFont = font();
 
-    // 连接主题变化信号
     connect(nTheme, &NTheme::darkModeChanged, this, [this](bool isDark) {
         Q_D(NLabel);
         d->_isDark = isDark;
         d->updateColor();
     });
 
-    // 初始化样式
     updateStyle();
 }
 

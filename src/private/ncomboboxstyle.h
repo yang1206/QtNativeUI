@@ -1,4 +1,3 @@
-// ncomboboxstyle.h
 #ifndef NCOMBOBOXSTYLE_H
 #define NCOMBOBOXSTYLE_H
 

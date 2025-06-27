@@ -113,7 +113,6 @@ void NInfoBar::information(NInfoBarType::PositionPolicy position,
     Q_UNUSED(infoBar);
 }
 
-// 添加新的构造函数实现
 NInfoBar::NInfoBar(NInfoBarType::InfoMode severity,
                    const QString&         title,
                    const QString&         message,
@@ -125,20 +124,15 @@ NInfoBar::NInfoBar(NInfoBarType::InfoMode severity,
     d->_borderRadius    = 6;
     d->_title           = title;
     d->_message         = message;
-    d->_position        = NInfoBarType::Top; // 默认位置，实际不会使用
+    d->_position        = NInfoBarType::Top;
     d->_severity        = severity;
     d->_themeMode       = nTheme->themeMode();
     d->_showCloseButton = showCloseButton;
-
-    // 设置基本属性
     setMouseTracking(true);
-    d->_pOpacity = 1;
-
-    // 创建布局
+    d->_pOpacity            = 1;
     QHBoxLayout* mainLayout = new QHBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 10, 0);
 
-    // 创建额外控件的布局容器
     d->_widgetsLayout = new QHBoxLayout();
     d->_widgetsLayout->setContentsMargins(0, 0, 0, 0);
     d->_widgetsLayout->setSpacing(8);
@@ -146,7 +140,6 @@ NInfoBar::NInfoBar(NInfoBarType::InfoMode severity,
     mainLayout->addStretch();
     mainLayout->addLayout(d->_widgetsLayout);
 
-    // 创建关闭按钮
     if (showCloseButton) {
         d->_closeButton = new NPushButton(this);
         d->_closeButton->setObjectName("closeButton");
@@ -155,7 +148,6 @@ NInfoBar::NInfoBar(NInfoBarType::InfoMode severity,
         d->_closeButton->setFlat(true);
         d->_closeButton->setIcon(nIcon->fromRegular(NRegularIconType::Dismiss12Regular));
         d->_closeButton->setIconSize(QSize(12, 12));
-        // 设置关闭按钮悬停颜色
         switch (d->_severity) {
             case NInfoBarType::Success:
                 d->_closeButton->setLightHoverColor(
@@ -191,7 +183,6 @@ NInfoBar::NInfoBar(NInfoBarType::InfoMode severity,
     setObjectName("NInfoBar");
     setStyleSheet("#NInfoBar{background-color:transparent;}");
 
-    // 初始化InfoBar
     d->_initializeInfoBar();
 }
 
@@ -276,6 +267,7 @@ void NInfoBar::error(NInfoBarType::PositionPolicy position,
 }
 
 void NInfoBar::paintEvent(QPaintEvent* event) {
+    Q_UNUSED(event);
     Q_D(NInfoBar);
     QPainter painter(this);
     painter.setOpacity(d->_pOpacity);
