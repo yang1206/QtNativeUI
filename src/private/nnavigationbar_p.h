@@ -36,8 +36,7 @@ class NNavigationBarPrivate : public QObject {
     explicit NNavigationBarPrivate(QObject* parent = nullptr);
     ~NNavigationBarPrivate() override;
 
-    Q_SLOT void      onNavigationButtonClicked();
-    Q_INVOKABLE void onNavigationRouteBack(QVariantMap routeData);
+    Q_SLOT void onNavigationButtonClicked();
 
     // 核心跳转逻辑
     void onTreeViewClicked(const QModelIndex& index, bool isLogRoute = true);

@@ -196,9 +196,13 @@ Q_END_ENUM_CREATE(NNavigationType)
 Q_BEGIN_ENUM_CREATE(NNavigationRouterType)
 
 enum NavigationRouteType {
-    Success,            // 操作成功
-    ObjectInvalid,      // 对象无效
-    FunctionNameInvalid // 函数名无效
+    Success,             // 操作成功
+    ObjectInvalid,       // 对象无效
+    FunctionNameInvalid, // 函数名无效
+    PageNotFound,
+    RouteRejected,
+    NoHistory
+
 };
 Q_ENUM_CREATE(NavigationRouteType)
 

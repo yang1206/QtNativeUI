@@ -1,4 +1,6 @@
 ﻿#include "navigation.h"
+
+#include <QDateTime>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -10,10 +12,97 @@
 #include <QtNativeUI/NTabBar.h>
 #include <QtNativeUI/NTabWidget.h>
 #include <QtNativeUI/NToolButton.h>
+
+#include "QtNativeUI/NCheckBox.h"
 #include "QtNativeUI/NLabel.h"
+#include "QtNativeUI/NNavigationRouter.h"
 #include "QtNativeUI/NNavigationView.h"
 #include "QtNativeUI/NScrollArea.h"
 #include "widgets/ExampleSection.h"
+
+DemoPageComponent::DemoPageComponent(const QString& title, QWidget* parent)
+    : NPageComponent(parent), m_blockNavigation(false) {
+    setPageTitle(title);
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    // 添加标题
+    NLabel* titleLabel = new NLabel(title, NLabelType::Title);
+    layout->addWidget(titleLabel);
+    // 添加日志文本框
+    m_logTextEdit = new NTextEdit(this);
+    m_logTextEdit->setReadOnly(true);
+    m_logTextEdit->setMinimumHeight(150);
+    layout->addWidget(m_logTextEdit);
+    // 添加一些说明文本
+    NLabel* infoLabel = new NLabel("此页面演示路由生命周期和参数传递", NLabelType::Body);
+    layout->addWidget(infoLabel);
+    layout->addStretch();
+}
+
+void DemoPageComponent::onRouteEnter(const QVariantMap& params) {
+    QString log = "onRouteEnter 被调用\n";
+    if (!params.isEmpty()) {
+        log += "接收到参数:\n";
+        for (auto it = params.constBegin(); it != params.constEnd(); ++it) {
+            log += QString("  %1: %2\n").arg(it.key()).arg(it.value().toString());
+        }
+    } else {
+        log += "没有接收到参数\n";
+    }
+    m_logTextEdit->append(log);
+}
+
+void DemoPageComponent::onRouteLeave(QVariantMap& outParams) {
+    QString log = "onRouteLeave 被调用\n";
+    // 添加一些离开参数
+    outParams["leaveTime"] = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+    outParams["fromPage"]  = pageTitle();
+    log += "发送参数:\n";
+    for (auto it = outParams.constBegin(); it != outParams.constEnd(); ++it) {
+        log += QString("  %1: %2\n").arg(it.key()).arg(it.value().toString());
+    }
+    m_logTextEdit->append(log);
+}
+
+bool DemoPageComponent::beforeRouteEnter(const QVariantMap& params) {
+    QString log = "beforeRouteEnter 被调用\n";
+    if (!params.isEmpty()) {
+        log += "检查参数:\n";
+        for (auto it = params.constBegin(); it != params.constEnd(); ++it) {
+            log += QString("  %1: %2\n").arg(it.key()).arg(it.value().toString());
+        }
+    }
+    // 检查是否有阻止进入的条件
+    if (params.contains("blockEnter") && params["blockEnter"].toBool()) {
+        log += "导航被阻止!\n";
+        m_logTextEdit->append(log);
+        return false;
+    }
+    log += "允许导航\n";
+    m_logTextEdit->append(log);
+    return true;
+}
+
+bool DemoPageComponent::beforeRouteLeave(QVariantMap& outParams) {
+    QString log = "beforeRouteLeave 被调用\n";
+
+    // 如果设置了阻止导航，则阻止离开
+    if (m_blockNavigation) {
+        log += "导航被阻止!\n";
+        m_logTextEdit->append(log);
+        return false;
+    }
+
+    log += "允许导航\n";
+    m_logTextEdit->append(log);
+    return true;
+}
+
+void DemoPageComponent::setBlockNavigation(bool block) {
+    m_blockNavigation = block;
+    m_logTextEdit->append(QString("导航阻止状态设置为: %1").arg(block ? "是" : "否"));
+}
+
+QString DemoPageComponent::getLogText() const { return m_logTextEdit->toPlainText(); }
 
 NavigationExample::NavigationExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
@@ -286,55 +375,66 @@ QWidget* NavigationExample::createTabWidgets() {
 QWidget* NavigationExample::createNavigationBars() {
     QWidget*     container = new QWidget;
     QVBoxLayout* layout    = new QVBoxLayout(container);
-    // layout->setSpacing(16);
+    layout->setSpacing(16);
+
+    // 创建一个说明标签
+    NLabel* descriptionLabel =
+        new NLabel("NNavigationBar 提供了完整的导航功能，支持路由系统、导航历史记录和页面切换。", NLabelType::Caption);
+    descriptionLabel->setWordWrap(true);
+    layout->addWidget(descriptionLabel);
 
     // 1. 基本导航栏示例
     {
         QWidget*     demoSection   = new QWidget;
         QHBoxLayout* sectionLayout = new QHBoxLayout(demoSection);
-        // sectionLayout->setContentsMargins(0, 0, 0, 16);
+        sectionLayout->setContentsMargins(0, 0, 0, 16);
 
         // 创建导航栏
         NNavigationBar* navigationBar = new NNavigationBar(demoSection);
-        navigationBar->setHeaderWidget(new NLabel("头部组件", NLabelType::Subtitle));
+        navigationBar->setHeaderWidget(new NLabel("基本导航", NLabelType::Subtitle));
         navigationBar->setMinimumHeight(400);
         navigationBar->setSearchVisible(false);
 
         // 创建一些内容页面
         QWidget*     homePage   = new QWidget;
         QVBoxLayout* homeLayout = new QVBoxLayout(homePage);
-        homeLayout->addWidget(new QLabel("Home Page Content"));
+        homeLayout->addWidget(new NLabel("首页", NLabelType::Title));
+        homeLayout->addWidget(new NLabel("这是首页内容", NLabelType::Body));
 
         QWidget*     documentsPage   = new QWidget;
         QVBoxLayout* documentsLayout = new QVBoxLayout(documentsPage);
-        documentsLayout->addWidget(new QLabel("Documents Page Content"));
+        documentsLayout->addWidget(new NLabel("文档", NLabelType::Title));
+        documentsLayout->addWidget(new NLabel("这是文档页面内容", NLabelType::Body));
 
         QWidget*     settingsPage   = new QWidget;
         QVBoxLayout* settingsLayout = new QVBoxLayout(settingsPage);
-        settingsLayout->addWidget(new QLabel("Settings Page Content"));
+        settingsLayout->addWidget(new NLabel("设置", NLabelType::Title));
+        settingsLayout->addWidget(new NLabel("这是设置页面内容", NLabelType::Body));
 
         QWidget*     aboutPage   = new QWidget;
         QVBoxLayout* aboutLayout = new QVBoxLayout(aboutPage);
-        aboutLayout->addWidget(new QLabel("About Page Content"));
+        aboutLayout->addWidget(new NLabel("关于", NLabelType::Title));
+        aboutLayout->addWidget(new NLabel("这是关于页面内容", NLabelType::Body));
 
         QWidget*     profilePage   = new QWidget;
         QVBoxLayout* profileLayout = new QVBoxLayout(profilePage);
-        profileLayout->addWidget(new QLabel("Profile Page Content"));
+        profileLayout->addWidget(new NLabel("个人资料", NLabelType::Title));
+        profileLayout->addWidget(new NLabel("这是个人资料页面内容", NLabelType::Body));
 
         // 创建内容显示区
         NStackedWidget* contentStack = new NStackedWidget(demoSection);
         contentStack->addWidget(homePage);
         contentStack->addWidget(documentsPage);
         contentStack->addWidget(settingsPage);
-        contentStack->addWidget(profilePage);
         contentStack->addWidget(aboutPage);
+        contentStack->addWidget(profilePage);
 
         m_pageKeyMap.clear();
 
         connect(navigationBar,
                 &NNavigationBar::displayModeChange,
                 this,
-                [](NNavigationType::NavigationDisplayMode mode) { qDebug() << "displayModeChange:" << mode; });
+                [](NNavigationType::NavigationDisplayMode mode) { qDebug() << "显示模式变更为:" << mode; });
 
         connect(navigationBar,
                 &NNavigationBar::navigationNodeAdded,
@@ -342,7 +442,7 @@ QWidget* NavigationExample::createNavigationBars() {
                     for (int i = 0; i < contentStack->count(); ++i) {
                         if (contentStack->widget(i) == page) {
                             m_pageKeyMap[nodeKey] = i;
-                            qDebug() << "Mapped node" << nodeKey << "to page index" << i;
+                            qDebug() << "节点" << nodeKey << "映射到页面索引" << i;
                             break;
                         }
                     }
@@ -350,23 +450,23 @@ QWidget* NavigationExample::createNavigationBars() {
 
         // 添加导航节点
         QString expanderKey;
-        navigationBar->addExpanderNode("System", expanderKey, NRegularIconType::Settings24Regular);
+        navigationBar->addExpanderNode("系统", expanderKey, NRegularIconType::Settings24Regular);
 
         // 添加页面节点
-        navigationBar->addPageNode("Home", homePage, NRegularIconType::Home24Regular);
-        navigationBar->addPageNode("Documents", documentsPage, NRegularIconType::Document24Regular);
-        navigationBar->addPageNode("Settings", settingsPage, expanderKey, NRegularIconType::Settings24Regular);
-        navigationBar->addPageNode("About", aboutPage, NFilledIconType::Info24Filled);
+        navigationBar->addPageNode("首页", homePage, NRegularIconType::Home24Regular);
+        navigationBar->addPageNode("文档", documentsPage, NRegularIconType::Document24Regular);
+        navigationBar->addPageNode("设置", settingsPage, expanderKey, NRegularIconType::Settings24Regular);
+        navigationBar->addPageNode("关于", aboutPage, NFilledIconType::Info24Filled);
 
         // 添加页脚节点
         QString footerKey;
-        navigationBar->addFooterNode("Profile", profilePage, footerKey, 0, NRegularIconType::Person24Regular);
+        navigationBar->addFooterNode("个人资料", profilePage, footerKey, 0, NRegularIconType::Person24Regular);
 
-        // 连接导航事件，使用映射表切换页面
+        // 连接导航事件
         connect(navigationBar,
                 &NNavigationBar::navigationNodeClicked,
                 [this, contentStack](NNavigationType::NavigationNodeType nodeType, QString nodeKey) {
-                    qDebug() << "Navigation node clicked: " << nodeType << ", " << nodeKey;
+                    qDebug() << "导航节点被点击: " << nodeType << ", " << nodeKey;
                     if (m_pageKeyMap.contains(nodeKey)) {
                         contentStack->setCurrentIndex(m_pageKeyMap[nodeKey]);
                     }
@@ -377,7 +477,224 @@ QWidget* NavigationExample::createNavigationBars() {
         layout->addWidget(demoSection);
     }
 
+    // 2. 路由系统演示
+    layout->addWidget(createRouterDemo());
+
     return container;
+}
+
+// 添加新方法来创建路由系统演示
+// 添加新方法来创建路由系统演示
+QWidget* NavigationExample::createRouterDemo() {
+    QWidget*     demoSection   = new QWidget;
+    QVBoxLayout* sectionLayout = new QVBoxLayout(demoSection);
+    sectionLayout->setContentsMargins(0, 0, 0, 16);
+
+    sectionLayout->addWidget(new NLabel("路由系统演示", NLabelType::Subtitle));
+    QHBoxLayout* contentLayout = new QHBoxLayout();
+    // 创建导航栏
+    NNavigationBar* navigationBar = new NNavigationBar(demoSection);
+    navigationBar->setHeaderWidget(new NLabel("路由系统", NLabelType::Subtitle));
+    navigationBar->setMinimumHeight(500);
+    navigationBar->setSearchVisible(true);
+    // 创建页面组件
+    m_homePage     = new DemoPageComponent("首页", demoSection);
+    m_profilePage  = new DemoPageComponent("个人资料", demoSection);
+    m_settingsPage = new DemoPageComponent("设置", demoSection);
+    m_detailsPage  = new DemoPageComponent("详情页", demoSection);
+    // 创建内容显示区
+    NStackedWidget* contentStack = new NStackedWidget(demoSection);
+    contentStack->addWidget(m_homePage);
+    contentStack->addWidget(m_profilePage);
+    contentStack->addWidget(m_settingsPage);
+    contentStack->addWidget(m_detailsPage);
+    // 创建路由键到页面索引的映射
+    QMap<QString, int> pageIndexMap;
+    // 添加导航节点
+    QString expanderKey;
+    navigationBar->addExpanderNode("系统", expanderKey, NRegularIconType::Settings24Regular);
+    // 添加页面组件到导航栏
+    navigationBar->addPageComponent(m_homePage, NRegularIconType::Home24Regular);
+    navigationBar->addPageComponent(m_profilePage, NRegularIconType::Person24Regular);
+    navigationBar->addPageComponent(m_settingsPage, expanderKey, NRegularIconType::Settings24Regular);
+    navigationBar->addPageComponent(m_detailsPage, NRegularIconType::Document24Regular);
+    // 存储路由键
+    m_homeKey     = m_homePage->routeKey();
+    m_profileKey  = m_profilePage->routeKey();
+    m_settingsKey = m_settingsPage->routeKey();
+    m_detailsKey  = m_detailsPage->routeKey();
+    // 创建路由键到页面索引的映射
+    pageIndexMap[m_homeKey]     = 0;
+    pageIndexMap[m_profileKey]  = 1;
+    pageIndexMap[m_settingsKey] = 2;
+    pageIndexMap[m_detailsKey]  = 3;
+    // 获取路由器实例
+    NNavigationRouter* router = NNavigationRouter::getInstance();
+    // 监听路由变化，切换对应的页面
+    connect(router,
+            &NNavigationRouter::routeChanged,
+            [contentStack, pageIndexMap](const QString& pageKey, const QVariantMap& params) {
+                Q_UNUSED(params);
+                if (pageIndexMap.contains(pageKey)) {
+                    contentStack->setCurrentIndex(pageIndexMap[pageKey]);
+                }
+            });
+    // 监听路由返回，切换对应的页面
+    connect(
+        router,
+        &NNavigationRouter::routeBack,
+        [contentStack, pageIndexMap](const QString& fromPageKey, const QString& toPageKey, const QVariantMap& params) {
+            Q_UNUSED(fromPageKey);
+            Q_UNUSED(params);
+            if (pageIndexMap.contains(toPageKey)) {
+                contentStack->setCurrentIndex(pageIndexMap[toPageKey]);
+            }
+        });
+    // 创建控制面板
+    QWidget*     controlPanel  = new QWidget(demoSection);
+    QVBoxLayout* controlLayout = new QVBoxLayout(controlPanel);
+    // 添加导航控制按钮
+    QGroupBox*   navControlGroup  = new QGroupBox("导航控制", controlPanel);
+    QVBoxLayout* navControlLayout = new QVBoxLayout(navControlGroup);
+    // 导航到首页
+    NPushButton* navToHomeBtn = new NPushButton("导航到首页", navControlGroup);
+    connect(navToHomeBtn, &NPushButton::clicked, [this, router]() {
+        QVariantMap params;
+        params["source"] = "导航按钮";
+        params["time"]   = QDateTime::currentDateTime().toString("hh:mm:ss");
+        router->navigateTo(m_homeKey, params);
+    });
+    // 导航到个人资料
+    NPushButton* navToProfileBtn = new NPushButton("导航到个人资料", navControlGroup);
+    connect(navToProfileBtn, &NPushButton::clicked, [this, router]() {
+        QVariantMap params;
+        params["source"] = "导航按钮";
+        params["time"]   = QDateTime::currentDateTime().toString("hh:mm:ss");
+        params["userId"] = "user123";
+        router->navigateTo(m_profileKey, params);
+    });
+    // 导航到设置
+    NPushButton* navToSettingsBtn = new NPushButton("导航到设置", navControlGroup);
+    connect(navToSettingsBtn, &NPushButton::clicked, [this, router]() {
+        QVariantMap params;
+        params["source"]  = "导航按钮";
+        params["time"]    = QDateTime::currentDateTime().toString("hh:mm:ss");
+        params["section"] = "general";
+        router->navigateTo(m_settingsKey, params);
+    });
+    // 导航到详情页
+    NPushButton* navToDetailsBtn = new NPushButton("导航到详情页", navControlGroup);
+    connect(navToDetailsBtn, &NPushButton::clicked, [this, router]() {
+        QVariantMap params;
+        params["source"]   = "导航按钮";
+        params["time"]     = QDateTime::currentDateTime().toString("hh:mm:ss");
+        params["itemId"]   = "item456";
+        params["itemName"] = "示例项目";
+        router->navigateTo(m_detailsKey, params);
+    });
+    // 返回按钮
+    NPushButton* navBackBtn = new NPushButton("返回上一页", navControlGroup);
+    connect(navBackBtn, &NPushButton::clicked, [router]() {
+        QVariantMap params;
+        params["backReason"] = "用户点击返回按钮";
+        router->navigateBack(params);
+    });
+    navControlLayout->addWidget(navToHomeBtn);
+    navControlLayout->addWidget(navToProfileBtn);
+    navControlLayout->addWidget(navToSettingsBtn);
+    navControlLayout->addWidget(navToDetailsBtn);
+    navControlLayout->addWidget(navBackBtn);
+    // 添加路由守卫控制
+    QGroupBox*   guardControlGroup  = new QGroupBox("路由守卫控制", controlPanel);
+    QVBoxLayout* guardControlLayout = new QVBoxLayout(guardControlGroup);
+    // 阻止离开设置
+    NCheckBox* blockLeaveCheckBox = new NCheckBox("阻止离开当前页面", guardControlGroup);
+    connect(blockLeaveCheckBox, &NCheckBox::toggled, [this](bool checked) {
+        // 获取当前页面并设置阻止状态
+        QString            currentKey  = NNavigationRouter::getInstance()->currentRouteKey();
+        DemoPageComponent* currentPage = nullptr;
+        if (currentKey == m_homeKey)
+            currentPage = m_homePage;
+        else if (currentKey == m_profileKey)
+            currentPage = m_profilePage;
+        else if (currentKey == m_settingsKey)
+            currentPage = m_settingsPage;
+        else if (currentKey == m_detailsKey)
+            currentPage = m_detailsPage;
+        if (currentPage) {
+            currentPage->setBlockNavigation(checked);
+        }
+    });
+    // 阻止进入详情页
+    NCheckBox* blockEnterDetailsCheckBox = new NCheckBox("阻止进入详情页", guardControlGroup);
+    connect(blockEnterDetailsCheckBox, &NCheckBox::toggled, [this, navToDetailsBtn, router](bool checked) {
+        // 修改导航参数，添加阻止标志
+        disconnect(navToDetailsBtn, &NPushButton::clicked, nullptr, nullptr);
+        connect(navToDetailsBtn, &NPushButton::clicked, [this, router, checked]() {
+            QVariantMap params;
+            params["source"]     = "导航按钮";
+            params["time"]       = QDateTime::currentDateTime().toString("hh:mm:ss");
+            params["itemId"]     = "item456";
+            params["blockEnter"] = checked;
+            router->navigateTo(m_detailsKey, params);
+        });
+    });
+    guardControlLayout->addWidget(blockLeaveCheckBox);
+    guardControlLayout->addWidget(blockEnterDetailsCheckBox);
+    // 添加历史记录显示
+    QGroupBox*   historyGroup    = new QGroupBox("导航历史", controlPanel);
+    QVBoxLayout* historyLayout   = new QVBoxLayout(historyGroup);
+    QTextEdit*   historyTextEdit = new QTextEdit(historyGroup);
+    historyTextEdit->setReadOnly(true);
+    historyTextEdit->setMaximumHeight(100);
+    // 清除历史按钮
+    NPushButton* clearHistoryBtn = new NPushButton("清除历史记录", historyGroup);
+    connect(clearHistoryBtn, &NPushButton::clicked, [router, historyTextEdit]() {
+        router->clearHistory();
+        historyTextEdit->setText("历史记录已清除");
+    });
+    historyLayout->addWidget(historyTextEdit);
+    historyLayout->addWidget(clearHistoryBtn);
+    // 更新历史记录显示
+    auto updateHistoryDisplay = [router, historyTextEdit]() {
+        QString historyText = "当前路由: " + router->currentRouteKey() + "\n";
+        historyText += "历史记录数: " + QString::number(router->historyCount()) + "\n";
+        // 这里可以添加更多历史信息
+        historyTextEdit->setText(historyText);
+    };
+    // 连接路由信号
+    connect(router,
+            &NNavigationRouter::routeChanged,
+            [updateHistoryDisplay](const QString& pageKey, const QVariantMap& params) {
+                qDebug() << "路由变化到:" << pageKey << "参数:" << params;
+                updateHistoryDisplay();
+            });
+    connect(router,
+            &NNavigationRouter::routeBack,
+            [updateHistoryDisplay](const QString& fromPageKey, const QString& toPageKey, const QVariantMap& params) {
+                qDebug() << "路由返回从:" << fromPageKey << "到:" << toPageKey << "参数:" << params;
+                updateHistoryDisplay();
+            });
+    connect(router, &NNavigationRouter::navigationStateChanged, [updateHistoryDisplay](bool hasHistory) {
+        qDebug() << "导航状态变化, 有历史记录:" << hasHistory;
+        updateHistoryDisplay();
+    });
+    // 初始化历史显示
+    updateHistoryDisplay();
+    // 添加到控制面板
+    controlLayout->addWidget(navControlGroup);
+    controlLayout->addWidget(guardControlGroup);
+    controlLayout->addWidget(historyGroup);
+    controlLayout->addStretch();
+
+    // 添加到主布局
+    contentLayout->addWidget(navigationBar);
+    contentLayout->addWidget(contentStack, 2);
+    contentLayout->addWidget(controlPanel, 1);
+
+    sectionLayout->addLayout(contentLayout);
+
+    return demoSection;
 }
 
 QWidget* NavigationExample::createNavigationViews() {

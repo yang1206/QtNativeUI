@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QTimer>
 
+#include "../../include/QtNativeUI/NNavigationRouter.h"
 #include "QtNativeUI/NAutoSuggestBox.h"
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NMenu.h"
@@ -14,9 +15,9 @@
 #include "QtNativeUI/NToolButton.h"
 #include "nnavigationfooterdelegate_p.h"
 #include "nnavigationfootermodel_p.h"
+#include "nnavigationmanager.h"
 #include "nnavigationmodel_p.h"
 #include "nnavigationnode_p.h"
-#include "nnavigationrouter.h"
 #include "nnavigationtreeview_p.h"
 
 NNavigationBarPrivate::NNavigationBarPrivate(QObject* parent) : QObject{parent} {}
@@ -32,12 +33,6 @@ void NNavigationBarPrivate::onNavigationButtonClicked() {
     }
 }
 
-void NNavigationBarPrivate::onNavigationRouteBack(QVariantMap routeData) {
-    Q_Q(NNavigationBar);
-    QString pageKey = routeData.value("NPageKey").toString();
-    q->navigation(pageKey, false);
-}
-
 void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isLogRoute) {
     Q_Q(NNavigationBar);
     if (index.isValid()) {
@@ -47,29 +42,18 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
         }
 
         if (node->getIsExpanderNode()) {
-            if (_currentDisplayMode == NNavigationType::Compact) {
-                if (node->getIsHasPageChild()) {
-            QMenu* menu = _compactMenuMap.value(node);
-                    if (menu) {
-                        QPoint nodeTopRight =
-                            _navigationView->mapToGlobal(_navigationView->visualRect(node->getModelIndex()).topRight());
-                        menu->popup(QPoint(nodeTopRight.x() + 10, nodeTopRight.y()));
-                    }
-                }
-            } else {
-                if (node->getIsHasChild()) {
-                    QVariantMap data;
-                    if (_navigationView->isExpanded(index)) {
-              data.insert("Collapse", QVariant::fromValue(node));
-                        node->setIsExpanded(false);
-                        _navigationView->navigationNodeStateChange(data);
-                        _navigationView->collapse(index);
-                    } else {
-             data.insert("Expand", QVariant::fromValue(node));
-                        node->setIsExpanded(true);
-                        _navigationView->navigationNodeStateChange(data);
-                        _navigationView->expand(index);
-                    }
+            if (node->getIsHasChild()) {
+                QVariantMap data;
+                if (_navigationView->isExpanded(index)) {
+                    data.insert("Collapse", QVariant::fromValue(node));
+                    node->setIsExpanded(false);
+                    _navigationView->navigationNodeStateChange(data);
+                    _navigationView->collapse(index);
+                } else {
+                    data.insert("Expand", QVariant::fromValue(node));
+                    node->setIsExpanded(true);
+                    _navigationView->navigationNodeStateChange(data);
+                    _navigationView->expand(index);
                 }
             }
         } else {
@@ -80,41 +64,20 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
 
             NNavigationNode* selectedNode = _navigationModel->getSelectedNode();
             if (selectedNode != node) {
-                if (isLogRoute) {
-                    QVariantMap routeData = QVariantMap();
-                    QString     pageKey;
-                    if (selectedNode) {
-                        pageKey.append(selectedNode->getNodeKey());
-                    } else {
-                        if (_footerModel->getSelectedNode()) {
-                            pageKey.append(_footerModel->getSelectedNode()->getNodeKey());
-                        }
-                    }
-                    routeData.insert("NPageKey", pageKey);
-
-                    NNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRouteBack", routeData);
-                }
-
                 Q_EMIT q->navigationNodeClicked(NNavigationType::PageNode, node->getNodeKey());
+                // 使用新的路由系统记录导航
+                if (isLogRoute) {
+                    QString     pageKey = node->getNodeKey();
+                    QVariantMap params;
+                    params["source"] = "treeView";
 
-                if (_footerModel->getSelectedNode()) {
-                    _footerView->clearSelection();
-                    QVariantMap footerPostData = QVariantMap();
-                    footerPostData.insert("SelectMarkChanged", true);
-                    footerPostData.insert("LastSelectedNode", QVariant::fromValue(_footerModel->getSelectedNode()));
-                    footerPostData.insert("SelectedNode", QVariant::fromValue(nullptr));
-                    _footerModel->setSelectedNode(nullptr);
-                    _footerDelegate->navigationNodeStateChange(footerPostData);
+                    // 使用路由器导航
+                    NNavigationRouter::getInstance()->navigateTo(pageKey, params);
                 }
 
                 QVariantMap postData = QVariantMap();
                 postData.insert("SelectMarkChanged", true);
-                if (_navigationModel->getSelectedExpandedNode()) {
-                    postData.insert("LastSelectedNode",
-                                    QVariant::fromValue(_navigationModel->getSelectedExpandedNode()));
-                } else {
-                    postData.insert("LastSelectedNode", QVariant::fromValue(_navigationModel->getSelectedNode()));
-                }
+                postData.insert("LastSelectedNode", QVariant::fromValue(selectedNode));
 
                 if (_currentDisplayMode == NNavigationType::Compact) {
                     NNavigationNode* originNode = node->getOriginalNode();
@@ -157,24 +120,17 @@ void NNavigationBarPrivate::onFooterViewClicked(const QModelIndex& index, bool i
     }
 
     NNavigationNode* selectedNode = _footerModel->getSelectedNode();
-
     if (selectedNode != node) {
-       if (isLogRoute && node->getIsHasFooterPage()) {
-            QVariantMap routeData = QVariantMap();
-            QString     pageKey;
-            if (selectedNode) {
-                pageKey.append(selectedNode->getNodeKey());
-            } else {
-                if (_navigationModel->getSelectedNode()) {
-                    pageKey.append(_navigationModel->getSelectedNode()->getNodeKey());
-                }
-            }
-            routeData.insert("NPageKey", pageKey);
+        Q_EMIT q->navigationNodeClicked(NNavigationType::PageNode, node->getNodeKey());
+        // 使用新的路由系统记录导航
+        if (isLogRoute) {
+            QString     pageKey = node->getNodeKey();
+            QVariantMap params;
+            params["source"] = "footerView";
 
-            NNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRouteBack", routeData);
+            // 使用路由器导航
+            NNavigationRouter::getInstance()->navigateTo(pageKey, params);
         }
-
-        Q_EMIT q->navigationNodeClicked(NNavigationType::FooterNode, node->getNodeKey());
 
         if (node->getIsHasFooterPage()) {
             if (_navigationModel->getSelectedNode() || _navigationModel->getSelectedExpandedNode()) {
@@ -321,19 +277,18 @@ void NNavigationBarPrivate::_addStackedPage(QWidget* page, QString pageKey) {
     Q_EMIT q->navigationNodeAdded(NNavigationType::PageNode, pageKey, page);
 
     NNavigationNode* node = _navigationModel->getNavigationNode(pageKey);
-
-    QVariantMap suggestData;
-    suggestData.insert("NNodeType", "Stacked");
-    suggestData.insert("NPageKey", pageKey);
-    QString suggestKey;
-    if (node->getIcon() != NRegularIconType::None) {
-        suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
-    } else if (node->getFilledIcon() != NFilledIconType::None) {
-        suggestKey = _navigationSuggestBox->addSuggestion(node->getFilledIcon(), node->getNodeTitle(), suggestData);
-    } else {
-        suggestKey = _navigationSuggestBox->addSuggestion(node->getNodeTitle(), suggestData);
+    if (node) {
+        NPageComponent* pageComponent = qobject_cast<NPageComponent*>(page);
+        if (pageComponent) {
+            pageComponent->setRouteKey(pageKey);
+            NNavigationManager::getInstance()->registerPageComponent(pageComponent);
+        }
+        // 添加搜索建议
+        if (_navigationSuggestBox && !node->getNodeTitle().isEmpty()) {
+            QString suggestKey = _navigationSuggestBox->addSuggestion(node->getNodeTitle());
+            _suggestKeyMap.insert(pageKey, suggestKey);
+        }
     }
-    _suggestKeyMap.insert(pageKey, suggestKey);
 }
 
 void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footerKey) {
@@ -342,21 +297,13 @@ void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footerKey) {
 
     if (page) {
         page->setProperty("NPageKey", footerKey);
+
+        NPageComponent* pageComponent = qobject_cast<NPageComponent*>(page);
+        if (pageComponent) {
+            pageComponent->setRouteKey(footerKey);
+            NNavigationManager::getInstance()->registerPageComponent(pageComponent);
+        }
     }
-    _footerView->setFixedHeight(40 * _footerModel->getFooterNodeCount());
-    NNavigationNode* node = _footerModel->getNavigationNode(footerKey);
-    QVariantMap      suggestData;
-    suggestData.insert("NNodeType", "Footer");
-    suggestData.insert("NPageKey", footerKey);
-    QString suggestKey;
-    if (node->getIcon() != NRegularIconType::None) {
-        suggestKey = _navigationSuggestBox->addSuggestion(node->getIcon(), node->getNodeTitle(), suggestData);
-    } else if (node->getFilledIcon() != NFilledIconType::None) {
-        suggestKey = _navigationSuggestBox->addSuggestion(node->getFilledIcon(), node->getNodeTitle(), suggestData);
-    } else {
-        suggestKey = _navigationSuggestBox->addSuggestion(node->getNodeTitle(), suggestData);
-    }
-    _suggestKeyMap.insert(footerKey, suggestKey);
 }
 
 void NNavigationBarPrivate::_raiseNavigationBar() {

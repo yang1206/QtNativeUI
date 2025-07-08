@@ -5,6 +5,7 @@
 #include <QPropertyAnimation>
 #include <QResizeEvent>
 #include <QVBoxLayout>
+#include "../../include/QtNativeUI/NNavigationRouter.h"
 #include "../private/nnavigationbar_p.h"
 #include "../private/nnavigationfooterdelegate_p.h"
 #include "../private/nnavigationfootermodel_p.h"
@@ -15,6 +16,7 @@
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NToolButton.h"
 #include "nbaselistview.h"
+#include "nnavigationmanager.h"
 
 #include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NMenu.h"
@@ -29,6 +31,13 @@ NNavigationBar::NNavigationBar(QWidget* parent) : QWidget{parent}, d_ptr(new NNa
         d->_themeMode = themeMode;
         update();
     });
+
+    NNavigationManager::getInstance()->registerNavigationBar(this);
+    // 连接路由器信号
+    connect(
+        NNavigationRouter::getInstance(), &NNavigationRouter::routeChanged, this, &NNavigationBar::handleRouteChanged);
+    connect(NNavigationRouter::getInstance(), &NNavigationRouter::routeBack, this, &NNavigationBar::handleRouteBack);
+
     setFixedWidth(300);
     d->_pIsTransparent   = true;
     d->_pIsSearchVisible = true;
@@ -489,6 +498,100 @@ NNavigationType::NodeOperateReturnType NNavigationBar::addFooterNode(QString    
     return returnType;
 }
 
+NNavigationType::NodeOperateReturnType NNavigationBar::addPageComponent(NPageComponent*        page,
+                                                                        NRegularIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    if (!page) {
+        return NNavigationType::PageInvalid;
+    }
+
+    QString                                pageKey;
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addPageNode(page->pageTitle(), pageKey, icon);
+    if (returnType == NNavigationType::Success) {
+        // 设置页面的路由键
+        page->setRouteKey(pageKey);
+        // 注册到导航管理器
+        NNavigationManager::getInstance()->registerPageComponent(page);
+        d->_pageMetaMap.insert(pageKey, page->metaObject());
+        d->_addStackedPage(page, pageKey);
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType NNavigationBar::addPageComponent(NPageComponent*       page,
+                                                                        NFilledIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    if (!page) {
+        return NNavigationType::PageInvalid;
+    }
+
+    QString                                pageKey;
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addPageNode(page->pageTitle(), pageKey, icon);
+    if (returnType == NNavigationType::Success) {
+        // 设置页面的路由键
+        page->setRouteKey(pageKey);
+        // 注册到导航管理器
+        NNavigationManager::getInstance()->registerPageComponent(page);
+        d->_pageMetaMap.insert(pageKey, page->metaObject());
+        d->_addStackedPage(page, pageKey);
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationBar::addPageComponent(NPageComponent* page, const QString& expanderKey, NRegularIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    if (!page) {
+        return NNavigationType::PageInvalid;
+    }
+
+    QString                                pageKey;
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addPageNode(page->pageTitle(), pageKey, expanderKey, icon);
+    if (returnType == NNavigationType::Success) {
+        // 设置页面的路由键
+        page->setRouteKey(pageKey);
+        // 注册到导航管理器
+        NNavigationManager::getInstance()->registerPageComponent(page);
+        d->_pageMetaMap.insert(pageKey, page->metaObject());
+        d->_addStackedPage(page, pageKey);
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+    return returnType;
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationBar::addPageComponent(NPageComponent* page, const QString& expanderKey, NFilledIconType::Icon icon) {
+    Q_D(NNavigationBar);
+    if (!page) {
+        return NNavigationType::PageInvalid;
+    }
+
+    QString                                pageKey;
+    NNavigationType::NodeOperateReturnType returnType =
+        d->_navigationModel->addPageNode(page->pageTitle(), pageKey, expanderKey, icon);
+    if (returnType == NNavigationType::Success) {
+        // 设置页面的路由键
+        page->setRouteKey(pageKey);
+
+        // 注册到导航管理器
+        NNavigationManager::getInstance()->registerPageComponent(page);
+
+        d->_pageMetaMap.insert(pageKey, page->metaObject());
+        d->_addStackedPage(page, pageKey);
+        d->_initNodeModelIndex(QModelIndex());
+        d->_resetNodeSelected();
+    }
+    return returnType;
+}
+
 bool NNavigationBar::getNavigationNodeIsExpanded(QString expanderKey) const {
     Q_D(const NNavigationBar);
     NNavigationNode* node = d->_navigationModel->getNavigationNode(expanderKey);
@@ -627,6 +730,17 @@ void NNavigationBar::setDisplayMode(NNavigationType::NavigationDisplayMode displ
 
     d->_doComponentAnimation(displayMode, isAnimation);
     d->_raiseNavigationBar();
+}
+
+void NNavigationBar::handleRouteChanged(const QString& pageKey, const QVariantMap& params) {
+    Q_UNUSED(params);
+    navigation(pageKey, false);
+}
+
+void NNavigationBar::handleRouteBack(const QString& fromPageKey, const QString& toPageKey, const QVariantMap& params) {
+    Q_UNUSED(fromPageKey);
+    Q_UNUSED(params);
+    navigation(toPageKey, false);
 }
 
 void NNavigationBar::paintEvent(QPaintEvent* event) {
