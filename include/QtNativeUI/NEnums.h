@@ -183,10 +183,11 @@ enum NodeOperateReturnType {
 Q_ENUM_CREATE(NodeOperateReturnType)
 
 enum PageTransitionType {
-    SlideVertical,   // 垂直滑动（默认，从下方滑入）
-    SlideHorizontal, // 水平滑动（从右侧滑入）
-    Fade,            // 淡入淡出
-    None             // 无动画
+    NoTransition,    // 无过渡效果
+    FadeTransition,  // 淡入淡出
+    SlideHorizontal, // 水平滑动
+    SlideVertical,   // 垂直滑动
+    ZoomTransition   // 缩放过渡
 };
 Q_ENUM_CREATE(PageTransitionType)
 

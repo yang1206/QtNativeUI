@@ -26,12 +26,14 @@ class NNavigationViewPrivate : public QObject {
     void handleNavigationDisplayMode();
     void setDisplayMode(NNavigationType::NavigationDisplayMode mode);
     void executePageTransition(QWidget* targetWidget);
+    void setupRouterConnections();
 
   public slots:
     void onNavigationNodeClicked(NNavigationType::NavigationNodeType nodeType, QString nodeKey);
     void onNavigationNodeAdded(NNavigationType::NavigationNodeType nodeType, QString nodeKey, QWidget* page);
     void onNavigationNodeRemoved(NNavigationType::NavigationNodeType nodeType, QString nodeKey);
     void onDisplayModeChanged(NNavigationType::NavigationDisplayMode displayMode);
+    void onRouteChanged(const QString& pageKey, const QVariantMap& params);
 
   private:
     NNavigationBar* _navigationBar{nullptr};

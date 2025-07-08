@@ -7,6 +7,7 @@
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 
+class NPageComponent;
 class NNavigationViewPrivate;
 class QWidget;
 
@@ -66,6 +67,15 @@ class QTNATIVEUI_EXPORT NNavigationView : public QWidget {
     NNavigationType::NodeOperateReturnType
     addFooterNode(QString footerTitle, QWidget* page, QString& footerKey, int keyPoints, NFilledIconType::Icon icon);
 
+    NNavigationType::NodeOperateReturnType addPageComponent(NPageComponent*        page,
+                                                            NRegularIconType::Icon icon = NRegularIconType::None);
+    NNavigationType::NodeOperateReturnType addPageComponent(NPageComponent* page, NFilledIconType::Icon icon);
+    NNavigationType::NodeOperateReturnType addPageComponent(NPageComponent*        page,
+                                                            QString                targetExpanderKey,
+                                                            NRegularIconType::Icon icon = NRegularIconType::None);
+    NNavigationType::NodeOperateReturnType
+    addPageComponent(NPageComponent* page, QString targetExpanderKey, NFilledIconType::Icon icon);
+
     bool getNavigationNodeIsExpanded(QString expanderKey) const;
     void expandNavigationNode(QString expanderKey);
     void collpaseNavigationNode(QString expanderKey);
@@ -77,6 +87,15 @@ class QTNATIVEUI_EXPORT NNavigationView : public QWidget {
     void navigation(QString pageKey, bool isLogClicked = true);
     void setNavigationBarVisible(bool visible);
     bool isNavigationBarVisible() const;
+
+    // 路由系统方法
+    void        navigateTo(const QString& pageKey, const QVariantMap& params = {});
+    void        navigateBack(const QVariantMap& params = {});
+    QString     currentRouteKey() const;
+    QVariantMap currentRouteParams() const;
+    int         historyCount() const;
+    void        clearNavigationHistory();
+    bool        hasNavigationHistory() const;
 
     // 动画设置
     void setPageTransitionDuration(int duration);
@@ -93,6 +112,9 @@ class QTNATIVEUI_EXPORT NNavigationView : public QWidget {
     void navigationNodeRemoved(NNavigationType::NavigationNodeType nodeType, QString nodeKey);
     void displayModeChanged(NNavigationType::NavigationDisplayMode displayMode);
     void currentChanged(int index);
+    void routeChanged(const QString& pageKey, const QVariantMap& params);
+    void routeBack(const QString& fromPageKey, const QString& toPageKey, const QVariantMap& params);
+    void navigationStateChanged(bool hasHistory);
 
   protected:
     void resizeEvent(QResizeEvent* event) override;

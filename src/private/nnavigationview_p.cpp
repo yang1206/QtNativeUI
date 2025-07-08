@@ -1,13 +1,19 @@
 #include "nnavigationview_p.h"
+
+#include <QGraphicsOpacityEffect>
+
 #include "QtNativeUI/NNavigationBar.h"
 #include "QtNativeUI/NNavigationView.h"
 #include "QtNativeUI/NStackedWidget.h"
 #include "QtNativeUI/NTheme.h"
 
 #include <QHBoxLayout>
+#include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QResizeEvent>
 #include <QTimer>
+
+#include "QtNativeUI/NNavigationRouter.h"
 
 NNavigationViewPrivate::NNavigationViewPrivate(QObject* parent) : QObject(parent) { _themeMode = nTheme->themeMode(); }
 
@@ -18,9 +24,7 @@ void NNavigationViewPrivate::setupUI() {
 
     _navigationBar = new NNavigationBar(q);
 
-
     _stackedWidget = new NStackedWidget(q);
-
 
     _mainLayout = new QHBoxLayout(q);
     _mainLayout->setSpacing(0);
@@ -37,8 +41,16 @@ void NNavigationViewPrivate::setupUI() {
 
     connect(nTheme, &NTheme::themeModeChanged, q, [this](NThemeType::ThemeMode themeMode) { _themeMode = themeMode; });
 
-    _pDisplayMode  = NNavigationType::Maximal;
-    _isInitialized = true;
+    setupRouterConnections();
+    _pDisplayMode        = NNavigationType::Maximal;
+    _pPageTransitionType = NNavigationType::SlideVertical;
+    _isInitialized       = true;
+}
+
+void NNavigationViewPrivate::setupRouterConnections() {
+    // 连接路由器信号
+    NNavigationRouter* router = NNavigationRouter::getInstance();
+    connect(router, &NNavigationRouter::routeChanged, this, &NNavigationViewPrivate::onRouteChanged);
 }
 
 void NNavigationViewPrivate::updateLayout() {
@@ -46,6 +58,15 @@ void NNavigationViewPrivate::updateLayout() {
         return;
 
     _mainLayout->setContentsMargins(_isNavigationBarVisible ? 5 : 0, 0, 0, 0);
+}
+
+void NNavigationViewPrivate::onRouteChanged(const QString& pageKey, const QVariantMap& params) {
+    Q_UNUSED(params);
+
+    if (_pageMap.contains(pageKey)) {
+        Q_Q(NNavigationView);
+        q->navigation(pageKey, false);
+    }
 }
 
 void NNavigationViewPrivate::handleNavigationDisplayMode() {
@@ -86,9 +107,7 @@ void NNavigationViewPrivate::setDisplayMode(NNavigationType::NavigationDisplayMo
 void NNavigationViewPrivate::onNavigationNodeClicked(NNavigationType::NavigationNodeType nodeType, QString nodeKey) {
     Q_Q(NNavigationView);
 
-
     emit q->navigationNodeClicked(nodeType, nodeKey);
-
 
     QWidget* page = _pageMap.value(nodeKey);
     if (!page) {
@@ -163,51 +182,74 @@ void NNavigationViewPrivate::onDisplayModeChanged(NNavigationType::NavigationDis
 }
 
 void NNavigationViewPrivate::executePageTransition(QWidget* targetWidget) {
-    if (_pPageTransitionType == NNavigationType::None) {
+    if (!targetWidget || _pPageTransitionType == NNavigationType::NoTransition)
         return;
-    }
 
-    QPropertyAnimation* animation = nullptr;
+    // 设置目标页面的初始状态
+    targetWidget->setVisible(true);
+
+    // 根据过渡类型执行不同的动画
     switch (_pPageTransitionType) {
-        case NNavigationType::SlideVertical: {
-            animation       = new QPropertyAnimation(targetWidget, "pos");
-            QPoint finalPos = targetWidget->pos();
-            QPoint startPos = finalPos;
-            startPos.setY(finalPos.y() + 80);
-            animation->setStartValue(startPos);
-            animation->setEndValue(finalPos);
+        case NNavigationType::FadeTransition: {
+            QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(targetWidget);
+            targetWidget->setGraphicsEffect(effect);
+            effect->setOpacity(0);
+
+            QPropertyAnimation* animation = new QPropertyAnimation(effect, "opacity");
+            animation->setDuration(_pageTransitionDuration);
+            animation->setStartValue(0.0);
+            animation->setEndValue(1.0);
+            animation->setEasingCurve(QEasingCurve::OutCubic);
+            animation->start(QAbstractAnimation::DeleteWhenStopped);
             break;
         }
         case NNavigationType::SlideHorizontal: {
-            animation       = new QPropertyAnimation(targetWidget, "pos");
-            QPoint finalPos = targetWidget->pos();
-            QPoint startPos = finalPos;
-            startPos.setX(finalPos.x() + 80);
-            animation->setStartValue(startPos);
-            animation->setEndValue(finalPos);
+            QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
+            animation->setDuration(_pageTransitionDuration);
+            animation->setStartValue(QPoint(targetWidget->width(), 0));
+            animation->setEndValue(QPoint(0, 0));
+            animation->setEasingCurve(QEasingCurve::OutCubic);
+            animation->start(QAbstractAnimation::DeleteWhenStopped);
             break;
         }
-        case NNavigationType::Fade: {
-            animation = new QPropertyAnimation(targetWidget, "windowOpacity");
-            targetWidget->setWindowOpacity(0);
-            animation->setStartValue(0.0);
-            animation->setEndValue(1.0);
+        case NNavigationType::SlideVertical: {
+            QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
+            animation->setDuration(_pageTransitionDuration);
+            animation->setStartValue(QPoint(0, targetWidget->height()));
+            animation->setEndValue(QPoint(0, 0));
+            animation->setEasingCurve(QEasingCurve::OutCubic);
+            animation->start(QAbstractAnimation::DeleteWhenStopped);
+            break;
+        }
+        case NNavigationType::ZoomTransition: {
+            QPropertyAnimation* scaleAnimation = new QPropertyAnimation(targetWidget, "geometry");
+            QRect               startRect      = targetWidget->geometry();
+            QRect               endRect        = startRect;
+            // 开始时缩小到中心点
+            startRect.setWidth(startRect.width() * 0.8);
+            startRect.setHeight(startRect.height() * 0.8);
+            startRect.moveCenter(endRect.center());
+            scaleAnimation->setDuration(_pageTransitionDuration);
+            scaleAnimation->setStartValue(startRect);
+            scaleAnimation->setEndValue(endRect);
+            scaleAnimation->setEasingCurve(QEasingCurve::OutCubic);
+            QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(targetWidget);
+            targetWidget->setGraphicsEffect(effect);
+            effect->setOpacity(0);
+
+            QPropertyAnimation* opacityAnimation = new QPropertyAnimation(effect, "opacity");
+            opacityAnimation->setDuration(_pageTransitionDuration);
+            opacityAnimation->setStartValue(0.0);
+            opacityAnimation->setEndValue(1.0);
+            opacityAnimation->setEasingCurve(QEasingCurve::OutCubic);
+
+            QParallelAnimationGroup* group = new QParallelAnimationGroup;
+            group->addAnimation(scaleAnimation);
+            group->addAnimation(opacityAnimation);
+            group->start(QAbstractAnimation::DeleteWhenStopped);
             break;
         }
         default:
-            animation       = new QPropertyAnimation(targetWidget, "pos");
-            QPoint finalPos = targetWidget->pos();
-            QPoint startPos = finalPos;
-            startPos.setY(finalPos.y() + 80);
-
-            animation->setStartValue(startPos);
-            animation->setEndValue(finalPos);
             break;
-    }
-
-    if (animation) {
-        animation->setEasingCurve(QEasingCurve::OutCubic);
-        animation->setDuration(_pageTransitionDuration);
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }

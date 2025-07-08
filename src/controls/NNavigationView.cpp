@@ -5,6 +5,8 @@
 
 #include <QResizeEvent>
 
+#include "QtNativeUI/NNavigationRouter.h"
+
 NNavigationView::NNavigationView(QWidget* parent) : QWidget(parent), d_ptr(new NNavigationViewPrivate()) {
     Q_D(NNavigationView);
     d->q_ptr = this;
@@ -12,6 +14,11 @@ NNavigationView::NNavigationView(QWidget* parent) : QWidget(parent), d_ptr(new N
 
     setMinimumWidth(300);
     setMinimumHeight(200);
+
+    NNavigationRouter* router = NNavigationRouter::getInstance();
+    connect(router, &NNavigationRouter::routeChanged, this, &NNavigationView::routeChanged);
+    connect(router, &NNavigationRouter::routeBack, this, &NNavigationView::routeBack);
+    connect(router, &NNavigationRouter::navigationStateChanged, this, &NNavigationView::navigationStateChanged);
 }
 
 NNavigationView::~NNavigationView() {}
@@ -148,6 +155,30 @@ NNavigationType::NodeOperateReturnType NNavigationView::addFooterNode(QString   
     return d->_navigationBar->addFooterNode(footerTitle, page, footerKey, keyPoints, icon);
 }
 
+NNavigationType::NodeOperateReturnType NNavigationView::addPageComponent(NPageComponent*        page,
+                                                                         NRegularIconType::Icon icon) {
+    Q_D(NNavigationView);
+    return d->_navigationBar->addPageComponent(page, icon);
+}
+
+NNavigationType::NodeOperateReturnType NNavigationView::addPageComponent(NPageComponent*       page,
+                                                                         NFilledIconType::Icon icon) {
+    Q_D(NNavigationView);
+    return d->_navigationBar->addPageComponent(page, icon);
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationView::addPageComponent(NPageComponent* page, QString targetExpanderKey, NRegularIconType::Icon icon) {
+    Q_D(NNavigationView);
+    return d->_navigationBar->addPageComponent(page, targetExpanderKey, icon);
+}
+
+NNavigationType::NodeOperateReturnType
+NNavigationView::addPageComponent(NPageComponent* page, QString targetExpanderKey, NFilledIconType::Icon icon) {
+    Q_D(NNavigationView);
+    return d->_navigationBar->addPageComponent(page, targetExpanderKey, icon);
+}
+
 bool NNavigationView::getNavigationNodeIsExpanded(QString expanderKey) const {
     Q_D(const NNavigationView);
     return d->_navigationBar->getNavigationNodeIsExpanded(expanderKey);
@@ -182,6 +213,26 @@ void NNavigationView::navigation(QString pageKey, bool isLogClicked) {
     Q_D(NNavigationView);
     d->_navigationBar->navigation(pageKey, isLogClicked);
 }
+
+void NNavigationView::navigateTo(const QString& pageKey, const QVariantMap& params) {
+    NNavigationRouter::getInstance()->navigateTo(pageKey, params);
+}
+
+void NNavigationView::navigateBack(const QVariantMap& params) {
+    NNavigationRouter::getInstance()->navigateBack(params);
+}
+
+QString NNavigationView::currentRouteKey() const { return NNavigationRouter::getInstance()->currentRouteKey(); }
+
+QVariantMap NNavigationView::currentRouteParams() const {
+    return NNavigationRouter::getInstance()->currentRouteParams();
+}
+
+int NNavigationView::historyCount() const { return NNavigationRouter::getInstance()->historyCount(); }
+
+void NNavigationView::clearNavigationHistory() { NNavigationRouter::getInstance()->clearHistory(); }
+
+bool NNavigationView::hasNavigationHistory() const { return NNavigationRouter::getInstance()->historyCount() > 0; }
 
 void NNavigationView::setNavigationBarVisible(bool visible) {
     Q_D(NNavigationView);
