@@ -75,6 +75,16 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
                     NNavigationRouter::getInstance()->navigateTo(pageKey, params);
                 }
 
+                if (_footerModel->getSelectedNode()) {
+                    QVariantMap footerPostData = QVariantMap();
+                    footerPostData.insert("SelectMarkChanged", true);
+                    footerPostData.insert("LastSelectedNode", QVariant::fromValue(_footerModel->getSelectedNode()));
+                    footerPostData.insert("SelectedNode", QVariant::fromValue(nullptr));
+                    _footerView->clearSelection();
+                    _footerDelegate->navigationNodeStateChange(footerPostData);
+                    _footerModel->setSelectedNode(nullptr);
+                }
+
                 QVariantMap postData = QVariantMap();
                 postData.insert("SelectMarkChanged", true);
                 postData.insert("LastSelectedNode", QVariant::fromValue(selectedNode));
@@ -304,6 +314,17 @@ void NNavigationBarPrivate::_addFooterPage(QWidget* page, QString footerKey) {
             NNavigationManager::getInstance()->registerPageComponent(pageComponent);
         }
     }
+    NNavigationNode* node = _footerModel->getNavigationNode(footerKey);
+    if (node && _navigationSuggestBox && !node->getNodeTitle().isEmpty()) {
+        QVariantMap suggestData;
+        suggestData["NNodeType"] = "Footer";
+        suggestData["NPageKey"]  = footerKey;
+        QString suggestKey       = _navigationSuggestBox->addSuggestion(node->getNodeTitle(), suggestData);
+        _suggestKeyMap.insert(footerKey, suggestKey);
+    }
+    _footerView->setVisible(true);
+    _footerView->setFixedHeight(40 * _footerModel->getFooterNodeCount());
+    _footerView->viewport()->update();
 }
 
 void NNavigationBarPrivate::_raiseNavigationBar() {

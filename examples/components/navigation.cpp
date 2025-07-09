@@ -2,8 +2,6 @@
 
 #include <QDateTime>
 #include <QGroupBox>
-#include <QHBoxLayout>
-#include <QLabel>
 #include <QVBoxLayout>
 #include <QtNativeUI/NIcon.h>
 #include <QtNativeUI/NNavigationBar.h>
@@ -14,10 +12,12 @@
 #include <QtNativeUI/NToolButton.h>
 
 #include "QtNativeUI/NCheckBox.h"
+#include "QtNativeUI/NComboBox.h"
 #include "QtNativeUI/NLabel.h"
 #include "QtNativeUI/NNavigationRouter.h"
 #include "QtNativeUI/NNavigationView.h"
 #include "QtNativeUI/NScrollArea.h"
+#include "QtNativeUI/NSlider.h"
 #include "widgets/ExampleSection.h"
 
 DemoPageComponent::DemoPageComponent(const QString& title, QWidget* parent)
@@ -35,6 +35,20 @@ DemoPageComponent::DemoPageComponent(const QString& title, QWidget* parent)
     // 添加一些说明文本
     NLabel* infoLabel = new NLabel("此页面演示路由生命周期和参数传递", NLabelType::Body);
     layout->addWidget(infoLabel);
+
+    // 添加路由键显示
+    QHBoxLayout* keyLayout = new QHBoxLayout();
+    keyLayout->addWidget(new NLabel("路由键:", NLabelType::Body));
+    NLabel* keyLabel = new NLabel("未设置", NLabelType::Body);
+    keyLabel->setObjectName("routeKeyLabel");
+    keyLayout->addWidget(keyLabel);
+    keyLayout->addStretch();
+    layout->addLayout(keyLayout);
+    connect(this, &NPageComponent::routeKeyChanged, this, [this, keyLabel]() {
+        keyLabel->setText(routeKey());
+        m_logTextEdit->append(QString("路由键设置为: %1").arg(routeKey()));
+    });
+
     layout->addStretch();
 }
 
@@ -726,35 +740,18 @@ QWidget* NavigationExample::createNavigationViews() {
         // 设置头部组件
         navigationView->setHeaderWidget(new NLabel("导航示例", NLabelType::Subtitle));
 
-        // 创建一些内容页面
-        QWidget*     homePage   = new QWidget;
-        QVBoxLayout* homeLayout = new QVBoxLayout(homePage);
-        homeLayout->addWidget(new NLabel("首页内容", NLabelType::Title));
-        homeLayout->addWidget(new NLabel("这是首页的详细内容展示区域", NLabelType::Body));
+        DemoPageComponent* homePage      = new DemoPageComponent("首页", demoSection);
+        DemoPageComponent* documentsPage = new DemoPageComponent("文档", demoSection);
+        DemoPageComponent* settingsPage  = new DemoPageComponent("设置", demoSection);
+        DemoPageComponent* profilePage   = new DemoPageComponent("个人资料", demoSection);
 
-        QWidget*     documentsPage   = new QWidget;
-        QVBoxLayout* documentsLayout = new QVBoxLayout(documentsPage);
-        documentsLayout->addWidget(new NLabel("文档页面", NLabelType::Title));
-        documentsLayout->addWidget(new NLabel("这里展示文档相关内容", NLabelType::Body));
-
-        QWidget*     settingsPage   = new QWidget;
-        QVBoxLayout* settingsLayout = new QVBoxLayout(settingsPage);
-        settingsLayout->addWidget(new NLabel("设置页面", NLabelType::Title));
-        settingsLayout->addWidget(new NLabel("系统设置选项将在此处显示", NLabelType::Body));
-
-        QWidget*     profilePage   = new QWidget;
-        QVBoxLayout* profileLayout = new QVBoxLayout(profilePage);
-        profileLayout->addWidget(new NLabel("个人资料", NLabelType::Title));
-        profileLayout->addWidget(new NLabel("用户个人资料信息", NLabelType::Body));
-
-        // 添加导航节点
         QString expanderKey;
         navigationView->addExpanderNode("系统", expanderKey, NRegularIconType::Settings24Regular);
 
         // 添加页面节点 - 使用 Regular 图标
-        navigationView->addPageNode("首页", homePage, NRegularIconType::Home24Regular);
-        navigationView->addPageNode("文档", documentsPage, NRegularIconType::Document24Regular);
-        navigationView->addPageNode("设置", settingsPage, expanderKey, NRegularIconType::Settings24Regular);
+        navigationView->addPageComponent(homePage, NRegularIconType::Home24Regular);
+        navigationView->addPageComponent(documentsPage, NRegularIconType::Document24Regular);
+        navigationView->addPageComponent(settingsPage, expanderKey, NRegularIconType::Settings24Regular);
 
         // 添加页脚节点
         QString footerKey;
@@ -767,6 +764,49 @@ QWidget* NavigationExample::createNavigationViews() {
                     qDebug() << "节点被点击:" << nodeType << nodeKey;
                 });
 
+        QWidget*     controlPanel        = new QWidget(demoSection);
+        QHBoxLayout* controlLayout       = new QHBoxLayout(controlPanel);
+        NPushButton* navigateHomeBtn     = new NPushButton("导航到首页", controlPanel);
+        NPushButton* navigateDocsBtn     = new NPushButton("导航到文档", controlPanel);
+        NPushButton* navigateSettingsBtn = new NPushButton("导航到设置", controlPanel);
+        NPushButton* navigateProfileBtn  = new NPushButton("导航到个人资料", controlPanel);
+        connect(navigateHomeBtn, &NPushButton::clicked, [homePage]() {
+            QVariantMap params;
+            params["source"] = "导航按钮";
+            params["time"]   = QDateTime::currentDateTime().toString("hh:mm:ss");
+            homePage->navigateTo(homePage->routeKey(), params);
+        });
+        connect(navigateDocsBtn, &NPushButton::clicked, [documentsPage]() {
+            QVariantMap params;
+            params["source"] = "导航按钮";
+            params["time"]   = QDateTime::currentDateTime().toString("hh:mm:ss");
+            params["docId"]  = "doc123";
+            documentsPage->navigateTo(documentsPage->routeKey(), params);
+        });
+        connect(navigateSettingsBtn, &NPushButton::clicked, [settingsPage]() {
+            QVariantMap params;
+            params["source"]  = "导航按钮";
+            params["time"]    = QDateTime::currentDateTime().toString("hh:mm:ss");
+            params["section"] = "general";
+            settingsPage->navigateTo(settingsPage->routeKey(), params);
+        });
+
+        connect(navigateProfileBtn, &NPushButton::clicked, [profilePage]() {
+            QVariantMap params;
+            params["source"] = "导航按钮";
+            params["time"]   = QDateTime::currentDateTime().toString("hh:mm:ss");
+            params["userId"] = "user456";
+            profilePage->navigateTo(profilePage->routeKey(), params);
+        });
+
+        controlLayout->addWidget(navigateHomeBtn);
+        controlLayout->addWidget(navigateDocsBtn);
+        controlLayout->addWidget(navigateSettingsBtn);
+        controlLayout->addWidget(navigateProfileBtn);
+
+        sectionLayout->addWidget(navigationView);
+        sectionLayout->addWidget(controlPanel);
+
         connect(navigationView, &NNavigationView::currentChanged, [](int index) {
             qDebug() << "当前页面索引变更为:" << index;
         });
@@ -775,56 +815,91 @@ QWidget* NavigationExample::createNavigationViews() {
         layout->addWidget(demoSection);
     }
 
-    // 2. 创建使用 Filled 图标的 NavigationView 示例
+    // 2. 创建带过渡动画的 NavigationView 示例
     {
         QWidget*     demoSection   = new QWidget;
         QVBoxLayout* sectionLayout = new QVBoxLayout(demoSection);
         sectionLayout->setContentsMargins(0, 0, 0, 16);
 
-        sectionLayout->addWidget(new NLabel("使用 Filled 图标的 NavigationView", NLabelType::Subtitle));
+        sectionLayout->addWidget(new NLabel("带过渡动画的 NavigationView 示例", NLabelType::Subtitle));
 
         // 创建 NavigationView
         NNavigationView* navigationView = new NNavigationView(demoSection);
         navigationView->setMinimumHeight(400);
-        navigationView->setDisplayMode(NNavigationType::Compact); // 设置为紧凑模式
+        navigationView->setPageTransitionType(NNavigationType::SlideHorizontal);
+        navigationView->setPageTransitionDuration(400);
+        navigationView->setSearchVisible(true);
 
         // 设置头部组件
-        navigationView->setHeaderWidget(new NLabel("Filled 图标", NLabelType::Subtitle));
+        navigationView->setHeaderWidget(new NLabel("过渡动画演示", NLabelType::Subtitle));
 
-        // 创建内容页面
-        QWidget*     dashboardPage   = new QWidget;
-        QVBoxLayout* dashboardLayout = new QVBoxLayout(dashboardPage);
-        dashboardLayout->addWidget(new NLabel("仪表盘", NLabelType::Title));
-        dashboardLayout->addWidget(new NLabel("数据概览和统计信息", NLabelType::Body));
+        // 创建一些页面组件
+        DemoPageComponent* dashboardPage = new DemoPageComponent("仪表盘", demoSection);
+        DemoPageComponent* mailPage      = new DemoPageComponent("邮件", demoSection);
+        DemoPageComponent* calendarPage  = new DemoPageComponent("日历", demoSection);
+        DemoPageComponent* helpPage      = new DemoPageComponent("帮助", demoSection);
 
-        QWidget*     mailPage   = new QWidget;
-        QVBoxLayout* mailLayout = new QVBoxLayout(mailPage);
-        mailLayout->addWidget(new NLabel("邮件", NLabelType::Title));
-        mailLayout->addWidget(new NLabel("收件箱和邮件管理", NLabelType::Body));
-
-        QWidget*     calendarPage   = new QWidget;
-        QVBoxLayout* calendarLayout = new QVBoxLayout(calendarPage);
-        calendarLayout->addWidget(new NLabel("日历", NLabelType::Title));
-        calendarLayout->addWidget(new NLabel("日程和事件管理", NLabelType::Body));
-
-        QWidget*     helpPage   = new QWidget;
-        QVBoxLayout* helpLayout = new QVBoxLayout(helpPage);
-        helpLayout->addWidget(new NLabel("帮助", NLabelType::Title));
-        helpLayout->addWidget(new NLabel("帮助文档和支持信息", NLabelType::Body));
-
-        // 添加页面节点 - 使用 Filled 图标
-        navigationView->addPageNode("仪表盘", dashboardPage, NFilledIconType::Dishwasher20Filled);
-        navigationView->addPageNode("邮件", mailPage, NFilledIconType::Mail24Filled);
-        navigationView->addPageNode("日历", calendarPage, NFilledIconType::Calendar24Filled);
+        // 添加页面组件 - 使用 PageComponent
+        navigationView->addPageComponent(dashboardPage, NFilledIconType::Dishwasher20Filled);
+        navigationView->addPageComponent(mailPage, NFilledIconType::Mail24Filled);
+        navigationView->addPageComponent(calendarPage, NFilledIconType::Calendar24Filled);
 
         // 添加页脚节点
         QString helpKey;
         navigationView->addFooterNode("帮助", helpPage, helpKey, 0, NFilledIconType::QuestionCircle24Filled);
 
-        // 设置页面切换动画时长
-        navigationView->setPageTransitionDuration(400);
+        // 添加过渡动画控制
+        QWidget*     controlPanel  = new QWidget(demoSection);
+        QVBoxLayout* controlLayout = new QVBoxLayout(controlPanel);
+
+        // 过渡类型选择
+        QHBoxLayout* transitionTypeLayout = new QHBoxLayout();
+        NLabel*      transitionTypeLabel  = new NLabel("过渡类型:", NLabelType::Body);
+        NComboBox*   transitionTypeCombo  = new NComboBox(controlPanel);
+        transitionTypeCombo->addItem("无过渡效果", NNavigationType::NoTransition);
+        transitionTypeCombo->addItem("淡入淡出", NNavigationType::FadeTransition);
+        transitionTypeCombo->addItem("水平滑动", NNavigationType::SlideHorizontal);
+        transitionTypeCombo->addItem("垂直滑动", NNavigationType::SlideVertical);
+        transitionTypeCombo->addItem("缩放过渡", NNavigationType::ZoomTransition);
+        transitionTypeCombo->setCurrentIndex(2); // 默认选择水平滑动
+
+        transitionTypeLayout->addWidget(transitionTypeLabel);
+        transitionTypeLayout->addWidget(transitionTypeCombo);
+
+        // 过渡时长控制
+        QHBoxLayout* durationLayout = new QHBoxLayout();
+        NLabel*      durationLabel  = new NLabel("过渡时长:", NLabelType::Body);
+        NSlider*     durationSlider = new NSlider(Qt::Horizontal, controlPanel);
+        durationSlider->setRange(100, 1000);
+        durationSlider->setValue(400);
+        durationSlider->setTickInterval(100);
+        durationSlider->setTickPosition(NSlider::TicksBelow);
+        NLabel* durationValueLabel = new NLabel("400ms", NLabelType::Body);
+        durationValueLabel->setMinimumWidth(50);
+
+        durationLayout->addWidget(durationLabel);
+        durationLayout->addWidget(durationSlider);
+        durationLayout->addWidget(durationValueLabel);
+
+        // 连接信号
+        connect(transitionTypeCombo,
+                QOverload<int>::of(&QComboBox::currentIndexChanged),
+                [navigationView, transitionTypeCombo](int index) {
+                    NNavigationType::PageTransitionType type =
+                        static_cast<NNavigationType::PageTransitionType>(transitionTypeCombo->itemData(index).toInt());
+                    navigationView->setPageTransitionType(type);
+                });
+
+        connect(durationSlider, &NSlider::valueChanged, [navigationView, durationValueLabel](int value) {
+            navigationView->setPageTransitionDuration(value);
+            durationValueLabel->setText(QString("%1ms").arg(value));
+        });
+
+        controlLayout->addLayout(transitionTypeLayout);
+        controlLayout->addLayout(durationLayout);
 
         sectionLayout->addWidget(navigationView);
+        sectionLayout->addWidget(controlPanel);
         layout->addWidget(demoSection);
     }
 

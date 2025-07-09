@@ -185,9 +185,6 @@ void NNavigationViewPrivate::executePageTransition(QWidget* targetWidget) {
     if (!targetWidget || _pPageTransitionType == NNavigationType::NoTransition)
         return;
 
-    // 设置目标页面的初始状态
-    targetWidget->setVisible(true);
-
     // 根据过渡类型执行不同的动画
     switch (_pPageTransitionType) {
         case NNavigationType::FadeTransition: {
@@ -214,10 +211,13 @@ void NNavigationViewPrivate::executePageTransition(QWidget* targetWidget) {
         }
         case NNavigationType::SlideVertical: {
             QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
-            animation->setDuration(_pageTransitionDuration);
-            animation->setStartValue(QPoint(0, targetWidget->height()));
-            animation->setEndValue(QPoint(0, 0));
+            QPoint              finalPos  = targetWidget->pos();
+            QPoint              startPos  = finalPos;
+            startPos.setY(finalPos.y() + 80);
+            animation->setStartValue(startPos);
+            animation->setEndValue(finalPos);
             animation->setEasingCurve(QEasingCurve::OutCubic);
+            animation->setDuration(_pageTransitionDuration);
             animation->start(QAbstractAnimation::DeleteWhenStopped);
             break;
         }

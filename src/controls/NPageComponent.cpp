@@ -32,7 +32,12 @@ bool NPageComponent::beforeRouteLeave(QVariantMap& outParams) {
 
 QString NPageComponent::routeKey() const { return _routeKey; }
 
-void NPageComponent::setRouteKey(const QString& key) { _routeKey = key; }
+void NPageComponent::setRouteKey(const QString& key) {
+    if (_routeKey != key) {
+        _routeKey = key;
+        emit routeKeyChanged(_routeKey);
+    }
+}
 
 void NPageComponent::navigateTo(const QString& pageKey, const QVariantMap& params) {
     NNavigationRouter::getInstance()->navigateTo(pageKey, params);

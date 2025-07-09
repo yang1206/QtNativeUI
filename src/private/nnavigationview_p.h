@@ -42,7 +42,7 @@ class NNavigationViewPrivate : public QObject {
 
     QMap<QString, QWidget*> _pageMap;
     int                     _targetPageIndex{0};
-    int                     _pageTransitionDuration{300};
+    int                     _pageTransitionDuration{250};
     bool                    _isNavigationBarVisible{true};
     bool                    _isInitialized{false};
     NThemeType::ThemeMode   _themeMode{NThemeType::Light};

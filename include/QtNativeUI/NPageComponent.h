@@ -29,6 +29,8 @@ class QTNATIVEUI_EXPORT NPageComponent : public QWidget {
 
     QString pageTitle() const;
     void    setPageTitle(const QString& title);
+  signals:
+    void routeKeyChanged(const QString& key);
 
   private:
     QString _routeKey;
