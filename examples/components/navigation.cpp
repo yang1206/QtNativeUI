@@ -861,7 +861,11 @@ QWidget* NavigationExample::createNavigationViews() {
         transitionTypeCombo->addItem("水平滑动", NNavigationType::SlideHorizontal);
         transitionTypeCombo->addItem("垂直滑动", NNavigationType::SlideVertical);
         transitionTypeCombo->addItem("缩放过渡", NNavigationType::ZoomTransition);
-        transitionTypeCombo->setCurrentIndex(2); // 默认选择水平滑动
+        transitionTypeCombo->addItem("翻转过渡", NNavigationType::FlipTransition);
+        transitionTypeCombo->addItem("推送过渡", NNavigationType::PushTransition);
+        transitionTypeCombo->addItem("揭示过渡", NNavigationType::RevealTransition);
+        transitionTypeCombo->addItem("弹性过渡", NNavigationType::ElasticTransition);
+        transitionTypeCombo->setCurrentIndex(2);
 
         transitionTypeLayout->addWidget(transitionTypeLabel);
         transitionTypeLayout->addWidget(transitionTypeCombo);

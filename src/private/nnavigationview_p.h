@@ -2,8 +2,10 @@
 #define NNAVIGATIONVIEW_P_H
 
 #include <QMap>
+
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
+#include "nnavigationanimation_p.h"
 
 class NNavigationView;
 class NNavigationBar;
@@ -40,12 +42,13 @@ class NNavigationViewPrivate : public QObject {
     NStackedWidget* _stackedWidget{nullptr};
     QHBoxLayout*    _mainLayout{nullptr};
 
-    QMap<QString, QWidget*> _pageMap;
-    int                     _targetPageIndex{0};
-    int                     _pageTransitionDuration{250};
-    bool                    _isNavigationBarVisible{true};
-    bool                    _isInitialized{false};
-    NThemeType::ThemeMode   _themeMode{NThemeType::Light};
+    QMap<QString, QWidget*>      _pageMap;
+    int                          _targetPageIndex{0};
+    int                          _pageTransitionDuration{250};
+    bool                         _isNavigationBarVisible{true};
+    bool                         _isInitialized{false};
+    NThemeType::ThemeMode        _themeMode{NThemeType::Light};
+    NNavigationAnimationManager* _animationManager{nullptr};
 };
 
 #endif // NNAVIGATIONVIEW_P_H

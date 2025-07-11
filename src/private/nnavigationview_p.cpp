@@ -1,7 +1,6 @@
 #include "nnavigationview_p.h"
 
 #include <QGraphicsOpacityEffect>
-
 #include "QtNativeUI/NNavigationBar.h"
 #include "QtNativeUI/NNavigationView.h"
 #include "QtNativeUI/NStackedWidget.h"
@@ -184,72 +183,5 @@ void NNavigationViewPrivate::onDisplayModeChanged(NNavigationType::NavigationDis
 void NNavigationViewPrivate::executePageTransition(QWidget* targetWidget) {
     if (!targetWidget || _pPageTransitionType == NNavigationType::NoTransition)
         return;
-
-    // 根据过渡类型执行不同的动画
-    switch (_pPageTransitionType) {
-        case NNavigationType::FadeTransition: {
-            QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(targetWidget);
-            targetWidget->setGraphicsEffect(effect);
-            effect->setOpacity(0);
-
-            QPropertyAnimation* animation = new QPropertyAnimation(effect, "opacity");
-            animation->setDuration(_pageTransitionDuration);
-            animation->setStartValue(0.0);
-            animation->setEndValue(1.0);
-            animation->setEasingCurve(QEasingCurve::OutCubic);
-            animation->start(QAbstractAnimation::DeleteWhenStopped);
-            break;
-        }
-        case NNavigationType::SlideHorizontal: {
-            QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
-            animation->setDuration(_pageTransitionDuration);
-            animation->setStartValue(QPoint(targetWidget->width(), 0));
-            animation->setEndValue(QPoint(0, 0));
-            animation->setEasingCurve(QEasingCurve::OutCubic);
-            animation->start(QAbstractAnimation::DeleteWhenStopped);
-            break;
-        }
-        case NNavigationType::SlideVertical: {
-            QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
-            QPoint              finalPos  = targetWidget->pos();
-            QPoint              startPos  = finalPos;
-            startPos.setY(finalPos.y() + 80);
-            animation->setStartValue(startPos);
-            animation->setEndValue(finalPos);
-            animation->setEasingCurve(QEasingCurve::OutCubic);
-            animation->setDuration(_pageTransitionDuration);
-            animation->start(QAbstractAnimation::DeleteWhenStopped);
-            break;
-        }
-        case NNavigationType::ZoomTransition: {
-            QPropertyAnimation* scaleAnimation = new QPropertyAnimation(targetWidget, "geometry");
-            QRect               startRect      = targetWidget->geometry();
-            QRect               endRect        = startRect;
-            // 开始时缩小到中心点
-            startRect.setWidth(startRect.width() * 0.8);
-            startRect.setHeight(startRect.height() * 0.8);
-            startRect.moveCenter(endRect.center());
-            scaleAnimation->setDuration(_pageTransitionDuration);
-            scaleAnimation->setStartValue(startRect);
-            scaleAnimation->setEndValue(endRect);
-            scaleAnimation->setEasingCurve(QEasingCurve::OutCubic);
-            QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(targetWidget);
-            targetWidget->setGraphicsEffect(effect);
-            effect->setOpacity(0);
-
-            QPropertyAnimation* opacityAnimation = new QPropertyAnimation(effect, "opacity");
-            opacityAnimation->setDuration(_pageTransitionDuration);
-            opacityAnimation->setStartValue(0.0);
-            opacityAnimation->setEndValue(1.0);
-            opacityAnimation->setEasingCurve(QEasingCurve::OutCubic);
-
-            QParallelAnimationGroup* group = new QParallelAnimationGroup;
-            group->addAnimation(scaleAnimation);
-            group->addAnimation(opacityAnimation);
-            group->start(QAbstractAnimation::DeleteWhenStopped);
-            break;
-        }
-        default:
-            break;
-    }
+    _animationManager->executeTransition(targetWidget, _pPageTransitionType, _pageTransitionDuration);
 }

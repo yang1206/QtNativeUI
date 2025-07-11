@@ -117,7 +117,6 @@ void NComboBox::init() {
     connect(d->_arrowAnimation, &QtNativeUI::NTranslateYAnimation::yChanged, this, [d](qreal value) {
         d->setArrowYOffset(value);
     });
-
     setObjectName("NComboBox");
     setMinimumHeight(35);
 
@@ -146,7 +145,6 @@ void NComboBox::init() {
         container->setStyleSheet("background-color:transparent;");
     }
     QComboBox::setMaxVisibleItems(5);
-
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NComboBox);
         d->_themeMode = themeMode;
@@ -189,7 +187,6 @@ void NComboBox::showPopup() {
     if (count() > 0) {
         QWidget* container = this->findChild<QFrame*>();
         if (container) {
-
             int containerHeight = 0;
             if (count() >= maxVisibleItems()) {
                 containerHeight = maxVisibleItems() * 35 + 8;
