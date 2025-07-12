@@ -1217,7 +1217,7 @@ QWidget* ControlsExample::createComboBoxes() {
     layout->addWidget(signalLabel);
 
     NComboBox* signalComboBox = new NComboBox(container);
-    signalComboBox->addItems({"红色", "绿色", "蓝色", "黄色", "紫色"});
+    signalComboBox->addItems({"红色", "绿色", "蓝色", "黄色", "紫色", "青色", "白色", "黑色"});
     signalComboBox->setMinimumWidth(200);
     QLabel* selectionLabel = new QLabel("当前选择: 红色", container);
     connect(signalComboBox,

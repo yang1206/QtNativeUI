@@ -125,6 +125,7 @@ void NComboBox::init() {
     comboBoxView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     NScrollBar* scrollBar = new NScrollBar(this);
     comboBoxView->setVerticalScrollBar(scrollBar);
+
     comboBoxView->setAutoScroll(false);
     comboBoxView->setSelectionMode(QAbstractItemView::NoSelection);
     comboBoxView->setObjectName("NComboBoxView");
@@ -142,7 +143,9 @@ void NComboBox::init() {
         }
         layout->addWidget(view());
         layout->setContentsMargins(6, 0, 6, 6);
+#ifndef Q_OS_WIN
         container->setStyleSheet("background-color:transparent;");
+#endif
     }
     QComboBox::setMaxVisibleItems(5);
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
