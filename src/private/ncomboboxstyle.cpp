@@ -126,14 +126,6 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         }
 
         painter->restore();
-
-        if (!comboOpt->editable) {
-            QRect contentRect = editRect.adjusted(4, 0, -4, 0);
-            QString text = comboOpt->currentText;
-            painter->setPen(textColor);
-            painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, text);
-        }
-
         return;
     }
 
@@ -208,11 +200,11 @@ void NComboBoxStyle::drawControl(ControlElement      element,
             if (element == CE_ComboBoxLabel) {
                 const QStyleOptionComboBox* comboOpt = qstyleoption_cast<const QStyleOptionComboBox*>(option);
                 if (comboOpt && !comboOpt->editable) {
-                    QRect editRect = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
-                    QRect contentRect = editRect.adjusted(4, 0, -4, 0);
-                    bool isDark = m_styleInterface->isDarkMode();
-                    bool isEnabled = comboOpt->state & QStyle::State_Enabled;
-                    QColor textColor = m_styleInterface->textColorForState(isDark, isEnabled);
+                    QRect  editRect    = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
+                    QRect  contentRect = editRect.adjusted(4, 0, -4, 0);
+                    bool   isDark      = m_styleInterface->isDarkMode();
+                    bool   isEnabled   = comboOpt->state & QStyle::State_Enabled;
+                    QColor textColor   = m_styleInterface->textColorForState(isDark, isEnabled);
                     painter->save();
                     painter->setPen(textColor);
                     painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, comboOpt->currentText);
