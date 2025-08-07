@@ -9,12 +9,18 @@ Q_SINGLETON_CREATE_CPP(NTheme)
 NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme) {
+        d_ptr->invalidateSystemCache();
+        d_ptr->invalidateColorCache();
+
         updateThemeState();
         if (d_ptr->_themeMode == NThemeType::ThemeMode::System) {
             emit themeModeChanged(d_ptr->_themeMode);
         }
     });
     connect(qApp, &QApplication::paletteChanged, this, [this]() {
+        d_ptr->invalidateSystemCache();
+        d_ptr->invalidateColorCache();
+
         if (d_ptr->_useSystemAccentColor) {
             QColor newAccentColor = d_ptr->detectSystemAccentColor();
             if (newAccentColor.isValid() && newAccentColor != d_ptr->_systemAccentColor) {
@@ -26,6 +32,10 @@ NTheme::NTheme(QObject* parent) : QObject(parent), d_ptr(new NThemePrivate(this)
     });
 #else
     connect(qApp, &QApplication::paletteChanged, this, [this]() {
+        // 系统调色板变化时失效缓存
+        d_ptr->invalidateSystemCache();
+        d_ptr->invalidateColorCache();
+
         updateThemeState();
         if (d_ptr->_themeMode == NThemeType::ThemeMode::System) {
             emit themeModeChanged(d_ptr->_themeMode);
@@ -123,6 +133,10 @@ void NTheme::updateThemeState() {
 
     if (d->_isDark != newIsDark) {
         d->_isDark = newIsDark;
+
+        // 主题变化时清除颜色缓存
+        d->invalidateColorCache();
+
         emit darkModeChanged(newIsDark);
     }
 }
@@ -159,6 +173,9 @@ void NTheme::setAccentColor(const NAccentColor& color) {
     Q_D(NTheme);
     if (d->_accentColor != color) {
         d->_accentColor = color;
+
+        d->invalidateColorCache();
+
         emit accentColorChanged(color);
     }
 }
@@ -173,6 +190,8 @@ QColor NTheme::getColor(NFluentColorKey::Key key) const {
 void NTheme::setColor(NFluentColorKey::Key key, const QColor& color) {
     Q_D(NTheme);
     d->_customColors[key] = color;
+
+    d->invalidateColorCache();
 }
 
 QColor NTheme::getColorForTheme(NFluentColorKey::Key key, NThemeType::ThemeMode mode) const {
@@ -192,7 +211,7 @@ QColor NTheme::getColorForTheme(NFluentColorKey::Key key, NThemeType::ThemeMode 
     if (d->_customColors.contains(key)) {
         return d->_customColors[key];
     }
-    const QMap<NFluentColorKey::Key, QColor>& themeColors = isDarkForMode ? d->_darkColors : d->_lightColors;
+    const QMap<NFluentColorKey::Key, QColor>& themeColors = isDarkForMode ? *d->s_darkColors : *d->s_lightColors;
     if (themeColors.contains(key)) {
         return themeColors[key];
     }
@@ -335,32 +354,27 @@ void NTheme::drawEffectShadow(QPainter*                  painter,
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing);
 
-    // 获取阴影层级设置
     QVariantMap elevation   = getElevation(elevationKey).toMap();
     int         yOffset     = elevation["yOffset"].toInt();
     QColor      shadowColor = elevation["color"].value<QColor>();
 
-    // 根据 yOffset 调整阴影范围
+    if (yOffset == 0 || shadowColor.alpha() == 0) {
+        painter->restore();
+        return;
+    }
+
     int effectiveShadowWidth = qMax(shadowBorderWidth, yOffset);
 
-    QPainterPath path;
-    path.setFillRule(Qt::WindingFill);
-
-    // 调整阴影绘制范围以适应 yOffset
-    for (int i = 0; i < effectiveShadowWidth; i++) {
-        path.addRoundedRect(shadowBorderWidth - i,
-                            shadowBorderWidth - i + (yOffset / 4),
-                            widgetRect.width() - (shadowBorderWidth - i) * 2,
-                            widgetRect.height() - (shadowBorderWidth - i) * 2,
-                            borderRadius + i,
-                            borderRadius + i);
-
-        // 使用阴影颜色的 alpha 值作为基准，随距离渐变
-        int alpha = 1 * (shadowBorderWidth - i + 1);
-        shadowColor.setAlpha(alpha > 255 ? 255 : alpha);
-        painter->setPen(shadowColor);
-        painter->drawPath(path);
-    }
+    QRadialGradient gradient(widgetRect.center(), effectiveShadowWidth);
+    gradient.setColorAt(0, QColor(shadowColor.red(), shadowColor.green(), shadowColor.blue(), shadowColor.alpha()));
+    gradient.setColorAt(1, QColor(shadowColor.red(), shadowColor.green(), shadowColor.blue(), 0));
+    painter->setBrush(gradient);
+    painter->setPen(Qt::NoPen);
+    painter->drawRoundedRect(
+        widgetRect.adjusted(
+            -effectiveShadowWidth, -effectiveShadowWidth + yOffset / 4, effectiveShadowWidth, effectiveShadowWidth),
+        borderRadius + effectiveShadowWidth,
+        borderRadius + effectiveShadowWidth);
 
     painter->restore();
 }

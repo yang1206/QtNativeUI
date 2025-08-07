@@ -153,14 +153,13 @@ void NPushButton::paintEvent([[maybe_unused]] QPaintEvent* event) {
         } else if (d->_isHovered) {
             elevationKey = NDesignTokenKey::ElevationHover;
         }
- nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
+        nTheme->drawEffectShadow(&painter, rect(), d->_shadowBorderWidth, d->_pBorderRadius, elevationKey);
     }
 
     drawBackground(&painter);
     drawBorder(&painter);
     drawIcon(&painter);
     drawText(&painter);
-    updateFluentIcon();
 }
 
 QSize NPushButton::sizeHint() const {
@@ -286,17 +285,17 @@ void NPushButton::drawIcon(QPainter* painter) {
 
     QMargins margins = contentsMargins();
 
-    QRect foregroundRect(d->_shadowBorderWidth + margins.left(),
+    QRect    foregroundRect(d->_shadowBorderWidth + margins.left(),
                          d->_shadowBorderWidth + margins.top(),
                          width() - 2 * d->_shadowBorderWidth - margins.left() - margins.right(),
                          height() - 2 * d->_shadowBorderWidth - margins.top() - margins.bottom());
- QVariant customRectVar = property("_nContentRect");
+    QVariant customRectVar = property("_nContentRect");
     if (customRectVar.isValid()) {
         foregroundRect = customRectVar.toRect();
     }
- QRect iconRect;
-    QSize iconSize = this->iconSize();
- int iconTextSpacing = property("_nIconTextSpacing").isValid() ? property("_nIconTextSpacing").toInt() : 4;
+    QRect iconRect;
+    QSize iconSize        = this->iconSize();
+    int   iconTextSpacing = property("_nIconTextSpacing").isValid() ? property("_nIconTextSpacing").toInt() : 4;
 
     if (text().isEmpty()) {
         iconRect = QRect(foregroundRect.x() + (foregroundRect.width() - iconSize.width()) / 2,

@@ -11,15 +11,15 @@ class QTNATIVEUI_EXPORT NConfig : public QObject {
     Q_OBJECT
     Q_SINGLETON_CREATE_H(NConfig)
 
-public:
+  public:
     void initialize();
-    
-    bool setLanguage(const QString& locale);
-    QString currentLanguage() const;
-    QStringList availableLanguages() const;
-    bool loadCustomTranslation(const QString& filePath);
 
-private:
+    bool        setLanguage(const QString& locale);
+    QString     currentLanguage() const;
+    QStringList availableLanguages() const;
+    bool        loadCustomTranslation(const QString& filePath);
+
+  private:
     explicit NConfig(QObject* parent = nullptr);
     ~NConfig();
 };

@@ -1,0 +1,20 @@
+# doc.qt.io
+
+> A brief description of doc.qt.io. Explain the main purpose or service here.
+
+Add more background details about the website if necessary, without using headings.
+
+## Core Content
+- [Homepage](https://doc.qt.io/index.html.md): The main landing page.
+- [Products/Services](https://doc.qt.io/products.md): Overview of offerings.
+- [Blog](https://doc.qt.io/blog/index.html.md): Latest updates and articles.
+
+## Important Resources
+- [About Us](https://doc.qt.io/about.md): Information about the company/project.
+- [Contact](https://doc.qt.io/contact.md): How to get in touch.
+
+## Optional
+- [FAQ](https://doc.qt.io/faq.md): Answers to common questions.
+- [Case Studies](https://doc.qt.io/cases.md): Examples of successful implementations.
+
+你是一个QT开发专家，了解QT的每一个模块，非常熟悉QT的每一个函数和类，你非常擅长开发高性能的Qt组件，非常擅长使用QPainter等开发一些组件，擅长使用QProxyStyle和QPropertyAnimation开发动画丰富且样式完美的组件。

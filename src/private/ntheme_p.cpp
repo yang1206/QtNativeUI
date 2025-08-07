@@ -1,6 +1,5 @@
 #include "ntheme_p.h"
 #include <QApplication>
-#include <QPalette>
 #include <QScreen>
 #include <QStyle>
 #include <QStyleHints>
@@ -8,119 +7,153 @@
 #include <QtCore/qeasingcurve.h>
 #include <QtNativeUI/NFluentColors.h>
 
+const QMap<NFluentColorKey::Key, QColor>* NThemePrivate::s_lightColors           = nullptr;
+const QMap<NFluentColorKey::Key, QColor>* NThemePrivate::s_darkColors            = nullptr;
+bool                                      NThemePrivate::s_staticDataInitialized = false;
+
+QHash<NDesignTokenKey::Radius, QVariant>            NThemePrivate::s_defaultRadiusTokens;
+QHash<NDesignTokenKey::Spacing, QVariant>           NThemePrivate::s_defaultSpacingTokens;
+QHash<NDesignTokenKey::FontSize, QVariant>          NThemePrivate::s_defaultFontSizeTokens;
+QHash<NDesignTokenKey::FontWeight, QVariant>        NThemePrivate::s_defaultFontWeightTokens;
+QHash<NDesignTokenKey::Elevation, QVariant>         NThemePrivate::s_defaultElevationTokens;
+QHash<NDesignTokenKey::AnimationDuration, QVariant> NThemePrivate::s_defaultAnimationDurationTokens;
+QHash<NDesignTokenKey::AnimationEasing, QVariant>   NThemePrivate::s_defaultAnimationEasingTokens;
+
 NThemePrivate::NThemePrivate(NTheme* q)
     : q_ptr(q),
       _themeMode(NThemeType::ThemeMode::System),
       _isDark(false),
       _accentColor(NColors::blue),
       _useSystemAccentColor(true),
-      _systemAccentColor(Qt::transparent) {
-    initLightColors();
-    initDarkColors();
-    initDesignTokens();
+      _systemAccentColor(Qt::transparent),
+      _cacheInvalidationTimer(nullptr) {
+    // 确保静态数据只初始化一次
+    if (!s_staticDataInitialized) {
+        initializeStaticData();
+        s_staticDataInitialized = true;
+    }
 
-    _isDark = detectSystemTheme();
+    // 设置缓存容量（限制内存使用）
+    _colorCache.setMaxCost(100); // 最多缓存100个颜色
 
+    // 设置缓存失效定时器
+    setupCacheInvalidationTimer();
+
+    _isDark            = detectSystemTheme();
     _systemAccentColor = detectSystemAccentColor();
 }
 
-NThemePrivate::~NThemePrivate() {}
+NThemePrivate::~NThemePrivate() {
+    if (_cacheInvalidationTimer) {
+        _cacheInvalidationTimer->stop();
+        delete _cacheInvalidationTimer;
+    }
+}
 
-void NThemePrivate::initDesignTokens() {
+void NThemePrivate::initializeStaticData() {
+    // 初始化静态颜色数据（指向全局常量，不复制）
+    s_lightColors = &LightThemeColors;
+    s_darkColors  = &DarkThemeColors;
+
+    // 初始化设计令牌（移动原有的initDesignTokens内容到这里）
     // 圆角大小 (CornerRadius)
-    _radiusTokens[NDesignTokenKey::CornerRadiusNone]     = 0.0;
-    _radiusTokens[NDesignTokenKey::CornerRadiusSmall]    = 2.0;
-    _radiusTokens[NDesignTokenKey::CornerRadiusDefault]  = 4.0;
-    _radiusTokens[NDesignTokenKey::CornerRadiusMedium]   = 8.0;
-    _radiusTokens[NDesignTokenKey::CornerRadiusLarge]    = 12.0;
-    _radiusTokens[NDesignTokenKey::CornerRadiusCircular] = 999.0; // 实际应用时需计算为宽度的50%
+    s_defaultRadiusTokens[NDesignTokenKey::CornerRadiusNone]     = 0.0;
+    s_defaultRadiusTokens[NDesignTokenKey::CornerRadiusSmall]    = 2.0;
+    s_defaultRadiusTokens[NDesignTokenKey::CornerRadiusDefault]  = 4.0;
+    s_defaultRadiusTokens[NDesignTokenKey::CornerRadiusMedium]   = 8.0;
+    s_defaultRadiusTokens[NDesignTokenKey::CornerRadiusLarge]    = 12.0;
+    s_defaultRadiusTokens[NDesignTokenKey::CornerRadiusCircular] = 999.0; // 实际应用时需计算为宽度的50%
 
     // 间距 (Spacing)
-    _spacingTokens[NDesignTokenKey::SpacingNone] = 0;
-    _spacingTokens[NDesignTokenKey::SpacingXS]   = 2;
-    _spacingTokens[NDesignTokenKey::SpacingS]    = 4;
-    _spacingTokens[NDesignTokenKey::SpacingM]    = 8;
-    _spacingTokens[NDesignTokenKey::SpacingL]    = 12;
-    _spacingTokens[NDesignTokenKey::SpacingXL]   = 16;
-    _spacingTokens[NDesignTokenKey::SpacingXXL]  = 20;
-    _spacingTokens[NDesignTokenKey::SpacingXXXL] = 24;
+    s_defaultSpacingTokens[NDesignTokenKey::SpacingNone] = 0;
+    s_defaultSpacingTokens[NDesignTokenKey::SpacingXS]   = 2;
+    s_defaultSpacingTokens[NDesignTokenKey::SpacingS]    = 4;
+    s_defaultSpacingTokens[NDesignTokenKey::SpacingM]    = 8;
+    s_defaultSpacingTokens[NDesignTokenKey::SpacingL]    = 12;
+    s_defaultSpacingTokens[NDesignTokenKey::SpacingXL]   = 16;
+    s_defaultSpacingTokens[NDesignTokenKey::SpacingXXL]  = 20;
+    s_defaultSpacingTokens[NDesignTokenKey::SpacingXXXL] = 24;
 
     // 字体大小 (FontSize)
-    _fontSizeTokens[NDesignTokenKey::FontSizeCaption]    = 12;
-    _fontSizeTokens[NDesignTokenKey::FontSizeBody]       = 14;
-    _fontSizeTokens[NDesignTokenKey::FontSizeBodyLarge]  = 18;
-    _fontSizeTokens[NDesignTokenKey::FontSizeSubTitle]   = 20;
-    _fontSizeTokens[NDesignTokenKey::FontSizeTitle]      = 28;
-    _fontSizeTokens[NDesignTokenKey::FontSizeTitleLarge] = 40;
-    _fontSizeTokens[NDesignTokenKey::FontSizeDisplay]    = 68;
+    s_defaultFontSizeTokens[NDesignTokenKey::FontSizeCaption]    = 12;
+    s_defaultFontSizeTokens[NDesignTokenKey::FontSizeBody]       = 14;
+    s_defaultFontSizeTokens[NDesignTokenKey::FontSizeBodyLarge]  = 18;
+    s_defaultFontSizeTokens[NDesignTokenKey::FontSizeSubTitle]   = 20;
+    s_defaultFontSizeTokens[NDesignTokenKey::FontSizeTitle]      = 28;
+    s_defaultFontSizeTokens[NDesignTokenKey::FontSizeTitleLarge] = 40;
+    s_defaultFontSizeTokens[NDesignTokenKey::FontSizeDisplay]    = 68;
 
     // 字重 (FontWeight)
-    _fontWeightTokens[NDesignTokenKey::FontWeightRegular]  = 400;
-    _fontWeightTokens[NDesignTokenKey::FontWeightMedium]   = 500;
-    _fontWeightTokens[NDesignTokenKey::FontWeightSemibold] = 600;
-    _fontWeightTokens[NDesignTokenKey::FontWeightBold]     = 700;
+    s_defaultFontWeightTokens[NDesignTokenKey::FontWeightRegular]  = 400;
+    s_defaultFontWeightTokens[NDesignTokenKey::FontWeightMedium]   = 500;
+    s_defaultFontWeightTokens[NDesignTokenKey::FontWeightSemibold] = 600;
+    s_defaultFontWeightTokens[NDesignTokenKey::FontWeightBold]     = 700;
 
     // 阴影层级 - 存储为 QGraphicsEffect 参数或自定义结构
-    _elevationTokens[NDesignTokenKey::ElevationNone] =
+    s_defaultElevationTokens[NDesignTokenKey::ElevationNone] =
         QVariantMap({{"blurRadius", 0}, {"xOffset", 0}, {"yOffset", 0}, {"color", QColor(0, 0, 0, 0)}});
 
-    _elevationTokens[NDesignTokenKey::ElevationRest] =
+    s_defaultElevationTokens[NDesignTokenKey::ElevationRest] =
         QVariantMap({{"blurRadius", 4}, {"xOffset", 0}, {"yOffset", 2}, {"color", QColor(0, 0, 0, 30)}});
 
-    _elevationTokens[NDesignTokenKey::ElevationHover] =
+    s_defaultElevationTokens[NDesignTokenKey::ElevationHover] =
         QVariantMap({{"blurRadius", 8}, {"xOffset", 0}, {"yOffset", 4}, {"color", QColor(0, 0, 0, 36)}});
 
-    _elevationTokens[NDesignTokenKey::ElevationFlyout] =
+    s_defaultElevationTokens[NDesignTokenKey::ElevationFlyout] =
         QVariantMap({{"blurRadius", 16}, {"xOffset", 0}, {"yOffset", 8}, {"color", QColor(0, 0, 0, 41)}});
 
-    _elevationTokens[NDesignTokenKey::ElevationDialog] =
+    s_defaultElevationTokens[NDesignTokenKey::ElevationDialog] =
         QVariantMap({{"blurRadius", 32}, {"xOffset", 0}, {"yOffset", 16}, {"color", QColor(0, 0, 0, 51)}});
 
     // 动效时长 (AnimationDuration)
-    _animationDurationTokens[NDesignTokenKey::AnimationFast]     = 100;
-    _animationDurationTokens[NDesignTokenKey::AnimationNormal]   = 200;
-    _animationDurationTokens[NDesignTokenKey::AnimationSlow]     = 400;
-    _animationDurationTokens[NDesignTokenKey::AnimationVerySlow] = 600;
+    s_defaultAnimationDurationTokens[NDesignTokenKey::AnimationFast]     = 100;
+    s_defaultAnimationDurationTokens[NDesignTokenKey::AnimationNormal]   = 200;
+    s_defaultAnimationDurationTokens[NDesignTokenKey::AnimationSlow]     = 400;
+    s_defaultAnimationDurationTokens[NDesignTokenKey::AnimationVerySlow] = 600;
 
     // 缓动曲线 (EasingCurve)
-    _animationEasingTokens[NDesignTokenKey::EasingStandard]   = QEasingCurve(QEasingCurve::OutCubic);
-    _animationEasingTokens[NDesignTokenKey::EasingAccelerate] = QEasingCurve(QEasingCurve::InCubic);
-    _animationEasingTokens[NDesignTokenKey::EasingDecelerate] = QEasingCurve(QEasingCurve::OutCubic);
-    _animationEasingTokens[NDesignTokenKey::EasingLinear]     = QEasingCurve(QEasingCurve::Linear);
-}
-
-// 初始化亮色主题颜色
-void NThemePrivate::initLightColors() {
-    // 直接使用自动生成的 Fluent 颜色映射
-    _lightColors = LightThemeColors;
-}
-
-// 初始化暗色主题颜色
-void NThemePrivate::initDarkColors() {
-    // 直接使用自动生成的 Fluent 颜色映射
-    _darkColors = DarkThemeColors;
+    s_defaultAnimationEasingTokens[NDesignTokenKey::EasingStandard]   = QEasingCurve(QEasingCurve::OutCubic);
+    s_defaultAnimationEasingTokens[NDesignTokenKey::EasingAccelerate] = QEasingCurve(QEasingCurve::InCubic);
+    s_defaultAnimationEasingTokens[NDesignTokenKey::EasingDecelerate] = QEasingCurve(QEasingCurve::OutCubic);
+    s_defaultAnimationEasingTokens[NDesignTokenKey::EasingLinear]     = QEasingCurve(QEasingCurve::Linear);
 }
 
 bool NThemePrivate::detectSystemTheme() const {
+    if (_systemThemeCacheValid) {
+        return _systemThemeCache;
+    }
+
+    bool isDark = false;
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    return qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+    isDark = qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
 #else
     QPalette pal         = QApplication::palette();
     QColor   windowColor = pal.color(QPalette::Window);
     QColor   textColor   = pal.color(QPalette::WindowText);
 
-    bool isDark = textColor.lightness() > windowColor.lightness();
+    isDark = textColor.lightness() > windowColor.lightness();
 
     if (!isDark) {
         int brightness = (windowColor.red() + windowColor.green() + windowColor.blue()) / 3;
         isDark         = brightness < 128;
     }
+#endif
+
+    _systemThemeCache      = isDark;
+    _systemThemeCacheValid = true;
+
+    if (_cacheInvalidationTimer && !_cacheInvalidationTimer->isActive()) {
+        _cacheInvalidationTimer->start();
+    }
 
     return isDark;
-#endif
 }
 
 QColor NThemePrivate::detectSystemAccentColor() const {
+    if (_systemAccentColorCacheValid) {
+        return _systemAccentColorCache;
+    }
+
     QColor accentColor;
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
     accentColor = QApplication::palette().color(QPalette::Active, QPalette::Accent);
@@ -136,39 +169,50 @@ QColor NThemePrivate::detectSystemAccentColor() const {
     }
 #endif
 
-    // 如果获取的颜色无效或是黑白色，使用默认的蓝色
     if (!accentColor.isValid() || accentColor == Qt::black || accentColor == Qt::white) {
         accentColor = QColor(0, 120, 215); // Windows 10/11 默认蓝色
+    }
+    _systemAccentColorCache      = accentColor;
+    _systemAccentColorCacheValid = true;
+
+    // 启动定时器，5秒后失效缓存
+    if (_cacheInvalidationTimer && !_cacheInvalidationTimer->isActive()) {
+        _cacheInvalidationTimer->start();
     }
 
     return accentColor;
 }
 
-// 解析颜色 - 考虑当前主题模式和自定义颜色
 QColor NThemePrivate::resolveColor(NFluentColorKey::Key key) const {
-    // 首先检查自定义颜色
+    if (QColor* cachedColor = _colorCache.object(key)) {
+        return *cachedColor;
+    }
+
+    QColor resolvedColor;
+
     if (_customColors.contains(key)) {
-        return _customColors[key];
+        resolvedColor = _customColors[key];
+    } else {
+        const QMap<NFluentColorKey::Key, QColor>& themeColors = _isDark ? *s_darkColors : *s_lightColors;
+        if (themeColors.contains(key)) {
+            resolvedColor = themeColors[key];
+        } else {
+            resolvedColor = QColor(128, 128, 128);
+        }
     }
 
-    // 然后根据当前主题模式选择颜色
-    const QMap<NFluentColorKey::Key, QColor>& themeColors = _isDark ? _darkColors : _lightColors;
-    if (themeColors.contains(key)) {
-        return themeColors[key];
-    }
+    _colorCache.insert(key, new QColor(resolvedColor));
 
-    // 返回安全的默认颜色
-    return QColor(128, 128, 128);
+    return resolvedColor;
 }
 
-// 令牌解析模板特化
 template <>
 QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Radius& key) const {
     if (_customRadiusTokens.contains(key)) {
         return _customRadiusTokens[key];
     }
-    if (_radiusTokens.contains(key)) {
-        return _radiusTokens[key];
+    if (s_defaultRadiusTokens.contains(key)) {
+        return s_defaultRadiusTokens[key];
     }
     return QVariant();
 }
@@ -178,8 +222,8 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Spacing& key) const 
     if (_customSpacingTokens.contains(key)) {
         return _customSpacingTokens[key];
     }
-    if (_spacingTokens.contains(key)) {
-        return _spacingTokens[key];
+    if (s_defaultSpacingTokens.contains(key)) {
+        return s_defaultSpacingTokens[key];
     }
     return QVariant();
 }
@@ -189,8 +233,8 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontSize& key) const
     if (_customFontSizeTokens.contains(key)) {
         return _customFontSizeTokens[key];
     }
-    if (_fontSizeTokens.contains(key)) {
-        return _fontSizeTokens[key];
+    if (s_defaultFontSizeTokens.contains(key)) {
+        return s_defaultFontSizeTokens[key];
     }
     return QVariant();
 }
@@ -200,8 +244,8 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::FontWeight& key) con
     if (_customFontWeightTokens.contains(key)) {
         return _customFontWeightTokens[key];
     }
-    if (_fontWeightTokens.contains(key)) {
-        return _fontWeightTokens[key];
+    if (s_defaultFontWeightTokens.contains(key)) {
+        return s_defaultFontWeightTokens[key];
     }
     return QVariant();
 }
@@ -211,8 +255,8 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::Elevation& key) cons
     if (_customElevationTokens.contains(key)) {
         return _customElevationTokens[key];
     }
-    if (_elevationTokens.contains(key)) {
-        return _elevationTokens[key];
+    if (s_defaultElevationTokens.contains(key)) {
+        return s_defaultElevationTokens[key];
     }
     return QVariant();
 }
@@ -222,8 +266,8 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::AnimationDuration& k
     if (_customAnimationDurationTokens.contains(key)) {
         return _customAnimationDurationTokens[key];
     }
-    if (_animationDurationTokens.contains(key)) {
-        return _animationDurationTokens[key];
+    if (s_defaultAnimationDurationTokens.contains(key)) {
+        return s_defaultAnimationDurationTokens[key];
     }
     return QVariant();
 }
@@ -233,8 +277,23 @@ QVariant NThemePrivate::resolveToken(const NDesignTokenKey::AnimationEasing& key
     if (_customAnimationEasingTokens.contains(key)) {
         return _customAnimationEasingTokens[key];
     }
-    if (_animationEasingTokens.contains(key)) {
-        return _animationEasingTokens[key];
+    if (s_defaultAnimationEasingTokens.contains(key)) {
+        return s_defaultAnimationEasingTokens[key];
     }
     return QVariant();
 }
+
+void NThemePrivate::setupCacheInvalidationTimer() {
+    _cacheInvalidationTimer = new QTimer(q_ptr);
+    _cacheInvalidationTimer->setSingleShot(true);
+    _cacheInvalidationTimer->setInterval(5000); // 5秒后失效缓存
+
+    QObject::connect(_cacheInvalidationTimer, &QTimer::timeout, [this]() { invalidateSystemCache(); });
+}
+
+void NThemePrivate::invalidateSystemCache() {
+    _systemThemeCacheValid       = false;
+    _systemAccentColorCacheValid = false;
+}
+
+void NThemePrivate::invalidateColorCache() { _colorCache.clear(); }

@@ -1,0 +1,107 @@
+
+
+你是一个QT开发专家，了解QT的每一个模块，非常熟悉QT的每一个函数和类，你非常擅长开发高性能的Qt组件，非常擅长使用QPainter等开发一些组件，擅长使用QProxyStyle和QPropertyAnimation开发动画丰富且样式完美的组件。
+
+
+# https://doc.qt.io/qt-6/zh/ llms.txt
+
+- [Reporting Bugs in Qt](https://doc.qt.io/qt-6/zh/bughowto.html): Learn how to effectively report bugs in Qt software.
+- [QSizeGrip Class](https://doc.qt.io/qt-6/zh/qsizegrip.html): QSizeGrip class provides a handle for resizing top-level windows.
+- [Q3DScene Class](https://doc.qt.io/qt-6/zh/q3dscene-qtdatavis.html): Q3DScene class for visualizing 3D data scenes in Qt.
+- [Qt QML Models](https://doc.qt.io/qt-6/zh/qtqmlmodels-index.html): Explore QML models for defining data in Qt applications.
+- [Qt 3D Render Tips](https://doc.qt.io/qt-6/zh/qt3drender-protips.html): Essential tips for rendering with Qt 3D effectively.
+- [OAuth2 Device Authorization](https://doc.qt.io/qt-6/zh/qoauth2deviceauthorizationflow.html): Implement device authorization flow for OAuth2 in Qt applications.
+- [QStyleOptionToolButton](https://doc.qt.io/qt-6/zh/qstyleoptiontoolbutton.html): Class for describing parameters of tool button drawing.
+- [Qt Concurrent Module](https://doc.qt.io/qt-6/zh/qtconcurrent-index.html): Qt Concurrent module simplifies multi-threading without low-level primitives.
+- [QFutureSynchronizer Class](https://doc.qt.io/qt-6/zh/qfuturesynchronizer.html): Convenient class for synchronizing multiple QFuture objects in Qt.
+- [QSpline3DSeries Class](https://doc.qt.io/qt-6/zh/qspline3dseries.html): Class for representing 3D spline curves in Qt.
+- [Secure OPC UA Clients](https://doc.qt.io/qt-6/zh/qtopcua-security.html): Learn to create secure OPC UA clients with Qt.
+- [QRhi Readback Description](https://doc.qt.io/qt-6/zh/qrhireadbackdescription.html): Describes operations for reading back texture content from GPU.
+- [QListView Class](https://doc.qt.io/qt-6/zh/qlistview.html): QListView class provides a flexible list or icon view for models.
+- [QOpcUaStructureField Class](https://doc.qt.io/qt-6/zh/qopcuastructurefield.html): Detailed documentation on QOpcUaStructureField class in Qt.
+- [QFontVariableAxis Class](https://doc.qt.io/qt-6/zh/qfontvariableaxis.html): Explore the QFontVariableAxis class for variable font axes.
+- [Qt 6.9 New Features](https://doc.qt.io/qt-6/zh/newclasses69.html): Comprehensive list of new classes and functions in Qt 6.9.
+- [QWidget Accessibility](https://doc.qt.io/qt-6/zh/accessible-qwidget.html): Explore accessibility features for QWidget applications in Qt.
+- [QHttpServerConfiguration Class](https://doc.qt.io/qt-6/zh/qhttpserverconfiguration.html): Manage server parameters with QHttpServerConfiguration class in Qt.
+- [QRgbaFloat Class](https://doc.qt.io/qt-6/zh/qrgbafloat.html): QRgbaFloat class for RGBA float color representation in Qt.
+- [Qt 6.9 Features](https://doc.qt.io/qt-6/zh/whatsnew69.html): Discover new features and improvements in Qt 6.9 release.
+- [QIODeviceBase Class](https://doc.qt.io/qt-6/zh/qiodevicebase.html): Base class for QIODevice, defining device open modes.
+- [QBluetooth Namespace Overview](https://doc.qt.io/qt-6/zh/qbluetooth.html): Explore QBluetooth namespace for Bluetooth-related classes and functions.
+- [Qt Positioning Module](https://doc.qt.io/qt-6/zh/qtpositioning-module.html): Qt Positioning module provides location information via QML and C++.
+- [QPainterStateGuard Class](https://doc.qt.io/qt-6/zh/qpainterstateguard.html): RAII class for managing QPainter state in Qt.
+- [QWebEngineProfileBuilder](https://doc.qt.io/qt-6/zh/qwebengineprofilebuilder.html): Build and configure QWebEngineProfile instances in Qt applications.
+- [QFutureWatcher Class](https://doc.qt.io/qt-6/zh/qfuturewatcher.html): Monitor QFuture asynchronous computations with QFutureWatcher class.
+- [QAbstractItemView Class](https://doc.qt.io/qt-6/zh/qabstractitemview.html): QAbstractItemView class provides basic functionality for item views.
+- [QOAuth2DeviceAuthorizationFlow Members](https://doc.qt.io/qt-6/zh/qoauth2deviceauthorizationflow-members.html): Comprehensive member list for QOAuth2DeviceAuthorizationFlow class.
+- [QTreeWidget Class](https://doc.qt.io/qt-6/zh/qtreewidget.html): QTreeWidget class provides a tree view with predefined model.
+- [Vulkan Queue Submission](https://doc.qt.io/qt-6/zh/qrhivulkanqueuesubmitparams.html): Detailed parameters for Vulkan queue submission in Qt.
+- [Qt Jenny: Code Generator](https://doc.qt.io/qt-6/zh/qtjenny.html): Qt Jenny is a Java code generator for C++ wrappers.
+- [QSpline3DSeries Members](https://doc.qt.io/qt-6/zh/qspline3dseries-members.html): Complete member list for QSpline3DSeries in Qt 6.9.
+- [QRhiShadingRateMap Class](https://doc.qt.io/qt-6/zh/qrhishadingratemap.html): Class for managing shading rate maps in Qt 6.9.
+- [QInputSettings Class](https://doc.qt.io/qt-6/zh/qt3dinput-qinputsettings.html): QInputSettings class manages input event source in Qt 3D.
+- [Qt Designer Task Menu](https://doc.qt.io/qt-6/zh/qdesignertaskmenuextension.html): Add custom menu items in Qt Designer's task menu.
+- [QQmlSA ElementPass Class](https://doc.qt.io/qt-6/zh/qqmlsa-elementpass.html): Overview of QQmlSA::ElementPass class for static analysis.
+- [QJniArray Class](https://doc.qt.io/qt-6/zh/qjniarray.html): QJniArray class simplifies handling Java arrays in C++.
+- [QValueAxis Class](https://doc.qt.io/qt-6/zh/qvalueaxis-qtcharts.html): QValueAxis class for adding value axes to charts.
+- [C++20 Features in Qt](https://doc.qt.io/qt-6/zh/cpp20-overview.html): Overview of C++20 features available in Qt 6.
+- [QTextLength Class](https://doc.qt.io/qt-6/zh/qtextlength.html): QTextLength class defines various length types for text documents.
+- [Qt3DRender QLineWidth](https://doc.qt.io/qt-6/zh/qt3drender-qlinewidth.html): Defines the width of rasterized lines in Qt 3D rendering.
+- [QCandlestickModelMapper](https://doc.qt.io/qt-6/zh/qcandlestickmodelmapper-qtcharts.html): Abstract model mapper for candlestick series in Qt Charts.
+- [QAnalogAxisInput Class](https://doc.qt.io/qt-6/zh/qt3dinput-qanalogaxisinput.html): Class for controlling axis input from analog devices.
+- [Native Shading Rate Map](https://doc.qt.io/qt-6/zh/qrhishadingratemap-nativeshadingratemap.html): Overview of NativeShadingRateMap structure in Qt 6.9 documentation.
+- [Qt Widgets Tutorials](https://doc.qt.io/qt-6/zh/widget-tutorials.html): Explore comprehensive tutorials for Qt Widgets development.
+- [Qt Help Examples](https://doc.qt.io/qt-6/zh/examples-qthelp.html): Explore examples for integrating context-sensitive help in Qt applications.
+- [QHash Insertion Result](https://doc.qt.io/qt-6/zh/qhash-tryemplaceresult.html): QHash::TryEmplaceResult indicates insertion results in Qt 6.9.
+- [Qt Known Issues](https://doc.qt.io/qt-6/zh/known-issues.html): Find the latest known issues and updates for Qt.
+- [QColorSpace PrimaryPoints](https://doc.qt.io/qt-6/zh/qcolorspace-primarypoints.html): Explore the QColorSpace PrimaryPoints structure in Qt 6.9.
+- [Spline3DSeries QML Type](https://doc.qt.io/qt-6/zh/qml-qtgraphs-spline3dseries.html): Explore the Spline3DSeries QML type for 3D graphs.
+- [FontInfo QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick-fontinfo.html): Information on resolving font queries in Qt applications.
+- [OpenSSL for Android](https://doc.qt.io/qt-6/zh/android-openssl-support.html): Guide to adding OpenSSL support for Android applications.
+- [3D Bar Data Proxy](https://doc.qt.io/qt-6/zh/qml-qtgraphs-bardataproxy.html): Data proxy for 3D bar charts in Qt Graphs.
+- [Shear QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick-shear.html): Learn about the Shear QML type for transformations.
+- [Object3D QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick3d-object3d.html): Abstract base type for all 3D nodes and resources.
+- [CMake Commands in Qt6](https://doc.qt.io/qt-6/zh/cmake-commands-qtcore.html): Explore CMake commands for Qt6 Core module usage.
+- [QML Camera Type](https://doc.qt.io/qt-6/zh/qml-qtquick3d-camera.html): Abstract camera type for 3D scene visualization in QML.
+- [WebEngineProfilePrototype](https://doc.qt.io/qt-6/zh/qml-qtwebengine-webengineprofileprototype.html): Create instances of QQuickWebEngineProfile in QML.
+- [Qt Quick Window Example](https://doc.qt.io/qt-6/zh/qtquick-window-example.html): Learn to create and manage windows in QML applications.
+- [Qt Widgets Notepad Guide](https://doc.qt.io/qt-6/zh/widgets-getting-started.html): Learn to create a simple notepad application using Qt Widgets.
+- [ReadItem QML Type](https://doc.qt.io/qt-6/zh/qml-qtopcua-readitem.html): Specifies items to read from the OPC UA server.
+- [Audio Output Example](https://doc.qt.io/qt-6/zh/qtmultimedia-audiooutput-example.html): Demonstrates audio playback using QAudioSink class in Qt.
+- [Qt WebView Minibrowser](https://doc.qt.io/qt-6/zh/qtwebview-minibrowser-example.html): Minibrowser example showcasing basic browsing with Qt WebView.
+- [SafeArea QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick-safearea.html): Access safe area properties for QML projects and windows.
+- [WriteResult QML Type](https://doc.qt.io/qt-6/zh/qml-qtopcua-writeresult.html): Details about the WriteResult QML type in Qt.
+- [Matrix4x4 QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick-matrix4x4.html): Learn to apply 4x4 transformation matrices in QML.
+- [QQmlSA::ElementPass Members](https://doc.qt.io/qt-6/zh/qqmlsa-elementpass-members.html): Comprehensive member list for QQmlSA::ElementPass class.
+- [Context-Sensitive Help Example](https://doc.qt.io/qt-6/zh/qthelp-contextsensitivehelp-example.html): Implement context-sensitive help using QHelpEngineCore class.
+- [StackView QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick-controls-stackview.html): Explore StackView for efficient navigation in QML applications.
+- [SafeArea Members List](https://doc.qt.io/qt-6/zh/qml-qtquick-safearea-members.html): Comprehensive list of SafeArea members and properties in Qt.
+- [DelegateChooser QML Type](https://doc.qt.io/qt-6/zh/qml-qtqml-models-delegatechooser.html): DelegateChooser allows different delegates for model items.
+- [Particle System QML](https://doc.qt.io/qt-6/zh/qml-qtquick-particles-particlesystem.html): A system for managing particle emitters and effects.
+- [Drawer QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick-controls-drawer.html): Explore the Drawer QML type for side panel navigation.
+- [Qt Calculator Example](https://doc.qt.io/qt-6/zh/qtwidgets-widgets-calculator-example.html): Learn to create a functional calculator using Qt Widgets.
+- [Custom Completer Example](https://doc.qt.io/qt-6/zh/qtwidgets-tools-customcompleter-example.html): Custom completer example for text input in Qt applications.
+- [CuboidGeometry QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick3d-helpers-cuboidgeometry.html): CuboidGeometry type for defining 3D cuboid shapes in QML.
+- [Rectangular Shadow Effect](https://doc.qt.io/qt-6/zh/qml-qtquick-effects-rectangularshadow.html): Create smooth rectangular shadows for visual effects in QML.
+- [ParticleAffector QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick-particles-particleaffector.html): Modify particle properties during their lifecycle in QML.
+- [Threaded Fetch More Example](https://doc.qt.io/qt-6/zh/qtquick-models-threadedfetchmore-example.html): Demonstrates fetchMore() in worker thread for responsive UI.
+- [2D Graphs in Qt](https://doc.qt.io/qt-6/zh/qtgraphs-2d-quickwidgetgraphs-example.html): Learn to use 2D graphs in Qt Widgets applications.
+- [FontInfo Members List](https://doc.qt.io/qt-6/zh/qml-qtquick-fontinfo-members.html): Comprehensive list of FontInfo members in Qt Quick.
+- [XR Haptic Feedback](https://doc.qt.io/qt-6/zh/qml-qtquick3d-xr-xrhapticfeedback.html): Control haptic feedback for XR controllers in Qt.
+- [Cylinder Geometry QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick3d-helpers-cylindergeometry.html): Provides geometry for creating cylinder shapes in QML.
+- [Qt 2D Graphs Example](https://doc.qt.io/qt-6/zh/qtgraphs-2d-hellographs-example.html): Learn to create 2D bar and line graphs in Qt.
+- [Plane Geometry in Qt](https://doc.qt.io/qt-6/zh/qml-qtquick3d-helpers-planegeometry.html): Provides geometric representation for planes in Qt Quick 3D.
+- [Sphere Geometry QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick3d-helpers-spheregeometry.html): Provides geometric representation of a sphere in QML.
+- [Extruded Text Geometry](https://doc.qt.io/qt-6/zh/qml-qtquick3d-helpers-extrudedtextgeometry.html): Provides geometry for extruded text in Qt Quick 3D.
+- [Cone Geometry QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick3d-helpers-conegeometry.html): Provides geometric representation of a cone in QML.
+- [Qt Quick Pixelator Example](https://doc.qt.io/qt-6/zh/qtquick-tableview-pixelator-example.html): Explore Qt Quick TableView example for custom image models.
+- [QML Context Menu](https://doc.qt.io/qt-6/zh/qml-qtquick-controls-contextmenu.html): Learn how to implement context menus in QML applications.
+- [WebEngineProfilePrototype Members](https://doc.qt.io/qt-6/zh/qml-qtwebengine-webengineprofileprototype-members.html): Comprehensive member list for WebEngineProfilePrototype in Qt.
+- [QML MenuBar Overview](https://doc.qt.io/qt-6/zh/qml-qtquick-controls-menubar.html): Explore the QML MenuBar type for Qt applications.
+- [XrSimpleHapticEffect Overview](https://doc.qt.io/qt-6/zh/qml-qtquick3d-xr-xrsimplehapticeffect.html): Control haptic feedback with amplitude, duration, and frequency settings.
+- [Two Texture Providers Example](https://doc.qt.io/qt-6/zh/qtquick-scenegraph-twotextureproviders-example.html): Demonstrates combining two textures from texture providers.
+- [Threaded Song List Model](https://doc.qt.io/qt-6/zh/qtquick-models-threadedsonglist-example.html): Learn to create a responsive song list model using threads.
+- [TorusGeometry QML Type](https://doc.qt.io/qt-6/zh/qml-qtquick3d-helpers-torusgeometry.html): Provides geometric representation of a torus in QML.
+- [TableViewDelegate Overview](https://doc.qt.io/qt-6/zh/qml-qtquick-controls-tableviewdelegate.html): Delegate for rendering table cells in Qt Quick applications.
+- [DelegateChoice QML Type](https://doc.qt.io/qt-6/zh/qml-qtqml-models-delegatechoice.html): DelegateChoice QML type for managing model delegates effectively.
+- [Android Permissions in Qt](https://doc.qt.io/qt-6/zh/qt-add-android-permission.html): Add Android permissions to Qt executable targets easily.
+
