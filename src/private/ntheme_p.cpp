@@ -27,16 +27,13 @@ NThemePrivate::NThemePrivate(NTheme* q)
       _useSystemAccentColor(true),
       _systemAccentColor(Qt::transparent),
       _cacheInvalidationTimer(nullptr) {
-    // 确保静态数据只初始化一次
     if (!s_staticDataInitialized) {
         initializeStaticData();
         s_staticDataInitialized = true;
     }
 
-    // 设置缓存容量（限制内存使用）
     _colorCache.setMaxCost(100); // 最多缓存100个颜色
 
-    // 设置缓存失效定时器
     setupCacheInvalidationTimer();
 
     _isDark            = detectSystemTheme();
@@ -55,7 +52,6 @@ void NThemePrivate::initializeStaticData() {
     s_lightColors = &LightThemeColors;
     s_darkColors  = &DarkThemeColors;
 
-    // 初始化设计令牌（移动原有的initDesignTokens内容到这里）
     // 圆角大小 (CornerRadius)
     s_defaultRadiusTokens[NDesignTokenKey::CornerRadiusNone]     = 0.0;
     s_defaultRadiusTokens[NDesignTokenKey::CornerRadiusSmall]    = 2.0;

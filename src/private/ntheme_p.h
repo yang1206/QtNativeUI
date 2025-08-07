@@ -3,11 +3,13 @@
 
 #include <QCache>
 #include <QColor>
+#include <QPixmap>
 #include <QTimer>
 #include <QVariant>
 #include <QtNativeUI/NColor.h>
 #include <QtNativeUI/NFluentColors.h>
 #include <QtNativeUI/NTheme.h>
+
 
 class NTheme;
 class NThemePrivate {
@@ -28,10 +30,10 @@ class NThemePrivate {
     static const QMap<NFluentColorKey::Key, QColor>* s_lightColors;
     static const QMap<NFluentColorKey::Key, QColor>* s_darkColors;
     static bool                                      s_staticDataInitialized;
-    // 只存储自定义颜色
+
     QMap<NFluentColorKey::Key, QColor> _customColors;
 
-    // 设计令牌 - 改为静态共享
+    // 设计令牌
     static QHash<NDesignTokenKey::Radius, QVariant>            s_defaultRadiusTokens;
     static QHash<NDesignTokenKey::Spacing, QVariant>           s_defaultSpacingTokens;
     static QHash<NDesignTokenKey::FontSize, QVariant>          s_defaultFontSizeTokens;
@@ -51,6 +53,8 @@ class NThemePrivate {
 
     mutable QCache<NFluentColorKey::Key, QColor> _colorCache;
 
+    // 移除阴影缓存，新算法本身就很高效
+
     mutable bool   _systemThemeCacheValid       = false;
     mutable bool   _systemThemeCache            = false;
     mutable bool   _systemAccentColorCacheValid = false;
@@ -64,7 +68,7 @@ class NThemePrivate {
     QColor detectSystemAccentColor() const;
 
     QColor resolveColor(NFluentColorKey::Key key) const;
- template <typename T>
+    template <typename T>
     QVariant resolveToken(const T& key) const;
 
     void setupCacheInvalidationTimer();
