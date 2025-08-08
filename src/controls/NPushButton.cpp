@@ -61,6 +61,9 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
 
+        d->invalidateColorCache();
+        d->invalidateIconCache();
+
         if (d->_buttonType == NPushButtonPrivate::Accent) {
             updateAccentColors();
         }
@@ -71,6 +74,8 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
         Q_D(NPushButton);
         if (d->_buttonType == NPushButtonPrivate::Accent) {
+            d->invalidateColorCache();
+            d->invalidateIconCache();
             updateAccentColors();
             update();
         }
@@ -102,6 +107,7 @@ NPushButton::ButtonType NPushButton::buttonType() const {
 void NPushButton::enterEvent(QEnterEvent* event) {
     Q_D(NPushButton);
     d->_isHovered = true;
+    d->invalidateColorCache(); // 状态变化时失效缓存
     update();
     QPushButton::enterEvent(event);
 }
@@ -109,6 +115,7 @@ void NPushButton::enterEvent(QEnterEvent* event) {
 void NPushButton::leaveEvent(QEvent* event) {
     Q_D(NPushButton);
     d->_isHovered = false;
+    d->invalidateColorCache(); // 状态变化时失效缓存
     update();
     QPushButton::leaveEvent(event);
 }
@@ -116,6 +123,7 @@ void NPushButton::leaveEvent(QEvent* event) {
 void NPushButton::mousePressEvent(QMouseEvent* event) {
     Q_D(NPushButton);
     d->_isPressed = true;
+    d->invalidateColorCache(); // 状态变化时失效缓存
     update();
     QPushButton::mousePressEvent(event);
 }
@@ -123,6 +131,7 @@ void NPushButton::mousePressEvent(QMouseEvent* event) {
 void NPushButton::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NPushButton);
     d->_isPressed = false;
+    d->invalidateColorCache(); // 状态变化时失效缓存
     update();
     QPushButton::mouseReleaseEvent(event);
 }
@@ -200,41 +209,43 @@ void NPushButton::drawBackground(QPainter* painter) {
                          width() - 2 * (d->_shadowBorderWidth),
                          height() - 2 * d->_shadowBorderWidth);
 
-    if (d->_buttonType == NPushButtonPrivate::Accent) {
-        QColor bgColor;
-        if (!isEnabled()) {
-            bgColor = d->_accentDisabledColor;
-        } else if (d->_isPressed) {
-            bgColor = d->_accentPressColor;
-        } else if (d->_isHovered) {
-            bgColor = d->_accentHoverColor;
-        } else {
-            bgColor = d->_accentDefaultColor;
-        }
-
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(bgColor);
-        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
-    } else {
-        QColor bgColor;
-        if (!isEnabled()) {
-            bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
-        } else if (d->_isPressed) {
-            bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
-        } else if (d->_isHovered) {
-            bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
-        } else {
-            if (d->_pTransparentBackground) {
-                bgColor = Qt::transparent;
+    QColor bgColor;
+    if (!d->_colorCacheValid) {
+        if (d->_buttonType == NPushButtonPrivate::Accent) {
+            if (!isEnabled()) {
+                bgColor = d->_accentDisabledColor;
+            } else if (d->_isPressed) {
+                bgColor = d->_accentPressColor;
+            } else if (d->_isHovered) {
+                bgColor = d->_accentHoverColor;
             } else {
-                bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+                bgColor = d->_accentDefaultColor;
+            }
+        } else {
+            if (!isEnabled()) {
+                bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+            } else if (d->_isPressed) {
+                bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+            } else if (d->_isHovered) {
+                bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+            } else {
+                if (d->_pTransparentBackground) {
+                    bgColor = Qt::transparent;
+                } else {
+                    bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+                }
             }
         }
-
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(bgColor);
-        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+        
+        d->_cachedBackgroundColor = bgColor;
+        d->_colorCacheValid = true;
+    } else {
+        bgColor = d->_cachedBackgroundColor;
     }
+
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(bgColor);
+    painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
 
     if ((!d->_isPressed) && (!d->_pTransparentBackground)) {
         if (d->_buttonType == NPushButtonPrivate::Accent) {
@@ -457,6 +468,13 @@ void NPushButton::updateFluentIcon() {
         return;
     }
 
+    // 性能优化：检查图标缓存
+    if (d->_iconCacheValid && !d->_cachedFluentIcon.isNull()) {
+        setIcon(d->_cachedFluentIcon);
+        setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
+        return;
+    }
+
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
         if (d->_buttonType == NPushButtonPrivate::Accent) {
@@ -484,13 +502,19 @@ void NPushButton::updateFluentIcon() {
         iconColor = d->_fluentIcon.customColor;
     }
 
+    QIcon generatedIcon;
     if (d->_fluentIcon.isRegular) {
-        setIcon(nIcon->fromRegular(
-            static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
+        generatedIcon = nIcon->fromRegular(
+            static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     } else {
-        setIcon(nIcon->fromFilled(
-            static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
+        generatedIcon = nIcon->fromFilled(
+            static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     }
 
+    // 缓存生成的图标
+    d->_cachedFluentIcon = generatedIcon;
+    d->_iconCacheValid = true;
+
+    setIcon(generatedIcon);
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
 }
