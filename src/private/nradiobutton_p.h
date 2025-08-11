@@ -62,6 +62,22 @@ class NRadioButtonPrivate : public QObject {
     QColor _accentHoverColor;
     QColor _accentPressedColor;
     QColor _accentDisabledColor;
+    
+    mutable QColor _cachedOuterCircleColor;
+    mutable QColor _cachedOuterBorderColor;
+    mutable QColor _cachedInnerCircleColor;
+    mutable QColor _cachedTextColor;
+    mutable bool _outerCircleColorCacheValid = false;
+    mutable bool _outerBorderColorCacheValid = false;
+    mutable bool _innerCircleColorCacheValid = false;
+    mutable bool _textColorCacheValid = false;
+    
+    void invalidateColorCache() {
+        _outerCircleColorCacheValid = false;
+        _outerBorderColorCacheValid = false;
+        _innerCircleColorCacheValid = false;
+        _textColorCacheValid = false;
+    }
 };
 
 #endif // NRADIOBUTTON_P_H

@@ -22,12 +22,16 @@ void NRadioButtonPrivate::startInnerCircleAnimation(qreal startScale, qreal endS
     QObject::disconnect(_innerCircleAnimation, nullptr, q_ptr, nullptr);
 
     QObject::connect(_innerCircleAnimation, &QPropertyAnimation::valueChanged, q_ptr, [this](const QVariant& value) {
-        _innerCircleScale = value.toReal();
-        q_ptr->update();
+        qreal newScale = value.toReal();
+        if (qAbs(_innerCircleScale - newScale) > 0.01) {
+            _innerCircleScale = newScale;
+            q_ptr->update();
+        }
     });
 
     QObject::connect(_innerCircleAnimation, &QPropertyAnimation::finished, q_ptr, [this]() {
         QObject::disconnect(_innerCircleAnimation, nullptr, q_ptr, nullptr);
+        q_ptr->update();
     });
 
     _innerCircleAnimation->start();
