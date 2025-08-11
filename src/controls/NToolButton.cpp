@@ -522,7 +522,6 @@ void NToolButton::updateFluentIcon() {
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
         if (d->_buttonType == NToolButtonPrivate::Accent) {
-            qDebug() << d->_buttonType;
             if (!isEnabled()) {
                 iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
             } else {
