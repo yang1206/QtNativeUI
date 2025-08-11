@@ -22,6 +22,16 @@ private:
     bool _isDark;
     QUrl _url;
     int _pBorderRadius;
+    
+    mutable QColor _cachedTextColor;
+    mutable QColor _cachedBackgroundColor;
+    mutable bool _textColorCacheValid = false;
+    mutable bool _backgroundColorCacheValid = false;
+
+    void invalidateColorCache() { 
+        _textColorCacheValid = false; 
+        _backgroundColorCacheValid = false; 
+    }
 };
 
 #endif // QTNATIVEUI_NHYPERLINKBUTTON_P_H

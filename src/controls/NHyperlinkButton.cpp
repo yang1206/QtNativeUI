@@ -48,6 +48,14 @@ NHyperlinkButton::NHyperlinkButton(QWidget* parent) : QPushButton(parent), d_ptr
             NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_isDark ? NThemeType::Dark : NThemeType::Light);
         d->_pBackgroundPressColor =
             NThemeColor(NFluentColorKey::SubtleFillColorTertiary, d->_isDark ? NThemeType::Dark : NThemeType::Light);
+        
+        d->invalidateColorCache();
+        update();
+    });
+
+    connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
+        Q_D(NHyperlinkButton);
+        d->_textColorCacheValid = false;
         update();
     });
 
@@ -69,6 +77,7 @@ NHyperlinkButton::~NHyperlinkButton() {}
 void NHyperlinkButton::enterEvent(QEnterEvent* event) {
     Q_D(NHyperlinkButton);
     d->_isHovered = true;
+    d->invalidateColorCache();
     update();
     QPushButton::enterEvent(event);
 }
@@ -76,6 +85,7 @@ void NHyperlinkButton::enterEvent(QEnterEvent* event) {
 void NHyperlinkButton::leaveEvent(QEvent* event) {
     Q_D(NHyperlinkButton);
     d->_isHovered = false;
+    d->invalidateColorCache();
     update();
     QPushButton::leaveEvent(event);
 }
@@ -83,6 +93,7 @@ void NHyperlinkButton::leaveEvent(QEvent* event) {
 void NHyperlinkButton::mousePressEvent(QMouseEvent* event) {
     Q_D(NHyperlinkButton);
     d->_isPressed = true;
+    d->invalidateColorCache();
     update();
     QPushButton::mousePressEvent(event);
 }
@@ -90,6 +101,7 @@ void NHyperlinkButton::mousePressEvent(QMouseEvent* event) {
 void NHyperlinkButton::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NHyperlinkButton);
     d->_isPressed = false;
+    d->invalidateColorCache();
     update();
     QPushButton::mouseReleaseEvent(event);
 }
@@ -103,9 +115,18 @@ void NHyperlinkButton::paintEvent(QPaintEvent* event) {
 
     // 绘制背景
     if ((d->_isPressed || d->_isHovered) && isEnabled()) {
+        QColor bgColor;
+        if (!d->_backgroundColorCacheValid) {
+            bgColor = d->_isPressed ? d->_pBackgroundPressColor : d->_pBackgroundHoverColor;
+            d->_cachedBackgroundColor = bgColor;
+            d->_backgroundColorCacheValid = true;
+        } else {
+            bgColor = d->_cachedBackgroundColor;
+        }
+        
         QPainterPath path;
         path.addRoundedRect(rect(), d->_pBorderRadius, d->_pBorderRadius);
-        painter.fillPath(path, d->_isPressed ? d->_pBackgroundPressColor : d->_pBackgroundHoverColor);
+        painter.fillPath(path, bgColor);
     }
 
     drawText(&painter);
@@ -116,13 +137,24 @@ void NHyperlinkButton::drawText(QPainter* painter) {
     if (text().isEmpty())
         return;
 
-    painter->setPen(isEnabled() ? nTheme->accentColor().normal() : d->_pDisabledColor);
+    QColor textColor;
+    if (!d->_textColorCacheValid) {
+        textColor = isEnabled() ? nTheme->accentColor().normal() : d->_pDisabledColor;
+        d->_cachedTextColor = textColor;
+        d->_textColorCacheValid = true;
+    } else {
+        textColor = d->_cachedTextColor;
+    }
+
+    painter->setPen(textColor);
     painter->drawText(rect(), Qt::AlignCenter, text());
 }
 
 void NHyperlinkButton::changeEvent(QEvent* event) {
+    Q_D(NHyperlinkButton);
     if (event->type() == QEvent::EnabledChange || event->type() == QEvent::PaletteChange ||
         event->type() == QEvent::LanguageChange) {
+        d->invalidateColorCache();
         update();
     }
     QPushButton::changeEvent(event);
