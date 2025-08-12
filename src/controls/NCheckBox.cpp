@@ -72,11 +72,17 @@ void NCheckBox::init() {
         Q_D(NCheckBox);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
+        d->invalidateColorCache();
+        d->invalidateIconCache();
         updateAccentColors();
         update();
     });
 
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
+        Q_D(NCheckBox);
+        d->_backgroundColorCacheValid = false;
+        d->_iconColorCacheValid = false;
+        d->invalidateIconCache();
         updateAccentColors();
         update();
     });
@@ -90,6 +96,9 @@ void NCheckBox::setChecked(bool checked) {
 
     if (isChecked() == checked)
         return;
+
+    d->invalidateColorCache();
+    d->invalidateIconCache();
 
     d->startAlphaAnimation(checked);
 
@@ -112,6 +121,9 @@ void NCheckBox::nextCheckState() {
 
     bool needAnimation = (currentState == Qt::Unchecked && nextState != Qt::Unchecked) ||
                          (currentState != Qt::Unchecked && nextState == Qt::Unchecked);
+
+    d->invalidateColorCache();
+    d->invalidateIconCache();
 
     QCheckBox::nextCheckState();
 
@@ -140,46 +152,80 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
     QRect checkBoxRect(0, (height() - d->_checkBoxSize) / 2, d->_checkBoxSize, d->_checkBoxSize);
     QRect innerRect = checkBoxRect.adjusted(1, 1, -1, -1);
 
-    QColor bgColor;
-    QColor borderColor;
-
     bool isCheckedOrPartial = isChecked() || checkState() == Qt::PartiallyChecked;
 
-    if (d->_isAnimationFinished) {
-        if (isCheckedOrPartial) {
-            if (!isEnabled()) {
-                bgColor = d->_accentDisabledColor;
-            } else if (d->_isPressed) {
-                bgColor = d->_accentPressColor;
-            } else if (d->_isHovered) {
-                bgColor = d->_accentHoverColor;
-
+    QColor bgColor;
+    if (!d->_backgroundColorCacheValid || !d->_isAnimationFinished) {
+        if (d->_isAnimationFinished) {
+            if (isCheckedOrPartial) {
+                if (!isEnabled()) {
+                    bgColor = d->_accentDisabledColor;
+                } else if (d->_isPressed) {
+                    bgColor = d->_accentPressColor;
+                } else if (d->_isHovered) {
+                    bgColor = d->_accentHoverColor;
+                } else {
+                    bgColor = d->_accentDefaultColor;
+                }
             } else {
-                bgColor = d->_accentDefaultColor;
+                if (!isEnabled()) {
+                    bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+                } else if (d->_isPressed) {
+                    bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+                } else if (d->_isHovered) {
+                    bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+                } else {
+                    bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+                }
             }
-            borderColor = Qt::transparent;
-            painter->setPen(Qt::NoPen);
-            painter->setBrush(bgColor);
-            painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
         } else {
             if (!isEnabled()) {
-                bgColor     = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+                bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+            } else if (d->_isPressed) {
+                bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+            } else if (d->_isHovered) {
+                bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+            } else {
+                bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+            }
+        }
+        if (d->_isAnimationFinished) {
+            d->_cachedBackgroundColor = bgColor;
+            d->_backgroundColorCacheValid = true;
+        }
+    } else {
+        bgColor = d->_cachedBackgroundColor;
+    }
+
+    QColor borderColor;
+    if (!d->_borderColorCacheValid || !d->_isAnimationFinished) {
+        if (d->_isAnimationFinished && isCheckedOrPartial) {
+            borderColor = Qt::transparent;
+        } else {
+            if (!isEnabled()) {
                 borderColor = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, d->_themeMode);
             } else if (d->_isPressed) {
-                bgColor     = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
                 borderColor = d->_isDark ? d->_pDarkBorderPressColor : d->_pLightBorderPressColor;
             } else if (d->_isHovered) {
-                bgColor     = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
                 borderColor = d->_isDark ? d->_pDarkBorderHoverColor : d->_pLightBorderHoverColor;
             } else {
-                bgColor     = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
                 borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
             }
+        }
+        if (d->_isAnimationFinished) {
+            d->_cachedBorderColor = borderColor;
+            d->_borderColorCacheValid = true;
+        }
+    } else {
+        borderColor = d->_cachedBorderColor;
+    }
 
-            painter->setPen(Qt::NoPen);
-            painter->setBrush(bgColor);
-            painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
+    if (d->_isAnimationFinished) {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(bgColor);
+        painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
 
+        if (!isCheckedOrPartial && borderColor != Qt::transparent) {
             QPen pen(borderColor);
             pen.setWidth(1);
             painter->setPen(pen);
@@ -187,20 +233,9 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
             painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
         }
     } else {
-        QColor uncheckedBgColor;
-        if (!isEnabled()) {
-            uncheckedBgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
-            borderColor      = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, d->_themeMode);
-        } else if (d->_isPressed) {
-            uncheckedBgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
-            borderColor      = d->_isDark ? d->_pDarkBorderPressColor : d->_pLightBorderPressColor;
-        } else if (d->_isHovered) {
-            uncheckedBgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
-            borderColor      = d->_isDark ? d->_pDarkBorderHoverColor : d->_pLightBorderHoverColor;
-        } else {
-            uncheckedBgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
-            borderColor      = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-        }
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(bgColor);
+        painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
 
         QColor checkedBgColor;
         if (!isEnabled()) {
@@ -213,14 +248,8 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
             checkedBgColor = d->_accentDefaultColor;
         }
 
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(uncheckedBgColor);
-        painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
-
         QColor accentColor = checkedBgColor;
         accentColor.setAlpha(d->_pCheckAlpha);
-
-        painter->setPen(Qt::NoPen);
         painter->setBrush(accentColor);
         painter->drawRoundedRect(innerRect, d->_pBorderRadius, d->_pBorderRadius);
 
@@ -238,10 +267,19 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
 
     if (isCheckedOrPartial || d->_pCheckAlpha > 0) {
         QColor iconColor;
-        if (!isEnabled()) {
-            iconColor = d->_accentDisabledTextColor;
+        if (d->_isAnimationFinished && d->_iconColorCacheValid) {
+            iconColor = d->_cachedIconColor;
         } else {
-            iconColor = d->_accentTextColor;
+            if (!isEnabled()) {
+                iconColor = d->_accentDisabledTextColor;
+            } else {
+                iconColor = d->_accentTextColor;
+            }
+            
+            if (d->_isAnimationFinished) {
+                d->_cachedIconColor = iconColor;
+                d->_iconColorCacheValid = true;
+            }
         }
 
         if (!d->_isAnimationFinished) {
@@ -254,15 +292,26 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
         if (checkState() == Qt::PartiallyChecked) {
             painter->setPen(QPen(iconColor, 2));
 
-            int lineWidth = innerRect.width() * 0.6; // 使用60%的宽度
+            int lineWidth = innerRect.width() * 0.6;
             int startX    = innerRect.center().x() - lineWidth / 2;
             int endX      = innerRect.center().x() + lineWidth / 2;
             int y         = innerRect.center().y();
 
             painter->drawLine(startX, y, endX, y);
         } else {
-            NFilledIconType::Icon iconType = NFilledIconType::Checkmark24Filled;
-            QIcon                 icon     = nIcon->fromFilled(iconType, d->_checkIcon.size, iconColor);
+            QIcon icon;
+            if (!d->_checkIconCacheValid || !d->_isAnimationFinished) {
+                NFilledIconType::Icon iconType = NFilledIconType::Checkmark24Filled;
+                QColor colorToUse = d->_isAnimationFinished ? d->_cachedIconColor : iconColor;
+                icon = nIcon->fromFilled(iconType, d->_checkIcon.size, colorToUse);
+                
+                if (d->_isAnimationFinished) {
+                    d->_cachedCheckIcon = icon;
+                    d->_checkIconCacheValid = true;
+                }
+            } else {
+                icon = d->_cachedCheckIcon;
+            }
 
             QRect iconRect(innerRect.x() + (innerRect.width() - d->_checkIcon.size) / 2,
                            innerRect.y() + (innerRect.height() - d->_checkIcon.size) / 2,
@@ -290,10 +339,16 @@ void NCheckBox::drawText(QPainter* painter) {
     QRect textRect(d->_checkBoxSize + d->_spacing, 0, width() - d->_checkBoxSize - d->_spacing, height());
 
     QColor textColor;
-    if (!isEnabled()) {
-        textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
+    if (!d->_textColorCacheValid) {
+        if (!isEnabled()) {
+            textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
+        } else {
+            textColor = d->_isDark ? d->_pDarkTextColor : d->_pLightTextColor;
+        }
+        d->_cachedTextColor = textColor;
+        d->_textColorCacheValid = true;
     } else {
-        textColor = d->_isDark ? d->_pDarkTextColor : d->_pLightTextColor;
+        textColor = d->_cachedTextColor;
     }
 
     painter->setPen(textColor);
@@ -305,6 +360,7 @@ void NCheckBox::drawText(QPainter* painter) {
 void NCheckBox::enterEvent(QEnterEvent* event) {
     Q_D(NCheckBox);
     d->_isHovered = true;
+    d->invalidateColorCache();
     update();
     QCheckBox::enterEvent(event);
 }
@@ -312,6 +368,7 @@ void NCheckBox::enterEvent(QEnterEvent* event) {
 void NCheckBox::leaveEvent(QEvent* event) {
     Q_D(NCheckBox);
     d->_isHovered = false;
+    d->invalidateColorCache();
     update();
     QCheckBox::leaveEvent(event);
 }
@@ -320,6 +377,7 @@ void NCheckBox::mousePressEvent(QMouseEvent* event) {
     Q_D(NCheckBox);
     d->_isPressed           = true;
     d->_isAnimationFinished = false;
+    d->invalidateColorCache();
     update();
     QCheckBox::mousePressEvent(event);
 }
@@ -327,6 +385,7 @@ void NCheckBox::mousePressEvent(QMouseEvent* event) {
 void NCheckBox::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NCheckBox);
     d->_isPressed = false;
+    d->invalidateColorCache();
 
     bool wasChecked = d->_pCheckAlpha > 127;
 
@@ -344,7 +403,10 @@ void NCheckBox::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void NCheckBox::changeEvent(QEvent* event) {
+    Q_D(NCheckBox);
     if (event->type() == QEvent::EnabledChange) {
+        d->invalidateColorCache();
+        d->invalidateIconCache();
         update();
     }
     QCheckBox::changeEvent(event);

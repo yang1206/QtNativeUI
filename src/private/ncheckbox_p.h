@@ -58,6 +58,29 @@ class NCheckBoxPrivate : public QObject {
     CheckIconInfo _checkIcon;
 
     QPropertyAnimation* _alphaAnimation{nullptr};
+    
+    mutable QColor _cachedBackgroundColor;
+    mutable QColor _cachedBorderColor;
+    mutable QColor _cachedTextColor;
+    mutable QColor _cachedIconColor;
+    mutable QIcon _cachedCheckIcon;
+    mutable bool _backgroundColorCacheValid = false;
+    mutable bool _borderColorCacheValid = false;
+    mutable bool _textColorCacheValid = false;
+    mutable bool _iconColorCacheValid = false;
+    mutable bool _checkIconCacheValid = false;
+    
+    void invalidateColorCache() {
+        _backgroundColorCacheValid = false;
+        _borderColorCacheValid = false;
+        _textColorCacheValid = false;
+        _iconColorCacheValid = false;
+    }
+    
+    void invalidateIconCache() {
+        _checkIconCacheValid = false;
+        _iconColorCacheValid = false;
+    }
 };
 
 #endif // QTNATIVEUI_NCHECKBOX_P_H

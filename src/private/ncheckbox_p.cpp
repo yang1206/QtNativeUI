@@ -15,7 +15,14 @@ NCheckBoxPrivate::NCheckBoxPrivate(QObject* parent) : QObject(parent) {
         }
     });
 
-    connect(_alphaAnimation, &QPropertyAnimation::finished, this, [this]() { _isAnimationFinished = true; });
+    connect(_alphaAnimation, &QPropertyAnimation::finished, this, [this]() { 
+        _isAnimationFinished = true; 
+        invalidateColorCache();
+        invalidateIconCache();
+        if (q_ptr) {
+            q_ptr->update();
+        }
+    });
 }
 
 NCheckBoxPrivate::~NCheckBoxPrivate() { delete _alphaAnimation; }
