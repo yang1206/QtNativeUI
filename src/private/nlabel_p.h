@@ -21,6 +21,22 @@ class NLabelPrivate {
     bool             _isDark = false;
 
     QFont _originalFont;
+    
+    mutable QColor _cachedTextColor;
+    mutable QFont _cachedFont;
+    mutable QPalette _cachedPalette;
+    mutable bool _textColorCacheValid = false;
+    mutable bool _fontCacheValid = false;
+    mutable bool _paletteCacheValid = false;
+    
+    void invalidateColorCache() {
+        _textColorCacheValid = false;
+        _paletteCacheValid = false;
+    }
+    
+    void invalidateFontCache() {
+        _fontCacheValid = false;
+    }
 };
 
 #endif // NLABEL_P_H

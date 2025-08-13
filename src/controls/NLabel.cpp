@@ -1,4 +1,5 @@
-﻿#include <QtNativeUI/NLabel.h>
+﻿#include <QEvent>
+#include <QtNativeUI/NLabel.h>
 #include <QtNativeUI/NTheme.h>
 #include "../private/nlabel_p.h"
 
@@ -29,6 +30,7 @@ void NLabel::setType(NLabelType::Type type) {
     Q_D(NLabel);
     if (d->_type != type) {
         d->_type = type;
+        d->invalidateFontCache();
         d->updateFont();
         emit typeChanged();
     }
@@ -42,6 +44,14 @@ void NLabel::init() {
     connect(nTheme, &NTheme::darkModeChanged, this, [this](bool isDark) {
         Q_D(NLabel);
         d->_isDark = isDark;
+        d->invalidateColorCache();
+        d->updateColor();
+    });
+
+    connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode) {
+        Q_D(NLabel);
+        d->_isDark = nTheme->isDarkMode();
+        d->invalidateColorCache();
         d->updateColor();
     });
 
@@ -53,4 +63,13 @@ void NLabel::updateStyle() {
 
     d->updateFont();
     d->updateColor();
+}
+
+void NLabel::changeEvent(QEvent* event) {
+    Q_D(NLabel);
+    if (event->type() == QEvent::EnabledChange) {
+        d->invalidateColorCache();
+        d->updateColor();
+    }
+    QLabel::changeEvent(event);
 }
