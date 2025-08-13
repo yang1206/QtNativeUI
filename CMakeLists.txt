@@ -215,13 +215,12 @@ install(
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/QtNativeUI
 )
 
-# 构建示例
+
 if (QtNativeUI_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif ()
 
-# 在最后添加测试目录
 if (QtNativeUI_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
-endif()
+endif ()

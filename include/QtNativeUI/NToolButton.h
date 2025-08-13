@@ -47,20 +47,20 @@ class QTNATIVEUI_EXPORT NToolButton : public QToolButton {
     void setAccentColor(const QColor& color);
     void resetAccentColor();
 
-    void setFluentIcon(NRegularIconType::Icon icon, int size = 16, const QColor& color = QColor());
-    void setFluentIcon(NFilledIconType::Icon icon, int size = 16, const QColor& color = QColor());
-
-  protected:
-    void  enterEvent(QEnterEvent* event) override;
-    void  leaveEvent(QEvent* event) override;
-    void  mousePressEvent(QMouseEvent* event) override;
-    void  mouseReleaseEvent(QMouseEvent* event) override;
-    void  paintEvent(QPaintEvent* event) override;
-    void  changeEvent(QEvent* event) override;
-    void  focusInEvent(QFocusEvent* event) override;
-    void  focusOutEvent(QFocusEvent* event) override;
+    void  setFluentIcon(NRegularIconType::Icon icon, int size = 16, const QColor& color = QColor());
+    void  setFluentIcon(NFilledIconType::Icon icon, int size = 16, const QColor& color = QColor());
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
+
+  protected:
+    void enterEvent(QEnterEvent* event) override;
+    void leaveEvent(QEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
+    void changeEvent(QEvent* event) override;
+    void focusInEvent(QFocusEvent* event) override;
+    void focusOutEvent(QFocusEvent* event) override;
 
     void drawBackground(QPainter* painter);
     void drawBorder(QPainter* painter);
