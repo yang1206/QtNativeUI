@@ -40,15 +40,14 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                                     QPainter::SmoothPixmapTransform);
 
             QRect menuRect = mopt->rect;
+            menuRect.adjust(0, -2, 0, -2);
 
             int hPadding = d->_itemPadding;
             int iconSize = d->_itemIconSize;
 
             int menuBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
 
-
             if (mopt->menuItemType == QStyleOptionMenuItem::Separator) {
-
                 QColor sepColor = d->_isDark ? d->_pDarkSeparatorColor : d->_pLightSeparatorColor;
 
                 painter->setPen(Qt::NoPen);
@@ -59,17 +58,14 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                 return;
             }
 
-
             if (mopt->state.testFlag(State_Enabled) &&
                 (mopt->state.testFlag(State_Selected) || mopt->state.testFlag(State_MouseOver) || mopt->checked)) {
-
                 QColor hoverColor = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, d->_themeMode);
 
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(hoverColor);
                 painter->drawRoundedRect(menuRect, menuBorderRadius, menuBorderRadius);
             }
-
 
             QColor textColor =
                 NThemeColor(mopt->state.testFlag(QStyle::State_Enabled) ? NFluentColorKey::TextFillColorPrimary
@@ -78,7 +74,6 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
             painter->setPen(textColor);
 
             if (!mopt->icon.isNull()) {
-
                 int   iconY = menuRect.y() + (menuRect.height() - iconSize) / 2;
                 QRect iconRect(menuRect.x() + hPadding, iconY, iconSize, iconSize);
 
@@ -87,7 +82,6 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
             }
 
             else if (mopt->checked) {
-
                 int   checkSize = iconSize;
                 QRect checkRect(
                     menuRect.x() + hPadding, menuRect.y() + (menuRect.height() - checkSize) / 2, checkSize, checkSize);
@@ -96,12 +90,9 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                 checkIcon.paint(painter, checkRect, Qt::AlignCenter);
             }
 
-
             if (!mopt->text.isEmpty()) {
-
                 QString itemText = mopt->text;
                 QString shortcutText;
-
 
                 int tabIndex = itemText.indexOf('\t');
                 if (tabIndex != -1) {
@@ -109,9 +100,7 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                     itemText     = itemText.left(tabIndex);
                 }
 
-
                 int textX = menuRect.x() + hPadding;
-
 
                 if (!mopt->icon.isNull() || mopt->checked) {
                     textX += d->_checkmarkWidth;
@@ -122,13 +111,10 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                     shortcutWidth = painter->fontMetrics().horizontalAdvance(shortcutText) + 2 * d->_itemPadding;
                 }
 
-
                 QRect textRect(
                     textX, menuRect.y(), menuRect.width() - textX - hPadding - shortcutWidth, menuRect.height());
 
-
                 painter->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft | Qt::TextSingleLine, itemText);
-
 
                 if (!shortcutText.isEmpty()) {
                     QRect shortcutRect(
@@ -144,7 +130,6 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
                         shortcutRect, Qt::AlignVCenter | Qt::AlignRight | Qt::TextSingleLine, shortcutText);
                 }
             }
-
 
             if (mopt->menuItemType == QStyleOptionMenuItem::SubMenu) {
                 QRect arrowRect(menuRect.right() - hPadding - iconSize,
@@ -163,7 +148,6 @@ void NMenuPrivate::Style::drawControl(ControlElement      element,
         QProxyStyle::drawControl(element, option, painter, widget);
         return;
     } else if (element == CE_MenuScroller) {
-
         QProxyStyle::drawControl(element, option, painter, widget);
         return;
     } else if (element == CE_MenuTearoff) {
@@ -218,9 +202,9 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
 }
 
 int NMenuPrivate::Style::pixelMetric(PixelMetric metric, const QStyleOption* option, const QWidget* widget) const {
-    const NMenu* menu = qobject_cast<const NMenu*>(widget);
-    bool isNMenuOrChild = false;
-    
+    const NMenu* menu           = qobject_cast<const NMenu*>(widget);
+    bool         isNMenuOrChild = false;
+
     if (menu) {
         isNMenuOrChild = true;
     } else if (widget) {
@@ -235,14 +219,14 @@ int NMenuPrivate::Style::pixelMetric(PixelMetric metric, const QStyleOption* opt
 
     if (isNMenuOrChild) {
         const NMenuPrivate* d = menu ? menu->d_func() : this->d;
-        
+
         switch (metric) {
             case PM_MenuPanelWidth:
                 return 0;
             case QStyle::PM_MenuHMargin:
                 return d->_itemPadding;
             case QStyle::PM_MenuVMargin:
-                return 4;
+                return 8;
             case QStyle::PM_MenuScrollerHeight:
                 return 16;
             case QStyle::PM_SubMenuOverlap:
@@ -255,14 +239,14 @@ int NMenuPrivate::Style::pixelMetric(PixelMetric metric, const QStyleOption* opt
                 break;
         }
     }
-    
+
     return QProxyStyle::pixelMetric(metric, option, widget);
 }
 
-QSize NMenuPrivate::Style::sizeFromContents(ContentsType type,
-                                          const QStyleOption* option,
-                                          const QSize& size,
-                                          const QWidget* widget) const {
+QSize NMenuPrivate::Style::sizeFromContents(ContentsType        type,
+                                            const QStyleOption* option,
+                                            const QSize&        size,
+                                            const QWidget*      widget) const {
     bool isNMenuOrChild = false;
     if (widget) {
         const NMenu* menuWidget = qobject_cast<const NMenu*>(widget);
@@ -288,7 +272,7 @@ QSize NMenuPrivate::Style::sizeFromContents(ContentsType type,
             return QSize(menuItemSize.width(), d->_itemHeight);
         }
     }
-    
+
     return QProxyStyle::sizeFromContents(type, option, size, widget);
 }
 

@@ -5,15 +5,41 @@ import sys
 import re
 import xml.etree.ElementTree as ET
 import os
+import json
 
 def parse_color(xaml_color):
     """解析XAML颜色为QColor格式字符串"""
     if not xaml_color:
         return "QColor()"
     
-    # 直接返回颜色字符串，Qt 6 支持 #AARRGGBB 格式
+    # 将十六进制颜色转换为整数构造函数调用
     if xaml_color[0] == '#':
-        return f'QColor("{xaml_color}")'
+        # 移除 # 前缀
+        hex_color = xaml_color[1:]
+        
+        # 处理不同格式
+        if len(hex_color) == 8:  # #AARRGGBB
+            a = int(hex_color[0:2], 16)
+            r = int(hex_color[2:4], 16)
+            g = int(hex_color[4:6], 16)
+            b = int(hex_color[6:8], 16)
+            return f'QColor({r}, {g}, {b}, {a})'
+        elif len(hex_color) == 6:  # #RRGGBB
+            r = int(hex_color[0:2], 16)
+            g = int(hex_color[2:4], 16)
+            b = int(hex_color[4:6], 16)
+            return f'QColor({r}, {g}, {b})'
+        elif len(hex_color) == 4:  # #ARGB
+            a = int(hex_color[0] * 2, 16)
+            r = int(hex_color[1] * 2, 16)
+            g = int(hex_color[2] * 2, 16)
+            b = int(hex_color[3] * 2, 16)
+            return f'QColor({r}, {g}, {b}, {a})'
+        elif len(hex_color) == 3:  # #RGB
+            r = int(hex_color[0] * 2, 16)
+            g = int(hex_color[1] * 2, 16)
+            b = int(hex_color[2] * 2, 16)
+            return f'QColor({r}, {g}, {b})'
     
     return "QColor()"
 
@@ -75,10 +101,35 @@ def parse_xaml(xaml_file):
     
     return dark_colors, light_colors
 
-def generate_header(dark_colors, light_colors, output_file):
+def load_custom_colors(custom_colors_file):
+    """加载自定义颜色配置文件"""
+    if not os.path.exists(custom_colors_file):
+        return {}
+    
+    try:
+        with open(custom_colors_file, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        
+        custom_colors = config.get('custom_colors', {})
+        dark_colors = {}
+        light_colors = {}
+        
+        for color_name, color_data in custom_colors.items():
+            if 'dark' in color_data:
+                dark_colors[color_name] = color_data['dark']
+            if 'light' in color_data:
+                light_colors[color_name] = color_data['light']
+        
+        return dark_colors, light_colors
+    except Exception as e:
+        print(f"Error loading custom colors: {e}")
+        return {}, {}
+
+def generate_header(dark_colors, light_colors, output_file, custom_dark_colors={}, custom_light_colors={}):
     """生成C++头文件"""
     # 收集所有唯一的键，并排序以生成一致的枚举
-    all_keys = sorted(set(list(dark_colors.keys()) + list(light_colors.keys())))
+    all_keys = sorted(set(list(dark_colors.keys()) + list(light_colors.keys()) +
+                         list(custom_dark_colors.keys()) + list(custom_light_colors.keys())))
     
     # 使用UTF-8编码打开文件
     with open(output_file, 'w', encoding='utf-8') as f:
@@ -101,16 +152,27 @@ def generate_header(dark_colors, light_colors, output_file):
         
         # 添加辅助函数
         f.write("// 辅助函数：创建带有alpha值的颜色（alpha为0-255）\n")
-        f.write("inline QColor colorWithAlpha(const QString& hex, int alpha) {\n")
-        f.write("    QColor color(hex);\n")
+        f.write("inline QColor colorWithAlpha(int r, int g, int b, int alpha) {\n")
+        f.write("    return QColor(r, g, b, alpha);\n")
+        f.write("}\n\n")
+        
+        f.write("// 辅助函数：从现有颜色创建带有alpha值的颜色\n")
+        f.write("inline QColor colorWithAlpha(const QColor& baseColor, int alpha) {\n")
+        f.write("    QColor color = baseColor;\n")
         f.write("    color.setAlpha(alpha);\n")
         f.write("    return color;\n")
         f.write("}\n\n")
         
         # 添加新的百分比alpha函数
         f.write("// 辅助函数：创建带有百分比alpha值的颜色（alphaPercent为0-100）\n")
-        f.write("inline QColor colorWithAlphaPercent(const QString& hex, int alphaPercent) {\n")
-        f.write("    QColor color(hex);\n")
+        f.write("inline QColor colorWithAlphaPercent(int r, int g, int b, int alphaPercent) {\n")
+        f.write("    int alpha = static_cast<int>(255.0 * alphaPercent / 100.0);\n")
+        f.write("    return QColor(r, g, b, alpha);\n")
+        f.write("}\n\n")
+        
+        f.write("// 辅助函数：从现有颜色创建带有百分比alpha值的颜色\n")
+        f.write("inline QColor colorWithAlphaPercent(const QColor& baseColor, int alphaPercent) {\n")
+        f.write("    QColor color = baseColor;\n")
         f.write("    int alpha = static_cast<int>(255.0 * alphaPercent / 100.0);\n")
         f.write("    color.setAlpha(alpha);\n")
         f.write("    return color;\n")
@@ -150,14 +212,28 @@ def generate_header(dark_colors, light_colors, output_file):
         # 生成使用枚举索引的颜色映射
         f.write("// 暗色主题颜色\n")
         f.write("static const QMap<NFluentColorKey::Key, QColor> DarkThemeColors = {\n")
+        
+        # 首先添加官方颜色
         for key, value in dark_colors.items():
             f.write(f"    {{NFluentColorKey::{key}, {value}}},\n")
+        
+        # 然后添加自定义颜色
+        for key, value in custom_dark_colors.items():
+            f.write(f"    {{NFluentColorKey::{key}, {value}}},\n")
+        
         f.write("};\n\n")
         
         f.write("// 亮色主题颜色\n")
         f.write("static const QMap<NFluentColorKey::Key, QColor> LightThemeColors = {\n")
+        
+        # 首先添加官方颜色
         for key, value in light_colors.items():
             f.write(f"    {{NFluentColorKey::{key}, {value}}},\n")
+        
+        # 然后添加自定义颜色
+        for key, value in custom_light_colors.items():
+            f.write(f"    {{NFluentColorKey::{key}, {value}}},\n")
+        
         f.write("};\n\n")
         
         f.write("#endif // NFLUENTCOLORS_H\n")
@@ -178,8 +254,9 @@ def download_xaml(url, output_file):
 def main():
     # 检查命令行参数
     if len(sys.argv) < 2:
-        print("Usage: python color_generator.py <output_file> [xaml_file]")
+        print("Usage: python color_generator.py <output_file> [xaml_file] [custom_colors_file]")
         print("If xaml_file is not provided, it will be downloaded from Microsoft's GitHub repository")
+        print("If custom_colors_file is not provided, will look for custom_colors.json in the same directory")
         sys.exit(1)
     
     output_file = sys.argv[1]
@@ -203,13 +280,20 @@ def main():
     print(f"Parsing XAML file: {xaml_file}")
     dark_colors, light_colors = parse_xaml(xaml_file)
     
+    # 加载自定义颜色
+    custom_colors_file = sys.argv[3] if len(sys.argv) >= 4 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "custom_colors.json")
+    print(f"Loading custom colors from: {custom_colors_file}")
+    custom_dark_colors, custom_light_colors = load_custom_colors(custom_colors_file)
+    
     # 生成头文件
     print(f"Generating header file: {output_file}")
-    generate_header(dark_colors, light_colors, output_file)
+    generate_header(dark_colors, light_colors, output_file, custom_dark_colors, custom_light_colors)
     
     print(f"Successfully generated {output_file}")
     print(f"Dark colors: {len(dark_colors)}")
     print(f"Light colors: {len(light_colors)}")
+    print(f"Custom dark colors: {len(custom_dark_colors)}")
+    print(f"Custom light colors: {len(custom_light_colors)}")
 
 if __name__ == "__main__":
     main()

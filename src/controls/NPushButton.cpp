@@ -236,9 +236,9 @@ void NPushButton::drawBackground(QPainter* painter) {
                 }
             }
         }
-        
+
         d->_cachedBackgroundColor = bgColor;
-        d->_colorCacheValid = true;
+        d->_colorCacheValid       = true;
     } else {
         bgColor = d->_cachedBackgroundColor;
     }
@@ -247,13 +247,13 @@ void NPushButton::drawBackground(QPainter* painter) {
     painter->setBrush(bgColor);
     painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
 
-    if ((!d->_isPressed) && (!d->_pTransparentBackground)) {
+    if ((!d->_isPressed) && (!d->_pTransparentBackground) && !d->_isDark && isEnabled()) {
         if (d->_buttonType == NPushButtonPrivate::Accent) {
             painter->restore();
             return;
         }
 
-        painter->setPen(NThemeColor(NFluentColorKey::ControlStrokeColorSecondary, d->_themeMode));
+        painter->setPen(NThemeColor(NFluentColorKey::ControlBaseLine, d->_themeMode));
         painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
                           height() - d->_shadowBorderWidth,
                           foregroundRect.width(),
@@ -513,7 +513,7 @@ void NPushButton::updateFluentIcon() {
 
     // 缓存生成的图标
     d->_cachedFluentIcon = generatedIcon;
-    d->_iconCacheValid = true;
+    d->_iconCacheValid   = true;
 
     setIcon(generatedIcon);
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));

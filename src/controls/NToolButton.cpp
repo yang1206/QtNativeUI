@@ -266,13 +266,13 @@ void NToolButton::drawBackground(QPainter* painter) {
     painter->setBrush(bgColor);
     painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
 
-    if ((!d->_isPressed) && (!d->_pTransparentBackground)) {
+    if ((!d->_isPressed) && (!d->_pTransparentBackground) && !d->_isDark && isEnabled()) {
         if (d->_buttonType == NToolButtonPrivate::Accent) {
             painter->restore();
             return;
         }
 
-        painter->setPen(NThemeColor(NFluentColorKey::ControlStrokeColorSecondary, d->_themeMode));
+        painter->setPen(NThemeColor(NFluentColorKey::ControlBaseLine, d->_themeMode));
         painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
                           height() - d->_shadowBorderWidth,
                           foregroundRect.width(),
