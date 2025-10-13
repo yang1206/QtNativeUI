@@ -69,6 +69,7 @@ QWidget* ButtonExample::createPushButtons() {
 
     NPushButton* normalBtn   = new NPushButton("Standard");
     NPushButton* disabledBtn = new NPushButton("Disabled");
+    disabledBtn->setFluentIcon(NRegularIconType::NoteAdd16Regular, 16);
     disabledBtn->setDisabled(true);
 
     // 1. 标准图标按钮
@@ -175,11 +176,13 @@ QWidget* ButtonExample::createToolButtons() {
 
     // 禁用状态
     NToolButton* disabledBtn = new NToolButton();
+
     disabledBtn->setToolTip("禁用状态");
 
     disabledBtn->setFixedSize(80, 40);
     disabledBtn->setText("禁用");
-    disabledBtn->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    disabledBtn->setFluentIcon(NRegularIconType::NoteAdd16Regular, 16);
+    disabledBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     disabledBtn->setDisabled(true);
 
     iconPositionLayout->addWidget(iconOnlyBtn);

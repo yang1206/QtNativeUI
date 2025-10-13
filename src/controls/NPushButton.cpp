@@ -139,6 +139,11 @@ void NPushButton::mouseReleaseEvent(QMouseEvent* event) {
 void NPushButton::changeEvent(QEvent* event) {
     if (event->type() == QEvent::EnabledChange || event->type() == QEvent::PaletteChange ||
         event->type() == QEvent::LanguageChange) {
+        Q_D(NPushButton);
+        // 状态变化时失效缓存
+        d->invalidateColorCache();
+        d->invalidateIconCache();
+        updateFluentIcon();
         update();
     }
     QPushButton::changeEvent(event);

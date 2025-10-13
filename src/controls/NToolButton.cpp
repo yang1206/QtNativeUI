@@ -158,6 +158,7 @@ void NToolButton::changeEvent(QEvent* event) {
         // 状态变化时失效缓存
         d->invalidateColorCache();
         d->invalidateIconCache();
+        updateFluentIcon();
         update();
     }
     QToolButton::changeEvent(event);

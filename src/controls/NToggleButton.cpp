@@ -252,8 +252,10 @@ bool NToggleButton::event(QEvent* event) {
             break;
         }
         case QEvent::EnabledChange: {
-            d->invalidateColorCache(); 
+            d->invalidateColorCache();
             d->invalidateIconCache();
+            // 当启用状态变化时，更新图标颜色
+            updateFluentIcon();
             break;
         }
         default: {
@@ -482,11 +484,6 @@ void NToggleButton::updateFluentIcon() {
         return;
     }
 
-    if (d->_iconCacheValid && !d->_cachedFluentIcon.isNull()) {
-        d->_icon = d->_cachedFluentIcon;
-        setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
-        return;
-    }
 
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
