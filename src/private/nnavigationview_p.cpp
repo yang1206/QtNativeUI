@@ -42,7 +42,7 @@ void NNavigationViewPrivate::setupUI() {
 
     setupRouterConnections();
     _pDisplayMode        = NNavigationType::Maximal;
-    _pPageTransitionType = NNavigationType::SlideVertical;
+    _pPageTransitionType = NNavigationType::ScaleTransition;
     _isInitialized       = true;
 }
 
@@ -118,19 +118,12 @@ void NNavigationViewPrivate::onNavigationNodeClicked(NNavigationType::Navigation
         return;
     }
 
+    bool isRouteBack = pageIndex < _targetPageIndex;
     _targetPageIndex = pageIndex;
 
-    QTimer::singleShot(180, q, [this, pageIndex]() {
-        QWidget* targetWidget = _stackedWidget->widget(pageIndex);
-        if (!targetWidget)
-            return;
+    _stackedWidget->doPageSwitch(_pPageTransitionType, pageIndex, isRouteBack, _pageTransitionDuration);
 
-        _stackedWidget->setCurrentIndex(pageIndex);
-
-        executePageTransition(targetWidget);
-        Q_Q(NNavigationView);
-        emit q->currentChanged(pageIndex);
-    });
+    emit q->currentChanged(pageIndex);
 }
 
 void NNavigationViewPrivate::onNavigationNodeAdded(NNavigationType::NavigationNodeType nodeType,
@@ -178,10 +171,4 @@ void NNavigationViewPrivate::onDisplayModeChanged(NNavigationType::NavigationDis
     Q_Q(NNavigationView);
 
     emit q->displayModeChanged(displayMode);
-}
-
-void NNavigationViewPrivate::executePageTransition(QWidget* targetWidget) {
-    if (!targetWidget || _pPageTransitionType == NNavigationType::NoTransition)
-        return;
-    _animationManager->executeTransition(targetWidget, _pPageTransitionType, _pageTransitionDuration);
 }

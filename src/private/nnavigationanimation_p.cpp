@@ -1,273 +1,311 @@
 #include "nnavigationanimation_p.h"
-#include <QGraphicsDropShadowEffect>
-#include <QPainter>
-#include <QParallelAnimationGroup>
-#include <QPropertyAnimation>
-#include <QTransform>
 
-NNavigationAnimationManager::NNavigationAnimationManager(QObject* parent) : QObject(parent) {}
+#include <QApplication>
+#include <QGraphicsBlurEffect>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPropertyAnimation>
+#include <QStackedWidget>
+#include <QTimer>
+#include <cmath>
+
+NNavigationAnimationManager::NNavigationAnimationManager(QStackedWidget* stackedWidget, QObject* parent)
+    : QObject(parent), m_stackedWidget(stackedWidget) {
+    m_blurEffect = new QGraphicsBlurEffect(m_stackedWidget);
+    m_blurEffect->setBlurHints(QGraphicsBlurEffect::BlurHint::QualityHint);
+    m_blurEffect->setBlurRadius(0);
+    m_blurEffect->setEnabled(false);
+    m_stackedWidget->setGraphicsEffect(m_blurEffect);
+}
 
 NNavigationAnimationManager::~NNavigationAnimationManager() {}
 
-void NNavigationAnimationManager::executeTransition(QWidget*                            targetWidget,
-                                                    NNavigationType::PageTransitionType type,
+void NNavigationAnimationManager::executeTransition(NNavigationType::PageTransitionType type,
+                                                    int                                 targetIndex,
+                                                    bool                                isRouteBack,
                                                     int                                 duration) {
-    if (!targetWidget)
-        return;
+    m_transitionType = type;
 
     switch (type) {
-        case NNavigationType::FadeTransition:
-            executeFadeTransition(targetWidget, duration);
+        case NNavigationType::NoTransition: {
+            m_stackedWidget->setCurrentIndex(targetIndex);
             break;
-        case NNavigationType::SlideHorizontal:
-            executeSlideHorizontalTransition(targetWidget, duration);
+        }
+        case NNavigationType::PopupTransition: {
+            QTimer::singleShot(180, this, [=]() {
+                QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
+                m_stackedWidget->setCurrentIndex(targetIndex);
+                getTargetStackPix();
+                targetWidget->setVisible(false);
+
+                QPropertyAnimation* popupAnimation = new QPropertyAnimation(this, "popupAnimationYOffset");
+                connect(popupAnimation, &QPropertyAnimation::valueChanged, this, [=]() {
+                    m_stackedWidget->parentWidget()->update();
+                });
+                connect(popupAnimation, &QPropertyAnimation::finished, this, [=]() {
+                    m_targetStackPix = QPixmap();
+                    targetWidget->setVisible(true);
+                });
+                popupAnimation->setEasingCurve(QEasingCurve::OutCubic);
+                popupAnimation->setDuration(duration);
+                int targetWidgetY = m_stackedWidget->mapToParent(QPoint(0, 0)).y();
+                popupAnimation->setEndValue(targetWidgetY);
+                targetWidgetY += 80;
+                popupAnimation->setStartValue(targetWidgetY);
+                popupAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+            });
             break;
-        case NNavigationType::SlideVertical:
-            executeSlideVerticalTransition(targetWidget, duration);
+        }
+        case NNavigationType::ScaleTransition: {
+            QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
+            getCurrentStackPix();
+            m_stackedWidget->setCurrentIndex(targetIndex);
+            getTargetStackPix();
+            targetWidget->setVisible(false);
+            m_isDrawNewPix = false;
+
+            QPropertyAnimation* currentPixZoomAnimation = new QPropertyAnimation(this, "scaleAnimationRatio");
+            connect(currentPixZoomAnimation, &QPropertyAnimation::valueChanged, this, [=]() {
+                m_stackedWidget->parentWidget()->update();
+            });
+            connect(currentPixZoomAnimation, &QPropertyAnimation::finished, this, [=]() {
+                m_isDrawNewPix = true;
+                QPropertyAnimation* targetPixZoomAnimation = new QPropertyAnimation(this, "scaleAnimationRatio");
+                connect(targetPixZoomAnimation, &QPropertyAnimation::valueChanged, this, [=]() {
+                    m_stackedWidget->parentWidget()->update();
+                });
+                connect(targetPixZoomAnimation, &QPropertyAnimation::finished, this, [=]() {
+                    m_targetStackPix = QPixmap();
+                    m_currentStackPix = QPixmap();
+                    targetWidget->setVisible(true);
+                });
+                if (isRouteBack) {
+                    targetPixZoomAnimation->setStartValue(1.5);
+                    targetPixZoomAnimation->setEndValue(1);
+                } else {
+                    targetPixZoomAnimation->setStartValue(0.85);
+                    targetPixZoomAnimation->setEndValue(1);
+                }
+                targetPixZoomAnimation->setDuration(duration);
+                targetPixZoomAnimation->setEasingCurve(QEasingCurve::OutCubic);
+                targetPixZoomAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+            });
+
+            if (isRouteBack) {
+                currentPixZoomAnimation->setStartValue(1);
+                currentPixZoomAnimation->setEndValue(0.85);
+            } else {
+                currentPixZoomAnimation->setStartValue(1);
+                currentPixZoomAnimation->setEndValue(1.15);
+            }
+            currentPixZoomAnimation->setDuration(150);
+            currentPixZoomAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+
+            QPropertyAnimation* currentPixOpacityAnimation = new QPropertyAnimation(this, "scaleAnimationPixOpacity");
+            connect(currentPixZoomAnimation, &QPropertyAnimation::finished, this, [=]() {
+                QPropertyAnimation* targetPixOpacityAnimation = new QPropertyAnimation(this, "scaleAnimationPixOpacity");
+                targetPixOpacityAnimation->setStartValue(0);
+                targetPixOpacityAnimation->setEndValue(1);
+                targetPixOpacityAnimation->setDuration(duration);
+                targetPixOpacityAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+            });
+            currentPixOpacityAnimation->setStartValue(1);
+            currentPixOpacityAnimation->setEndValue(0);
+            currentPixOpacityAnimation->setDuration(150);
+            currentPixOpacityAnimation->start(QAbstractAnimation::DeleteWhenStopped);
             break;
-        case NNavigationType::ZoomTransition:
-            executeZoomTransition(targetWidget, duration);
+        }
+        case NNavigationType::FlipTransition: {
+            QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
+            getCurrentStackPix();
+            m_stackedWidget->setCurrentIndex(targetIndex);
+            getTargetStackPix();
+            targetWidget->setVisible(false);
+
+            QPropertyAnimation* flipAnimation = new QPropertyAnimation(this, "flipAnimationRatio");
+            connect(flipAnimation, &QPropertyAnimation::valueChanged, this, [=]() {
+                m_stackedWidget->parentWidget()->update();
+            });
+            connect(flipAnimation, &QPropertyAnimation::finished, this, [=]() {
+                m_targetStackPix = QPixmap();
+                m_currentStackPix = QPixmap();
+                targetWidget->setVisible(true);
+            });
+            flipAnimation->setEasingCurve(QEasingCurve::InOutSine);
+            flipAnimation->setDuration(650);
+            flipAnimation->setStartValue(0);
+            flipAnimation->setEndValue(isRouteBack ? -180 : 180);
+            flipAnimation->start(QAbstractAnimation::DeleteWhenStopped);
             break;
-        case NNavigationType::FlipTransition:
-            executeFlipTransition(targetWidget, duration);
+        }
+        case NNavigationType::BlurTransition: {
+            m_targetStackPix = QPixmap();
+            m_blurEffect->setEnabled(true);
+
+            QPropertyAnimation* blurAnimation = new QPropertyAnimation(this, "blurAnimationRadius");
+            connect(blurAnimation, &QPropertyAnimation::valueChanged, this, [=]() {
+                m_blurEffect->setBlurRadius(m_blurAnimationRadius);
+            });
+            connect(blurAnimation, &QPropertyAnimation::finished, this, [=]() { m_blurEffect->setEnabled(false); });
+            blurAnimation->setEasingCurve(QEasingCurve::InOutSine);
+            blurAnimation->setDuration(350);
+            blurAnimation->setStartValue(40);
+            blurAnimation->setEndValue(2);
+            blurAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+            QApplication::processEvents();
+            m_stackedWidget->setCurrentIndex(targetIndex);
             break;
-        case NNavigationType::PushTransition:
-            executePushTransition(targetWidget, duration);
+        }
+        case NNavigationType::CubeTransition: {
+            QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
+            getCurrentStackPix();
+            m_stackedWidget->setCurrentIndex(targetIndex);
+            getTargetStackPix();
+            targetWidget->setVisible(false);
+
+            QPropertyAnimation* cubeAnimation = new QPropertyAnimation(this, "cubeAnimationAngle");
+            connect(cubeAnimation, &QPropertyAnimation::valueChanged, this, [=]() {
+                m_stackedWidget->parentWidget()->update();
+            });
+            connect(cubeAnimation, &QPropertyAnimation::finished, this, [=]() {
+                m_targetStackPix = QPixmap();
+                m_currentStackPix = QPixmap();
+                targetWidget->setVisible(true);
+            });
+            cubeAnimation->setEasingCurve(QEasingCurve::InOutSine);
+            cubeAnimation->setDuration(650);
+            cubeAnimation->setStartValue(0);
+            cubeAnimation->setEndValue(isRouteBack ? -180 : 180);
+            cubeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
             break;
-        case NNavigationType::RevealTransition:
-            executeRevealTransition(targetWidget, duration);
+        }
+        case NNavigationType::RippleTransition: {
+            QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
+            getCurrentStackPix();
+            m_stackedWidget->setCurrentIndex(targetIndex);
+            getTargetStackPix();
+            targetWidget->setVisible(false);
+
+            QPropertyAnimation* rippleAnimation = new QPropertyAnimation(this, "rippleAnimationRadius");
+            connect(rippleAnimation, &QPropertyAnimation::valueChanged, this, [=]() {
+                m_stackedWidget->parentWidget()->update();
+            });
+            connect(rippleAnimation, &QPropertyAnimation::finished, this, [=]() {
+                m_targetStackPix = QPixmap();
+                m_currentStackPix = QPixmap();
+                targetWidget->setVisible(true);
+            });
+            rippleAnimation->setEasingCurve(QEasingCurve::OutCubic);
+            rippleAnimation->setDuration(duration);
+            rippleAnimation->setStartValue(0);
+            QRect rect = m_stackedWidget->rect();
+            qreal maxRadius = qSqrt(rect.width() * rect.width() + rect.height() * rect.height()) / 2.0;
+            rippleAnimation->setEndValue(maxRadius);
+            rippleAnimation->start(QAbstractAnimation::DeleteWhenStopped);
             break;
-        case NNavigationType::ElasticTransition:
-            executeElasticTransition(targetWidget, duration);
-            break;
-        default:
-            break;
+        }
     }
 }
 
-void NNavigationAnimationManager::executeFadeTransition(QWidget* targetWidget, int duration) {
-    QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(targetWidget);
-    targetWidget->setGraphicsEffect(effect);
-    effect->setOpacity(0);
-
-    QPropertyAnimation* animation = new QPropertyAnimation(effect, "opacity");
-    animation->setDuration(duration);
-    animation->setStartValue(0.0);
-    animation->setEndValue(1.0);
-    animation->setEasingCurve(QEasingCurve::OutQuint);
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationAnimationManager::executeSlideHorizontalTransition(QWidget* targetWidget, int duration) {
-    QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
-    animation->setDuration(duration);
-
-    QPoint finalPos = targetWidget->pos();
-    QPoint startPos = finalPos;
-    startPos.setX(finalPos.x() + targetWidget->width());
-
-    animation->setStartValue(startPos);
-    animation->setEndValue(finalPos);
-    animation->setEasingCurve(QEasingCurve::OutQuint);
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationAnimationManager::executeSlideVerticalTransition(QWidget* targetWidget, int duration) {
-    QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
-    QPoint              finalPos  = targetWidget->pos();
-    QPoint              startPos  = finalPos;
-    startPos.setY(finalPos.y() + 80);
-
-    animation->setStartValue(startPos);
-    animation->setEndValue(finalPos);
-    animation->setEasingCurve(QEasingCurve::OutQuint);
-    animation->setDuration(duration);
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationAnimationManager::executeZoomTransition(QWidget* targetWidget, int duration) {
-    QParallelAnimationGroup* group = new QParallelAnimationGroup;
-
-    QPropertyAnimation* scaleAnimation = new QPropertyAnimation(targetWidget, "geometry");
-    QRect               endRect        = targetWidget->geometry();
-    QRect               startRect      = endRect;
-
-    startRect.setWidth(endRect.width() * 0.85);
-    startRect.setHeight(endRect.height() * 0.85);
-    startRect.moveCenter(endRect.center());
-
-    scaleAnimation->setDuration(duration);
-    scaleAnimation->setStartValue(startRect);
-    scaleAnimation->setEndValue(endRect);
-    scaleAnimation->setEasingCurve(QEasingCurve::OutQuint);
-
-    QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(targetWidget);
-    targetWidget->setGraphicsEffect(effect);
-    effect->setOpacity(0);
-
-    QPropertyAnimation* opacityAnimation = new QPropertyAnimation(effect, "opacity");
-    opacityAnimation->setDuration(duration);
-    opacityAnimation->setStartValue(0.0);
-    opacityAnimation->setEndValue(1.0);
-    opacityAnimation->setEasingCurve(QEasingCurve::OutQuint);
-
-    group->addAnimation(scaleAnimation);
-    group->addAnimation(opacityAnimation);
-    group->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationAnimationManager::executeFlipTransition(QWidget* targetWidget, int duration) {
-    QPropertyAnimation* opacityAnimation = new QPropertyAnimation(targetWidget, "windowOpacity");
-    opacityAnimation->setDuration(duration);
-    opacityAnimation->setStartValue(0.0);
-    opacityAnimation->setEndValue(1.0);
-    opacityAnimation->setEasingCurve(QEasingCurve::OutQuint);
-    NRotationEffect* rotationEffect = new NRotationEffect(targetWidget);
-    targetWidget->setGraphicsEffect(rotationEffect);
-    rotationEffect->setAxis(Qt::YAxis);
-    QPropertyAnimation* rotationAnimation = new QPropertyAnimation(rotationEffect, "angle");
-    rotationAnimation->setDuration(duration);
-    rotationAnimation->setStartValue(90.0); // 从90度开始
-    rotationAnimation->setEndValue(0.0);    // 旋转到0度
-    rotationAnimation->setEasingCurve(QEasingCurve::OutQuint);
-    QParallelAnimationGroup* group = new QParallelAnimationGroup;
-    group->addAnimation(opacityAnimation);
-    group->addAnimation(rotationAnimation);
-
-    group->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationAnimationManager::executePushTransition(QWidget* targetWidget, int duration) {
-    QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
-    animation->setDuration(duration);
-
-    QPoint finalPos = targetWidget->pos();
-    QPoint startPos = finalPos;
-    startPos.setX(finalPos.x() + targetWidget->width());
-
-    animation->setStartValue(startPos);
-    animation->setEndValue(finalPos);
-    animation->setEasingCurve(QEasingCurve::OutBack); // 使用回弹效果
-    QGraphicsDropShadowEffect* shadowEffect = new QGraphicsDropShadowEffect(targetWidget);
-    shadowEffect->setBlurRadius(20);
-    shadowEffect->setColor(QColor(0, 0, 0, 80));
-    shadowEffect->setOffset(5, 5);
-    targetWidget->setGraphicsEffect(shadowEffect);
-    connect(animation, &QPropertyAnimation::finished, this, [this, targetWidget, shadowEffect]() {
-        cleanupEffects(targetWidget, shadowEffect);
-    });
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationAnimationManager::executeRevealTransition(QWidget* targetWidget, int duration) {
-    QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(targetWidget);
-    targetWidget->setGraphicsEffect(effect);
-    effect->setOpacity(0.0);
-    QPropertyAnimation* opacityAnimation = new QPropertyAnimation(effect, "opacity");
-    opacityAnimation->setDuration(duration);
-    opacityAnimation->setStartValue(0.0);
-    opacityAnimation->setEndValue(1.0);
-    opacityAnimation->setEasingCurve(QEasingCurve::OutQuint);
-    QPropertyAnimation* slideAnimation = new QPropertyAnimation(targetWidget, "pos");
-    slideAnimation->setDuration(duration);
-
-    QPoint finalPos = targetWidget->pos();
-    QPoint startPos = finalPos;
-    startPos.setY(finalPos.y() + 50); // 从下方滑入
-
-    slideAnimation->setStartValue(startPos);
-    slideAnimation->setEndValue(finalPos);
-    slideAnimation->setEasingCurve(QEasingCurve::OutQuint);
-    QParallelAnimationGroup* group = new QParallelAnimationGroup;
-    group->addAnimation(opacityAnimation);
-    group->addAnimation(slideAnimation);
-    group->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationAnimationManager::executeElasticTransition(QWidget* targetWidget, int duration) {
-    QPropertyAnimation* animation = new QPropertyAnimation(targetWidget, "pos");
-    animation->setDuration(duration * 1.2); // 稍微延长时间以适应弹性效果
-
-    QPoint finalPos = targetWidget->pos();
-    QPoint startPos = finalPos;
-    startPos.setY(finalPos.y() + 100); // 从更远的地方开始
-
-    animation->setStartValue(startPos);
-    animation->setEndValue(finalPos);
-    animation->setEasingCurve(QEasingCurve::OutElastic); // 使用弹性缓动曲线
-    QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect(targetWidget);
-    targetWidget->setGraphicsEffect(effect);
-    effect->setOpacity(0.0);
-    QPropertyAnimation* opacityAnimation = new QPropertyAnimation(effect, "opacity");
-    opacityAnimation->setDuration(duration * 0.7); // 透明度动画稍短
-    opacityAnimation->setStartValue(0.0);
-    opacityAnimation->setEndValue(1.0);
-    opacityAnimation->setEasingCurve(QEasingCurve::OutQuint);
-    QParallelAnimationGroup* group = new QParallelAnimationGroup;
-    group->addAnimation(animation);
-    group->addAnimation(opacityAnimation);
-
-    group->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void NNavigationAnimationManager::cleanupEffects(QWidget* widget, QGraphicsEffect* effect) {
-    if (widget && effect) {
-        widget->setGraphicsEffect(nullptr);
-        effect->deleteLater();
-    }
-}
-
-NRotationEffect::NRotationEffect(QObject* parent) : QGraphicsEffect(parent), m_angle(0), m_axis(Qt::YAxis) {}
-
-NRotationEffect::~NRotationEffect() {}
-
-void NRotationEffect::setAngle(qreal angle) {
-    if (m_angle != angle) {
-        m_angle = angle;
-        update();
-    }
-}
-
-void NRotationEffect::setAxis(Qt::Axis axis) {
-    if (m_axis != axis) {
-        m_axis = axis;
-        update();
-    }
-}
-
-void NRotationEffect::draw(QPainter* painter) {
-    if (!painter)
+void NNavigationAnimationManager::paintTransition(QPainter* painter, const QRect& rect, int borderRadius) {
+    if (m_targetStackPix.isNull())
         return;
+
     painter->save();
-    QPoint  offset;
-    QPixmap pixmap = sourcePixmap(Qt::LogicalCoordinates, &offset);
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-    if (pixmap.isNull()) {
-        painter->restore();
-        return;
-    }
-    QPointF    center = QPointF(pixmap.width() / 2.0, pixmap.height() / 2.0);
-    QTransform transform;
-    transform.translate(offset.x() + center.x(), offset.y() + center.y());
+    QRect centralStackRect = m_stackedWidget->rect();
 
-    switch (m_axis) {
-        case Qt::XAxis:
-            transform.rotate(m_angle, Qt::XAxis);
-            break;
-        case Qt::YAxis:
-            transform.rotate(m_angle, Qt::YAxis);
-            break;
-        case Qt::ZAxis:
-            transform.rotate(m_angle, Qt::ZAxis);
-            break;
+    if (borderRadius > 0) {
+        QPainterPath clipPath;
+        clipPath.addRoundedRect(centralStackRect, borderRadius, borderRadius);
+        painter->setClipPath(clipPath);
     }
 
-    transform.translate(-center.x(), -center.y());
-
-    painter->setTransform(transform, true);
-    painter->drawPixmap(0, 0, pixmap);
+    switch (m_transitionType) {
+        case NNavigationType::NoTransition: {
+            break;
+        }
+        case NNavigationType::PopupTransition: {
+            painter->drawPixmap(QRect(0, m_popupAnimationYOffset, rect.width(), m_stackedWidget->height()),
+                               m_targetStackPix);
+            break;
+        }
+        case NNavigationType::ScaleTransition: {
+            painter->setOpacity(m_scaleAnimationPixOpacity);
+            painter->translate(m_stackedWidget->rect().center());
+            painter->scale(m_scaleAnimationRatio, m_scaleAnimationRatio);
+            painter->translate(-m_stackedWidget->rect().center());
+            painter->drawPixmap(centralStackRect, m_isDrawNewPix ? m_targetStackPix : m_currentStackPix);
+            break;
+        }
+        case NNavigationType::FlipTransition: {
+            QTransform transform;
+            transform.translate(centralStackRect.center().x(), 0);
+            if (abs(m_flipAnimationRatio) >= 90) {
+                transform.rotate(-180 + m_flipAnimationRatio, Qt::YAxis);
+            } else {
+                transform.rotate(m_flipAnimationRatio, Qt::YAxis);
+            }
+            transform.translate(-centralStackRect.center().x(), 0);
+            painter->setTransform(transform);
+            if (abs(m_flipAnimationRatio) >= 90) {
+                painter->drawPixmap(centralStackRect, m_targetStackPix);
+            } else {
+                painter->drawPixmap(centralStackRect, m_currentStackPix);
+            }
+            break;
+        }
+        case NNavigationType::BlurTransition: {
+            break;
+        }
+        case NNavigationType::CubeTransition: {
+            QTransform transform;
+            transform.translate(0, centralStackRect.center().y());
+            if (abs(m_cubeAnimationAngle) >= 90) {
+                transform.rotate(-180 + m_cubeAnimationAngle, Qt::XAxis);
+            } else {
+                transform.rotate(m_cubeAnimationAngle, Qt::XAxis);
+            }
+            transform.translate(0, -centralStackRect.center().y());
+            painter->setTransform(transform);
+            if (abs(m_cubeAnimationAngle) >= 90) {
+                painter->drawPixmap(centralStackRect, m_targetStackPix);
+            } else {
+                painter->drawPixmap(centralStackRect, m_currentStackPix);
+            }
+            break;
+        }
+        case NNavigationType::RippleTransition: {
+            QPainterPath ripplePath;
+            QPointF center = centralStackRect.center();
+            ripplePath.addEllipse(center, m_rippleAnimationRadius, m_rippleAnimationRadius);
+            painter->setClipPath(ripplePath);
+            painter->drawPixmap(centralStackRect, m_targetStackPix);
+            
+            if (m_rippleAnimationRadius < centralStackRect.width() / 2.0) {
+                painter->setClipping(false);
+                QPainterPath inversePath;
+                inversePath.addRect(centralStackRect);
+                inversePath = inversePath.subtracted(ripplePath);
+                painter->setClipPath(inversePath);
+                painter->drawPixmap(centralStackRect, m_currentStackPix);
+            }
+            break;
+        }
+    }
 
     painter->restore();
 }
 
-QRectF NRotationEffect::boundingRectFor(const QRectF& rect) const { return rect.adjusted(-10, -10, 10, 10); }
+void NNavigationAnimationManager::getCurrentStackPix() {
+    m_targetStackPix = QPixmap();
+    m_stackedWidget->currentWidget()->setVisible(true);
+    m_currentStackPix = m_stackedWidget->grab();
+    m_stackedWidget->currentWidget()->setVisible(false);
+}
+
+void NNavigationAnimationManager::getTargetStackPix() {
+    m_targetStackPix = QPixmap();
+    m_targetStackPix = m_stackedWidget->grab();
+}

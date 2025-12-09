@@ -176,27 +176,22 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
             }
         }
     }
-    if (element == PE_PanelMenu) {
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-
-        QColor bgColor     = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
-        QColor borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-
-        QPainterPath path;
-        path.addRoundedRect(option->rect, d->_pBorderRadius, d->_pBorderRadius);
-
-        painter->setPen(QPen(borderColor, 1));
-        painter->setBrush(bgColor);
-        painter->drawPath(path);
-
-        painter->restore();
-        return;
-    } else if (element == PE_IndicatorMenuCheckMark) {
-        return;
-    } else if (element == PE_FrameMenu) {
-        return;
-    }
+    // if (element == PE_PanelMenu) {
+    //     painter->save();
+    //     painter->setRenderHint(QPainter::Antialiasing);
+    //
+    //     QColor       bgColor     = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
+    //     QColor       borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
+    //     QPainterPath path;
+    //     path.addRoundedRect(option->rect.adjusted(0, 0, -1, -1), d->_pBorderRadius, d->_pBorderRadius);
+    //
+    //     painter->setPen(QPen(borderColor, 1));
+    //     painter->setBrush(bgColor);
+    //     painter->drawPath(path);
+    //
+    //     painter->restore();
+    //     return;
+    // }
 
     QProxyStyle::drawPrimitive(element, option, painter, widget);
 }

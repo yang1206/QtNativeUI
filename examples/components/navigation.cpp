@@ -537,14 +537,14 @@ QWidget* NavigationExample::createRouterDemo() {
     m_profileKey  = m_profilePage->routeKey();
     m_settingsKey = m_settingsPage->routeKey();
     m_detailsKey  = m_detailsPage->routeKey();
-    // 创建路由键到页面索引的映射
+
     pageIndexMap[m_homeKey]     = 0;
     pageIndexMap[m_profileKey]  = 1;
     pageIndexMap[m_settingsKey] = 2;
     pageIndexMap[m_detailsKey]  = 3;
-    // 获取路由器实例
+
     NNavigationRouter* router = NNavigationRouter::getInstance();
-    // 监听路由变化，切换对应的页面
+
     connect(router,
             &NNavigationRouter::routeChanged,
             [contentStack, pageIndexMap](const QString& pageKey, const QVariantMap& params) {
@@ -553,7 +553,6 @@ QWidget* NavigationExample::createRouterDemo() {
                     contentStack->setCurrentIndex(pageIndexMap[pageKey]);
                 }
             });
-    // 监听路由返回，切换对应的页面
     connect(
         router,
         &NNavigationRouter::routeBack,
@@ -734,7 +733,7 @@ QWidget* NavigationExample::createNavigationViews() {
         // 创建 NavigationView
         NNavigationView* navigationView = new NNavigationView(demoSection);
         navigationView->setMinimumHeight(400);
-        navigationView->setPageTransitionType(NNavigationType::SlideVertical);
+        navigationView->setPageTransitionType(NNavigationType::PopupTransition);
         navigationView->setSearchVisible(false);
 
         // 设置头部组件
@@ -826,7 +825,7 @@ QWidget* NavigationExample::createNavigationViews() {
         // 创建 NavigationView
         NNavigationView* navigationView = new NNavigationView(demoSection);
         navigationView->setMinimumHeight(400);
-        navigationView->setPageTransitionType(NNavigationType::SlideHorizontal);
+        navigationView->setPageTransitionType(NNavigationType::ScaleTransition);
         navigationView->setPageTransitionDuration(400);
         navigationView->setSearchVisible(true);
 
@@ -857,14 +856,12 @@ QWidget* NavigationExample::createNavigationViews() {
         NLabel*      transitionTypeLabel  = new NLabel("过渡类型:", NLabelType::Body);
         NComboBox*   transitionTypeCombo  = new NComboBox(controlPanel);
         transitionTypeCombo->addItem("无过渡效果", NNavigationType::NoTransition);
-        transitionTypeCombo->addItem("淡入淡出", NNavigationType::FadeTransition);
-        transitionTypeCombo->addItem("水平滑动", NNavigationType::SlideHorizontal);
-        transitionTypeCombo->addItem("垂直滑动", NNavigationType::SlideVertical);
-        transitionTypeCombo->addItem("缩放过渡", NNavigationType::ZoomTransition);
+        transitionTypeCombo->addItem("弹出过渡", NNavigationType::PopupTransition);
+        transitionTypeCombo->addItem("缩放过渡", NNavigationType::ScaleTransition);
         transitionTypeCombo->addItem("翻转过渡", NNavigationType::FlipTransition);
-        transitionTypeCombo->addItem("推送过渡", NNavigationType::PushTransition);
-        transitionTypeCombo->addItem("揭示过渡", NNavigationType::RevealTransition);
-        transitionTypeCombo->addItem("弹性过渡", NNavigationType::ElasticTransition);
+        transitionTypeCombo->addItem("模糊过渡", NNavigationType::BlurTransition);
+        transitionTypeCombo->addItem("立方体翻转", NNavigationType::CubeTransition);
+        transitionTypeCombo->addItem("波纹扩散", NNavigationType::RippleTransition);
         transitionTypeCombo->setCurrentIndex(2);
 
         transitionTypeLayout->addWidget(transitionTypeLabel);

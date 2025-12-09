@@ -183,15 +183,13 @@ enum NodeOperateReturnType {
 Q_ENUM_CREATE(NodeOperateReturnType)
 
 enum PageTransitionType {
-    NoTransition,     // 无过渡效果
-    FadeTransition,   // 淡入淡出
-    SlideHorizontal,  // 水平滑动
-    SlideVertical,    // 垂直滑动
-    ZoomTransition,   // 缩放过渡
-    FlipTransition,   // 翻转过渡
-    PushTransition,   // 推入过渡
-    RevealTransition, // 揭示过渡
-    ElasticTransition // 弹性过渡
+    NoTransition,      // 无过渡效果
+    PopupTransition,   // 弹出过渡
+    ScaleTransition,   // 缩放过渡
+    FlipTransition,    // 翻转过渡
+    BlurTransition,    // 模糊过渡
+    CubeTransition,    // 立方体翻转
+    RippleTransition,  // 波纹扩散
 };
 Q_ENUM_CREATE(PageTransitionType)
 

@@ -1,71 +1,71 @@
 #ifndef NNAVIGATIONANIMATION_P_H
 #define NNAVIGATIONANIMATION_P_H
 
-#include <QGraphicsEffect>
+#include <QGraphicsBlurEffect>
+#include <QObject>
+#include <QPixmap>
 #include <QWidget>
 #include "QtNativeUI/NEnums.h"
 
-class NNavigationAnimationManager : public QObject {
+class QStackedWidget;
+
+    class NNavigationAnimationManager : public QObject {
     Q_OBJECT
+    Q_PROPERTY(int popupAnimationYOffset READ popupAnimationYOffset WRITE setPopupAnimationYOffset)
+    Q_PROPERTY(qreal scaleAnimationRatio READ scaleAnimationRatio WRITE setScaleAnimationRatio)
+    Q_PROPERTY(qreal scaleAnimationPixOpacity READ scaleAnimationPixOpacity WRITE setScaleAnimationPixOpacity)
+    Q_PROPERTY(qreal flipAnimationRatio READ flipAnimationRatio WRITE setFlipAnimationRatio)
+    Q_PROPERTY(int blurAnimationRadius READ blurAnimationRadius WRITE setBlurAnimationRadius)
+    Q_PROPERTY(qreal cubeAnimationAngle READ cubeAnimationAngle WRITE setCubeAnimationAngle)
+    Q_PROPERTY(qreal rippleAnimationRadius READ rippleAnimationRadius WRITE setRippleAnimationRadius)
+
   public:
-    explicit NNavigationAnimationManager(QObject* parent = nullptr);
+    explicit NNavigationAnimationManager(QStackedWidget* stackedWidget, QObject* parent = nullptr);
     ~NNavigationAnimationManager();
 
-    // 执行页面过渡动画
-    void executeTransition(QWidget* targetWidget, NNavigationType::PageTransitionType type, int duration = 250);
+    void executeTransition(NNavigationType::PageTransitionType type, int targetIndex, bool isRouteBack, int duration = 300);
+    void paintTransition(QPainter* painter, const QRect& rect, int borderRadius);
+
+    int popupAnimationYOffset() const { return m_popupAnimationYOffset; }
+    void setPopupAnimationYOffset(int offset) { m_popupAnimationYOffset = offset; }
+
+    qreal scaleAnimationRatio() const { return m_scaleAnimationRatio; }
+    void setScaleAnimationRatio(qreal ratio) { m_scaleAnimationRatio = ratio; }
+
+    qreal scaleAnimationPixOpacity() const { return m_scaleAnimationPixOpacity; }
+    void setScaleAnimationPixOpacity(qreal opacity) { m_scaleAnimationPixOpacity = opacity; }
+
+    qreal flipAnimationRatio() const { return m_flipAnimationRatio; }
+    void setFlipAnimationRatio(qreal ratio) { m_flipAnimationRatio = ratio; }
+
+    int blurAnimationRadius() const { return m_blurAnimationRadius; }
+    void setBlurAnimationRadius(int radius) { m_blurAnimationRadius = radius; }
+
+    qreal cubeAnimationAngle() const { return m_cubeAnimationAngle; }
+    void setCubeAnimationAngle(qreal angle) { m_cubeAnimationAngle = angle; }
+
+    qreal rippleAnimationRadius() const { return m_rippleAnimationRadius; }
+    void setRippleAnimationRadius(qreal radius) { m_rippleAnimationRadius = radius; }
+
 
   private:
-    // 淡入淡出动画
-    void executeFadeTransition(QWidget* targetWidget, int duration);
+    void getCurrentStackPix();
+    void getTargetStackPix();
 
-    // 水平滑动动画
-    void executeSlideHorizontalTransition(QWidget* targetWidget, int duration);
+    QStackedWidget*                     m_stackedWidget{nullptr};
+    NNavigationType::PageTransitionType m_transitionType{NNavigationType::NoTransition};
+    QPixmap                             m_targetStackPix;
+    QPixmap                             m_currentStackPix;
+    QGraphicsBlurEffect*                m_blurEffect{nullptr};
+    bool                                m_isDrawNewPix{false};
 
-    // 垂直滑动动画
-    void executeSlideVerticalTransition(QWidget* targetWidget, int duration);
-
-    // 缩放过渡动画
-    void executeZoomTransition(QWidget* targetWidget, int duration);
-
-    // 翻转过渡动画
-    void executeFlipTransition(QWidget* targetWidget, int duration);
-
-    // 推入过渡动画
-    void executePushTransition(QWidget* targetWidget, int duration);
-
-    // 揭示过渡动画
-    void executeRevealTransition(QWidget* targetWidget, int duration);
-
-    // 弹性过渡动画
-    void executeElasticTransition(QWidget* targetWidget, int duration);
-
-    // 清理动画效果
-    void cleanupEffects(QWidget* widget, QGraphicsEffect* effect);
-};
-
-// 自定义旋转效果类
-class NRotationEffect : public QGraphicsEffect {
-    Q_OBJECT
-    Q_PROPERTY(qreal angle READ angle WRITE setAngle)
-    Q_PROPERTY(Qt::Axis axis READ axis WRITE setAxis)
-
-  public:
-    explicit NRotationEffect(QObject* parent = nullptr);
-    ~NRotationEffect();
-
-    qreal angle() const { return m_angle; }
-    void  setAngle(qreal angle);
-
-    Qt::Axis axis() const { return m_axis; }
-    void     setAxis(Qt::Axis axis);
-
-  protected:
-    void   draw(QPainter* painter) override;
-    QRectF boundingRectFor(const QRectF& rect) const override;
-
-  private:
-    qreal    m_angle;
-    Qt::Axis m_axis;
+    int   m_popupAnimationYOffset{0};
+    qreal m_scaleAnimationRatio{1.0};
+    qreal m_scaleAnimationPixOpacity{1.0};
+    qreal m_flipAnimationRatio{0.0};
+    int   m_blurAnimationRadius{0};
+    qreal m_cubeAnimationAngle{0.0};
+    qreal m_rippleAnimationRadius{0.0};
 };
 
 #endif // NNAVIGATIONANIMATION_P_H
