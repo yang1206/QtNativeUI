@@ -301,9 +301,23 @@ QSize NComboBoxStyle::sizeFromContents(ContentsType        type,
         return itemSize;
     }
     if (type == CT_ComboBox && qobject_cast<const NComboBox*>(widget)) {
-        QSize newSize = QProxyStyle::sizeFromContents(type, option, size, widget);
-        newSize.setHeight(qMax(newSize.height(), 35));
-        return newSize;
+        const NComboBox* comboBox = qobject_cast<const NComboBox*>(widget);
+
+        QFontMetrics fm(widget->font());
+        int          maxTextWidth = 0;
+
+        for (int i = 0; i < comboBox->count(); ++i) {
+            int textWidth = fm.horizontalAdvance(comboBox->itemText(i));
+            maxTextWidth  = qMax(maxTextWidth, textWidth);
+        }
+
+        int padding    = 16;
+        int arrowWidth = 32;
+        int totalWidth = maxTextWidth + padding + arrowWidth;
+
+        int height = qMax(35, fm.height() + 10);
+
+        return QSize(totalWidth, height);
     }
 
     return QProxyStyle::sizeFromContents(type, option, size, widget);

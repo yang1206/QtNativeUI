@@ -60,6 +60,7 @@ class QTNATIVEUI_EXPORT NComboBox : public QComboBox {
     ~NComboBox();
 
     QLineEdit* getLineEdit() const;
+    QSize sizeHint() const override;
 
   protected:
     void contextMenuEvent(QContextMenuEvent* event) override;

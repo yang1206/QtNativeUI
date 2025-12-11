@@ -173,6 +173,8 @@ void NComboBox::init() {
 
 QLineEdit* NComboBox::getLineEdit() const { return lineEdit(); }
 
+QSize NComboBox::sizeHint() const { return style()->sizeFromContents(QStyle::CT_ComboBox, nullptr, QSize(), this); }
+
 void NComboBox::showPopup() {
     Q_D(NComboBox);
 
