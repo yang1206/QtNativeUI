@@ -188,7 +188,7 @@ void NComboBoxStyle::drawControl(ControlElement      element,
             }
             painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, nTheme->themeMode()));
             painter->drawText(
-                QRect(option->rect.x() + 20, option->rect.y(), option->rect.width() - 20, option->rect.height()),
+                QRect(option->rect.x() + 15, option->rect.y(), option->rect.width() - 10, option->rect.height()),
                 Qt::AlignVCenter,
                 vopt->text);
             painter->restore();
@@ -311,9 +311,10 @@ QSize NComboBoxStyle::sizeFromContents(ContentsType        type,
             maxTextWidth  = qMax(maxTextWidth, textWidth);
         }
 
-        int padding    = 16;
-        int arrowWidth = 32;
-        int totalWidth = maxTextWidth + padding + arrowWidth;
+        int padding          = 16;
+        int arrowWidth       = 32;
+        int scrollBarPadding = 20;
+        int totalWidth       = maxTextWidth + padding + arrowWidth + scrollBarPadding;
 
         int height = qMax(35, fm.height() + 10);
 
