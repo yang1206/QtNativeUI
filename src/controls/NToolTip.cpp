@@ -61,11 +61,13 @@ void NToolTip::init() {
     d->opacityAnimation = new QPropertyAnimation(this, "windowOpacity", this);
     d->opacityAnimation->setDuration(150);
 
+#ifndef Q_OS_MACOS
     d->shadowEffect = new QGraphicsDropShadowEffect(this);
     d->shadowEffect->setBlurRadius(25);
     d->shadowEffect->setColor(QColor(0, 0, 0, 50));
     d->shadowEffect->setOffset(0, 5);
     d->container->setGraphicsEffect(d->shadowEffect);
+#endif
 
     d->timer->setSingleShot(true);
     connect(d->timer, &QTimer::timeout, this, &NToolTip::hide);
