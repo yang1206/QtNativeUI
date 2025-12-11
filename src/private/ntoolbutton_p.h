@@ -66,6 +66,7 @@ class NToolButtonPrivate : public QObject {
     FluentIconInfo _fluentIcon;
 
     int _iconTextSpacing{4};
+    bool _userSetStyle{false};
     
     mutable QColor _cachedBackgroundColor;
     mutable QColor _cachedTextColor;

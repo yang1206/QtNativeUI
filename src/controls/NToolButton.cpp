@@ -70,8 +70,6 @@ void NToolButton::init() {
     setObjectName("NToolButton");
     setStyleSheet("#NToolButton{background-color:transparent;}");
 
-    setToolButtonStyle(Qt::ToolButtonIconOnly);
-
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NToolButton);
         d->_themeMode = themeMode;
@@ -561,4 +559,40 @@ void NToolButton::updateFluentIcon() {
 
     setIcon(generatedIcon);
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
+}
+
+void NToolButton::setText(const QString& text) {
+    QToolButton::setText(text);
+    updateToolButtonStyle();
+}
+
+void NToolButton::setIcon(const QIcon& icon) {
+    QToolButton::setIcon(icon);
+    updateToolButtonStyle();
+}
+
+void NToolButton::setToolButtonStyle(Qt::ToolButtonStyle style) {
+    Q_D(NToolButton);
+    d->_userSetStyle = true;
+    QToolButton::setToolButtonStyle(style);
+}
+
+void NToolButton::updateToolButtonStyle() {
+    Q_D(NToolButton);
+    
+    // 如果用户已经手动设置过样式，就不要自动更改
+    if (d->_userSetStyle) {
+        return;
+    }
+    
+    bool hasIcon = !icon().isNull();
+    bool hasText = !text().isEmpty();
+    
+    if (hasIcon && hasText) {
+        QToolButton::setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    } else if (hasIcon && !hasText) {
+        QToolButton::setToolButtonStyle(Qt::ToolButtonIconOnly);
+    } else if (!hasIcon && hasText) {
+        QToolButton::setToolButtonStyle(Qt::ToolButtonTextOnly);
+    }
 }

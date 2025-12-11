@@ -156,7 +156,6 @@ QWidget* ButtonExample::createToolButtons() {
     textOnlyBtn->setToolTip("只有文本");
     textOnlyBtn->setFixedSize(80, 40);
     textOnlyBtn->setText("设置");
-    textOnlyBtn->setToolButtonStyle(Qt::ToolButtonTextOnly);
 
     // 文本在图标旁边
     NToolButton* textBesideBtn = new NToolButton();
@@ -198,10 +197,9 @@ QWidget* ButtonExample::createToolButtons() {
     buttonTypeLayout->setSpacing(16);
 
     // 标准按钮
-    NToolButton* standardBtn = new NToolButton();
+    NToolButton* standardBtn = new NToolButton("标准");
     standardBtn->setToolTip("标准按钮");
     standardBtn->setFixedSize(120, 40);
-    standardBtn->setText("标准");
     standardBtn->setFluentIcon(NRegularIconType::Document24Regular, 20);
     standardBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 

@@ -52,6 +52,10 @@ class QTNATIVEUI_EXPORT NToolButton : public QToolButton {
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
+    void setText(const QString& text);
+    void setIcon(const QIcon& icon);
+    void setToolButtonStyle(Qt::ToolButtonStyle style);
+
   protected:
     void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
@@ -71,6 +75,7 @@ class QTNATIVEUI_EXPORT NToolButton : public QToolButton {
     void init();
     void updateAccentColors();
     void updateFluentIcon();
+    void updateToolButtonStyle();
 };
 
 #endif // NTOOLBUTTON_H
