@@ -81,7 +81,7 @@ void NCheckBox::init() {
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
         Q_D(NCheckBox);
         d->_backgroundColorCacheValid = false;
-        d->_iconColorCacheValid = false;
+        d->_iconColorCacheValid       = false;
         d->invalidateIconCache();
         updateAccentColors();
         update();
@@ -190,7 +190,7 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
             }
         }
         if (d->_isAnimationFinished) {
-            d->_cachedBackgroundColor = bgColor;
+            d->_cachedBackgroundColor     = bgColor;
             d->_backgroundColorCacheValid = true;
         }
     } else {
@@ -213,7 +213,7 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
             }
         }
         if (d->_isAnimationFinished) {
-            d->_cachedBorderColor = borderColor;
+            d->_cachedBorderColor     = borderColor;
             d->_borderColorCacheValid = true;
         }
     } else {
@@ -275,9 +275,9 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
             } else {
                 iconColor = d->_accentTextColor;
             }
-            
+
             if (d->_isAnimationFinished) {
-                d->_cachedIconColor = iconColor;
+                d->_cachedIconColor     = iconColor;
                 d->_iconColorCacheValid = true;
             }
         }
@@ -301,12 +301,12 @@ void NCheckBox::drawCheckBox(QPainter* painter) {
         } else {
             QIcon icon;
             if (!d->_checkIconCacheValid || !d->_isAnimationFinished) {
-                NFilledIconType::Icon iconType = NFilledIconType::Checkmark24Filled;
-                QColor colorToUse = d->_isAnimationFinished ? d->_cachedIconColor : iconColor;
-                icon = nIcon->fromFilled(iconType, d->_checkIcon.size, colorToUse);
-                
+                NFilledIconType::Icon iconType   = NFilledIconType::Checkmark24Filled;
+                QColor                colorToUse = d->_isAnimationFinished ? d->_cachedIconColor : iconColor;
+                icon                             = nIcon->fromFilled(iconType, d->_checkIcon.size, colorToUse);
+
                 if (d->_isAnimationFinished) {
-                    d->_cachedCheckIcon = icon;
+                    d->_cachedCheckIcon     = icon;
                     d->_checkIconCacheValid = true;
                 }
             } else {
@@ -345,7 +345,7 @@ void NCheckBox::drawText(QPainter* painter) {
         } else {
             textColor = d->_isDark ? d->_pDarkTextColor : d->_pLightTextColor;
         }
-        d->_cachedTextColor = textColor;
+        d->_cachedTextColor     = textColor;
         d->_textColorCacheValid = true;
     } else {
         textColor = d->_cachedTextColor;
@@ -410,6 +410,20 @@ void NCheckBox::changeEvent(QEvent* event) {
         update();
     }
     QCheckBox::changeEvent(event);
+}
+
+QSize NCheckBox::sizeHint() const {
+    Q_D(const NCheckBox);
+    if (text().isEmpty()) {
+        return QSize(d->_checkBoxSize, d->_checkBoxSize);
+    }
+
+    QFontMetrics fm(font());
+    int          textWidth  = fm.horizontalAdvance(text());
+    int          totalWidth = d->_checkBoxSize + d->_spacing + textWidth;
+    int          height     = qMax(d->_checkBoxSize, fm.height());
+
+    return QSize(totalWidth, height);
 }
 
 void NCheckBox::updateAccentColors() {
