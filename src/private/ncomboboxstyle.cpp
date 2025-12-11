@@ -163,7 +163,7 @@ void NComboBoxStyle::drawControl(ControlElement      element,
             painter->setPen(Qt::NoPen);
             QPainterPath path;
             QRect        optionRect = option->rect;
-            optionRect.adjust(margin, margin, -margin, -margin);
+            optionRect.adjust(0, margin, -margin, -margin);
 #ifndef Q_OS_WIN
             optionRect.adjust(6, 0, -6, 0);
 #endif
@@ -187,10 +187,17 @@ void NComboBoxStyle::drawControl(ControlElement      element,
                 }
             }
             painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, nTheme->themeMode()));
-            painter->drawText(
-                QRect(option->rect.x() + 15, option->rect.y(), option->rect.width() - 10, option->rect.height()),
-                Qt::AlignVCenter,
-                vopt->text);
+            int drawTextLeftOffset = 15;
+#ifndef Q_OS_WIN
+            drawTextLeftOffset = 20;
+#endif
+
+            painter->drawText(QRect(option->rect.x() + drawTextLeftOffset,
+                                    option->rect.y(),
+                                    option->rect.width() - 10,
+                                    option->rect.height()),
+                              Qt::AlignVCenter,
+                              vopt->text);
             painter->restore();
         }
         return;

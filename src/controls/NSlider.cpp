@@ -28,6 +28,7 @@ Q_PROPERTY_CREATE_Q_CPP(NSlider, QColor, LightTickColor)
 Q_PROPERTY_CREATE_Q_CPP(NSlider, QColor, DarkTickColor)
 Q_PROPERTY_CREATE_Q_CPP(NSlider, QColor, LightDisabledTickColor)
 Q_PROPERTY_CREATE_Q_CPP(NSlider, QColor, DarkDisabledTickColor)
+// TODO 重构 tick刻度，保持和 QSlider 一致
 Q_PROPERTY_CREATE_Q_CPP(NSlider, int, TickLength)
 Q_PROPERTY_CREATE_Q_CPP(NSlider, int, TickThickness)
 
@@ -89,14 +90,14 @@ void NSlider::init() {
             d->updateTooltip();
         }
     });
-    
+
     connect(this, &QSlider::sliderReleased, this, [this]() {
         Q_D(NSlider);
         if (d->_showTooltip) {
             d->hideTooltip();
         }
     });
-    
+
     connect(this, &QSlider::valueChanged, this, [this](int) {
         Q_D(NSlider);
         if (d->_isDragging && d->_showTooltip) {
@@ -197,11 +198,11 @@ void NSlider::mousePressEvent(QMouseEvent* event) {
         d->_isPressed  = true;
         d->_isDragging = true;
         d->startThumbAnimation(d->_thumbScale, 0.8);
-        
+
         if (d->_showTooltip) {
             d->updateTooltip();
         }
-        
+
         update();
     }
 
@@ -220,11 +221,11 @@ void NSlider::mouseReleaseEvent(QMouseEvent* event) {
         } else {
             d->startThumbAnimation(d->_thumbScale, 1.0);
         }
-        
+
         if (d->_showTooltip) {
             d->hideTooltip();
         }
-        
+
         update();
     }
 
@@ -240,9 +241,9 @@ void NSlider::setShowTooltip(bool show) {
     Q_D(NSlider);
     if (d->_showTooltip == show)
         return;
-        
+
     d->_showTooltip = show;
-    
+
     if (!show) {
         d->hideTooltip();
     }
