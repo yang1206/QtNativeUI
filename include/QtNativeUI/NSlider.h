@@ -6,6 +6,7 @@
 #define NSLIDER_H
 
 #include <QSlider>
+#include <functional>
 
 #include "NColor.h"
 #include "stdafx.h"
@@ -39,6 +40,8 @@ class QTNATIVEUI_EXPORT NSlider : public QSlider {
     Q_PROPERTY_CREATE_Q_H(int, TickLength)
     Q_PROPERTY_CREATE_Q_H(int, TickThickness)
 
+    Q_PROPERTY(bool showTooltip READ showTooltip WRITE setShowTooltip)
+
   public:
     NSlider(QWidget* parent = nullptr);
     NSlider(Qt::Orientation orientation, QWidget* parent = nullptr);
@@ -47,6 +50,10 @@ class QTNATIVEUI_EXPORT NSlider : public QSlider {
     void setAccentColor(const QColor& color);
     void setAccentColor(const NAccentColor& color);
     void resetAccentColor();
+
+    bool showTooltip() const;
+    void setShowTooltip(bool show);
+    void setTooltipFormatter(std::function<QString(int)> formatter);
 
   protected:
     void enterEvent(QEnterEvent* event) override;

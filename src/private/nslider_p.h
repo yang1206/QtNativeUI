@@ -7,7 +7,10 @@
 #include <QPropertyAnimation>
 #include <QProxyStyle>
 #include <QtNativeUI/NSlider.h>
+#include <functional>
 #include "QtNativeUI/NEnums.h"
+
+class NToolTip;
 
 class NSliderPrivate : public QObject {
     Q_OBJECT
@@ -62,6 +65,9 @@ class NSliderPrivate : public QObject {
         void drawProgress(const QStyleOptionSlider* option, QPainter* painter, const QWidget* widget) const;
         void drawHandle(const QStyleOptionSlider* option, QPainter* painter, const QWidget* widget) const;
         void drawTicks(const QStyleOptionSlider* option, QPainter* painter, const QWidget* widget) const;
+
+    public:
+        QRect calculateThumbRect(const QWidget* widget) const;
     };
 
     explicit NSliderPrivate(QObject* parent = nullptr);
@@ -76,6 +82,9 @@ class NSliderPrivate : public QObject {
     }
 
     void startThumbAnimation(qreal startScale, qreal endScale);
+    void updateTooltip();
+    void hideTooltip();
+    QRect getThumbRect() const;
 
   public:
     bool                  _isHovered  = false;
@@ -93,6 +102,10 @@ class NSliderPrivate : public QObject {
     QColor _accentDisabledColor;
 
     Style* _sliderStyle = nullptr;
+
+    NToolTip* _tooltip = nullptr;
+    bool _showTooltip = false;
+    std::function<QString(int)> _tooltipFormatter;
 };
 
 #endif // NSLIDER_P_H

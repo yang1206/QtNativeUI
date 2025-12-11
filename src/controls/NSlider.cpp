@@ -5,6 +5,7 @@
 #include <QEnterEvent>
 #include <QPainter>
 #include <QPainterPath>
+#include <QTimer>
 #include <QtNativeUI/NSlider.h>
 #include "../private/nslider_p.h"
 #include "QtNativeUI/NTheme.h"
@@ -79,6 +80,29 @@ void NSlider::init() {
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
     setFocusPolicy(Qt::StrongFocus);
+
+    d->_showTooltip = true;
+
+    connect(this, &QSlider::sliderPressed, this, [this]() {
+        Q_D(NSlider);
+        if (d->_showTooltip) {
+            d->updateTooltip();
+        }
+    });
+    
+    connect(this, &QSlider::sliderReleased, this, [this]() {
+        Q_D(NSlider);
+        if (d->_showTooltip) {
+            d->hideTooltip();
+        }
+    });
+    
+    connect(this, &QSlider::valueChanged, this, [this](int) {
+        Q_D(NSlider);
+        if (d->_isDragging && d->_showTooltip) {
+            d->updateTooltip();
+        }
+    });
 
     if (orientation() == Qt::Horizontal) {
         setFixedHeight(d->_pThumbDiameter);
@@ -173,6 +197,11 @@ void NSlider::mousePressEvent(QMouseEvent* event) {
         d->_isPressed  = true;
         d->_isDragging = true;
         d->startThumbAnimation(d->_thumbScale, 0.8);
+        
+        if (d->_showTooltip) {
+            d->updateTooltip();
+        }
+        
         update();
     }
 
@@ -191,14 +220,50 @@ void NSlider::mouseReleaseEvent(QMouseEvent* event) {
         } else {
             d->startThumbAnimation(d->_thumbScale, 1.0);
         }
+        
+        if (d->_showTooltip) {
+            d->hideTooltip();
+        }
+        
         update();
     }
 
     QSlider::mouseReleaseEvent(event);
 }
 
+bool NSlider::showTooltip() const {
+    Q_D(const NSlider);
+    return d->_showTooltip;
+}
+
+void NSlider::setShowTooltip(bool show) {
+    Q_D(NSlider);
+    if (d->_showTooltip == show)
+        return;
+        
+    d->_showTooltip = show;
+    
+    if (!show) {
+        d->hideTooltip();
+    }
+}
+
+void NSlider::setTooltipFormatter(std::function<QString(int)> formatter) {
+    Q_D(NSlider);
+    d->_tooltipFormatter = formatter;
+}
+
 void NSlider::mouseMoveEvent(QMouseEvent* event) {
     Q_D(NSlider);
+
+    if (isEnabled() && d->_isDragging && d->_showTooltip) {
+        QTimer::singleShot(0, this, [this]() {
+            Q_D(NSlider);
+            if (d->_isDragging && d->_showTooltip) {
+                d->updateTooltip();
+            }
+        });
+    }
 
     if (isEnabled() && !d->_isDragging) {
         d->_isHovered = rect().contains(event->pos());

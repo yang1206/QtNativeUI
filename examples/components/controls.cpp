@@ -4,8 +4,8 @@
 #include <QtNativeUI/NCheckBox.h>
 #include <QtNativeUI/NLineEdit.h>
 #include <QtNativeUI/NPushButton.h>
-#include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NRangeSlider.h>
+#include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NToggleSwitch.h>
 
@@ -375,17 +375,18 @@ QWidget* ControlsExample::createSliders() {
 
     // === 单滑块 ===
     QLabel* singleLabel = new QLabel("单滑块 (NSlider):", container);
-    QFont labelFont = singleLabel->font();
+    QFont   labelFont   = singleLabel->font();
     labelFont.setBold(true);
     singleLabel->setFont(labelFont);
     layout->addWidget(singleLabel);
 
     // 水平滑块
     QHBoxLayout* horizontalLayout = new QHBoxLayout();
-    NSlider* horizontalSlider = new NSlider(Qt::Horizontal, container);
+    NSlider*     horizontalSlider = new NSlider(Qt::Horizontal, container);
     horizontalSlider->setRange(0, 100);
     horizontalSlider->setValue(50);
     horizontalSlider->setMinimumWidth(200);
+    horizontalSlider->setShowTooltip(true);
     QLabel* horizontalValueLabel = new QLabel("值: 50", container);
     connect(horizontalSlider, &NSlider::valueChanged, [horizontalValueLabel](int value) {
         horizontalValueLabel->setText(QString("值: %1").arg(value));
@@ -397,7 +398,7 @@ QWidget* ControlsExample::createSliders() {
 
     // 垂直滑块
     QHBoxLayout* verticalLayout = new QHBoxLayout();
-    NSlider* verticalSlider = new NSlider(Qt::Vertical, container);
+    NSlider*     verticalSlider = new NSlider(Qt::Vertical, container);
     verticalSlider->setRange(0, 100);
     verticalSlider->setValue(50);
     verticalSlider->setMinimumHeight(200);
@@ -433,7 +434,7 @@ QWidget* ControlsExample::createSliders() {
     layout->addWidget(rangeLabel);
 
     // 基本范围滑块
-    QHBoxLayout* basicRangeLayout = new QHBoxLayout();
+    QHBoxLayout*  basicRangeLayout = new QHBoxLayout();
     NRangeSlider* basicRangeSlider = new NRangeSlider(Qt::Horizontal, container);
     basicRangeSlider->setRange(0, 100);
     basicRangeSlider->setValues(25, 75);
@@ -448,7 +449,7 @@ QWidget* ControlsExample::createSliders() {
     layout->addLayout(basicRangeLayout);
 
     // 垂直范围滑块
-    QHBoxLayout* verticalRangeLayout = new QHBoxLayout();
+    QHBoxLayout*  verticalRangeLayout = new QHBoxLayout();
     NRangeSlider* verticalRangeSlider = new NRangeSlider(Qt::Vertical, container);
     verticalRangeSlider->setRange(0, 100);
     verticalRangeSlider->setValues(30, 70);
@@ -463,7 +464,7 @@ QWidget* ControlsExample::createSliders() {
     layout->addLayout(verticalRangeLayout);
 
     // 禁用状态的范围滑块
-    QHBoxLayout* disabledRangeLayout = new QHBoxLayout();
+    QHBoxLayout*  disabledRangeLayout = new QHBoxLayout();
     NRangeSlider* disabledRangeSlider = new NRangeSlider(Qt::Horizontal, container);
     disabledRangeSlider->setRange(0, 100);
     disabledRangeSlider->setValues(20, 80);
@@ -476,7 +477,7 @@ QWidget* ControlsExample::createSliders() {
     layout->addLayout(disabledRangeLayout);
 
     // 自定义强调色的范围滑块
-    QHBoxLayout* accentRangeLayout = new QHBoxLayout();
+    QHBoxLayout*  accentRangeLayout = new QHBoxLayout();
     NRangeSlider* accentRangeSlider = new NRangeSlider(Qt::Horizontal, container);
     accentRangeSlider->setRange(0, 100);
     accentRangeSlider->setValues(40, 60);
@@ -493,16 +494,16 @@ QWidget* ControlsExample::createSliders() {
     interactiveLabel->setFont(labelFont);
     layout->addWidget(interactiveLabel);
 
-    QHBoxLayout* interactiveLayout = new QHBoxLayout();
+    QHBoxLayout*  interactiveLayout = new QHBoxLayout();
     NRangeSlider* interactiveSlider = new NRangeSlider(Qt::Horizontal, container);
     interactiveSlider->setRange(0, 100);
     interactiveSlider->setValues(10, 90);
     interactiveSlider->setMinimumWidth(300);
-    
+
     QLabel* lowerLabel = new QLabel("下限: 10", container);
     QLabel* upperLabel = new QLabel("上限: 90", container);
-    QLabel* spanLabel = new QLabel("跨度: 80", container);
-    
+    QLabel* spanLabel  = new QLabel("跨度: 80", container);
+
     connect(interactiveSlider, &NRangeSlider::lowerValueChanged, [lowerLabel, spanLabel, interactiveSlider](int value) {
         lowerLabel->setText(QString("下限: %1").arg(value));
         spanLabel->setText(QString("跨度: %1").arg(interactiveSlider->getUpperValue() - value));
@@ -511,12 +512,12 @@ QWidget* ControlsExample::createSliders() {
         upperLabel->setText(QString("上限: %1").arg(value));
         spanLabel->setText(QString("跨度: %1").arg(value - interactiveSlider->getLowerValue()));
     });
-    
+
     QVBoxLayout* labelsLayout = new QVBoxLayout();
     labelsLayout->addWidget(lowerLabel);
     labelsLayout->addWidget(upperLabel);
     labelsLayout->addWidget(spanLabel);
-    
+
     interactiveLayout->addWidget(interactiveSlider);
     interactiveLayout->addLayout(labelsLayout);
     interactiveLayout->addStretch();
@@ -528,12 +529,12 @@ QWidget* ControlsExample::createSliders() {
     layout->addWidget(tooltipLabel);
 
     // 基本tooltip（拖动和hover时显示）
-    QHBoxLayout* tooltipBasicLayout = new QHBoxLayout();
+    QHBoxLayout*  tooltipBasicLayout = new QHBoxLayout();
     NRangeSlider* tooltipBasicSlider = new NRangeSlider(Qt::Horizontal, container);
     tooltipBasicSlider->setRange(0, 100);
     tooltipBasicSlider->setValues(30, 70);
     tooltipBasicSlider->setMinimumWidth(300);
-    tooltipBasicSlider->setShowTooltip(true);  // 启用tooltip
+    tooltipBasicSlider->setShowTooltip(true); // 启用tooltip
     QLabel* tooltipBasicLabel = new QLabel("拖动或悬停显示tooltip (30 - 70)", container);
     connect(tooltipBasicSlider, &NRangeSlider::rangeChanged, [tooltipBasicLabel](int lower, int upper) {
         tooltipBasicLabel->setText(QString("拖动或悬停显示tooltip (%1 - %2)").arg(lower).arg(upper));
@@ -544,14 +545,14 @@ QWidget* ControlsExample::createSliders() {
     layout->addLayout(tooltipBasicLayout);
 
     // 自定义tooltip格式
-    QHBoxLayout* tooltipFormatLayout = new QHBoxLayout();
+    QHBoxLayout*  tooltipFormatLayout = new QHBoxLayout();
     NRangeSlider* tooltipFormatSlider = new NRangeSlider(Qt::Horizontal, container);
     tooltipFormatSlider->setRange(0, 100);
     tooltipFormatSlider->setValues(40, 60);
     tooltipFormatSlider->setMinimumWidth(300);
     tooltipFormatSlider->setShowTooltip(true);
     tooltipFormatSlider->setTooltipFormatter([](int value) {
-        return QString("%1%").arg(value);  // 显示百分号
+        return QString("%1%").arg(value); // 显示百分号
     });
     QLabel* tooltipFormatLabel = new QLabel("自定义格式 (40% - 60%)", container);
     connect(tooltipFormatSlider, &NRangeSlider::rangeChanged, [tooltipFormatLabel](int lower, int upper) {

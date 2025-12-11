@@ -6,6 +6,7 @@
 
 #include <QPainterPath>
 #include <QStyleOptionSlider>
+#include <QtNativeUI/NToolTip.h>
 #include "QtNativeUI/NSlider.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -135,18 +136,31 @@ void NSliderPrivate::Style::drawProgress(const QStyleOptionSlider*       option,
     double ratio = (option->sliderPosition - option->minimum) / static_cast<double>(option->maximum - option->minimum);
 
     if (option->orientation == Qt::Horizontal) {
-        int   trackY        = (option->rect.height() - d->_pTrackHeight) / 2;
-        int   progressWidth = static_cast<int>((option->rect.width() - 2 * padding) * ratio);
-        QRect progressRect(padding, trackY, progressWidth, d->_pTrackHeight);
+        int trackY        = (option->rect.height() - d->_pTrackHeight) / 2;
+        int progressWidth = static_cast<int>((option->rect.width() - 2 * padding) * ratio);
+
+        QRect progressRect;
+        if (option->upsideDown) {
+            int progressX = option->rect.width() - padding - progressWidth;
+            progressRect  = QRect(progressX, trackY, progressWidth, d->_pTrackHeight);
+        } else {
+            progressRect = QRect(padding, trackY, progressWidth, d->_pTrackHeight);
+        }
 
         painter->setPen(Qt::NoPen);
         painter->setBrush(progressColor);
         painter->drawRoundedRect(progressRect, d->_pTrackCornerRadius, d->_pTrackCornerRadius);
     } else {
-        int   trackX         = (option->rect.width() - d->_pTrackHeight) / 2;
-        int   progressHeight = static_cast<int>((option->rect.height() - 2 * padding) * ratio);
-        int   progressY      = option->rect.height() - padding - progressHeight;
-        QRect progressRect(trackX, progressY, d->_pTrackHeight, progressHeight);
+        int trackX         = (option->rect.width() - d->_pTrackHeight) / 2;
+        int progressHeight = static_cast<int>((option->rect.height() - 2 * padding) * ratio);
+
+        QRect progressRect;
+        if (option->upsideDown) {
+            int progressY = option->rect.height() - padding - progressHeight;
+            progressRect  = QRect(trackX, progressY, d->_pTrackHeight, progressHeight);
+        } else {
+            progressRect = QRect(trackX, padding, d->_pTrackHeight, progressHeight);
+        }
 
         painter->setPen(Qt::NoPen);
         painter->setBrush(progressColor);
@@ -182,13 +196,13 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
     }
 
     QColor outerColor = d->_isDark ? d->_pDarkThumbOuterColor : d->_pLightThumbOuterColor;
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(outerColor);
+    QColor borderColor =
+        NThemeColor(NFluentColorKey::ControlStrokeColorDefault, d->_isDark ? NThemeType::Dark : NThemeType::Light);
+    qreal outerRadius = (d->_pThumbDiameter / 2.0) - 1;
 
-    QPainterPath outerPath;
-    qreal        outerRadius = d->_pThumbDiameter / 2.0;
-    outerPath.addEllipse(thumbCenter, outerRadius, outerRadius);
-    painter->drawPath(outerPath);
+    painter->setPen(QPen(borderColor, 1));
+    painter->setBrush(outerColor);
+    painter->drawEllipse(thumbCenter, outerRadius, outerRadius);
 
     QColor innerColor;
     if (!(option->state & QStyle::State_Enabled)) {
@@ -203,11 +217,9 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
 
     qreal innerRadius = (d->_pThumbInnerDiameter / 2.0) * d->_thumbScale;
 
+    painter->setPen(Qt::NoPen);
     painter->setBrush(innerColor);
-
-    QPainterPath innerPath;
-    innerPath.addEllipse(thumbCenter, innerRadius, innerRadius);
-    painter->drawPath(innerPath);
+    painter->drawEllipse(thumbCenter, innerRadius, innerRadius);
 
     painter->restore();
 }
@@ -278,7 +290,12 @@ NSliderPrivate::NSliderPrivate(QObject* parent) : QObject(parent) {
     _thumbAnimation->setDuration(150);
 }
 
-NSliderPrivate::~NSliderPrivate() {}
+NSliderPrivate::~NSliderPrivate() {
+    if (_tooltip) {
+        _tooltip->deleteLater();
+        _tooltip = nullptr;
+    }
+}
 
 void NSliderPrivate::startThumbAnimation(qreal startScale, qreal endScale) {
     _thumbAnimation->stop();
@@ -297,4 +314,101 @@ void NSliderPrivate::startThumbAnimation(qreal startScale, qreal endScale) {
     });
 
     _thumbAnimation->start();
+}
+
+void NSliderPrivate::updateTooltip() {
+    if (!_showTooltip || !q_ptr)
+        return;
+
+    if (!_tooltip) {
+        _tooltip = new NToolTip("", q_ptr->window());
+        _tooltip->setDuration(-1);
+    }
+
+    int value = q_ptr->value();
+    QString text = _tooltipFormatter ? _tooltipFormatter(value) : QString::number(value);
+    _tooltip->setText(text);
+
+    // 计算滑块位置 - 使用简化的方法
+    int padding = _pThumbDiameter / 2;
+    double ratio = (q_ptr->value() - q_ptr->minimum()) / static_cast<double>(q_ptr->maximum() - q_ptr->minimum());
+    
+    QPoint thumbCenter;
+    if (q_ptr->orientation() == Qt::Horizontal) {
+        int availableWidth = q_ptr->width() - 2 * padding;
+        int thumbX = padding + static_cast<int>(availableWidth * ratio);
+        int thumbY = q_ptr->height() / 2;
+        thumbCenter = q_ptr->mapToGlobal(QPoint(thumbX, thumbY));
+    } else {
+        int availableHeight = q_ptr->height() - 2 * padding;
+        int thumbX = q_ptr->width() / 2;
+        int thumbY = q_ptr->height() - padding - static_cast<int>(availableHeight * ratio);
+        thumbCenter = q_ptr->mapToGlobal(QPoint(thumbX, thumbY));
+    }
+    
+    _tooltip->adjustSize();
+    
+    QPoint tooltipPos;
+    if (q_ptr->orientation() == Qt::Horizontal) {
+        tooltipPos = QPoint(thumbCenter.x() - _tooltip->width() / 2,
+                           thumbCenter.y() - _pThumbDiameter / 2 - _tooltip->height() - 5);
+    } else {
+        tooltipPos = QPoint(thumbCenter.x() + _pThumbDiameter / 2 + 5,
+                           thumbCenter.y() - _tooltip->height() / 2);
+    }
+    
+    _tooltip->move(tooltipPos);
+    _tooltip->show();
+}
+
+void NSliderPrivate::hideTooltip() {
+    if (_tooltip && _tooltip->isVisible()) {
+        _tooltip->hide();
+    }
+}
+
+QRect NSliderPrivate::getThumbRect() const {
+    if (!q_ptr || !_sliderStyle)
+        return QRect();
+    
+    return _sliderStyle->calculateThumbRect(q_ptr);
+}
+
+QRect NSliderPrivate::Style::calculateThumbRect(const QWidget* widget) const {
+    const QSlider* slider = qobject_cast<const QSlider*>(widget);
+    if (!slider)
+        return QRect();
+
+    QStyleOptionSlider option;
+    option.initFrom(slider);
+    option.orientation = slider->orientation();
+    option.minimum = slider->minimum();
+    option.maximum = slider->maximum();
+    option.sliderPosition = slider->sliderPosition();
+    option.sliderValue = slider->value();
+    option.singleStep = slider->singleStep();
+    option.pageStep = slider->pageStep();
+    option.upsideDown = slider->invertedAppearance();
+    option.direction = slider->layoutDirection();
+    option.rect = slider->rect();
+
+    int sliderPos = sliderPositionFromValue(option.minimum,
+                                          option.maximum,
+                                          option.sliderPosition,
+                                          option.orientation == Qt::Horizontal
+                                              ? option.rect.width() - d->_pThumbDiameter
+                                              : option.rect.height() - d->_pThumbDiameter,
+                                          option.upsideDown);
+
+    if (option.orientation == Qt::Horizontal) {
+        return QRect(sliderPos + d->_pThumbDiameter / 2,
+                    (option.rect.height() - d->_pThumbDiameter) / 2,
+                    d->_pThumbDiameter,
+                    d->_pThumbDiameter);
+    } else {
+        return QRect((option.rect.width() - d->_pThumbDiameter) / 2,
+                    sliderPos + d->_pThumbDiameter / 2,
+                    d->_pThumbDiameter,
+                    d->_pThumbDiameter);
+    }
 }

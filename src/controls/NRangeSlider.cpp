@@ -1,8 +1,6 @@
 #include <QEnterEvent>
 #include <QKeyEvent>
-#include <QPainter>
 #include <QPainterPath>
-#include <QTimer>
 #include <QtNativeUI/NRangeSlider.h>
 #include "../private/nrangeslider_p.h"
 #include "QtNativeUI/NTheme.h"
@@ -376,7 +374,9 @@ void NRangeSlider::drawHandle(QPainter* painter, const QRect& rect, bool isActiv
 
     QPointF center     = rect.center();
     QColor  outerColor = d->_isDark ? d->_pDarkThumbOuterColor : d->_pLightThumbOuterColor;
-    painter->setPen(Qt::NoPen);
+    QColor  borderColor =
+        NThemeColor(NFluentColorKey::ControlStrokeColorDefault, d->_isDark ? NThemeType::Dark : NThemeType::Light);
+    painter->setPen(QPen(borderColor, 1));
     painter->setBrush(outerColor);
 
     qreal outerRadius = d->_pThumbDiameter / 2.0;
