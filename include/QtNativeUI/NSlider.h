@@ -54,6 +54,10 @@ class QTNATIVEUI_EXPORT NSlider : public QSlider {
     bool showTooltip() const;
     void setShowTooltip(bool show);
     void setTooltipFormatter(std::function<QString(int)> formatter);
+    using QSlider::setTickInterval;
+    using QSlider::tickInterval;
+    using QSlider::setTickPosition;
+    using QSlider::tickPosition;
 
   protected:
     void enterEvent(QEnterEvent* event) override;

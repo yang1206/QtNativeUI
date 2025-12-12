@@ -28,7 +28,6 @@ Q_PROPERTY_CREATE_Q_CPP(NSlider, QColor, LightTickColor)
 Q_PROPERTY_CREATE_Q_CPP(NSlider, QColor, DarkTickColor)
 Q_PROPERTY_CREATE_Q_CPP(NSlider, QColor, LightDisabledTickColor)
 Q_PROPERTY_CREATE_Q_CPP(NSlider, QColor, DarkDisabledTickColor)
-// TODO 重构 tick刻度，保持和 QSlider 一致
 Q_PROPERTY_CREATE_Q_CPP(NSlider, int, TickLength)
 Q_PROPERTY_CREATE_Q_CPP(NSlider, int, TickThickness)
 
@@ -67,7 +66,7 @@ void NSlider::init() {
     d->_pLightThumbOuterColor = NThemeColor(NFluentColorKey::ControlSolidFillColorDefault, NThemeType::Light);
     d->_pDarkThumbOuterColor  = NThemeColor(NFluentColorKey::ControlSolidFillColorDefault, NThemeType::Dark);
 
-    d->_pTickLength    = 5; // 刻度线长度
+    d->_pTickLength    = 6; // 刻度线长度
     d->_pTickThickness = 1; // 刻度线厚度
 
     d->_pLightTickColor         = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Light);

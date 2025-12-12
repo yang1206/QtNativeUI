@@ -227,7 +227,12 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
 void NSliderPrivate::Style::drawTicks(const QStyleOptionSlider*       option,
                                       QPainter*                       painter,
                                       [[maybe_unused]] const QWidget* widget) const {
+    if (option->tickPosition == QSlider::NoTicks) {
+        return;
+    }
+
     painter->save();
+    painter->setRenderHints(QPainter::Antialiasing);
 
     QColor tickColor;
     if (!(option->state & QStyle::State_Enabled)) {
@@ -238,45 +243,87 @@ void NSliderPrivate::Style::drawTicks(const QStyleOptionSlider*       option,
 
     painter->setPen(QPen(tickColor, d->_pTickThickness));
 
-    int padding    = d->_pThumbDiameter / 2;
-    int valueRange = option->maximum - option->minimum;
-
     int interval = option->tickInterval;
     if (interval <= 0) {
-        interval = qMax(1, valueRange / 10);
+        interval = option->pageStep;
+        if (interval <= 0) {
+            interval = 1;
+        }
     }
 
+    int valueRange = option->maximum - option->minimum;
+    if (valueRange <= 0) {
+        painter->restore();
+        return;
+    }
+
+    int padding = d->_pThumbDiameter / 2;
+    
     if (option->orientation == Qt::Horizontal) {
-        int trackY     = (option->rect.height() - d->_pTrackHeight) / 2;
-        int tickTop    = trackY - d->_pTickLength - 1;
-        int tickBottom = trackY + d->_pTrackHeight + 1;
-
+        int availableWidth = option->rect.width() - 2 * padding;
+        int trackY = (option->rect.height() - d->_pTrackHeight) / 2;
+        
+        int tickSpacing = 4; 
+        int tickAboveY = trackY - tickSpacing;
+        int tickBelowY = trackY + d->_pTrackHeight + tickSpacing;
+        
+        int tickInset = 8; 
+        int adjustedWidth = availableWidth - 2 * tickInset;
+        
         for (int value = option->minimum; value <= option->maximum; value += interval) {
-            double ratio = (value - option->minimum) / static_cast<double>(valueRange);
-            int    tickX = padding + static_cast<int>((option->rect.width() - 2 * padding) * ratio);
-
+            if (value < option->minimum || value > option->maximum) {
+                continue;
+            }
+            
+            double ratio = static_cast<double>(value - option->minimum) / valueRange;
+            int tickX = padding + tickInset + static_cast<int>(adjustedWidth * ratio);
+            
+            if (tickX < padding || tickX > option->rect.width() - padding) {
+                continue;
+            }
+            
             if (option->tickPosition & QSlider::TicksAbove) {
-                painter->drawLine(tickX, tickTop, tickX, tickTop + d->_pTickLength);
+                painter->drawLine(tickX, tickAboveY, tickX, tickAboveY - d->_pTickLength);
             }
             if (option->tickPosition & QSlider::TicksBelow) {
-                painter->drawLine(tickX, tickBottom, tickX, tickBottom + d->_pTickLength);
+                painter->drawLine(tickX, tickBelowY, tickX, tickBelowY + d->_pTickLength);
             }
         }
     } else {
-        int trackX    = (option->rect.width() - d->_pTrackHeight) / 2;
-        int tickLeft  = trackX - d->_pTickLength - 1;
-        int tickRight = trackX + d->_pTrackHeight + 1;
+        int availableHeight = option->rect.height() - 2 * padding;
+        int trackX = (option->rect.width() - d->_pTrackHeight) / 2;
+        
+   
+        int tickSpacing = 4;
+        int tickLeftX = trackX - tickSpacing;
+        int tickRightX = trackX + d->_pTrackHeight + tickSpacing;
+        
 
+        int tickInset = 8;
+        int adjustedHeight = availableHeight - 2 * tickInset;
+        
         for (int value = option->minimum; value <= option->maximum; value += interval) {
-            double ratio = (value - option->minimum) / static_cast<double>(valueRange);
-            int    tickY =
-                option->rect.height() - padding - static_cast<int>((option->rect.height() - 2 * padding) * ratio);
-
+            if (value < option->minimum || value > option->maximum) {
+                continue;
+            }
+            double ratio = static_cast<double>(value - option->minimum) / valueRange;
+            int tickY;
+            
+            if (option->upsideDown) {
+                tickY = padding + tickInset + static_cast<int>(adjustedHeight * ratio);
+            } else {
+                tickY = option->rect.height() - padding - tickInset - static_cast<int>(adjustedHeight * ratio);
+            }
+            
+            if (tickY < padding || tickY > option->rect.height() - padding) {
+                continue;
+            }
+            
             if (option->tickPosition & QSlider::TicksLeft) {
-                painter->drawLine(tickLeft, tickY, tickLeft + d->_pTickLength, tickY);
+                painter->drawLine(tickLeftX, tickY, tickLeftX - d->_pTickLength, tickY);
             }
             if (option->tickPosition & QSlider::TicksRight) {
-                painter->drawLine(tickRight, tickY, tickRight + d->_pTickLength, tickY);
+                painter->drawLine(tickRightX, tickY, tickRightX + d->_pTickLength, tickY);
             }
         }
     }
@@ -329,7 +376,6 @@ void NSliderPrivate::updateTooltip() {
     QString text = _tooltipFormatter ? _tooltipFormatter(value) : QString::number(value);
     _tooltip->setText(text);
 
-    // 计算滑块位置 - 使用简化的方法
     int padding = _pThumbDiameter / 2;
     double ratio = (q_ptr->value() - q_ptr->minimum()) / static_cast<double>(q_ptr->maximum() - q_ptr->minimum());
     

@@ -488,6 +488,7 @@ void NToolButton::setFluentIcon(NRegularIconType::Icon icon, int size, const QCo
     // 图标设置变化时，失效缓存并更新
     d->invalidateIconCache();
     updateFluentIcon();
+    updateToolButtonStyle();
 }
 
 void NToolButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QColor& color) {
@@ -501,6 +502,7 @@ void NToolButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QCol
     // 图标设置变化时，失效缓存并更新
     d->invalidateIconCache();
     updateFluentIcon();
+    updateToolButtonStyle();
 }
 
 void NToolButton::updateFluentIcon() {
