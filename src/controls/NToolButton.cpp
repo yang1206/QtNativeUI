@@ -76,7 +76,6 @@ void NToolButton::init() {
         d->_isDark    = nTheme->isDarkMode();
 
         d->invalidateColorCache();
-        d->invalidateIconCache();
 
         if (d->_buttonType == NToolButtonPrivate::Accent) {
             updateAccentColors();
@@ -89,7 +88,6 @@ void NToolButton::init() {
         Q_D(NToolButton);
         if (d->_buttonType == NToolButtonPrivate::Accent) {
             d->invalidateColorCache();
-            d->invalidateIconCache();
             updateAccentColors();
             update();
         }
@@ -105,7 +103,6 @@ void NToolButton::setButtonType(ButtonType type) {
             updateAccentColors();
         }
 
-        d->invalidateIconCache();
         updateFluentIcon();
 
         update();
@@ -137,6 +134,7 @@ void NToolButton::mousePressEvent(QMouseEvent* event) {
     Q_D(NToolButton);
     d->_isPressed = true;
     d->invalidateColorCache();
+    updateFluentIcon();
     update();
     QToolButton::mousePressEvent(event);
 }
@@ -145,6 +143,7 @@ void NToolButton::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NToolButton);
     d->_isPressed = false;
     d->invalidateColorCache();
+    updateFluentIcon();
     update();
     QToolButton::mouseReleaseEvent(event);
 }
@@ -155,7 +154,6 @@ void NToolButton::changeEvent(QEvent* event) {
         event->type() == QEvent::LanguageChange) {
         // 状态变化时失效缓存
         d->invalidateColorCache();
-        d->invalidateIconCache();
         updateFluentIcon();
         update();
     }
@@ -461,8 +459,6 @@ void NToolButton::setAccentColor(const NAccentColor& color) {
     d->_accentTextColor         = NThemeColor(NFluentColorKey::TextOnAccentFillColorPrimary, d->_themeMode);
     d->_accentDisabledTextColor = NThemeColor(NFluentColorKey::TextOnAccentFillColorDisabled, d->_themeMode);
 
-    // 强调色变化时，需要失效图标缓存并更新图标颜色
-    d->invalidateIconCache();
     updateFluentIcon();
 
     update();
@@ -485,10 +481,9 @@ void NToolButton::setFluentIcon(NRegularIconType::Icon icon, int size, const QCo
     d->_fluentIcon.customColor  = color;
     d->_fluentIcon.isFluentIcon = true;
 
-    // 图标设置变化时，失效缓存并更新
-    d->invalidateIconCache();
     updateFluentIcon();
     updateToolButtonStyle();
+    update();
 }
 
 void NToolButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QColor& color) {
@@ -499,10 +494,9 @@ void NToolButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QCol
     d->_fluentIcon.customColor  = color;
     d->_fluentIcon.isFluentIcon = true;
 
-    // 图标设置变化时，失效缓存并更新
-    d->invalidateIconCache();
     updateFluentIcon();
     updateToolButtonStyle();
+    update();
 }
 
 void NToolButton::updateFluentIcon() {
@@ -515,23 +509,10 @@ void NToolButton::updateFluentIcon() {
         return;
     }
 
-    if (d->_iconCacheValid && !d->_cachedFluentIcon.isNull()) {
-        setIcon(d->_cachedFluentIcon);
-        setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
-        return;
-    }
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
         if (d->_buttonType == NToolButtonPrivate::Accent) {
-            if (!isEnabled()) {
-                iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
-            } else {
-                if (d->_isPressed) {
-                    iconColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
-                } else {
-                    iconColor = d->_accentTextColor;
-                }
-            }
+            iconColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
         } else {
             if (!isEnabled()) {
                 iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
@@ -555,9 +536,6 @@ void NToolButton::updateFluentIcon() {
         generatedIcon = nIcon->fromFilled(
             static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     }
-
-    d->_cachedFluentIcon = generatedIcon;
-    d->_iconCacheValid   = true;
 
     setIcon(generatedIcon);
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));

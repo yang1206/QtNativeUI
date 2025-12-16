@@ -61,16 +61,13 @@ class NToggleButtonPrivate : public QObject {
     mutable QColor _cachedBackgroundColor;
     mutable QColor _cachedTextColor;
     mutable QColor _cachedBorderColor;
-    mutable QIcon _cachedFluentIcon;
     mutable bool _backgroundColorCacheValid = false;
     mutable bool _textColorCacheValid = false;
-    mutable bool _iconCacheValid = false;
     
     void invalidateColorCache() { 
         _backgroundColorCacheValid = false; 
         _textColorCacheValid = false; 
     }
-    void invalidateIconCache() { _iconCacheValid = false; }
 };
 
 #endif // QTNATIVEUI_NTOGGLEBUTTON_P_H

@@ -70,12 +70,9 @@ class NToolButtonPrivate : public QObject {
     
     mutable QColor _cachedBackgroundColor;
     mutable QColor _cachedTextColor;
-    mutable QIcon _cachedFluentIcon;
     mutable bool _colorCacheValid = false;
-    mutable bool _iconCacheValid = false;
     
     void invalidateColorCache() { _colorCacheValid = false; }
-    void invalidateIconCache() { _iconCacheValid = false; }
 };
 
 #endif // NTOOLBUTTON_P_H

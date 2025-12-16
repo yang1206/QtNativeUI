@@ -62,7 +62,7 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
         d->_isDark    = nTheme->isDarkMode();
 
         d->invalidateColorCache();
-        d->invalidateIconCache();
+
 
         if (d->_buttonType == NPushButtonPrivate::Accent) {
             updateAccentColors();
@@ -75,7 +75,6 @@ NPushButton::NPushButton(QWidget* parent) : QPushButton(parent), d_ptr(new NPush
         Q_D(NPushButton);
         if (d->_buttonType == NPushButtonPrivate::Accent) {
             d->invalidateColorCache();
-            d->invalidateIconCache();
             updateAccentColors();
             update();
         }
@@ -123,7 +122,8 @@ void NPushButton::leaveEvent(QEvent* event) {
 void NPushButton::mousePressEvent(QMouseEvent* event) {
     Q_D(NPushButton);
     d->_isPressed = true;
-    d->invalidateColorCache(); // 状态变化时失效缓存
+    d->invalidateColorCache();
+    updateFluentIcon();
     update();
     QPushButton::mousePressEvent(event);
 }
@@ -131,7 +131,8 @@ void NPushButton::mousePressEvent(QMouseEvent* event) {
 void NPushButton::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NPushButton);
     d->_isPressed = false;
-    d->invalidateColorCache(); // 状态变化时失效缓存
+    d->invalidateColorCache();
+    updateFluentIcon();
     update();
     QPushButton::mouseReleaseEvent(event);
 }
@@ -140,9 +141,7 @@ void NPushButton::changeEvent(QEvent* event) {
     if (event->type() == QEvent::EnabledChange || event->type() == QEvent::PaletteChange ||
         event->type() == QEvent::LanguageChange) {
         Q_D(NPushButton);
-        // 状态变化时失效缓存
         d->invalidateColorCache();
-        d->invalidateIconCache();
         updateFluentIcon();
         update();
     }
@@ -451,6 +450,7 @@ void NPushButton::setFluentIcon(NRegularIconType::Icon icon, int size, const QCo
     d->_fluentIcon.isFluentIcon = true;
 
     updateFluentIcon();
+    update();
 }
 
 void NPushButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QColor& color) {
@@ -461,6 +461,7 @@ void NPushButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QCol
     d->_fluentIcon.customColor  = color;
     d->_fluentIcon.isFluentIcon = true;
     updateFluentIcon();
+    update();
 }
 
 void NPushButton::updateFluentIcon() {
@@ -473,25 +474,10 @@ void NPushButton::updateFluentIcon() {
         return;
     }
 
-    // 性能优化：检查图标缓存
-    if (d->_iconCacheValid && !d->_cachedFluentIcon.isNull()) {
-        setIcon(d->_cachedFluentIcon);
-        setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
-        return;
-    }
-
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
         if (d->_buttonType == NPushButtonPrivate::Accent) {
-            if (!isEnabled()) {
-                iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
-            } else {
-                if (d->_isPressed) {
-                    iconColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
-                } else {
-                    iconColor = d->_isDark ? d->_accentTextColor : d->_accentDisabledTextColor;
-                }
-            }
+            iconColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
         } else {
             if (!isEnabled()) {
                 iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
@@ -515,10 +501,6 @@ void NPushButton::updateFluentIcon() {
         generatedIcon = nIcon->fromFilled(
             static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     }
-
-    // 缓存生成的图标
-    d->_cachedFluentIcon = generatedIcon;
-    d->_iconCacheValid   = true;
 
     setIcon(generatedIcon);
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));

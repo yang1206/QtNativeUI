@@ -75,11 +75,9 @@ void NToggleButton::init() {
         Q_D(NToggleButton);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
-        
-    
+
         d->invalidateColorCache();
-        d->invalidateIconCache();
-        
+
         updateAccentColors();
         updateFluentIcon();
         update();
@@ -87,10 +85,9 @@ void NToggleButton::init() {
 
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
         Q_D(NToggleButton);
-        
+
         d->invalidateColorCache();
-        d->invalidateIconCache();
-        
+
         updateAccentColors();
         update();
     });
@@ -101,10 +98,9 @@ void NToggleButton::setChecked(bool checked) {
     if (d->_checked != checked) {
         d->_checked = checked;
         d->startAlphaAnimation(checked);
-        
+
         d->invalidateColorCache();
-        d->invalidateIconCache();
-        
+
         updateFluentIcon();
         emit toggled(checked);
     }
@@ -163,8 +159,8 @@ void NToggleButton::setFluentIcon(NRegularIconType::Icon icon, int size, const Q
     d->_fluentIcon.size        = size;
     d->_fluentIcon.customColor = color;
 
-    d->invalidateIconCache();
     updateFluentIcon();
+    update();
 }
 
 void NToggleButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QColor& color) {
@@ -173,9 +169,9 @@ void NToggleButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QC
     d->_fluentIcon.iconCode    = static_cast<quint32>(icon);
     d->_fluentIcon.size        = size;
     d->_fluentIcon.customColor = color;
-    
-    d->invalidateIconCache();
+
     updateFluentIcon();
+    update();
 }
 
 QIcon NToggleButton::icon() const {
@@ -220,15 +216,17 @@ void NToggleButton::paintEvent(QPaintEvent* event) {
 void NToggleButton::mousePressEvent(QMouseEvent* event) {
     Q_D(NToggleButton);
     d->_isPressed = true;
-    d->invalidateColorCache(); 
+    d->invalidateColorCache();
+    updateFluentIcon();
     update();
-    QWidget::mouseReleaseEvent(event);
+    QWidget::mousePressEvent(event);
 }
 
 void NToggleButton::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NToggleButton);
     d->_isPressed = false;
     d->invalidateColorCache();
+    updateFluentIcon();
     if (rect().contains(event->pos())) {
         bool wasChecked = d->_pCheckAlpha > 127;
         toggle();
@@ -247,14 +245,12 @@ bool NToggleButton::event(QEvent* event) {
     switch (event->type()) {
         case QEvent::Enter:
         case QEvent::Leave: {
-            d->invalidateColorCache(); 
+            d->invalidateColorCache();
             update();
             break;
         }
         case QEvent::EnabledChange: {
             d->invalidateColorCache();
-            d->invalidateIconCache();
-            // 当启用状态变化时，更新图标颜色
             updateFluentIcon();
             break;
         }
@@ -299,7 +295,7 @@ void NToggleButton::drawBackground(QPainter* painter) {
                 }
             }
 
-            d->_cachedBackgroundColor = bgColor;
+            d->_cachedBackgroundColor     = bgColor;
             d->_backgroundColorCacheValid = true;
         } else {
             bgColor = d->_cachedBackgroundColor;
@@ -437,7 +433,7 @@ void NToggleButton::drawText(QPainter* painter) {
                 }
             }
         }
-        d->_cachedTextColor = textColor;
+        d->_cachedTextColor     = textColor;
         d->_textColorCacheValid = true;
     } else {
         textColor = d->_cachedTextColor;
@@ -478,12 +474,11 @@ void NToggleButton::updateAccentColors() {
 
 void NToggleButton::updateFluentIcon() {
     Q_D(NToggleButton);
-    
+
     if (d->_fluentIcon.iconCode == 0) {
         d->_icon = QIcon();
         return;
     }
-
 
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
@@ -513,9 +508,6 @@ void NToggleButton::updateFluentIcon() {
             static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     }
 
-    d->_cachedFluentIcon = generatedIcon;
-    d->_iconCacheValid = true;
     d->_icon = generatedIcon;
-
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
 }

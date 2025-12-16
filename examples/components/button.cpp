@@ -76,6 +76,9 @@ QWidget* ButtonExample::createPushButtons() {
     NPushButton* settingsBtn = new NPushButton("Settings");
     settingsBtn->setFixedSize(120, 40);
     settingsBtn->setFluentIcon(NRegularIconType::SettingsChat16Regular, 24);
+    connect(settingsBtn, &NPushButton::clicked, this, [settingsBtn]() {
+        settingsBtn->setFluentIcon(NRegularIconType::Record16Regular, 24);
+    });
 
     // 2. 只有图标的按钮
     NPushButton* searchBtn = new NPushButton;
