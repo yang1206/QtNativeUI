@@ -126,7 +126,7 @@ void NComboBox::init() {
     NScrollBar* scrollBar = new NScrollBar(this);
     comboBoxView->setVerticalScrollBar(scrollBar);
 
-    comboBoxView->setAutoScroll(false);
+    comboBoxView->setAutoScroll(true);
     comboBoxView->setSelectionMode(QAbstractItemView::NoSelection);
     comboBoxView->setObjectName("NComboBoxView");
     comboBoxView->setStyleSheet("#NComboBoxView{background-color:transparent;}");
@@ -192,14 +192,21 @@ void NComboBox::showPopup() {
     if (count() > 0) {
         QWidget* container = this->findChild<QFrame*>();
         if (container) {
-            int containerHeight = 0;
-            if (count() >= maxVisibleItems()) {
-                containerHeight = maxVisibleItems() * 35 + 8;
-            } else {
-                containerHeight = count() * 35 + 8;
+            int itemHeight = view()->sizeHintForRow(0);
+            if (itemHeight <= 0) {
+                itemHeight = 35;
             }
 
-            view()->resize(view()->width(), containerHeight - 8);
+            int viewHeight;
+            int containerHeight;
+            if (count() >= maxVisibleItems()) {
+                viewHeight = maxVisibleItems() * itemHeight;
+            } else {
+                viewHeight = count() * itemHeight;
+            }
+            containerHeight = viewHeight + 8;
+
+            view()->resize(view()->width(), viewHeight);
             container->move(container->x(), container->y() + 3);
 
             QLayout* layout = container->layout();
@@ -218,10 +225,12 @@ void NComboBox::showPopup() {
             fixedSizeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
             QPropertyAnimation* viewPosAnimation = new QPropertyAnimation(view(), "pos");
-            connect(
-                viewPosAnimation, &QPropertyAnimation::finished, this, [this, layout]() { layout->addWidget(view()); });
+            connect(viewPosAnimation, &QPropertyAnimation::finished, this, [this, layout, viewHeight]() {
+                layout->addWidget(view());
+                view()->setFixedHeight(viewHeight);
+            });
             QPoint viewPos = view()->pos();
-            viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() - view()->height()));
+            viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() - viewHeight));
             viewPosAnimation->setEndValue(viewPos);
             viewPosAnimation->setEasingCurve(QEasingCurve::OutCubic);
             viewPosAnimation->setDuration(400);

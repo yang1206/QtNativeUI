@@ -1341,6 +1341,7 @@ QWidget* ControlsExample::createComboBoxes() {
     basicComboBox->addItem("选项 2");
     basicComboBox->addItem("选项 3");
     basicComboBox->setMinimumWidth(200);
+    basicComboBox->setFixedWidth(80);
     layout->addWidget(basicComboBox);
 
     // 2. 预设选项的下拉框
