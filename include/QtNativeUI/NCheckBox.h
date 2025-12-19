@@ -41,6 +41,7 @@ class QTNATIVEUI_EXPORT NCheckBox : public QCheckBox {
     void  mouseReleaseEvent(QMouseEvent* event) override;
     void  changeEvent(QEvent* event) override;
     QSize sizeHint() const override;
+    bool  hitButton(const QPoint& pos) const override;
 
     void drawCheckBox(QPainter* painter);
     void drawText(QPainter* painter);

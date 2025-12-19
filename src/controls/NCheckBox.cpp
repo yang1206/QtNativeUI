@@ -375,10 +375,12 @@ void NCheckBox::leaveEvent(QEvent* event) {
 
 void NCheckBox::mousePressEvent(QMouseEvent* event) {
     Q_D(NCheckBox);
-    d->_isPressed           = true;
-    d->_isAnimationFinished = false;
-    d->invalidateColorCache();
-    update();
+    if (isEnabled()) {
+        d->_isPressed           = true;
+        d->_isAnimationFinished = false;
+        d->invalidateColorCache();
+        update();
+    }
     QCheckBox::mousePressEvent(event);
 }
 
@@ -424,6 +426,14 @@ QSize NCheckBox::sizeHint() const {
     int          height     = qMax(d->_checkBoxSize, fm.height());
 
     return QSize(totalWidth, height);
+}
+
+bool NCheckBox::hitButton(const QPoint& pos) const {
+    Q_D(const NCheckBox);
+    QRect checkBoxRect(0, (height() - d->_checkBoxSize) / 2, d->_checkBoxSize, d->_checkBoxSize);
+    QRect textRect(d->_checkBoxSize + d->_spacing, 0, width() - d->_checkBoxSize - d->_spacing, height());
+    
+    return checkBoxRect.contains(pos) || textRect.contains(pos);
 }
 
 void NCheckBox::updateAccentColors() {
