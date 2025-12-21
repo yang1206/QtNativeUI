@@ -5,7 +5,6 @@
 #include <QPen>
 
 NStackedWidget::NStackedWidget(QWidget* parent) : QStackedWidget(parent) {
-    setObjectName("NStackedWidget");
     m_borderRadius = 10;
     m_themeMode    = nTheme->themeMode();
     m_background   = NThemeColor(NFluentColorKey::LayerFillColorDefault, m_themeMode);
@@ -18,7 +17,12 @@ NStackedWidget::NStackedWidget(QWidget* parent) : QStackedWidget(parent) {
         update();
     });
     setAttribute(Qt::WA_TranslucentBackground);
-    setStyleSheet("background: transparent;");
+    setAutoFillBackground(false);
+    setObjectName("NStackedWidget");
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, Qt::transparent);
+    pal.setColor(QPalette::Base, Qt::transparent);
+    setPalette(pal);
 }
 
 NStackedWidget::~NStackedWidget() {}

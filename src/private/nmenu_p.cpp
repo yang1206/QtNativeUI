@@ -163,6 +163,21 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
                                         const QStyleOption* option,
                                         QPainter*           painter,
                                         const QWidget*      widget) const {
+    if (element == PE_PanelMenu) {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing);
+        QColor       bgColor     = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
+        QColor       borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
+        QPainterPath path;
+        path.addRoundedRect(option->rect.adjusted(0, 0, -1, -1), d->_pBorderRadius, d->_pBorderRadius);
+
+        painter->setPen(QPen(borderColor, 1));
+        painter->setBrush(bgColor);
+        painter->drawPath(path);
+
+        painter->restore();
+        return;
+    }
     if (widget) {
         const NMenu* menuWidget = qobject_cast<const NMenu*>(widget);
         if (!menuWidget) {
@@ -176,22 +191,6 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
             }
         }
     }
-    // if (element == PE_PanelMenu) {
-    //     painter->save();
-    //     painter->setRenderHint(QPainter::Antialiasing);
-    //
-    //     QColor       bgColor     = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
-    //     QColor       borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-    //     QPainterPath path;
-    //     path.addRoundedRect(option->rect.adjusted(0, 0, -1, -1), d->_pBorderRadius, d->_pBorderRadius);
-    //
-    //     painter->setPen(QPen(borderColor, 1));
-    //     painter->setBrush(bgColor);
-    //     painter->drawPath(path);
-    //
-    //     painter->restore();
-    //     return;
-    // }
 
     QProxyStyle::drawPrimitive(element, option, painter, widget);
 }
