@@ -17,6 +17,8 @@ NStackedWidget::NStackedWidget(QWidget* parent) : QStackedWidget(parent) {
         m_themeMode  = mode;
         update();
     });
+    setAttribute(Qt::WA_TranslucentBackground);
+    setStyleSheet("background: transparent;");
 }
 
 NStackedWidget::~NStackedWidget() {}
@@ -39,12 +41,16 @@ void NStackedWidget::doPageSwitch(NNavigationType::PageTransitionType transition
 }
 
 void NStackedWidget::paintEvent(QPaintEvent* event) {
+    QStackedWidget::paintEvent(event);
+
     QPainter painter(this);
     QRect    targetRect = this->rect();
     targetRect.adjust(1, 1, 10, 10);
     painter.save();
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(NThemeColor(NFluentColorKey::ControlStrokeColorOnAccentDisabled, m_themeMode), 1.5));
+    // painter.setBrush(m_background);
+
     if (m_borderRadius >= 1) {
         painter.drawRoundedRect(targetRect, m_borderRadius, m_borderRadius);
     } else {
@@ -53,6 +59,4 @@ void NStackedWidget::paintEvent(QPaintEvent* event) {
     painter.restore();
 
     m_animationManager->paintTransition(&painter, rect(), m_borderRadius);
-
-    QStackedWidget::paintEvent(event);
 }

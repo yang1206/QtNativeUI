@@ -7,7 +7,7 @@
 #include <QWidget>
 
 class NMainWindow;
-class QScrollArea;
+class NScrollArea;
 class ButtonExample : public QWidget {
     Q_OBJECT
   public:
@@ -22,7 +22,7 @@ class ButtonExample : public QWidget {
     QWidget* createRadioButtons();
     QWidget* createToolButtons();
 
-    QScrollArea* m_scrollArea;
+    NScrollArea* m_scrollArea;
     NMainWindow* m_mainWindow = nullptr;
 };
 

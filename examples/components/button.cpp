@@ -27,13 +27,9 @@ ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
 void ButtonExample::initUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
 
     // 创建滚动区域
     m_scrollArea = new NScrollArea(this);
-    m_scrollArea->setWidgetResizable(true);
-    m_scrollArea->setFrameShape(QFrame::NoFrame);
     // 创建内容容器
     QWidget*     contentWidget = new QWidget(m_scrollArea);
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
