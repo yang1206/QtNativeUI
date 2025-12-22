@@ -18,12 +18,11 @@ NFlyout::NFlyout(QWidget* parent) : QWidget(parent), d_ptr(new NFlyoutPrivate())
     Q_D(NFlyout);
     d->q_ptr = this;
 
-
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
     d->_pPlacement    = Qt::BottomEdge;
 
-    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::BypassWindowManagerHint);
+    setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::BypassWindowManagerHint);
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_DeleteOnClose, false);
 
@@ -31,9 +30,7 @@ NFlyout::NFlyout(QWidget* parent) : QWidget(parent), d_ptr(new NFlyoutPrivate())
 
     setMouseTracking(true);
 
-
     d->setupUI();
-
 
     setupEventFilter();
 
@@ -146,6 +143,7 @@ void NFlyout::showAt(QWidget* target) {
 
     Q_D(NFlyout);
     d->_pTarget = target;
+
     emit opening();
 
     QRect  rect = d->calculatePlacement(target, d->_pPlacement);
@@ -191,10 +189,7 @@ void NFlyout::fadeOut() {
     d->_fadeOutAnimation->start();
 }
 
-void NFlyout::showEvent(QShowEvent* event) {
-    activateWindow();
-    QWidget::showEvent(event);
-}
+void NFlyout::showEvent(QShowEvent* event) { QWidget::showEvent(event); }
 
 void NFlyout::hideEvent(QHideEvent* event) { QWidget::hideEvent(event); }
 
@@ -260,6 +255,11 @@ void NFlyout::keyPressEvent(QKeyEvent* event) {
 bool NFlyout::eventFilter(QObject* watched, QEvent* event) {
     Q_D(NFlyout);
 
+    if (isVisible() && d->_pTarget && watched == d->_pTarget->window() && event->type() == QEvent::Move) {
+        fadeOut();
+        return false;
+    }
+
     if (isVisible() && event->type() == QEvent::MouseButtonPress) {
         QMouseEvent* mouseEvent    = static_cast<QMouseEvent*>(event);
         QWidget*     clickedWidget = QApplication::widgetAt(mouseEvent->globalPosition().toPoint());
@@ -279,18 +279,6 @@ bool NFlyout::eventFilter(QObject* watched, QEvent* event) {
     }
 
     return QWidget::eventFilter(watched, event);
-}
-
-void NFlyout::updatePosition() {
-    Q_D(NFlyout);
-
-    if (!d->_pTarget)
-        return;
-
-    QPoint pos = calculatePositionForTarget(d->_pTarget);
-    if (!pos.isNull()) {
-        move(pos);
-    }
 }
 
 void NFlyout::setupEventFilter() {
