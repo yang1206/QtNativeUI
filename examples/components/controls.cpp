@@ -1,4 +1,4 @@
-﻿#include "controls.h"
+#include "controls.h"
 #include <QGroupBox>
 #include <QVBoxLayout>
 #include <QtNativeUI/NCheckBox.h>
@@ -14,6 +14,7 @@
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NComboBox.h"
 #include "QtNativeUI/NDoubleSpinBox.h"
+#include "QtNativeUI/NGroupBox.h"
 #include "QtNativeUI/NLabel.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
@@ -44,6 +45,7 @@ void ControlsExample::initUI() {
 
     // 添加各个控件区域
     contentLayout->addWidget(new ExampleSection("Label", createLabels()));
+    contentLayout->addWidget(new ExampleSection("GroupBox", createGroupBoxes()));
     contentLayout->addWidget(new ExampleSection("CheckBox", createCheckBoxes()));
     contentLayout->addWidget(new ExampleSection("ToggleSwitch", createToggleSwitches()));
     contentLayout->addWidget(new ExampleSection("LineEdit", createLineEdits()));
@@ -1644,5 +1646,220 @@ QWidget* ControlsExample::createLabels() {
     layout->addLayout(gridLayout);
     layout->addStretch();
 
+    return container;
+}
+
+QWidget* ControlsExample::createGroupBoxes() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(24);
+
+    // 1. 基本分组框
+    QLabel* basicLabel = new QLabel("基本分组框:", container);
+    QFont   labelFont  = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    NGroupBox* basicGroupBox = new NGroupBox("基本信息", container);
+    basicGroupBox->setMinimumWidth(400);
+    
+    QVBoxLayout* basicLayout = new QVBoxLayout(basicGroupBox);
+    basicLayout->addWidget(new NLineEdit("姓名"));
+    basicLayout->addWidget(new NLineEdit("邮箱"));
+    basicLayout->addWidget(new NLineEdit("电话"));
+    
+    layout->addWidget(basicGroupBox);
+
+    // 2. 不同样式的分组框
+    QLabel* styleLabel = new QLabel("不同样式:", container);
+    styleLabel->setFont(labelFont);
+    layout->addWidget(styleLabel);
+
+    QHBoxLayout* styleLayout = new QHBoxLayout();
+    styleLayout->setSpacing(16);
+
+    // 标准样式
+    NGroupBox* standardGroupBox = new NGroupBox("标准样式", container);
+    standardGroupBox->setGroupBoxStyle(NGroupBox::Standard);
+    standardGroupBox->setMinimumWidth(180);
+    QVBoxLayout* standardLayout = new QVBoxLayout(standardGroupBox);
+    standardLayout->addWidget(new NCheckBox("选项 1"));
+    standardLayout->addWidget(new NCheckBox("选项 2"));
+    styleLayout->addWidget(standardGroupBox);
+
+    // 卡片样式
+    NGroupBox* cardGroupBox = new NGroupBox("卡片样式", container);
+    cardGroupBox->setGroupBoxStyle(NGroupBox::Card);
+    cardGroupBox->setMinimumWidth(180);
+    QVBoxLayout* cardLayout = new QVBoxLayout(cardGroupBox);
+    cardLayout->addWidget(new NCheckBox("选项 A"));
+    cardLayout->addWidget(new NCheckBox("选项 B"));
+    styleLayout->addWidget(cardGroupBox);
+
+    // 轮廓样式
+    NGroupBox* outlinedGroupBox = new NGroupBox("轮廓样式", container);
+    outlinedGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
+    outlinedGroupBox->setMinimumWidth(180);
+    QVBoxLayout* outlinedLayout = new QVBoxLayout(outlinedGroupBox);
+    outlinedLayout->addWidget(new NCheckBox("选项 X"));
+    outlinedLayout->addWidget(new NCheckBox("选项 Y"));
+    styleLayout->addWidget(outlinedGroupBox);
+
+    styleLayout->addStretch();
+    layout->addLayout(styleLayout);
+
+    // 3. 带图标的分组框
+    QLabel* iconLabel = new QLabel("带图标的分组框:", container);
+    iconLabel->setFont(labelFont);
+    layout->addWidget(iconLabel);
+
+    QHBoxLayout* iconLayout = new QHBoxLayout();
+    iconLayout->setSpacing(16);
+
+    NGroupBox* settingsGroupBox = new NGroupBox("设置", container);
+    settingsGroupBox->setTitleIcon(NRegularIconType::Settings24Regular, 20);
+    settingsGroupBox->setMinimumWidth(200);
+    QVBoxLayout* settingsLayout = new QVBoxLayout(settingsGroupBox);
+    settingsLayout->addWidget(new NToggleSwitch("启用通知"));
+    settingsLayout->addWidget(new NToggleSwitch("自动更新"));
+    iconLayout->addWidget(settingsGroupBox);
+
+    NGroupBox* securityGroupBox = new NGroupBox("安全", container);
+    securityGroupBox->setTitleIcon(NFilledIconType::Shield24Filled, 20);
+    securityGroupBox->setMinimumWidth(200);
+    QVBoxLayout* securityLayout = new QVBoxLayout(securityGroupBox);
+    securityLayout->addWidget(new NCheckBox("启用防火墙"));
+    securityLayout->addWidget(new NCheckBox("自动扫描"));
+    iconLayout->addWidget(securityGroupBox);
+
+    iconLayout->addStretch();
+    layout->addLayout(iconLayout);
+
+    // 4. 可折叠的分组框
+    QLabel* collapsibleLabel = new QLabel("可折叠的分组框:", container);
+    collapsibleLabel->setFont(labelFont);
+    layout->addWidget(collapsibleLabel);
+
+    NGroupBox* collapsibleGroupBox = new NGroupBox("高级设置", container);
+    collapsibleGroupBox->setTitleIcon(NRegularIconType::Options24Regular, 18);
+    collapsibleGroupBox->setCollapsible(true);
+    collapsibleGroupBox->setMinimumWidth(400);
+    
+    QVBoxLayout* collapsibleLayout = new QVBoxLayout(collapsibleGroupBox);
+    collapsibleLayout->addWidget(new NLineEdit("服务器地址"));
+    collapsibleLayout->addWidget(new NSpinBox());
+    collapsibleLayout->addWidget(new NCheckBox("启用SSL"));
+    collapsibleLayout->addWidget(new NCheckBox("启用压缩"));
+    
+    QLabel* statusLabel = new QLabel("状态: 展开", container);
+    connect(collapsibleGroupBox, &NGroupBox::collapsedChanged, [statusLabel](bool collapsed) {
+        statusLabel->setText(collapsed ? "状态: 折叠" : "状态: 展开");
+    });
+    
+    layout->addWidget(collapsibleGroupBox);
+    layout->addWidget(statusLabel);
+
+    // 5. 嵌套分组框
+    QLabel* nestedLabel = new QLabel("嵌套分组框:", container);
+    nestedLabel->setFont(labelFont);
+    layout->addWidget(nestedLabel);
+
+    NGroupBox* parentGroupBox = new NGroupBox("用户配置", container);
+    parentGroupBox->setMinimumWidth(450);
+    
+    QVBoxLayout* parentLayout = new QVBoxLayout(parentGroupBox);
+    
+    // 个人信息子组
+    NGroupBox* personalGroupBox = new NGroupBox("个人信息", parentGroupBox);
+    personalGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
+    personalGroupBox->setTitleIcon(NRegularIconType::Person24Regular, 16);
+    QVBoxLayout* personalLayout = new QVBoxLayout(personalGroupBox);
+    personalLayout->addWidget(new NLineEdit("用户名"));
+    personalLayout->addWidget(new NLineEdit("显示名称"));
+    parentLayout->addWidget(personalGroupBox);
+    
+    // 权限子组
+    NGroupBox* permissionGroupBox = new NGroupBox("权限设置", parentGroupBox);
+    permissionGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
+    permissionGroupBox->setTitleIcon(NRegularIconType::Key24Regular, 16);
+    permissionGroupBox->setCollapsible(true);
+    // permissionGroupBox->setCollapsed(true);  // 默认展开，让用户看到完整功能
+    QVBoxLayout* permissionLayout = new QVBoxLayout(permissionGroupBox);
+    permissionLayout->addWidget(new NCheckBox("管理员权限"));
+    permissionLayout->addWidget(new NCheckBox("读取权限"));
+    permissionLayout->addWidget(new NCheckBox("写入权限"));
+    parentLayout->addWidget(permissionGroupBox);
+    
+    layout->addWidget(parentGroupBox);
+
+    // 6. 不同状态的分组框
+    QLabel* stateLabel = new QLabel("不同状态:", container);
+    stateLabel->setFont(labelFont);
+    layout->addWidget(stateLabel);
+
+    QHBoxLayout* stateLayout = new QHBoxLayout();
+    stateLayout->setSpacing(16);
+
+    // 正常状态
+    NGroupBox* normalGroupBox = new NGroupBox("正常状态", container);
+    normalGroupBox->setMinimumWidth(150);
+    QVBoxLayout* normalLayout = new QVBoxLayout(normalGroupBox);
+    normalLayout->addWidget(new NPushButton("按钮"));
+    stateLayout->addWidget(normalGroupBox);
+
+    // 禁用状态
+    NGroupBox* disabledGroupBox = new NGroupBox("禁用状态", container);
+    disabledGroupBox->setEnabled(false);
+    disabledGroupBox->setMinimumWidth(150);
+    QVBoxLayout* disabledLayout = new QVBoxLayout(disabledGroupBox);
+    disabledLayout->addWidget(new NPushButton("按钮"));
+    stateLayout->addWidget(disabledGroupBox);
+
+    // 无边框
+    NGroupBox* noBorderGroupBox = new NGroupBox("无边框", container);
+    noBorderGroupBox->setShowBorder(false);
+    noBorderGroupBox->setMinimumWidth(150);
+    QVBoxLayout* noBorderLayout = new QVBoxLayout(noBorderGroupBox);
+    noBorderLayout->addWidget(new NPushButton("按钮"));
+    stateLayout->addWidget(noBorderGroupBox);
+
+    stateLayout->addStretch();
+    layout->addLayout(stateLayout);
+
+    // 7. 自定义边距和折叠图标
+    QLabel* customLabel = new QLabel("自定义边距和折叠图标:", container);
+    customLabel->setFont(labelFont);
+    layout->addWidget(customLabel);
+
+    QHBoxLayout* customLayout = new QHBoxLayout();
+    customLayout->setSpacing(16);
+
+    // 自定义边距
+    NGroupBox* customMarginGroupBox = new NGroupBox("大边距", container);
+    customMarginGroupBox->setContentMargin(20);
+    customMarginGroupBox->setTitleHeight(40);
+    customMarginGroupBox->setMinimumWidth(200);
+    QVBoxLayout* customMarginLayout = new QVBoxLayout(customMarginGroupBox);
+    customMarginLayout->addWidget(new NCheckBox("选项 1"));
+    customMarginLayout->addWidget(new NCheckBox("选项 2"));
+    customLayout->addWidget(customMarginGroupBox);
+
+    // 自定义折叠图标
+    NGroupBox* customIconGroupBox = new NGroupBox("自定义折叠图标", container);
+    customIconGroupBox->setCollapsible(true);
+    customIconGroupBox->setExpandedIcon(NRegularIconType::ChevronUp16Regular);
+    customIconGroupBox->setCollapsedIcon(NRegularIconType::Add16Regular);
+    customIconGroupBox->setCollapseIndicatorSize(18);
+    customIconGroupBox->setMinimumWidth(200);
+    QVBoxLayout* customIconLayout = new QVBoxLayout(customIconGroupBox);
+    customIconLayout->addWidget(new NLineEdit("内容"));
+    customIconLayout->addWidget(new NCheckBox("选项"));
+    customLayout->addWidget(customIconGroupBox);
+
+    customLayout->addStretch();
+    layout->addLayout(customLayout);
+
+    layout->addStretch();
     return container;
 }
