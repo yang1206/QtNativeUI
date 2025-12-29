@@ -171,18 +171,9 @@ void NGroupBox::setCollapsed(bool collapsed) {
         targetHeight = d->_expandedHeight > 0 ? d->_expandedHeight : sizeHint().height();
     }
 
-    if (collapsed) {
-        for (QWidget* child : findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly)) {
-            if (child != this && !qobject_cast<QLabel*>(child)) {
-                child->setVisible(false);
-            }
-        }
-    } else {
-        for (QWidget* child : findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly)) {
-            if (child != this && !qobject_cast<QLabel*>(child)) {
-                child->setVisible(true);
-            }
-        }
+    // 展开时立即显示子控件，折叠时延迟隐藏
+    if (!collapsed) {
+        updateChildrenVisibility(true);
     }
 
     QPropertyAnimation* heightAnimation = new QPropertyAnimation(this, "maximumHeight", this);
@@ -201,7 +192,10 @@ void NGroupBox::setCollapsed(bool collapsed) {
         Q_D(NGroupBox);
         d->_isAnimating = false;
 
-        if (!collapsed) {
+        if (collapsed) {
+            // 动画完成后隐藏子控件
+            updateChildrenVisibility(false);
+        } else {
             setMaximumHeight(QWIDGETSIZE_MAX);
             setMinimumHeight(0);
         }
@@ -416,4 +410,18 @@ void NGroupBox::updateLayout() {
     setContentsMargins(cRect.x(), cRect.y(), width() - cRect.right(), height() - cRect.bottom());
 }
 
-void NGroupBox::updateTitleIcon() { update(); }
+void NGroupBox::updateChildrenVisibility(bool visible) {
+    // 优化：只处理真正的内容控件，排除布局管理器等
+    const QList<QWidget*> children = findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
+    for (QWidget* child : children) {
+        if (child != this && 
+            !qobject_cast<QLabel*>(child) && 
+            child->objectName() != "qt_groupbox_checkbox") {
+            child->setVisible(visible);
+        }
+    }
+}
+
+void NGroupBox::updateTitleIcon() { 
+    update(); 
+}

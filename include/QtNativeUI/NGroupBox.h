@@ -75,6 +75,7 @@ class QTNATIVEUI_EXPORT NGroupBox : public QGroupBox {
   private:
     void init();
     void updateLayout();
+    void updateChildrenVisibility(bool visible);
     void updateTitleIcon();
 };
 

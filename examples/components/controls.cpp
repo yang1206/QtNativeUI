@@ -1663,12 +1663,12 @@ QWidget* ControlsExample::createGroupBoxes() {
 
     NGroupBox* basicGroupBox = new NGroupBox("基本信息", container);
     basicGroupBox->setMinimumWidth(400);
-    
+
     QVBoxLayout* basicLayout = new QVBoxLayout(basicGroupBox);
     basicLayout->addWidget(new NLineEdit("姓名"));
     basicLayout->addWidget(new NLineEdit("邮箱"));
     basicLayout->addWidget(new NLineEdit("电话"));
-    
+
     layout->addWidget(basicGroupBox);
 
     // 2. 不同样式的分组框
@@ -1745,18 +1745,18 @@ QWidget* ControlsExample::createGroupBoxes() {
     collapsibleGroupBox->setTitleIcon(NRegularIconType::Options24Regular, 18);
     collapsibleGroupBox->setCollapsible(true);
     collapsibleGroupBox->setMinimumWidth(400);
-    
+
     QVBoxLayout* collapsibleLayout = new QVBoxLayout(collapsibleGroupBox);
     collapsibleLayout->addWidget(new NLineEdit("服务器地址"));
     collapsibleLayout->addWidget(new NSpinBox());
     collapsibleLayout->addWidget(new NCheckBox("启用SSL"));
     collapsibleLayout->addWidget(new NCheckBox("启用压缩"));
-    
+
     QLabel* statusLabel = new QLabel("状态: 展开", container);
     connect(collapsibleGroupBox, &NGroupBox::collapsedChanged, [statusLabel](bool collapsed) {
         statusLabel->setText(collapsed ? "状态: 折叠" : "状态: 展开");
     });
-    
+
     layout->addWidget(collapsibleGroupBox);
     layout->addWidget(statusLabel);
 
@@ -1767,9 +1767,9 @@ QWidget* ControlsExample::createGroupBoxes() {
 
     NGroupBox* parentGroupBox = new NGroupBox("用户配置", container);
     parentGroupBox->setMinimumWidth(450);
-    
+
     QVBoxLayout* parentLayout = new QVBoxLayout(parentGroupBox);
-    
+
     // 个人信息子组
     NGroupBox* personalGroupBox = new NGroupBox("个人信息", parentGroupBox);
     personalGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
@@ -1778,19 +1778,18 @@ QWidget* ControlsExample::createGroupBoxes() {
     personalLayout->addWidget(new NLineEdit("用户名"));
     personalLayout->addWidget(new NLineEdit("显示名称"));
     parentLayout->addWidget(personalGroupBox);
-    
+
     // 权限子组
     NGroupBox* permissionGroupBox = new NGroupBox("权限设置", parentGroupBox);
     permissionGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
     permissionGroupBox->setTitleIcon(NRegularIconType::Key24Regular, 16);
     permissionGroupBox->setCollapsible(true);
-    // permissionGroupBox->setCollapsed(true);  // 默认展开，让用户看到完整功能
     QVBoxLayout* permissionLayout = new QVBoxLayout(permissionGroupBox);
     permissionLayout->addWidget(new NCheckBox("管理员权限"));
     permissionLayout->addWidget(new NCheckBox("读取权限"));
     permissionLayout->addWidget(new NCheckBox("写入权限"));
     parentLayout->addWidget(permissionGroupBox);
-    
+
     layout->addWidget(parentGroupBox);
 
     // 6. 不同状态的分组框
