@@ -5,6 +5,7 @@
 
 class NScrollArea;
 class NListView;
+class NTreeView;
 
 class ViewExample : public QWidget {
     Q_OBJECT
@@ -15,6 +16,7 @@ class ViewExample : public QWidget {
     void initUI();
 
     QWidget* createListViewSection();
+    QWidget* createTreeViewSection();
 
     NScrollArea* m_scrollArea{nullptr};
 };
