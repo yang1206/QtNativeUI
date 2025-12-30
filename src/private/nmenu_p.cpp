@@ -166,31 +166,34 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
     if (element == PE_PanelMenu) {
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
-        QColor       bgColor     = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
-        QColor       borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-        QPainterPath path;
-        path.addRoundedRect(option->rect.adjusted(0, 0, -1, -1), d->_pBorderRadius, d->_pBorderRadius);
+        QColor bgColor            = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
+        QColor borderColor        = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
+        int    _shadowBorderWidth = 3;
+        QRect  foregroundRect(_shadowBorderWidth,
+                             _shadowBorderWidth,
+                             option->rect.width() - 2 * _shadowBorderWidth,
+                             option->rect.height() - 2 * _shadowBorderWidth);
 
         painter->setPen(QPen(borderColor, 1));
         painter->setBrush(bgColor);
-        painter->drawPath(path);
+        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
 
         painter->restore();
         return;
     }
-    if (widget) {
-        const NMenu* menuWidget = qobject_cast<const NMenu*>(widget);
-        if (!menuWidget) {
-            QWidget* parent = widget->parentWidget();
-            while (parent && !menuWidget) {
-                menuWidget = qobject_cast<const NMenu*>(parent);
-                parent     = parent->parentWidget();
-            }
-            if (!menuWidget) {
-                return QProxyStyle::drawPrimitive(element, option, painter, widget);
-            }
-        }
-    }
+    // if (widget) {
+    //     const NMenu* menuWidget = qobject_cast<const NMenu*>(widget);
+    //     if (!menuWidget) {
+    //         QWidget* parent = widget->parentWidget();
+    //         while (parent && !menuWidget) {
+    //             menuWidget = qobject_cast<const NMenu*>(parent);
+    //             parent     = parent->parentWidget();
+    //         }
+    //         if (!menuWidget) {
+    //             return QProxyStyle::drawPrimitive(element, option, painter, widget);
+    //         }
+    //     }
+    // }
 
     QProxyStyle::drawPrimitive(element, option, painter, widget);
 }

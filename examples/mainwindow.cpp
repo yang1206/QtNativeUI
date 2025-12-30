@@ -7,6 +7,7 @@
 #include "components/icon.h"
 #include "components/menu.h"
 #include "components/navigation.h"
+#include "components/view.h"
 
 MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     m_navigationView = new NNavigationView(this);
@@ -18,6 +19,7 @@ MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     m_navigationView->addPageNode("Menus", new MenuExample(this), NRegularIconType::MoreHorizontal16Regular);
     m_navigationView->addPageNode("Dialogs", new DialogsExample(this), NRegularIconType::Flag16Regular);
     m_navigationView->addPageNode("Navigation", new NavigationExample(this), NRegularIconType::Router20Regular);
+    m_navigationView->addPageNode("Views", new ViewExample(this), NRegularIconType::List16Regular);
     m_navigationView->addPageNode("Colors", new ColorsExample(this), NRegularIconType::Color16Regular);
     m_navigationView->addPageNode("Icons", new IconExample(this), NRegularIconType::Icons20Regular);
 
