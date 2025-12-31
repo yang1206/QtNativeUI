@@ -30,6 +30,9 @@ void NDropDownButton::init() {
 void NDropDownButton::setMenu(NMenu* menu) {
     Q_D(NDropDownButton);
     d->_menu = menu;
+    if (menu) {
+        menu->setDropDownAnimation(true);
+    }
 }
 
 QMenu* NDropDownButton::menu() const {
@@ -56,6 +59,7 @@ void NDropDownButton::showMenu() {
         return;
     }
 
+    d->_menu->setMinimumWidth(width());
     QPoint pos = mapToGlobal(QPoint(0, height()));
     d->_menu->exec(pos);
 }

@@ -189,9 +189,21 @@ void NComboBox::showPopup() {
     QComboBox::showPopup();
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, oldAnimationEffects);
 
-    if (count() > 0) {
-        QWidget* container = this->findChild<QFrame*>();
-        if (container) {
+    QWidget* container = this->findChild<QFrame*>();
+    if (container) {
+        auto* effect = new QGraphicsOpacityEffect(container);
+        container->setGraphicsEffect(effect);
+
+        auto* opacityAni = new QPropertyAnimation(effect, "opacity");
+        opacityAni->setDuration(150);
+        opacityAni->setStartValue(0.0);
+        opacityAni->setEndValue(1.0);
+        opacityAni->setEasingCurve(QEasingCurve::OutCubic);
+        opacityAni->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+
+    if (count() > 0 && container) {
+        if (count() > 0 && container) {
             int itemHeight = view()->sizeHintForRow(0);
             if (itemHeight <= 0) {
                 itemHeight = 35;
