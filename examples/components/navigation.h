@@ -37,6 +37,7 @@ class NavigationExample : public QWidget {
 
   private:
     void     initUI();
+    QWidget* createPivots();
     QWidget* createTabBars();
     QWidget* createTabWidgets();
     QWidget* createNavigationBars();

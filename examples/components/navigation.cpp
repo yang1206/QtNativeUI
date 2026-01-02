@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QtNativeUI/NIcon.h>
 #include <QtNativeUI/NNavigationBar.h>
+#include <QtNativeUI/NPivot.h>
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NStackedWidget.h>
 #include <QtNativeUI/NTabBar.h>
@@ -140,6 +141,7 @@ void NavigationExample::initUI() {
 
     contentLayout->addWidget(new ExampleSection("NavigationView", createNavigationViews()));
     contentLayout->addWidget(new ExampleSection("NavigationBar", createNavigationBars()));
+    contentLayout->addWidget(new ExampleSection("Pivot", createPivots()));
     contentLayout->addWidget(new ExampleSection("TabBar", createTabBars()));
     contentLayout->addWidget(new ExampleSection("TabWidget", createTabWidgets()));
 
@@ -148,6 +150,334 @@ void NavigationExample::initUI() {
     m_scrollArea->setWidget(contentWidget);
     mainLayout->addWidget(m_scrollArea);
     setMinimumWidth(600);
+}
+
+QWidget* NavigationExample::createPivots() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    NLabel* descriptionLabel = new NLabel(
+        "NPivot 是一个轻量级的导航组件，适用于在少量页面之间切换，带有平滑的指示器动画。", NLabelType::Caption);
+    descriptionLabel->setWordWrap(true);
+    layout->addWidget(descriptionLabel);
+
+    // 1. 基本 Pivot 示例
+    {
+        layout->addWidget(new NLabel("基本 Pivot:", NLabelType::Body));
+
+        NPivot* pivot = new NPivot(container);
+        pivot->addItem("首页");
+        pivot->addItem("文档");
+        pivot->addItem("设置");
+        pivot->addItem("关于");
+
+        layout->addWidget(pivot);
+    }
+
+    // 2. Pivot 与 StackedWidget 联动
+    {
+        layout->addWidget(new NLabel("Pivot 与页面联动:", NLabelType::Body));
+
+        QWidget*     demoWidget = new QWidget(container);
+        QVBoxLayout* demoLayout = new QVBoxLayout(demoWidget);
+        demoLayout->setContentsMargins(0, 0, 0, 0);
+
+        NPivot* pivot = new NPivot(demoWidget);
+        pivot->addItem("概览");
+        pivot->addItem("详情");
+        pivot->addItem("评论");
+
+        NStackedWidget* stackedWidget = new NStackedWidget(demoWidget);
+        stackedWidget->setMinimumHeight(100);
+
+        QWidget*     page1   = new QWidget;
+        QVBoxLayout* layout1 = new QVBoxLayout(page1);
+        layout1->addWidget(new NLabel("这是概览页面的内容", NLabelType::Body));
+
+        QWidget*     page2   = new QWidget;
+        QVBoxLayout* layout2 = new QVBoxLayout(page2);
+        layout2->addWidget(new NLabel("这是详情页面的内容", NLabelType::Body));
+
+        QWidget*     page3   = new QWidget;
+        QVBoxLayout* layout3 = new QVBoxLayout(page3);
+        layout3->addWidget(new NLabel("这是评论页面的内容", NLabelType::Body));
+
+        stackedWidget->addWidget(page1);
+        stackedWidget->addWidget(page2);
+        stackedWidget->addWidget(page3);
+
+        connect(pivot, &NPivot::currentIndexChanged, stackedWidget, &NStackedWidget::setCurrentIndex);
+
+        demoLayout->addWidget(pivot);
+        demoLayout->addWidget(stackedWidget);
+        layout->addWidget(demoWidget);
+    }
+
+    // 3. 动态添加/移除项
+    {
+        layout->addWidget(new NLabel("动态操作:", NLabelType::Body));
+
+        QWidget*     demoWidget = new QWidget(container);
+        QVBoxLayout* demoLayout = new QVBoxLayout(demoWidget);
+        demoLayout->setContentsMargins(0, 0, 0, 0);
+
+        NPivot* pivot = new NPivot(demoWidget);
+        pivot->addItem("Tab 1");
+        pivot->addItem("Tab 2");
+
+        QWidget*     controlPanel  = new QWidget(demoWidget);
+        QHBoxLayout* controlLayout = new QHBoxLayout(controlPanel);
+        controlLayout->setContentsMargins(0, 8, 0, 0);
+
+        NPushButton* addBtn = new NPushButton("添加项", controlPanel);
+        connect(addBtn, &NPushButton::clicked, [pivot]() {
+            int index = pivot->count() + 1;
+            pivot->addItem(QString("Tab %1").arg(index));
+        });
+
+        NPushButton* removeBtn = new NPushButton("移除当前项", controlPanel);
+        connect(removeBtn, &NPushButton::clicked, [pivot]() {
+            if (pivot->count() > 1) {
+                pivot->removeItem(pivot->currentIndex());
+            }
+        });
+
+        controlLayout->addWidget(addBtn);
+        controlLayout->addWidget(removeBtn);
+        controlLayout->addStretch();
+
+        demoLayout->addWidget(pivot);
+        demoLayout->addWidget(controlPanel);
+        layout->addWidget(demoWidget);
+    }
+
+    // 4. 禁用项
+    {
+        layout->addWidget(new NLabel("禁用项:", NLabelType::Body));
+
+        NPivot* pivot = new NPivot(container);
+        pivot->addItem("可用");
+        pivot->addItem("禁用");
+        pivot->addItem("可用");
+        pivot->setItemEnabled(1, false);
+
+        layout->addWidget(pivot);
+    }
+
+    // 5. 自定义字体
+    {
+        layout->addWidget(new NLabel("自定义字体:", NLabelType::Body));
+
+        NPivot* pivot = new NPivot(container);
+        pivot->addItem("常规");
+        pivot->addItem("中等");
+        pivot->addItem("大号");
+
+        QFont itemFont = pivot->font();
+        itemFont.setPointSize(11);
+        pivot->setItemFont(itemFont);
+
+        QFont selectedFont = itemFont;
+        selectedFont.setPointSize(12);
+        selectedFont.setBold(true);
+        pivot->setSelectedItemFont(selectedFont);
+
+        layout->addWidget(pivot);
+    }
+
+    // 6. 带右侧控件
+    {
+        layout->addWidget(new NLabel("带右侧控件:", NLabelType::Body));
+
+        NPivot* pivot = new NPivot(container);
+        pivot->addItem("全部");
+        pivot->addItem("未读");
+        pivot->addItem("已读");
+
+        NPushButton* refreshBtn = new NPushButton(container);
+        refreshBtn->setFluentIcon(NRegularIconType::ArrowSync24Regular, 16);
+        refreshBtn->setTransparentBackground(true);
+        refreshBtn->setFixedSize(32, 32);
+
+        NPushButton* settingsBtn = new NPushButton(container);
+        settingsBtn->setFluentIcon(NRegularIconType::Settings24Regular, 16);
+        settingsBtn->setTransparentBackground(true);
+        settingsBtn->setFixedSize(32, 32);
+
+        pivot->addRightWidget(refreshBtn);
+        pivot->addRightWidget(settingsBtn);
+
+        layout->addWidget(pivot);
+    }
+
+    // 8. 图标支持演示
+    {
+        layout->addWidget(new NLabel("图标支持:", NLabelType::Body));
+
+        NPivot* pivot = new NPivot(container);
+        pivot->addItem(NRegularIconType::Home24Regular, "首页", 16);
+        pivot->addItem(NRegularIconType::Mail24Regular, "邮件", 16);
+        pivot->addItem(NRegularIconType::Calendar24Regular, "日历", 16);
+        pivot->addItem(NRegularIconType::Settings24Regular, "设置", 16);
+
+        layout->addWidget(pivot);
+    }
+
+    // 9. 徽章/Badge 演示
+    {
+        layout->addWidget(new NLabel("徽章/Badge 演示:", NLabelType::Body));
+
+        NPivot* pivot = new NPivot(container);
+        pivot->addItem(NRegularIconType::Home24Regular, "首页", 16);
+        pivot->addItem(NRegularIconType::Mail24Regular, "邮件", 16);
+        pivot->addItem(NRegularIconType::Alert20Regular, "通知", 16);
+        pivot->addItem(NRegularIconType::Settings24Regular, "设置", 16);
+
+        // 设置徽章
+        pivot->setItemBadge(1, 5);  // 邮件有5条未读
+        pivot->setItemBadge(2, 99); // 通知有99+条
+
+        QWidget*     controlPanel  = new QWidget(container);
+        QHBoxLayout* controlLayout = new QHBoxLayout(controlPanel);
+        controlLayout->setContentsMargins(0, 8, 0, 0);
+
+        NPushButton* addBadgeBtn = new NPushButton("增加邮件徽章", controlPanel);
+        connect(addBadgeBtn, &NPushButton::clicked, [pivot]() {
+            int current = pivot->itemBadge(1);
+            pivot->setItemBadge(1, current + 1);
+        });
+
+        NPushButton* clearBadgeBtn = new NPushButton("清除通知徽章", controlPanel);
+        connect(clearBadgeBtn, &NPushButton::clicked, [pivot]() { pivot->clearItemBadge(2); });
+
+        controlLayout->addWidget(addBadgeBtn);
+        controlLayout->addWidget(clearBadgeBtn);
+        controlLayout->addStretch();
+
+        layout->addWidget(pivot);
+        layout->addWidget(controlPanel);
+    }
+
+    // 10. 键盘导航演示
+    {
+        layout->addWidget(new NLabel("键盘导航演示 (点击获取焦点后使用方向键):", NLabelType::Body));
+
+        NPivot* pivot = new NPivot(container);
+        pivot->addItem(NRegularIconType::Home24Regular, "首页", 16);
+        pivot->addItem(NRegularIconType::Document24Regular, "文档", 16);
+        pivot->addItem(NRegularIconType::Settings24Regular, "设置", 16);
+        pivot->addItem(NRegularIconType::Info24Regular, "关于", 16);
+
+        // 禁用一个项目来演示跳过功能
+        pivot->setItemEnabled(2, false);
+
+        // 添加焦点指示
+        pivot->setStyleSheet("NPivot:focus { border: 2px solid #0078d4; border-radius: 4px; }");
+
+        NLabel* helpLabel = new NLabel("使用方向键、Home/End键导航，Enter/Space激活", NLabelType::Caption);
+        helpLabel->setWordWrap(true);
+
+        layout->addWidget(pivot);
+        layout->addWidget(helpLabel);
+    }
+
+    // 11. 自定义颜色和样式
+    {
+        layout->addWidget(new NLabel("自定义颜色和样式:", NLabelType::Body));
+
+        NPivot* pivot = new NPivot(container);
+        pivot->addItem("首页");
+        pivot->addItem("消息");
+        pivot->addItem("设置");
+
+        pivot->setItemSpacing(32);
+        pivot->setIndicatorHeight(4);
+        pivot->setIndicatorRadius(2);
+        pivot->setAnimationDuration(400);
+
+        pivot->setLightIndicatorColor(QColor(0xE8, 0x11, 0x23));
+        pivot->setDarkIndicatorColor(QColor(0xFF, 0x45, 0x00));
+        pivot->setLightTextColorSelected(QColor(0xE8, 0x11, 0x23));
+        pivot->setDarkTextColorSelected(QColor(0xFF, 0x45, 0x00));
+
+        layout->addWidget(pivot);
+    }
+
+    // 12. 对齐方式演示
+    {
+        layout->addWidget(new NLabel("对齐方式演示:", NLabelType::Body));
+
+        QWidget*     demoWidget = new QWidget(container);
+        QVBoxLayout* demoLayout = new QVBoxLayout(demoWidget);
+        demoLayout->setContentsMargins(0, 0, 0, 0);
+
+        // 左对齐
+        NPivot* leftPivot = new NPivot(demoWidget);
+        leftPivot->setAlignment(NPivotType::Left);
+        leftPivot->addItem("左对齐");
+        leftPivot->addItem("示例");
+        leftPivot->addItem("演示");
+
+        // 居中对齐
+        NPivot* centerPivot = new NPivot(demoWidget);
+        centerPivot->setAlignment(NPivotType::Center);
+        centerPivot->addItem("居中对齐");
+        centerPivot->addItem("示例");
+        centerPivot->addItem("演示");
+
+        // 右对齐
+        NPivot* rightPivot = new NPivot(demoWidget);
+        rightPivot->setAlignment(NPivotType::Right);
+        rightPivot->addItem("右对齐");
+        rightPivot->addItem("示例");
+        rightPivot->addItem("演示");
+
+        QWidget*     controlPanel  = new QWidget(demoWidget);
+        QHBoxLayout* controlLayout = new QHBoxLayout(controlPanel);
+        controlLayout->setContentsMargins(0, 8, 0, 0);
+
+        NLabel*      alignLabel = new NLabel("切换对齐:", NLabelType::Body);
+        NPushButton* leftBtn    = new NPushButton("左对齐", controlPanel);
+        NPushButton* centerBtn  = new NPushButton("居中", controlPanel);
+        NPushButton* rightBtn   = new NPushButton("右对齐", controlPanel);
+
+        connect(leftBtn, &NPushButton::clicked, [leftPivot, centerPivot, rightPivot]() {
+            leftPivot->setAlignment(NPivotType::Left);
+            centerPivot->setAlignment(NPivotType::Left);
+            rightPivot->setAlignment(NPivotType::Left);
+        });
+
+        connect(centerBtn, &NPushButton::clicked, [leftPivot, centerPivot, rightPivot]() {
+            leftPivot->setAlignment(NPivotType::Center);
+            centerPivot->setAlignment(NPivotType::Center);
+            rightPivot->setAlignment(NPivotType::Center);
+        });
+
+        connect(rightBtn, &NPushButton::clicked, [leftPivot, centerPivot, rightPivot]() {
+            leftPivot->setAlignment(NPivotType::Right);
+            centerPivot->setAlignment(NPivotType::Right);
+            rightPivot->setAlignment(NPivotType::Right);
+        });
+
+        controlLayout->addWidget(alignLabel);
+        controlLayout->addWidget(leftBtn);
+        controlLayout->addWidget(centerBtn);
+        controlLayout->addWidget(rightBtn);
+        controlLayout->addStretch();
+
+        demoLayout->addWidget(new NLabel("左对齐:", NLabelType::Caption));
+        demoLayout->addWidget(leftPivot);
+        demoLayout->addWidget(new NLabel("居中对齐:", NLabelType::Caption));
+        demoLayout->addWidget(centerPivot);
+        demoLayout->addWidget(new NLabel("右对齐:", NLabelType::Caption));
+        demoLayout->addWidget(rightPivot);
+        demoLayout->addWidget(controlPanel);
+
+        layout->addWidget(demoWidget);
+    }
+
+    return container;
 }
 
 QWidget* NavigationExample::createTabBars() {
