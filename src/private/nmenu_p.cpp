@@ -166,17 +166,12 @@ void NMenuPrivate::Style::drawPrimitive(PrimitiveElement    element,
     if (element == PE_PanelMenu) {
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
-        QColor bgColor            = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
-        QColor borderColor        = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
-        int    _shadowBorderWidth = 3;
-        QRect  foregroundRect(_shadowBorderWidth,
-                             _shadowBorderWidth,
-                             option->rect.width() - 2 * _shadowBorderWidth,
-                             option->rect.height() - 2 * _shadowBorderWidth);
+        QColor bgColor     = d->_isDark ? d->_pDarkBackgroundColor : d->_pLightBackgroundColor;
+        QColor borderColor = d->_isDark ? d->_pDarkBorderColor : d->_pLightBorderColor;
 
         painter->setPen(QPen(borderColor, 1));
         painter->setBrush(bgColor);
-        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+        painter->drawRoundedRect(option->rect, d->_pBorderRadius, d->_pBorderRadius);
 
         painter->restore();
         return;

@@ -41,7 +41,7 @@ void NNavigationViewPrivate::setupUI() {
     connect(nTheme, &NTheme::themeModeChanged, q, [this](NThemeType::ThemeMode themeMode) { _themeMode = themeMode; });
 
     setupRouterConnections();
-    _pDisplayMode        = NNavigationType::Maximal;
+    _pDisplayMode        = NNavigationType::Auto;
     _pPageTransitionType = NNavigationType::ScaleTransition;
     _isInitialized       = true;
 }

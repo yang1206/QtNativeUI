@@ -22,6 +22,9 @@ class QTNATIVEUI_EXPORT NMenu : public QMenu {
     explicit NMenu(const QString& title, QWidget* parent = nullptr);
     ~NMenu();
 
+    void setDropDownAnimation(bool enabled);
+    bool dropDownAnimation() const;
+
     // 添加菜单项
     QAction* addItem(const QString& text);
     QAction* addItem(const QString& text, NRegularIconType::Icon icon);
@@ -52,9 +55,11 @@ class QTNATIVEUI_EXPORT NMenu : public QMenu {
   protected:
     void paintEvent(QPaintEvent* event) override;
     void showEvent(QShowEvent* event) override;
+    bool event(QEvent* event) override;
 
   private:
     void     init();
+    void     addMenuShadow();
     QAction* createAction(const QString& text, const QIcon& icon = QIcon());
 };
 

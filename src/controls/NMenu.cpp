@@ -1,13 +1,36 @@
 #include "QtNativeUI/NMenu.h"
 
 #include <QEvent>
-#include <QPainter>
+#include <QGraphicsOpacityEffect>
 #include <QPainterPath>
 #include <QPropertyAnimation>
+#include <QTimer>
 
 #include "../private/nmenu_p.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
+
+#ifdef Q_OS_WIN
+#include <dwmapi.h>
+#include <windows.h>
+#pragma comment(lib, "dwmapi.lib")
+
+#ifndef DWMWA_NCRENDERING_POLICY
+#define DWMWA_NCRENDERING_POLICY 2
+#endif
+
+#ifndef DWMNCRP_ENABLED
+#define DWMNCRP_ENABLED 2
+#endif
+
+#ifndef DWMWA_SYSTEMBACKDROP_TYPE
+#define DWMWA_SYSTEMBACKDROP_TYPE 38
+#endif
+
+#ifndef DWMSBT_MAINWINDOW
+#define DWMSBT_MAINWINDOW 2
+#endif
+#endif
 
 Q_PROPERTY_CREATE_Q_CPP(NMenu, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NMenu, QColor, LightBackgroundColor)
@@ -21,6 +44,16 @@ NMenu::NMenu(QWidget* parent) : QMenu(parent), d_ptr(new NMenuPrivate()) { init(
 NMenu::NMenu(const QString& title, QWidget* parent) : NMenu(parent) { setTitle(title); }
 
 NMenu::~NMenu() {}
+
+void NMenu::setDropDownAnimation(bool enabled) {
+    Q_D(NMenu);
+    d->_enableDropDownAnimation = enabled;
+}
+
+bool NMenu::dropDownAnimation() const {
+    Q_D(const NMenu);
+    return d->_enableDropDownAnimation;
+}
 
 void NMenu::init() {
     Q_D(NMenu);
@@ -42,12 +75,8 @@ void NMenu::init() {
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_NoSystemBackground);
     setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
-
     setObjectName("NMenu");
-
     setStyle(d->_menuStyle);
-
-    d->_pAnimationImagePosY = 0;
 
 #ifdef Q_OS_MAC
     QMenu::setNoReplayFor(this);
@@ -168,49 +197,64 @@ QAction* NMenu::createAction(const QString& text, const QIcon& icon) {
     return action;
 }
 
-void NMenu::paintEvent(QPaintEvent* event) {
-    Q_D(NMenu);
-    QPainter painter(this);
-    painter.setRenderHints(QPainter::Antialiasing);
-    if (!d->_animationPix.isNull()) {
-        painter.drawPixmap(QRect(0, d->_pAnimationImagePosY, width(), height()), d->_animationPix);
-    } else {
-        QMenu::paintEvent(event);
-    }
-}
+void NMenu::paintEvent(QPaintEvent* event) { QMenu::paintEvent(event); }
 
 void NMenu::showEvent(QShowEvent* event) {
     Q_D(NMenu);
-    move(this->pos().x() - 6, this->pos().y());
-    if (!d->_animationPix.isNull()) {
-        d->_animationPix = QPixmap();
-    }
-    d->_animationPix                 = this->grab(this->rect());
-    QPropertyAnimation* posAnimation = new QPropertyAnimation(d, "pAnimationImagePosY");
-    connect(posAnimation, &QPropertyAnimation::finished, this, [this, d]() {
-        d->_animationPix = QPixmap();
-        update();
-    });
-    connect(posAnimation, &QPropertyAnimation::valueChanged, this, [this]() { update(); });
-    posAnimation->setEasingCurve(NDesignToken(NDesignTokenKey::EasingStandard).value<QEasingCurve>());
-    posAnimation->setDuration(NDesignToken(NDesignTokenKey::AnimationSlow).toInt());
+    
+    auto* effect = new QGraphicsOpacityEffect(this);
+    setGraphicsEffect(effect);
 
-    int targetPosY = height();
-    if (targetPosY > 160) {
-        if (targetPosY < 320) {
-            targetPosY = 160;
-        } else {
-            targetPosY /= 2;
-        }
-    }
-
-    if (pos().y() + 28 + 9 >= QCursor::pos().y()) {
-        posAnimation->setStartValue(-targetPosY);
+    if (d->_enableDropDownAnimation) {
+        QPoint startPos = pos() - QPoint(0, 20);
+        move(startPos);
+        
+        auto* posAni = new QPropertyAnimation(this, "pos");
+        posAni->setDuration(300);
+        posAni->setStartValue(startPos);
+        posAni->setEndValue(startPos + QPoint(0, 20));
+        posAni->setEasingCurve(QEasingCurve::OutCubic);
+        posAni->start(QAbstractAnimation::DeleteWhenStopped);
+        
+        auto* opacityAni = new QPropertyAnimation(effect, "opacity");
+        opacityAni->setDuration(250);
+        opacityAni->setStartValue(0.0);
+        opacityAni->setEndValue(1.0);
+        opacityAni->setEasingCurve(QEasingCurve::OutCubic);
+        opacityAni->start(QAbstractAnimation::DeleteWhenStopped);
     } else {
-        posAnimation->setStartValue(targetPosY);
+        auto* ani = new QPropertyAnimation(effect, "opacity");
+        ani->setDuration(150);
+        ani->setStartValue(0.0);
+        ani->setEndValue(1.0);
+        ani->setEasingCurve(QEasingCurve::OutCubic);
+        ani->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+    
+    QMenu::showEvent(event);
+}
+
+bool NMenu::event(QEvent* event) {
+    // if (event->type() == QEvent::WinIdChange) {
+    //     addMenuShadow();
+    // }
+    return QMenu::event(event);
+}
+
+void NMenu::addMenuShadow() {
+#ifdef Q_OS_WIN
+    HWND hwnd = reinterpret_cast<HWND>(winId());
+    if (!hwnd) {
+        return;
     }
 
-    posAnimation->setEndValue(0);
-    posAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-    QMenu::showEvent(event);
+    auto policy = static_cast<DWMNCRENDERINGPOLICY>(DWMNCRP_ENABLED);
+    DwmSetWindowAttribute(hwnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof(policy));
+
+    MARGINS margins = {-1, -1, -1, -1};
+    DwmExtendFrameIntoClientArea(hwnd, &margins);
+
+    DWORD backdrop = DWMSBT_MAINWINDOW;
+    DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
+#endif
 }
