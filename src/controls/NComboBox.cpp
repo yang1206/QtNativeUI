@@ -190,64 +190,43 @@ void NComboBox::showPopup() {
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, oldAnimationEffects);
 
     QWidget* container = this->findChild<QFrame*>();
-    if (container) {
+    if (container && count() > 0) {
+        int itemHeight = view()->sizeHintForRow(0);
+        if (itemHeight <= 0) {
+            itemHeight = 35;
+        }
+
+        int viewHeight;
+        int containerHeight;
+        if (count() >= maxVisibleItems()) {
+            viewHeight = maxVisibleItems() * itemHeight;
+        } else {
+            viewHeight = count() * itemHeight;
+        }
+        containerHeight = viewHeight + 8;
+
+        view()->setFixedHeight(viewHeight);
+        container->setFixedHeight(containerHeight);
+        
         auto* effect = new QGraphicsOpacityEffect(container);
         container->setGraphicsEffect(effect);
 
+        QPoint startPos = container->pos() - QPoint(0, 20);
+        container->move(startPos);
+        
+        auto* posAni = new QPropertyAnimation(container, "pos");
+        posAni->setDuration(350);
+        posAni->setStartValue(startPos);
+        posAni->setEndValue(startPos + QPoint(0, 20));
+        posAni->setEasingCurve(QEasingCurve::OutCubic);
+        posAni->start(QAbstractAnimation::DeleteWhenStopped);
+
         auto* opacityAni = new QPropertyAnimation(effect, "opacity");
-        opacityAni->setDuration(150);
+        opacityAni->setDuration(300);
         opacityAni->setStartValue(0.0);
         opacityAni->setEndValue(1.0);
         opacityAni->setEasingCurve(QEasingCurve::OutCubic);
         opacityAni->start(QAbstractAnimation::DeleteWhenStopped);
-    }
-
-    if (count() > 0 && container) {
-        if (count() > 0 && container) {
-            int itemHeight = view()->sizeHintForRow(0);
-            if (itemHeight <= 0) {
-                itemHeight = 35;
-            }
-
-            int viewHeight;
-            int containerHeight;
-            if (count() >= maxVisibleItems()) {
-                viewHeight = maxVisibleItems() * itemHeight;
-            } else {
-                viewHeight = count() * itemHeight;
-            }
-            containerHeight = viewHeight + 8;
-
-            view()->resize(view()->width(), viewHeight);
-            container->move(container->x(), container->y() + 3);
-
-            QLayout* layout = container->layout();
-            while (layout && layout->count()) {
-                layout->takeAt(0);
-            }
-
-            QPropertyAnimation* fixedSizeAnimation = new QPropertyAnimation(container, "maximumHeight");
-            connect(fixedSizeAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
-                container->setFixedHeight(value.toUInt());
-            });
-            fixedSizeAnimation->setStartValue(1);
-            fixedSizeAnimation->setEndValue(containerHeight);
-            fixedSizeAnimation->setEasingCurve(QEasingCurve::OutCubic);
-            fixedSizeAnimation->setDuration(400);
-            fixedSizeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-
-            QPropertyAnimation* viewPosAnimation = new QPropertyAnimation(view(), "pos");
-            connect(viewPosAnimation, &QPropertyAnimation::finished, this, [this, layout, viewHeight]() {
-                layout->addWidget(view());
-                view()->setFixedHeight(viewHeight);
-            });
-            QPoint viewPos = view()->pos();
-            viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() - viewHeight));
-            viewPosAnimation->setEndValue(viewPos);
-            viewPosAnimation->setEasingCurve(QEasingCurve::OutCubic);
-            viewPosAnimation->setDuration(400);
-            viewPosAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-        }
     }
 }
 

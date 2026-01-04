@@ -60,7 +60,6 @@ class NComboBoxPrivate : public QObject, public NComboBoxStyleInterface {
 
     NComboBoxStyle* _comboBoxStyle{nullptr};
 
-
     QtNativeUI::NTranslateYAnimation* _arrowAnimation{nullptr};
 
     qreal arrowYOffset() const { return _arrowYOffset; }
