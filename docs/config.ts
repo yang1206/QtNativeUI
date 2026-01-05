@@ -2,14 +2,27 @@ import { defineAdditionalConfig, type DefaultTheme } from 'vitepress'
 
 export default defineAdditionalConfig({
   themeConfig: {
-    search: { options: searchOptions() },
+    logo: '/logo.svg',
+    search: { options: searchOptions(), provider: 'local' },
     nav: [
-      { text: '首页', link: '/' },
+      { text: '首页', link: '/index' },
+      { text: '指南', link: '/guide/getting-started' },
       { text: '组件', link: '/components/NLabel' },
       { text: '工具', link: '/tools/NTheme' },
       { text: 'GitHub', link: 'https://github.com/yang1206/QtNativeUI' }
     ],
     sidebar: {
+      '/guide/': [
+        {
+          text: '开始使用',
+          items: [
+            { text: '快速开始', link: '/guide/getting-started' },
+            { text: '设计理念', link: '/guide/design' },
+            { text: '部署指南', link: '/guide/deployment' },
+            { text: '贡献指南', link: '/guide/contributing' }
+          ]
+        }
+      ],
       '/components/': [
         {
           text: '基础控件',
@@ -119,15 +132,12 @@ export default defineAdditionalConfig({
       prev: '上一页',
       next: '下一页'
     },
-
     outline: {
       label: '页面导航'
     },
-
     lastUpdated: {
       text: '最后更新于'
     },
-
     notFound: {
       title: '页面未找到',
       quote:
@@ -135,7 +145,6 @@ export default defineAdditionalConfig({
       linkLabel: '前往首页',
       linkText: '带我回首页'
     },
-
     langMenuLabel: '多语言',
     returnToTopLabel: '回到顶部',
     sidebarMenuLabel: '菜单',

@@ -1,0 +1,29 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fluent_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0078D7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#005A9E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="qt_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#41CD52;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2DA44E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Abstract Layout Symbol -->
+  <!-- Left Sidebar (Fluent Blue) -->
+  <rect x="64" y="64" width="128" height="384" rx="32" fill="url(#fluent_grad)" filter="drop-shadow(0px 4px 8px rgba(0,0,0,0.1))"/>
+  
+  <!-- Top Bar (Qt Green) -->
+  <rect x="216" y="64" width="232" height="112" rx="32" fill="url(#qt_grad)" filter="drop-shadow(0px 4px 8px rgba(0,0,0,0.1))"/>
+  
+  <!-- Content Area (Light/Glass-like representing 'Native') -->
+  <rect x="216" y="200" width="232" height="248" rx="32" fill="#E6E6E6" fill-opacity="0.9" stroke="#0078D7" stroke-width="8"/>
+  
+  <!-- Small detail to make it look like a component -->
+  <circle cx="272" cy="256" r="16" fill="#0078D7"/>
+  <rect x="304" y="244" width="96" height="24" rx="12" fill="#0078D7" fill-opacity="0.5"/>
+  
+  <rect x="272" y="300" width="128" height="24" rx="12" fill="#999999" fill-opacity="0.5"/>
+  <rect x="272" y="348" width="128" height="24" rx="12" fill="#999999" fill-opacity="0.5"/>
+</svg>
