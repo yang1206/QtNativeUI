@@ -309,7 +309,9 @@ void NInfoBar::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
     d->_calculateTextLayout();
     if (d->_closeButton) {
-        d->_closeButton->move(width() - d->_closeButton->width() - 10, (height() - d->_closeButton->height()) / 2);
+        int buttonX = width() - d->_closeButton->width() - 15;
+        int buttonY = (height() >= 60) ? 15 : (height() - d->_closeButton->height()) / 2;
+        d->_closeButton->move(buttonX, buttonY);
     }
 }
 
