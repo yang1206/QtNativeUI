@@ -11,7 +11,7 @@
 ### 从源代码构建
 
 ```bash
-git clone https://github.com/Neutron12138/QtNativeUI.git
+git clone https://github.com/yang1206/QtNativeUI.git
 cd QtNativeUI
 cmake --preset default
 cmake --build build --config Release
@@ -38,13 +38,13 @@ target_link_libraries(your_target QtNativeUI::QtNativeUI)
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    
+
     NMainWindow window;
     window.setWindowTitle("QtNativeUI Demo");
-    
+
     NPushButton *button = new NPushButton("Click Me");
     window.setCentralWidget(button);
-    
+
     window.show();
     return app.exec();
 }
@@ -77,4 +77,4 @@ QColor color = NThemeColor(NFluentColorKey::AccentFillColorDefault, NThemeType::
 
 - 浏览 [组件库](/components/NLabel) 了解所有可用控件
 - 查看 [示例代码](https://github.com/Neutron12138/QtNativeUI/tree/main/examples)
-- 阅读 [API 文档](/components/)
+- 阅读 [API 文档](/components/NLabel)

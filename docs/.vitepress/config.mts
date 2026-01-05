@@ -22,12 +22,14 @@ export default defineConfig({
     //   link: '/en/'
     // }
   },
-  vite:{
-    plugins:[
-        llmstxt({
-          workDir: 'en',
+  vite: {
+    plugins: [
+      llmstxt(
+        {
+          workDir: 'zh',
           ignoreFiles: ['index.md']
-        })
+        }
+      )
     ],
   }
 })
