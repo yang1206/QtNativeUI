@@ -36,17 +36,28 @@ void NWindowBar::setupUI() {
     d->rightLayout->setContentsMargins(0, 0, 0, 0);
     d->rightLayout->setSpacing(0);
 
+#ifndef Q_OS_MAC
     d->iconLabel = new QLabel(this);
     d->iconLabel->setFixedSize(16, 16);
     d->iconLabel->setScaledContents(true);
     d->leftLayout->addWidget(d->iconLabel);
+#endif
 
     d->titleLabel = new QLabel(this);
     d->titleLabel->setObjectName(QStringLiteral("NWindowBarTitle"));
-    d->leftLayout->addWidget(d->titleLabel);
+    d->titleLabel->setAlignment(Qt::AlignCenter);
 
+#ifdef Q_OS_MAC
+    d->centerLayout->addStretch();
+    d->centerLayout->addWidget(d->titleLabel);
+    d->centerLayout->addStretch();
     d->leftLayout->addStretch();
+#else
+    d->leftLayout->addWidget(d->titleLabel);
+    d->leftLayout->addStretch();
+#endif
 
+#ifndef Q_OS_MAC
     d->pinButton = new NWindowButton(NWindowButton::Pin, this);
     d->pinButton->setCheckable(true);
     d->themeButton = new NWindowButton(NWindowButton::Theme, this);
@@ -61,15 +72,16 @@ void NWindowBar::setupUI() {
     d->rightLayout->addWidget(d->maxButton);
     d->rightLayout->addWidget(d->closeButton);
 
-    d->mainLayout->addLayout(d->leftLayout, 1);
-    d->mainLayout->addLayout(d->centerLayout, 0);
-    d->mainLayout->addLayout(d->rightLayout, 0);
-
     connect(d->pinButton, &NWindowButton::clicked, this, [this](bool checked) { emit pinRequested(checked); });
     connect(d->themeButton, &NWindowButton::clicked, this, &NWindowBar::themeRequested);
     connect(d->minButton, &NWindowButton::clicked, this, &NWindowBar::minimizeRequested);
     connect(d->maxButton, &NWindowButton::clicked, this, &NWindowBar::maximizeRequested);
     connect(d->closeButton, &NWindowButton::clicked, this, &NWindowBar::closeRequested);
+#endif
+
+    d->mainLayout->addLayout(d->leftLayout, 0);
+    d->mainLayout->addLayout(d->centerLayout, 1);
+    d->mainLayout->addLayout(d->rightLayout, 0);
 }
 
 QWidget* NWindowBar::hostWidget() const {
@@ -105,11 +117,13 @@ void NWindowBar::setTitle(const QString& title) {
 
 QIcon NWindowBar::icon() const {
     Q_D(const NWindowBar);
+    if (!d->iconLabel) return QIcon();
     return d->iconLabel->pixmap().isNull() ? QIcon() : QIcon(d->iconLabel->pixmap());
 }
 
 void NWindowBar::setIcon(const QIcon& icon) {
     Q_D(NWindowBar);
+    if (!d->iconLabel) return;
     if (icon.isNull()) {
         d->iconLabel->clear();
     } else {
@@ -130,13 +144,14 @@ void NWindowBar::setTitleVisible(bool visible) {
 
 bool NWindowBar::iconVisible() const {
     Q_D(const NWindowBar);
-    return d->iconVisible;
+    return d->iconLabel ? d->iconLabel->isVisible() : false;
 }
 
 void NWindowBar::setIconVisible(bool visible) {
     Q_D(NWindowBar);
-    d->iconVisible = visible;
-    d->iconLabel->setVisible(visible);
+    if (d->iconLabel) {
+        d->iconLabel->setVisible(visible);
+    }
 }
 
 void NWindowBar::setSystemButtonVisible(NWindowButton::SystemButtonType type, bool visible) {
@@ -226,7 +241,7 @@ bool NWindowBar::eventFilter(QObject* obj, QEvent* event) {
 void NWindowBar::updateButtonStates() {
     Q_D(NWindowBar);
 
-    if (d->hostWidget) {
+    if (d->hostWidget && d->maxButton) {
         bool maximized = d->hostWidget->isMaximized();
         d->maxButton->setMaximized(maximized);
     }

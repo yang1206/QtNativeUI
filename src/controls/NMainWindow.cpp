@@ -50,6 +50,19 @@ void NMainWindow::setupWindowAgent() {
     d->windowAgent = new QWK::WidgetWindowAgent(this);
     d->windowAgent->setup(this);
 
+#ifdef Q_OS_MAC
+    setAttribute(Qt::WA_ContentsMarginsRespectsSafeArea, false);
+    
+    connect(nTheme, &NTheme::themeModeChanged, this, [this]() {
+        Q_D(NMainWindow);
+        if (d->backdropType == Blur) {
+            d->windowAgent->setWindowAttribute(QStringLiteral("blur-effect"), nTheme->isDarkMode() ? "dark" : "light");
+        }
+        QEvent event(QEvent::StyleChange);
+        QApplication::sendEvent(this, &event);
+    });
+#endif
+
 #ifdef Q_OS_WIN
     d->windowAgent->setWindowAttribute(QStringLiteral("dark-mode"), nTheme->isDarkMode());
 
@@ -85,6 +98,8 @@ void NMainWindow::setupDefaultWindowBar() {
     d->windowAgent->setSystemButton(QWK::WindowAgentBase::Close, d->windowBar->systemButton(NWindowButton::Close));
     d->windowAgent->setHitTestVisible(d->windowBar->systemButton(NWindowButton::Theme), true);
     d->windowAgent->setHitTestVisible(d->windowBar->systemButton(NWindowButton::Pin), true);
+#else
+    d->windowAgent->setWindowAttribute(QStringLiteral("no-system-buttons"), false);
 #endif
 
     setMenuWidget(d->windowBar);
@@ -92,6 +107,8 @@ void NMainWindow::setupDefaultWindowBar() {
 
 void NMainWindow::connectWindowBarSignals() {
     Q_D(NMainWindow);
+
+    if (!d->windowBar) return;
 
     connect(d->windowBar, &NWindowBar::minimizeRequested, this, &QWidget::showMinimized);
 
@@ -402,7 +419,9 @@ void NMainWindow::setMenuBar(QMenuBar* menuBar) {
         setHitTestVisible(oldMenuBar, false);
     }
     
-    d->windowBar->setMenuBar(menuBar);
+    if (d->windowBar) {
+        d->windowBar->setMenuBar(menuBar);
+    }
     
     if (menuBar) {
         setHitTestVisible(menuBar, true);
@@ -411,5 +430,5 @@ void NMainWindow::setMenuBar(QMenuBar* menuBar) {
 
 QMenuBar* NMainWindow::menuBar() const {
     Q_D(const NMainWindow);
-    return d->windowBar->menuBar();
+    return d->windowBar ? d->windowBar->menuBar() : nullptr;
 }

@@ -19,8 +19,10 @@
 
 MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     setupMenuBar();
-    setupTitleBarWidgets();
 
+#ifdef Q_OS_WINDOWS
+    setupTitleBarWidgets();
+#endif
     m_navigationView = new NNavigationView(this);
     setCentralWidget(m_navigationView);
 
@@ -68,18 +70,22 @@ void MainWindow::setupMenuBar() {
     });
 
     viewMenu->addSeparator();
-    auto backdropMenu  = viewMenu->addSubMenu("Backdrop Effect", NRegularIconType::Window16Regular);
-    auto noneAction    = backdropMenu->addItem("None");
-    auto blurAction    = backdropMenu->addItem("Blur");
+    auto backdropMenu = viewMenu->addSubMenu("Backdrop Effect", NRegularIconType::Window16Regular);
+    auto noneAction   = backdropMenu->addItem("None");
+    auto blurAction   = backdropMenu->addItem("Blur");
+#ifdef Q_OS_WIN
     auto acrylicAction = backdropMenu->addItem("Acrylic");
     auto micaAction    = backdropMenu->addItem("Mica");
     auto micaAltAction = backdropMenu->addItem("Mica Alt");
+#endif
 
     connect(noneAction, &QAction::triggered, [this]() { setBackdropType(None); });
     connect(blurAction, &QAction::triggered, [this]() { setBackdropType(Blur); });
+#ifdef Q_OS_WIN
     connect(acrylicAction, &QAction::triggered, [this]() { setBackdropType(Acrylic); });
     connect(micaAction, &QAction::triggered, [this]() { setBackdropType(Mica); });
     connect(micaAltAction, &QAction::triggered, [this]() { setBackdropType(MicaAlt); });
+#endif
 
     // Window Menu
     auto windowMenu = menuBar->addMenu("Window");

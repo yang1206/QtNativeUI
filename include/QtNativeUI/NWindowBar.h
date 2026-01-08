@@ -80,6 +80,7 @@ public:
      * @brief Get window icon
      * @return Currently displayed window icon
      * @see setIcon()
+     * @note Not supported on macOS
      */
     QIcon icon() const;
 
@@ -92,6 +93,7 @@ public:
      * 
      * @param icon Window icon to display
      * @see icon(), setIconVisible()
+     * @note Not supported on macOS
      */
     void setIcon(const QIcon& icon);
 
@@ -118,6 +120,7 @@ public:
      * @brief Get window icon visibility state
      * @return true if icon is visible, false if hidden
      * @see setIconVisible()
+     * @note Not supported on macOS
      */
     bool iconVisible() const;
 
@@ -129,6 +132,7 @@ public:
      * 
      * @param visible true to show icon, false to hide icon
      * @see iconVisible(), setIcon()
+     * @note Not supported on macOS
      */
     void setIconVisible(bool visible);
 
@@ -145,6 +149,7 @@ public:
      * @param type Button type
      * @param visible true to show button, false to hide button
      * @see systemButtonVisible(), systemButton()
+     * @note Not supported on macOS (uses native system buttons)
      */
     void setSystemButtonVisible(NWindowButton::SystemButtonType type, bool visible);
 
@@ -153,6 +158,7 @@ public:
      * @param type Button type
      * @return true if button is visible, false if hidden
      * @see setSystemButtonVisible()
+     * @note Not supported on macOS (uses native system buttons)
      */
     bool systemButtonVisible(NWindowButton::SystemButtonType type) const;
 
@@ -165,6 +171,7 @@ public:
      * @param type Button type
      * @return Button component pointer, returns nullptr if button doesn't exist
      * @see setSystemButtonVisible(), NWindowButton
+     * @note Not supported on macOS (uses native system buttons)
      */
     NWindowButton* systemButton(NWindowButton::SystemButtonType type) const;
 

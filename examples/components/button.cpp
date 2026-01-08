@@ -289,7 +289,7 @@ QWidget* ButtonExample::createRadioButtons() {
     NRadioButton* micaBtn    = new NRadioButton("Mica (Windows 11)");
     NRadioButton* micaAltBtn = new NRadioButton("MicaAlt (Windows 11 22H2+)");
     NRadioButton* acrylicBtn = new NRadioButton("亚克力效果");
-    NRadioButton* dwmblurBtn = new NRadioButton("DWM模糊效果 (Windows 8)");
+    NRadioButton* dwmblurBtn = new NRadioButton("模糊效果");
 
     effectGroup->addButton(noneBtn, NMainWindow::None);
     effectGroup->addButton(micaBtn, NMainWindow::Mica);
