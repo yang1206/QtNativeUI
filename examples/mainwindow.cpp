@@ -2,8 +2,10 @@
 
 #include <QApplication>
 #include <QCoreApplication>
-#include <QMenuBar>
+#include <QDebug>
 #include <QStyle>
+#include <QtNativeUI/NLineEdit.h>
+#include <QtNativeUI/NMenuBar.h>
 #include <QtNativeUI/NNavigationView.h>
 #include <QtNativeUI/NWindowBar.h>
 #include "components/button.h"
@@ -17,6 +19,7 @@
 
 MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     setupMenuBar();
+    setupTitleBarWidgets();
 
     m_navigationView = new NNavigationView(this);
     setCentralWidget(m_navigationView);
@@ -40,34 +43,37 @@ MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
 }
 
 void MainWindow::setupMenuBar() {
-    auto menuBar = new QMenuBar(this);
-    menuBar->setNativeMenuBar(true);
+    auto menuBar = new NMenuBar(this);
 
     // File Menu
-    auto fileMenu = menuBar->addMenu("&File");
-    fileMenu->addAction("&New", this, &MainWindow::onNewFile, QKeySequence::New);
-    fileMenu->addAction("&Open", this, &MainWindow::onOpenFile, QKeySequence::Open);
-    fileMenu->addAction("&Save", this, &MainWindow::onSaveFile, QKeySequence::Save);
+    auto fileMenu   = menuBar->addMenu("File");
+    auto newAction  = fileMenu->addItem("New", NRegularIconType::DocumentAdd16Regular, QKeySequence::New);
+    auto openAction = fileMenu->addItem("Open", NRegularIconType::FolderOpen16Regular, QKeySequence::Open);
+    auto saveAction = fileMenu->addItem("Save", NRegularIconType::Save16Regular, QKeySequence::Save);
     fileMenu->addSeparator();
-    fileMenu->addAction("E&xit", this, &QWidget::close, QKeySequence::Quit);
+    auto exitAction = fileMenu->addItem("Exit", NRegularIconType::DismissCircle16Regular, QKeySequence::Quit);
+
+    connect(newAction, &QAction::triggered, this, &MainWindow::onNewFile);
+    connect(openAction, &QAction::triggered, this, &MainWindow::onOpenFile);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::onSaveFile);
+    connect(exitAction, &QAction::triggered, this, &QWidget::close);
 
     // View Menu
-    auto viewMenu    = menuBar->addMenu("&View");
-    auto themeAction = viewMenu->addAction("Toggle &Theme");
+    auto viewMenu    = menuBar->addMenu("View");
+    auto themeAction = viewMenu->addItem("Toggle Theme", NRegularIconType::WeatherMoon16Regular);
     connect(themeAction, &QAction::triggered, this, [this]() {
-        // Trigger theme button
         if (auto themeBtn = systemButton(Theme)) {
             themeBtn->click();
         }
     });
 
     viewMenu->addSeparator();
-    auto backdropMenu  = viewMenu->addMenu("&Backdrop Effect");
-    auto noneAction    = backdropMenu->addAction("&None");
-    auto blurAction    = backdropMenu->addAction("&Blur");
-    auto acrylicAction = backdropMenu->addAction("&Acrylic");
-    auto micaAction    = backdropMenu->addAction("&Mica");
-    auto micaAltAction = backdropMenu->addAction("Mica &Alt");
+    auto backdropMenu  = viewMenu->addSubMenu("Backdrop Effect", NRegularIconType::Window16Regular);
+    auto noneAction    = backdropMenu->addItem("None");
+    auto blurAction    = backdropMenu->addItem("Blur");
+    auto acrylicAction = backdropMenu->addItem("Acrylic");
+    auto micaAction    = backdropMenu->addItem("Mica");
+    auto micaAltAction = backdropMenu->addItem("Mica Alt");
 
     connect(noneAction, &QAction::triggered, [this]() { setBackdropType(None); });
     connect(blurAction, &QAction::triggered, [this]() { setBackdropType(Blur); });
@@ -76,9 +82,8 @@ void MainWindow::setupMenuBar() {
     connect(micaAltAction, &QAction::triggered, [this]() { setBackdropType(MicaAlt); });
 
     // Window Menu
-    auto windowMenu = menuBar->addMenu("&Window");
-    auto pinAction  = windowMenu->addAction("Stay on &Top");
-    pinAction->setCheckable(true);
+    auto windowMenu = menuBar->addMenu("Window");
+    auto pinAction  = windowMenu->addCheckableItem("Stay on Top", NRegularIconType::Pin16Regular, false);
     connect(pinAction, &QAction::triggered, this, [this](bool checked) {
         if (auto pinBtn = systemButton(Pin)) {
             pinBtn->click();
@@ -86,8 +91,11 @@ void MainWindow::setupMenuBar() {
     });
 
     windowMenu->addSeparator();
-    windowMenu->addAction("&Minimize", this, &QWidget::showMinimized, QKeySequence("Ctrl+M"));
-    windowMenu->addAction("&Maximize", this, [this]() {
+    auto minimizeAction = windowMenu->addItem("Minimize", NRegularIconType::Subtract16Regular, QKeySequence("Ctrl+M"));
+    auto maximizeAction = windowMenu->addItem("Maximize", NRegularIconType::Maximize16Regular);
+
+    connect(minimizeAction, &QAction::triggered, this, &QWidget::showMinimized);
+    connect(maximizeAction, &QAction::triggered, this, [this]() {
         if (isMaximized()) {
             showNormal();
         } else {
@@ -96,9 +104,12 @@ void MainWindow::setupMenuBar() {
     });
 
     // Help Menu
-    auto helpMenu = menuBar->addMenu("&Help");
-    helpMenu->addAction("&About", this, &MainWindow::onAbout);
-    helpMenu->addAction("About &Qt", qApp, &QApplication::aboutQt);
+    auto helpMenu      = menuBar->addMenu("Help");
+    auto aboutAction   = helpMenu->addItem("About", NRegularIconType::Info16Regular);
+    auto aboutQtAction = helpMenu->addItem("About Qt");
+
+    connect(aboutAction, &QAction::triggered, this, &MainWindow::onAbout);
+    connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
 
     setMenuBar(menuBar);
 }
@@ -117,4 +128,21 @@ void MainWindow::onSaveFile() {
 
 void MainWindow::onAbout() {
     // Placeholder for about dialog
+}
+
+void MainWindow::setupTitleBarWidgets() {
+    // Add a search box to the title bar
+    auto searchBox = new NLineEdit(this);
+    searchBox->setPlaceholderText("Search...");
+
+    setHitTestVisible(searchBox, true);
+
+    // Add the search box to the window bar (between menu and system buttons)
+    windowBar()->addWidget(searchBox);
+
+    // Connect search functionality
+    connect(searchBox, &NLineEdit::textChanged, this, [](const QString& text) {
+        // Handle search logic here
+        qDebug() << "Search:" << text;
+    });
 }

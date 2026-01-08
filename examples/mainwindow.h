@@ -19,6 +19,7 @@ private slots:
 
 private:
     void setupMenuBar();
+    void setupTitleBarWidgets();
     
     NNavigationView* m_navigationView;
 };
