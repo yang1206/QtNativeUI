@@ -3,21 +3,26 @@
 
 #include "QtNativeUI/NMainWindow.h"
 
-class NMainWindowPrivate : public QObject {
-    Q_OBJECT
+namespace QWK {
+class WidgetWindowAgent;
+}
+
+class NWindowBar;
+
+class NMainWindowPrivate {
+    Q_DECLARE_PUBLIC(NMainWindow)
+
   public:
-    explicit NMainWindowPrivate(QObject* parent = nullptr);
-    ~NMainWindowPrivate() override;
-
-    NMainWindow* q_ptr;
-    NMainWindow::BackdropType backdropEffect = NMainWindow::None;
-    bool isDarkMode = false;
-    bool isWindowActive = true;
-    QColor backgroundColor;
-
-    void setBackdropEffect(NMainWindow::BackdropType type);
-
+    NMainWindowPrivate();
+    ~NMainWindowPrivate();
+    
     void updateBackgroundColor();
+
+    NMainWindow*              q_ptr        = nullptr;
+    QWK::WidgetWindowAgent*   windowAgent  = nullptr;
+    NWindowBar*               windowBar    = nullptr;
+    NMainWindow::BackdropType backdropType = NMainWindow::None;
+    QColor                    backgroundColor;
 };
 
 #endif // QTNATIVEUI_NMAINWINDOW_P_H

@@ -295,7 +295,7 @@ QWidget* ButtonExample::createRadioButtons() {
     effectGroup->addButton(micaBtn, NMainWindow::Mica);
     effectGroup->addButton(micaAltBtn, NMainWindow::MicaAlt);
     effectGroup->addButton(acrylicBtn, NMainWindow::Acrylic);
-    effectGroup->addButton(dwmblurBtn, NMainWindow::DWMBlur);
+    effectGroup->addButton(dwmblurBtn, NMainWindow::Blur);
 
     // 连接信号槽，当选择改变时切换窗口效果
     connect(
@@ -304,14 +304,14 @@ QWidget* ButtonExample::createRadioButtons() {
         this,
         [this](int id) {
             if (m_mainWindow) {
-                m_mainWindow->setBackdropEffect(static_cast<NMainWindow::BackdropType>(id));
+                m_mainWindow->setBackdropType(static_cast<NMainWindow::BackdropType>(id));
             }
         },
         Qt::QueuedConnection);
 
     // 根据当前窗口效果设置选中状态
     if (m_mainWindow) {
-        int              currentEffect = m_mainWindow->backdropEffect();
+        int              currentEffect = m_mainWindow->backdropType();
         QAbstractButton* button        = effectGroup->button(currentEffect);
         if (button) {
             button->setChecked(true);
