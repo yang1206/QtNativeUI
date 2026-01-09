@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "@antfu/eslint-config": "^6.7.3",
+    "eslint": "^9.39.2",
+    "eslint-plugin-format": "^1.1.0",
+    "vitepress": "2.0.0-alpha.15",
+    "vitepress-plugin-llms": "^1.10.0"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "dependencies": {
+    "vue": "^3.5.26"
+  }
+}
