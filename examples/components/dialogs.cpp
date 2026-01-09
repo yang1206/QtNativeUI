@@ -16,6 +16,7 @@
 #include <QtNativeUI/NSpinBox.h>
 
 #include <QtNativeUI/NContentDialog.h>
+#include <QtNativeUI/NDialog.h>
 #include "QtNativeUI/NCalendarWidget.h"
 #include "widgets/ExampleSection.h"
 
@@ -42,6 +43,7 @@ void DialogsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("InfoBar", createInfoBars()));
     contentLayout->addWidget(new ExampleSection("Flyout", createFlyouts()));
     contentLayout->addWidget(new ExampleSection("Content Dialog", createContentDialogs()));
+    contentLayout->addWidget(new ExampleSection("NDialog (Frameless)", createNDialogs()));
 
     contentLayout->addStretch();
 
@@ -808,6 +810,201 @@ QWidget* DialogsExample::createContentDialogs() {
     threeButtonLayout->addWidget(threeButtonDialogButton);
     threeButtonLayout->addStretch();
     layout->addLayout(threeButtonLayout);
+
+    layout->addStretch();
+    return container;
+}
+
+QWidget* DialogsExample::createNDialogs() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(24);
+
+    QLabel* basicLabel = new QLabel("基于 QWindowKit 的无边框对话框:", container);
+    QFont   labelFont  = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    QGridLayout* gridLayout = new QGridLayout();
+    gridLayout->setSpacing(20);
+
+    NPushButton* noneButton = new NPushButton("无效果", container);
+    connect(noneButton, &NPushButton::clicked, [this]() {
+        NDialog* dialog = new NDialog(this);
+        dialog->setWindowTitle("无效果对话框");
+        dialog->setBackdropType(NDialog::None);
+        dialog->resize(400, 300);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+        QWidget*     content    = new QWidget(dialog);
+        QVBoxLayout* dlgLayout  = new QVBoxLayout(content);
+        dlgLayout->setContentsMargins(20, 10, 20, 20);
+        QLabel*      label      = new QLabel("这是一个无背景效果的 NDialog", content);
+        NPushButton* closeBtn   = new NPushButton("关闭", content);
+        connect(closeBtn, &NPushButton::clicked, dialog, &QDialog::accept);
+
+        dlgLayout->addWidget(label);
+        dlgLayout->addStretch();
+        dlgLayout->addWidget(closeBtn);
+        dialog->setContentWidget(content);
+
+        dialog->exec();
+    });
+    gridLayout->addWidget(noneButton, 0, 0);
+
+    NPushButton* blurButton = new NPushButton("Blur 效果", container);
+    connect(blurButton, &NPushButton::clicked, [this]() {
+        NDialog* dialog = new NDialog(this);
+        dialog->setWindowTitle("Blur 效果对话框");
+        dialog->setBackdropType(NDialog::Blur);
+        dialog->resize(400, 300);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+        QWidget*     content    = new QWidget(dialog);
+        QVBoxLayout* dlgLayout  = new QVBoxLayout(content);
+        dlgLayout->setContentsMargins(20, 10, 20, 20);
+        QLabel*      label      = new QLabel("这是一个 Blur 背景效果的 NDialog", content);
+        NPushButton* closeBtn   = new NPushButton("关闭", content);
+        connect(closeBtn, &NPushButton::clicked, dialog, &QDialog::accept);
+
+        dlgLayout->addWidget(label);
+        dlgLayout->addStretch();
+        dlgLayout->addWidget(closeBtn);
+        dialog->setContentWidget(content);
+
+        dialog->exec();
+    });
+    gridLayout->addWidget(blurButton, 0, 1);
+
+    NPushButton* acrylicButton = new NPushButton("Acrylic 效果", container);
+    connect(acrylicButton, &NPushButton::clicked, [this]() {
+        NDialog* dialog = new NDialog(this);
+        dialog->setWindowTitle("Acrylic 效果对话框");
+        dialog->setBackdropType(NDialog::Acrylic);
+        dialog->resize(400, 300);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+        QWidget*     content    = new QWidget(dialog);
+        QVBoxLayout* dlgLayout  = new QVBoxLayout(content);
+        dlgLayout->setContentsMargins(20, 10, 20, 20);
+        QLabel*      label      = new QLabel("这是一个 Acrylic 背景效果的 NDialog (Windows 10+)", content);
+        NPushButton* closeBtn   = new NPushButton("关闭", content);
+        connect(closeBtn, &NPushButton::clicked, dialog, &QDialog::accept);
+
+        dlgLayout->addWidget(label);
+        dlgLayout->addStretch();
+        dlgLayout->addWidget(closeBtn);
+        dialog->setContentWidget(content);
+
+        dialog->exec();
+    });
+    gridLayout->addWidget(acrylicButton, 0, 2);
+
+    NPushButton* micaButton = new NPushButton("Mica 效果", container);
+    connect(micaButton, &NPushButton::clicked, [this]() {
+        NDialog* dialog = new NDialog(this);
+        dialog->setWindowTitle("Mica 效果对话框");
+        dialog->setBackdropType(NDialog::Mica);
+        dialog->resize(400, 300);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+        QWidget*     content    = new QWidget(dialog);
+        QVBoxLayout* dlgLayout  = new QVBoxLayout(content);
+        dlgLayout->setContentsMargins(20, 10, 20, 20);
+        QLabel*      label      = new QLabel("这是一个 Mica 背景效果的 NDialog (Windows 11+)", content);
+        NPushButton* closeBtn   = new NPushButton("关闭", content);
+        connect(closeBtn, &NPushButton::clicked, dialog, &QDialog::accept);
+
+        dlgLayout->addWidget(label);
+        dlgLayout->addStretch();
+        dlgLayout->addWidget(closeBtn);
+        dialog->setContentWidget(content);
+
+        dialog->exec();
+    });
+    gridLayout->addWidget(micaButton, 1, 0);
+
+    NPushButton* micaAltButton = new NPushButton("MicaAlt 效果", container);
+    connect(micaAltButton, &NPushButton::clicked, [this]() {
+        NDialog* dialog = new NDialog(this);
+        dialog->setWindowTitle("MicaAlt 效果对话框");
+        dialog->setBackdropType(NDialog::MicaAlt);
+        dialog->resize(400, 300);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+        QWidget*     content    = new QWidget(dialog);
+        QVBoxLayout* dlgLayout  = new QVBoxLayout(content);
+        dlgLayout->setContentsMargins(20, 10, 20, 20);
+        QLabel*      label      = new QLabel("这是一个 MicaAlt 背景效果的 NDialog (Windows 11+)", content);
+        NPushButton* closeBtn   = new NPushButton("关闭", content);
+        connect(closeBtn, &NPushButton::clicked, dialog, &QDialog::accept);
+
+        dlgLayout->addWidget(label);
+        dlgLayout->addStretch();
+        dlgLayout->addWidget(closeBtn);
+        dialog->setContentWidget(content);
+
+        dialog->exec();
+    });
+    gridLayout->addWidget(micaAltButton, 1, 1);
+
+    layout->addLayout(gridLayout);
+
+    QLabel* customTitleBarLabel = new QLabel("自定义标题栏:", container);
+    customTitleBarLabel->setFont(labelFont);
+    layout->addWidget(customTitleBarLabel);
+
+    QHBoxLayout* customLayout = new QHBoxLayout();
+    NPushButton* customTitleBarButton = new NPushButton("显示带自定义标题栏的对话框", container);
+    connect(customTitleBarButton, &NPushButton::clicked, [this]() {
+        NDialog* dialog = new NDialog(this);
+        dialog->setBackdropType(NDialog::Mica);
+        dialog->resize(450, 350);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+        QWidget*     titleBar       = new QWidget(dialog);
+        QHBoxLayout* titleBarLayout = new QHBoxLayout(titleBar);
+        titleBarLayout->setContentsMargins(10, 5, 5, 5);
+
+        QLabel* titleLabel = new QLabel("自定义标题栏", titleBar);
+        QFont   titleFont  = titleLabel->font();
+        titleFont.setBold(true);
+        titleLabel->setFont(titleFont);
+
+        NPushButton* closeBtn = new NPushButton("×", titleBar);
+        closeBtn->setFixedSize(30, 30);
+        connect(closeBtn, &NPushButton::clicked, dialog, &QDialog::reject);
+
+        titleBarLayout->addWidget(titleLabel);
+        titleBarLayout->addStretch();
+        titleBarLayout->addWidget(closeBtn);
+
+        titleBar->setFixedHeight(40);
+        dialog->setTitleBar(titleBar);
+        dialog->setHitTestVisible(closeBtn, true);
+
+        QWidget*     contentWidget = new QWidget(dialog);
+        QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
+        contentLayout->setContentsMargins(20, 10, 20, 20);
+
+        QLabel* contentLabel = new QLabel("这个对话框使用了自定义标题栏，\n标题栏区域可以拖动窗口，\n关闭按钮可以正常点击。", contentWidget);
+        contentLabel->setWordWrap(true);
+
+        NPushButton* okBtn = new NPushButton("确定", contentWidget);
+        connect(okBtn, &NPushButton::clicked, dialog, &QDialog::accept);
+
+        contentLayout->addWidget(contentLabel);
+        contentLayout->addStretch();
+        contentLayout->addWidget(okBtn, 0, Qt::AlignRight);
+
+        dialog->setContentWidget(contentWidget);
+
+        dialog->exec();
+    });
+    customLayout->addWidget(customTitleBarButton);
+    customLayout->addStretch();
+    layout->addLayout(customLayout);
 
     layout->addStretch();
     return container;

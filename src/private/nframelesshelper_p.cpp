@@ -32,6 +32,7 @@ void NFramelessHelper::setup()
 #endif
 
     setupThemeConnection();
+    updateBackgroundColor();
 }
 
 void NFramelessHelper::setupThemeConnection()

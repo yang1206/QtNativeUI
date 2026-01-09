@@ -14,6 +14,7 @@ class DialogsExample : public QWidget {
     QWidget* createFlyouts();
     QWidget* createContentDialogs();
     QWidget* createInfoBars();
+    QWidget* createNDialogs();
 
     NScrollArea* m_scrollArea;
 };
