@@ -31,7 +31,6 @@ class NAutoSuggestDelegate;
 class QWidget;
 class QPropertyAnimation;
 
-// 下拉列表容器
 class NAutoSuggestPopup : public QWidget {
     Q_OBJECT
 

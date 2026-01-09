@@ -3,27 +3,62 @@
 
 #include "QtNativeUI/NMainWindow.h"
 
-class NMainWindowPrivate : public QObject {
-    Q_OBJECT
-  public:
-    explicit NMainWindowPrivate(QObject* parent = nullptr);
-    ~NMainWindowPrivate() override;
+namespace QWK {
+class WidgetWindowAgent;
+}
 
-    NMainWindow* q_ptr;
-    // 背景效果类型
-    NMainWindow::BackdropType backdropEffect = NMainWindow::None;
-    // 主题相关
-    bool isDarkMode = false;
-    // 窗口状态
-    bool isWindowActive = true;
-    // 窗口属性
-    QColor backgroundColor;
+class NWindowBar;
 
-    // 设置背景效果
-    void setBackdropEffect(NMainWindow::BackdropType type);
+class NMainWindowPrivate {
+    Q_DECLARE_PUBLIC(NMainWindow)
 
-    // 更新窗口背景颜色（用于None模式）
+public:
+    NMainWindowPrivate();
+    ~NMainWindowPrivate();
+
+    // ========== 平台能力查询 (编译期常量) ==========
+    static constexpr bool useNativeSystemButtons()
+    {
+#ifdef Q_OS_MAC
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    static constexpr bool supportsMica()
+    {
+#ifdef Q_OS_WIN
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    static constexpr bool supportsAcrylic()
+    {
+#ifdef Q_OS_WIN
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    // ========== 平台相关操作 ==========
+    void setupWindowAgent();
+    void setupThemeConnection();
+    void registerSystemButtons(NWindowBar* bar);
+    void applyBackdropEffect(NMainWindow::BackdropType type);
+
+    // ========== 通用操作 ==========
     void updateBackgroundColor();
+
+    // ========== 成员变量 ==========
+    NMainWindow*              q_ptr        = nullptr;
+    QWK::WidgetWindowAgent*   windowAgent  = nullptr;
+    NWindowBar*               windowBar    = nullptr;
+    NMainWindow::BackdropType backdropType = NMainWindow::None;
+    QColor                    backgroundColor;
 };
 
 #endif // QTNATIVEUI_NMAINWINDOW_P_H

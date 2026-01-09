@@ -75,12 +75,19 @@ void NToggleButton::init() {
         Q_D(NToggleButton);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
+
+        d->invalidateColorCache();
+
         updateAccentColors();
         updateFluentIcon();
         update();
     });
 
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
+        Q_D(NToggleButton);
+
+        d->invalidateColorCache();
+
         updateAccentColors();
         update();
     });
@@ -91,6 +98,9 @@ void NToggleButton::setChecked(bool checked) {
     if (d->_checked != checked) {
         d->_checked = checked;
         d->startAlphaAnimation(checked);
+
+        d->invalidateColorCache();
+
         updateFluentIcon();
         emit toggled(checked);
     }
@@ -150,6 +160,7 @@ void NToggleButton::setFluentIcon(NRegularIconType::Icon icon, int size, const Q
     d->_fluentIcon.customColor = color;
 
     updateFluentIcon();
+    update();
 }
 
 void NToggleButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QColor& color) {
@@ -158,7 +169,9 @@ void NToggleButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QC
     d->_fluentIcon.iconCode    = static_cast<quint32>(icon);
     d->_fluentIcon.size        = size;
     d->_fluentIcon.customColor = color;
+
     updateFluentIcon();
+    update();
 }
 
 QIcon NToggleButton::icon() const {
@@ -198,19 +211,22 @@ void NToggleButton::paintEvent(QPaintEvent* event) {
     drawBorder(&painter);
     drawIcon(&painter);
     drawText(&painter);
-    updateFluentIcon();
 }
 
 void NToggleButton::mousePressEvent(QMouseEvent* event) {
     Q_D(NToggleButton);
     d->_isPressed = true;
+    d->invalidateColorCache();
+    updateFluentIcon();
     update();
-    QWidget::mouseReleaseEvent(event);
+    QWidget::mousePressEvent(event);
 }
 
 void NToggleButton::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NToggleButton);
     d->_isPressed = false;
+    d->invalidateColorCache();
+    updateFluentIcon();
     if (rect().contains(event->pos())) {
         bool wasChecked = d->_pCheckAlpha > 127;
         toggle();
@@ -225,10 +241,17 @@ void NToggleButton::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 bool NToggleButton::event(QEvent* event) {
+    Q_D(NToggleButton);
     switch (event->type()) {
         case QEvent::Enter:
         case QEvent::Leave: {
+            d->invalidateColorCache();
             update();
+            break;
+        }
+        case QEvent::EnabledChange: {
+            d->invalidateColorCache();
+            updateFluentIcon();
             break;
         }
         default: {
@@ -249,26 +272,33 @@ void NToggleButton::drawBackground(QPainter* painter) {
 
     if (d->_isAnimationFinished) {
         QColor bgColor;
-        if (d->_checked) {
-            if (!isEnabled()) {
-                bgColor = d->_pAccentDisabledColor;
-            } else if (d->_isPressed) {
-                bgColor = d->_pAccentPressColor;
-            } else if (underMouse()) {
-                bgColor = d->_pAccentHoverColor;
+        if (!d->_backgroundColorCacheValid) {
+            if (d->_checked) {
+                if (!isEnabled()) {
+                    bgColor = d->_pAccentDisabledColor;
+                } else if (d->_isPressed) {
+                    bgColor = d->_pAccentPressColor;
+                } else if (underMouse()) {
+                    bgColor = d->_pAccentHoverColor;
+                } else {
+                    bgColor = d->_pAccentDefaultColor;
+                }
             } else {
-                bgColor = d->_pAccentDefaultColor;
+                if (!isEnabled()) {
+                    bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+                } else if (d->_isPressed) {
+                    bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+                } else if (underMouse()) {
+                    bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+                } else {
+                    bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+                }
             }
+
+            d->_cachedBackgroundColor     = bgColor;
+            d->_backgroundColorCacheValid = true;
         } else {
-            if (!isEnabled()) {
-                bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
-            } else if (d->_isPressed) {
-                bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
-            } else if (underMouse()) {
-                bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
-            } else {
-                bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
-            }
+            bgColor = d->_cachedBackgroundColor;
         }
 
         painter->setPen(Qt::NoPen);
@@ -389,18 +419,24 @@ void NToggleButton::drawText(QPainter* painter) {
                          height() - 2 * d->_shadowBorderWidth - margins.top() - margins.bottom());
 
     QColor textColor;
-    if (d->_checked) {
-        textColor = isEnabled() ? d->_pAccentTextColor : d->_pAccentDisabledTextColor;
-    } else {
-        if (!isEnabled()) {
-            textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
+    if (!d->_textColorCacheValid) {
+        if (d->_checked) {
+            textColor = isEnabled() ? d->_pAccentTextColor : d->_pAccentDisabledTextColor;
         } else {
-            if (d->_isPressed) {
-                textColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
+            if (!isEnabled()) {
+                textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
             } else {
-                textColor = d->_isDark ? d->_pDarkTextDefaultColor : d->_pLightTextDefaultColor;
+                if (d->_isPressed) {
+                    textColor = d->_isDark ? d->_pDarkTextPressColor : d->_pLightTextPressColor;
+                } else {
+                    textColor = d->_isDark ? d->_pDarkTextDefaultColor : d->_pLightTextDefaultColor;
+                }
             }
         }
+        d->_cachedTextColor     = textColor;
+        d->_textColorCacheValid = true;
+    } else {
+        textColor = d->_cachedTextColor;
     }
 
     painter->setPen(textColor);
@@ -439,6 +475,11 @@ void NToggleButton::updateAccentColors() {
 void NToggleButton::updateFluentIcon() {
     Q_D(NToggleButton);
 
+    if (d->_fluentIcon.iconCode == 0) {
+        d->_icon = QIcon();
+        return;
+    }
+
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
         if (d->_checked) {
@@ -458,13 +499,15 @@ void NToggleButton::updateFluentIcon() {
         iconColor = d->_fluentIcon.customColor;
     }
 
+    QIcon generatedIcon;
     if (d->_fluentIcon.isRegular) {
-        d->_icon = (nIcon->fromRegular(
-            static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
+        generatedIcon = nIcon->fromRegular(
+            static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     } else {
-        d->_icon = (nIcon->fromFilled(
-            static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
+        generatedIcon = nIcon->fromFilled(
+            static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     }
 
+    d->_icon = generatedIcon;
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
 }

@@ -1,5 +1,4 @@
 ﻿#include "QtNativeUI/NCalendarDatePicker.h"
-#include <QEvent>
 #include <QResizeEvent>
 #include "../private/ncalendardatepicker_p.h"
 

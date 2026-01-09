@@ -70,12 +70,12 @@ void NToolButton::init() {
     setObjectName("NToolButton");
     setStyleSheet("#NToolButton{background-color:transparent;}");
 
-    setToolButtonStyle(Qt::ToolButtonIconOnly);
-
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NToolButton);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
+
+        d->invalidateColorCache();
 
         if (d->_buttonType == NToolButtonPrivate::Accent) {
             updateAccentColors();
@@ -87,6 +87,7 @@ void NToolButton::init() {
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
         Q_D(NToolButton);
         if (d->_buttonType == NToolButtonPrivate::Accent) {
+            d->invalidateColorCache();
             updateAccentColors();
             update();
         }
@@ -102,6 +103,8 @@ void NToolButton::setButtonType(ButtonType type) {
             updateAccentColors();
         }
 
+        updateFluentIcon();
+
         update();
     }
 }
@@ -114,6 +117,7 @@ NToolButton::ButtonType NToolButton::buttonType() const {
 void NToolButton::enterEvent(QEnterEvent* event) {
     Q_D(NToolButton);
     d->_isHovered = true;
+    d->invalidateColorCache();
     update();
     QToolButton::enterEvent(event);
 }
@@ -121,6 +125,7 @@ void NToolButton::enterEvent(QEnterEvent* event) {
 void NToolButton::leaveEvent(QEvent* event) {
     Q_D(NToolButton);
     d->_isHovered = false;
+    d->invalidateColorCache();
     update();
     QToolButton::leaveEvent(event);
 }
@@ -128,6 +133,8 @@ void NToolButton::leaveEvent(QEvent* event) {
 void NToolButton::mousePressEvent(QMouseEvent* event) {
     Q_D(NToolButton);
     d->_isPressed = true;
+    d->invalidateColorCache();
+    updateFluentIcon();
     update();
     QToolButton::mousePressEvent(event);
 }
@@ -135,13 +142,19 @@ void NToolButton::mousePressEvent(QMouseEvent* event) {
 void NToolButton::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NToolButton);
     d->_isPressed = false;
+    d->invalidateColorCache();
+    updateFluentIcon();
     update();
     QToolButton::mouseReleaseEvent(event);
 }
 
 void NToolButton::changeEvent(QEvent* event) {
+    Q_D(NToolButton);
     if (event->type() == QEvent::EnabledChange || event->type() == QEvent::PaletteChange ||
         event->type() == QEvent::LanguageChange) {
+        // 状态变化时失效缓存
+        d->invalidateColorCache();
+        updateFluentIcon();
         update();
     }
     QToolButton::changeEvent(event);
@@ -172,7 +185,6 @@ void NToolButton::paintEvent(QPaintEvent* event) {
     drawBorder(&painter);
     drawIcon(&painter);
     drawText(&painter);
-    updateFluentIcon();
 }
 
 QSize NToolButton::sizeHint() const {
@@ -213,49 +225,51 @@ void NToolButton::drawBackground(QPainter* painter) {
                          width() - 2 * (d->_shadowBorderWidth),
                          height() - 2 * d->_shadowBorderWidth);
 
-    if (d->_buttonType == NToolButtonPrivate::Accent) {
-        QColor bgColor;
-        if (!isEnabled()) {
-            bgColor = d->_accentDisabledColor;
-        } else if (d->_isPressed) {
-            bgColor = d->_accentPressColor;
-        } else if (d->_isHovered) {
-            bgColor = d->_accentHoverColor;
-        } else {
-            bgColor = d->_accentDefaultColor;
-        }
-
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(bgColor);
-        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
-    } else {
-        QColor bgColor;
-        if (!isEnabled()) {
-            bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
-        } else if (d->_isPressed) {
-            bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
-        } else if (d->_isHovered) {
-            bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
-        } else {
-            if (d->_pTransparentBackground) {
-                bgColor = Qt::transparent;
+    QColor bgColor;
+    if (!d->_colorCacheValid) {
+        if (d->_buttonType == NToolButtonPrivate::Accent) {
+            if (!isEnabled()) {
+                bgColor = d->_accentDisabledColor;
+            } else if (d->_isPressed) {
+                bgColor = d->_accentPressColor;
+            } else if (d->_isHovered) {
+                bgColor = d->_accentHoverColor;
             } else {
-                bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+                bgColor = d->_accentDefaultColor;
+            }
+        } else {
+            if (!isEnabled()) {
+                bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+            } else if (d->_isPressed) {
+                bgColor = d->_isDark ? d->_pDarkPressColor : d->_pLightPressColor;
+            } else if (d->_isHovered) {
+                bgColor = d->_isDark ? d->_pDarkHoverColor : d->_pLightHoverColor;
+            } else {
+                if (d->_pTransparentBackground) {
+                    bgColor = Qt::transparent;
+                } else {
+                    bgColor = d->_isDark ? d->_pDarkDefaultColor : d->_pLightDefaultColor;
+                }
             }
         }
 
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(bgColor);
-        painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+        d->_cachedBackgroundColor = bgColor;
+        d->_colorCacheValid       = true;
+    } else {
+        bgColor = d->_cachedBackgroundColor;
     }
 
-    if ((!d->_isPressed) && (!d->_isHovered) && (!d->_pTransparentBackground)) {
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(bgColor);
+    painter->drawRoundedRect(foregroundRect, d->_pBorderRadius, d->_pBorderRadius);
+
+    if ((!d->_isPressed) && (!d->_pTransparentBackground) && !d->_isDark && isEnabled()) {
         if (d->_buttonType == NToolButtonPrivate::Accent) {
             painter->restore();
             return;
         }
 
-        painter->setPen(NThemeColor(NFluentColorKey::DividerStrokeColorDefault, d->_themeMode));
+        painter->setPen(NThemeColor(NFluentColorKey::ControlBaseLine, d->_themeMode));
         painter->drawLine(foregroundRect.x() + d->_pBorderRadius,
                           height() - d->_shadowBorderWidth,
                           foregroundRect.width(),
@@ -270,7 +284,7 @@ void NToolButton::drawBorder(QPainter* painter) {
     if (d->_pTransparentBackground) {
         return;
     }
-    if (!d->_isHovered && !d->_isPressed && d->_buttonType != NToolButtonPrivate::Accent) {
+    if (d->_buttonType == NToolButtonPrivate::Accent) {
         return;
     }
 
@@ -434,6 +448,7 @@ void NToolButton::setAccentColor(const NAccentColor& color) {
 
     if (d->_buttonType != NToolButtonPrivate::Accent) {
         setButtonType(Accent);
+        return; // setButtonType会调用updateFluentIcon，避免重复调用
     }
 
     d->_accentDefaultColor  = color.normal();
@@ -443,6 +458,8 @@ void NToolButton::setAccentColor(const NAccentColor& color) {
 
     d->_accentTextColor         = NThemeColor(NFluentColorKey::TextOnAccentFillColorPrimary, d->_themeMode);
     d->_accentDisabledTextColor = NThemeColor(NFluentColorKey::TextOnAccentFillColorDisabled, d->_themeMode);
+
+    updateFluentIcon();
 
     update();
 }
@@ -465,6 +482,8 @@ void NToolButton::setFluentIcon(NRegularIconType::Icon icon, int size, const QCo
     d->_fluentIcon.isFluentIcon = true;
 
     updateFluentIcon();
+    updateToolButtonStyle();
+    update();
 }
 
 void NToolButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QColor& color) {
@@ -474,7 +493,10 @@ void NToolButton::setFluentIcon(NFilledIconType::Icon icon, int size, const QCol
     d->_fluentIcon.size         = size;
     d->_fluentIcon.customColor  = color;
     d->_fluentIcon.isFluentIcon = true;
+
     updateFluentIcon();
+    updateToolButtonStyle();
+    update();
 }
 
 void NToolButton::updateFluentIcon() {
@@ -490,11 +512,7 @@ void NToolButton::updateFluentIcon() {
     QColor iconColor;
     if (!d->_fluentIcon.customColor.isValid()) {
         if (d->_buttonType == NToolButtonPrivate::Accent) {
-            if (!isEnabled()) {
-                iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
-            } else {
-                iconColor = d->_accentTextColor;
-            }
+            iconColor = isEnabled() ? d->_accentTextColor : d->_accentDisabledTextColor;
         } else {
             if (!isEnabled()) {
                 iconColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
@@ -510,13 +528,51 @@ void NToolButton::updateFluentIcon() {
         iconColor = d->_fluentIcon.customColor;
     }
 
+    QIcon generatedIcon;
     if (d->_fluentIcon.isRegular) {
-        setIcon(nIcon->fromRegular(
-            static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
+        generatedIcon = nIcon->fromRegular(
+            static_cast<NRegularIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     } else {
-        setIcon(nIcon->fromFilled(
-            static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor));
+        generatedIcon = nIcon->fromFilled(
+            static_cast<NFilledIconType::Icon>(d->_fluentIcon.iconCode), d->_fluentIcon.size, iconColor);
     }
 
+    setIcon(generatedIcon);
     setIconSize(QSize(d->_fluentIcon.size, d->_fluentIcon.size));
+}
+
+void NToolButton::setText(const QString& text) {
+    QToolButton::setText(text);
+    updateToolButtonStyle();
+}
+
+void NToolButton::setIcon(const QIcon& icon) {
+    QToolButton::setIcon(icon);
+    updateToolButtonStyle();
+}
+
+void NToolButton::setToolButtonStyle(Qt::ToolButtonStyle style) {
+    Q_D(NToolButton);
+    d->_userSetStyle = true;
+    QToolButton::setToolButtonStyle(style);
+}
+
+void NToolButton::updateToolButtonStyle() {
+    Q_D(NToolButton);
+    
+    // 如果用户已经手动设置过样式，就不要自动更改
+    if (d->_userSetStyle) {
+        return;
+    }
+    
+    bool hasIcon = !icon().isNull();
+    bool hasText = !text().isEmpty();
+    
+    if (hasIcon && hasText) {
+        QToolButton::setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    } else if (hasIcon && !hasText) {
+        QToolButton::setToolButtonStyle(Qt::ToolButtonIconOnly);
+    } else if (!hasIcon && hasText) {
+        QToolButton::setToolButtonStyle(Qt::ToolButtonTextOnly);
+    }
 }

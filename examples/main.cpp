@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QtNativeUI/NConfig.h>
+#include "QtNativeUI/NPushButton.h"
 #include "mainwindow.h"
 
 int main(int argc, char* argv[]) {

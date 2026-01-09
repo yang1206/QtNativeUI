@@ -43,7 +43,7 @@ void NAutoSuggestPopup::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.save();
     painter.setRenderHint(QPainter::Antialiasing);
-    // 绘制背景
+
     painter.setPen(NThemeColor(NFluentColorKey::ControlStrokeColorSecondary, _themeMode));
     painter.setBrush(NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, _themeMode));
     QRect foregroundRect(6, 0, rect().width() - 2 * 6, rect().height() - 6);
@@ -51,7 +51,6 @@ void NAutoSuggestPopup::paintEvent(QPaintEvent* event) {
     painter.restore();
 }
 
-// NAutoSuggestBoxPrivate 实现
 NAutoSuggestBoxPrivate::NAutoSuggestBoxPrivate(QObject* parent) : QObject(parent) { _themeMode = nTheme->themeMode(); }
 
 NAutoSuggestBoxPrivate::~NAutoSuggestBoxPrivate() {}
@@ -59,25 +58,24 @@ NAutoSuggestBoxPrivate::~NAutoSuggestBoxPrivate() {}
 void NAutoSuggestBoxPrivate::setupUI() {
     Q_Q(NAutoSuggestBox);
 
-    // 创建输入框
     _lineEdit = new NLineEdit(q);
     _lineEdit->setFixedHeight(35);
     _lineEdit->setPlaceholderText("查找功能");
     _lineEdit->setClearButtonEnabled(true);
     _lineEdit->addAction(NRegularIconType::Search16Regular, NLineEdit::TrailingPosition);
     _lineEdit->installEventFilter(this);
-    // 创建布局
+
     QVBoxLayout* mainLayout = new QVBoxLayout(q);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
     mainLayout->addWidget(_lineEdit);
 
-    // 创建弹出窗口
+
     _popup = new NAutoSuggestPopup(q->window());
-    // 设置弹出窗口布局
+
     _popupLayout = new QVBoxLayout(_popup);
     _popupLayout->setContentsMargins(0, 0, 0, 0);
-    // 创建列表视图
+
     _listView                   = new NBaseListView(_popup);
     NScrollBar* floatVScrollBar = new NScrollBar(_listView->verticalScrollBar(), _listView);
     // _listView->setVerticalScrollBar(floatVScrollBar);
@@ -89,7 +87,7 @@ void NAutoSuggestBoxPrivate::setupUI() {
     _listView->setItemDelegate(_delegate);
     _listView->installEventFilter(this);
     _popup->hide();
-    // 连接信号
+
     connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
     connect(_lineEdit, &NLineEdit::focusIn, this, &NAutoSuggestBoxPrivate::onTextChanged);
     connect(_lineEdit, &NLineEdit::focusOut, this, [this]() { _startCloseAnimation(); });
@@ -231,16 +229,16 @@ void NAutoSuggestBoxPrivate::_startCloseAnimation() {
 
 bool NAutoSuggestBoxPrivate::eventFilter(QObject* watched, QEvent* event) {
     Q_Q(NAutoSuggestBox);
-    // 处理LineEdit的键盘事件
+
     if (watched == _lineEdit && event->type() == QEvent::KeyPress) {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
         if (_popup->isVisible()) {
             if (keyEvent->key() == Qt::Key_Down) {
                 selectNextSuggestion();
-                return true; // 阻止事件传播
+                return true;
             } else if (keyEvent->key() == Qt::Key_Up) {
                 selectPreviousSuggestion();
-                return true; // 阻止事件传播
+                return true;
             } else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
                 if (_currentIndex >= 0 && _currentIndex < _model->rowCount()) {
                     applySelectedSuggestion();

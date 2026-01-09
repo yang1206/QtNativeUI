@@ -1,7 +1,6 @@
 #include "ncalendarwidget_p.h"
 
 #include <QApplication>
-#include <QPropertyAnimation>
 #include <QScrollBar>
 
 #include "QtNativeUI/NCalendarWidget.h"
@@ -158,11 +157,9 @@ void NCalendarWidgetPrivate::_doSwitchAnimation(bool isZoomIn) {
         newPixZoomAnimation->start(QAbstractAnimation::DeleteWhenStopped);
     });
     if (isZoomIn) {
-        // 放大 年-月-日
         oldPixZoomAnimation->setStartValue(1);
         oldPixZoomAnimation->setEndValue(1.15);
     } else {
-        // 缩小 日-月-年
         oldPixZoomAnimation->setStartValue(1);
         oldPixZoomAnimation->setEndValue(0.85);
     }
@@ -227,47 +224,42 @@ void NCalendarWidgetPrivate::handleDateSelection(const QDate& date) {
             break;
 
         case NCalendarWidget::MultipleDate:
-            // 切换日期选择状态
             if (_selectedDates.contains(date)) {
                 _selectedDates.removeAll(date);
             } else {
                 _selectedDates.append(date);
             }
-            _pSelectedDate = date; // 更新当前选中
+            _pSelectedDate = date;
             emit q->pSelectedDateChanged();
             emit q->selectedDatesChanged(_selectedDates);
             emit q->clicked(_pSelectedDate);
             break;
 
         case NCalendarWidget::DateRange:
-            // 如果第一个日期未设置或已有完整范围，从新开始
             if (!_selectedDateRange.first.isValid() ||
                 (_selectedDateRange.first.isValid() && _selectedDateRange.second.isValid())) {
                 _selectedDateRange.first  = date;
                 _selectedDateRange.second = QDate();
-            } // 否则，设置结束日期
+            }
             else {
                 _selectedDateRange.second = date;
-                // 确保开始日期不晚于结束日期
                 if (_selectedDateRange.first > _selectedDateRange.second) {
                     std::swap(_selectedDateRange.first, _selectedDateRange.second);
                 }
                 emit q->selectedDateRangeChanged(_selectedDateRange);
             }
-            _pSelectedDate = date; // 更新当前选中
+            _pSelectedDate = date;
             emit q->pSelectedDateChanged();
             emit q->clicked(_pSelectedDate);
             break;
     }
-    // 更新视图
     updateDateSelection();
 }
 
-// 更新日期选择状态
+
 void NCalendarWidgetPrivate::updateDateSelection() {
-    // 清除现有选择
+
     _calendarView->clearSelection();
-    // 根据模式设置选择
     switch (_selectionMode) {
         case NCalendarWidget::SingleDate:
             if (_pSelectedDate.isValid()) {
@@ -292,7 +284,6 @@ void NCalendarWidgetPrivate::updateDateSelection() {
                     currentDate = currentDate.addDays(1);
                 }
             } else if (_selectedDateRange.first.isValid()) {
-                // 只有起始日期时
                 QModelIndex index = _calendarModel->getIndexFromDate(_selectedDateRange.first);
                 _calendarView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
             }

@@ -6,6 +6,7 @@
 
 #include <QPainterPath>
 #include <QStyleOptionSlider>
+#include <QtNativeUI/NToolTip.h>
 #include "QtNativeUI/NSlider.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -17,7 +18,6 @@ void NSliderPrivate::Style::drawComplexControl(ComplexControl             contro
                                                const QWidget*             widget) const {
     if (control == CC_Slider) {
         if (const QStyleOptionSlider* sliderOption = qstyleoption_cast<const QStyleOptionSlider*>(option)) {
-            // 绘制轨道、进度、滑块和刻度
             drawTrack(sliderOption, painter, widget);
             drawProgress(sliderOption, painter, widget);
 
@@ -46,10 +46,8 @@ QStyle::SubControl NSliderPrivate::Style::hitTestComplexControl(ComplexControl  
                                                                 const QWidget*             widget) const {
     if (control == CC_Slider) {
         if (const QStyleOptionSlider* sliderOption = qstyleoption_cast<const QStyleOptionSlider*>(option)) {
-            // 计算滑块区域
             QRect handleRect;
 
-            // 获取滑块位置
             int sliderPos = sliderPositionFromValue(sliderOption->minimum,
                                                     sliderOption->maximum,
                                                     sliderOption->sliderPosition,
@@ -69,8 +67,6 @@ QStyle::SubControl NSliderPrivate::Style::hitTestComplexControl(ComplexControl  
                                    d->_pThumbDiameter,
                                    d->_pThumbDiameter);
             }
-
-            // 扩大点击区域，使其更容易点击
             int   extraMargin        = 4;
             QRect expandedHandleRect = handleRect.adjusted(-extraMargin, -extraMargin, extraMargin, extraMargin);
 
@@ -140,18 +136,31 @@ void NSliderPrivate::Style::drawProgress(const QStyleOptionSlider*       option,
     double ratio = (option->sliderPosition - option->minimum) / static_cast<double>(option->maximum - option->minimum);
 
     if (option->orientation == Qt::Horizontal) {
-        int   trackY        = (option->rect.height() - d->_pTrackHeight) / 2;
-        int   progressWidth = static_cast<int>((option->rect.width() - 2 * padding) * ratio);
-        QRect progressRect(padding, trackY, progressWidth, d->_pTrackHeight);
+        int trackY        = (option->rect.height() - d->_pTrackHeight) / 2;
+        int progressWidth = static_cast<int>((option->rect.width() - 2 * padding) * ratio);
+
+        QRect progressRect;
+        if (option->upsideDown) {
+            int progressX = option->rect.width() - padding - progressWidth;
+            progressRect  = QRect(progressX, trackY, progressWidth, d->_pTrackHeight);
+        } else {
+            progressRect = QRect(padding, trackY, progressWidth, d->_pTrackHeight);
+        }
 
         painter->setPen(Qt::NoPen);
         painter->setBrush(progressColor);
         painter->drawRoundedRect(progressRect, d->_pTrackCornerRadius, d->_pTrackCornerRadius);
     } else {
-        int   trackX         = (option->rect.width() - d->_pTrackHeight) / 2;
-        int   progressHeight = static_cast<int>((option->rect.height() - 2 * padding) * ratio);
-        int   progressY      = option->rect.height() - padding - progressHeight;
-        QRect progressRect(trackX, progressY, d->_pTrackHeight, progressHeight);
+        int trackX         = (option->rect.width() - d->_pTrackHeight) / 2;
+        int progressHeight = static_cast<int>((option->rect.height() - 2 * padding) * ratio);
+
+        QRect progressRect;
+        if (option->upsideDown) {
+            int progressY = option->rect.height() - padding - progressHeight;
+            progressRect  = QRect(trackX, progressY, d->_pTrackHeight, progressHeight);
+        } else {
+            progressRect = QRect(trackX, padding, d->_pTrackHeight, progressHeight);
+        }
 
         painter->setPen(Qt::NoPen);
         painter->setBrush(progressColor);
@@ -186,18 +195,15 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
         thumbCenter = QPointF(thumbX, thumbY);
     }
 
-    // 绘制外圆
     QColor outerColor = d->_isDark ? d->_pDarkThumbOuterColor : d->_pLightThumbOuterColor;
-    painter->setPen(Qt::NoPen);
+    QColor borderColor =
+        NThemeColor(NFluentColorKey::ControlStrokeColorDefault, d->_isDark ? NThemeType::Dark : NThemeType::Light);
+    qreal outerRadius = (d->_pThumbDiameter / 2.0) - 1;
+
+    painter->setPen(QPen(borderColor, 1));
     painter->setBrush(outerColor);
+    painter->drawEllipse(thumbCenter, outerRadius, outerRadius);
 
-    // 使用QPainterPath绘制圆形，可以提高绘制质量
-    QPainterPath outerPath;
-    qreal        outerRadius = d->_pThumbDiameter / 2.0;
-    outerPath.addEllipse(thumbCenter, outerRadius, outerRadius);
-    painter->drawPath(outerPath);
-
-    // 绘制内圆
     QColor innerColor;
     if (!(option->state & QStyle::State_Enabled)) {
         innerColor = d->_accentDisabledColor;
@@ -209,14 +215,11 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
         innerColor = d->_accentColor;
     }
 
-    // 使用thumbScale属性控制内圆大小，恢复动画效果
     qreal innerRadius = (d->_pThumbInnerDiameter / 2.0) * d->_thumbScale;
 
+    painter->setPen(Qt::NoPen);
     painter->setBrush(innerColor);
-
-    QPainterPath innerPath;
-    innerPath.addEllipse(thumbCenter, innerRadius, innerRadius);
-    painter->drawPath(innerPath);
+    painter->drawEllipse(thumbCenter, innerRadius, innerRadius);
 
     painter->restore();
 }
@@ -224,7 +227,12 @@ void NSliderPrivate::Style::drawHandle(const QStyleOptionSlider*       option,
 void NSliderPrivate::Style::drawTicks(const QStyleOptionSlider*       option,
                                       QPainter*                       painter,
                                       [[maybe_unused]] const QWidget* widget) const {
+    if (option->tickPosition == QSlider::NoTicks) {
+        return;
+    }
+
     painter->save();
+    painter->setRenderHints(QPainter::Antialiasing);
 
     QColor tickColor;
     if (!(option->state & QStyle::State_Enabled)) {
@@ -235,45 +243,87 @@ void NSliderPrivate::Style::drawTicks(const QStyleOptionSlider*       option,
 
     painter->setPen(QPen(tickColor, d->_pTickThickness));
 
-    int padding    = d->_pThumbDiameter / 2;
-    int valueRange = option->maximum - option->minimum;
-
     int interval = option->tickInterval;
     if (interval <= 0) {
-        interval = qMax(1, valueRange / 10);
+        interval = option->pageStep;
+        if (interval <= 0) {
+            interval = 1;
+        }
     }
 
+    int valueRange = option->maximum - option->minimum;
+    if (valueRange <= 0) {
+        painter->restore();
+        return;
+    }
+
+    int padding = d->_pThumbDiameter / 2;
+    
     if (option->orientation == Qt::Horizontal) {
-        int trackY     = (option->rect.height() - d->_pTrackHeight) / 2;
-        int tickTop    = trackY - d->_pTickLength - 1;
-        int tickBottom = trackY + d->_pTrackHeight + 1;
-
+        int availableWidth = option->rect.width() - 2 * padding;
+        int trackY = (option->rect.height() - d->_pTrackHeight) / 2;
+        
+        int tickSpacing = 4; 
+        int tickAboveY = trackY - tickSpacing;
+        int tickBelowY = trackY + d->_pTrackHeight + tickSpacing;
+        
+        int tickInset = 8; 
+        int adjustedWidth = availableWidth - 2 * tickInset;
+        
         for (int value = option->minimum; value <= option->maximum; value += interval) {
-            double ratio = (value - option->minimum) / static_cast<double>(valueRange);
-            int    tickX = padding + static_cast<int>((option->rect.width() - 2 * padding) * ratio);
-
+            if (value < option->minimum || value > option->maximum) {
+                continue;
+            }
+            
+            double ratio = static_cast<double>(value - option->minimum) / valueRange;
+            int tickX = padding + tickInset + static_cast<int>(adjustedWidth * ratio);
+            
+            if (tickX < padding || tickX > option->rect.width() - padding) {
+                continue;
+            }
+            
             if (option->tickPosition & QSlider::TicksAbove) {
-                painter->drawLine(tickX, tickTop, tickX, tickTop + d->_pTickLength);
+                painter->drawLine(tickX, tickAboveY, tickX, tickAboveY - d->_pTickLength);
             }
             if (option->tickPosition & QSlider::TicksBelow) {
-                painter->drawLine(tickX, tickBottom, tickX, tickBottom + d->_pTickLength);
+                painter->drawLine(tickX, tickBelowY, tickX, tickBelowY + d->_pTickLength);
             }
         }
     } else {
-        int trackX    = (option->rect.width() - d->_pTrackHeight) / 2;
-        int tickLeft  = trackX - d->_pTickLength - 1;
-        int tickRight = trackX + d->_pTrackHeight + 1;
+        int availableHeight = option->rect.height() - 2 * padding;
+        int trackX = (option->rect.width() - d->_pTrackHeight) / 2;
+        
+   
+        int tickSpacing = 4;
+        int tickLeftX = trackX - tickSpacing;
+        int tickRightX = trackX + d->_pTrackHeight + tickSpacing;
+        
 
+        int tickInset = 8;
+        int adjustedHeight = availableHeight - 2 * tickInset;
+        
         for (int value = option->minimum; value <= option->maximum; value += interval) {
-            double ratio = (value - option->minimum) / static_cast<double>(valueRange);
-            int    tickY =
-                option->rect.height() - padding - static_cast<int>((option->rect.height() - 2 * padding) * ratio);
-
+            if (value < option->minimum || value > option->maximum) {
+                continue;
+            }
+            double ratio = static_cast<double>(value - option->minimum) / valueRange;
+            int tickY;
+            
+            if (option->upsideDown) {
+                tickY = padding + tickInset + static_cast<int>(adjustedHeight * ratio);
+            } else {
+                tickY = option->rect.height() - padding - tickInset - static_cast<int>(adjustedHeight * ratio);
+            }
+            
+            if (tickY < padding || tickY > option->rect.height() - padding) {
+                continue;
+            }
+            
             if (option->tickPosition & QSlider::TicksLeft) {
-                painter->drawLine(tickLeft, tickY, tickLeft + d->_pTickLength, tickY);
+                painter->drawLine(tickLeftX, tickY, tickLeftX - d->_pTickLength, tickY);
             }
             if (option->tickPosition & QSlider::TicksRight) {
-                painter->drawLine(tickRight, tickY, tickRight + d->_pTickLength, tickY);
+                painter->drawLine(tickRightX, tickY, tickRightX + d->_pTickLength, tickY);
             }
         }
     }
@@ -287,7 +337,12 @@ NSliderPrivate::NSliderPrivate(QObject* parent) : QObject(parent) {
     _thumbAnimation->setDuration(150);
 }
 
-NSliderPrivate::~NSliderPrivate() {}
+NSliderPrivate::~NSliderPrivate() {
+    if (_tooltip) {
+        _tooltip->deleteLater();
+        _tooltip = nullptr;
+    }
+}
 
 void NSliderPrivate::startThumbAnimation(qreal startScale, qreal endScale) {
     _thumbAnimation->stop();
@@ -306,4 +361,100 @@ void NSliderPrivate::startThumbAnimation(qreal startScale, qreal endScale) {
     });
 
     _thumbAnimation->start();
+}
+
+void NSliderPrivate::updateTooltip() {
+    if (!_showTooltip || !q_ptr)
+        return;
+
+    if (!_tooltip) {
+        _tooltip = new NToolTip("", q_ptr->window());
+        _tooltip->setDuration(-1);
+    }
+
+    int value = q_ptr->value();
+    QString text = _tooltipFormatter ? _tooltipFormatter(value) : QString::number(value);
+    _tooltip->setText(text);
+
+    int padding = _pThumbDiameter / 2;
+    double ratio = (q_ptr->value() - q_ptr->minimum()) / static_cast<double>(q_ptr->maximum() - q_ptr->minimum());
+    
+    QPoint thumbCenter;
+    if (q_ptr->orientation() == Qt::Horizontal) {
+        int availableWidth = q_ptr->width() - 2 * padding;
+        int thumbX = padding + static_cast<int>(availableWidth * ratio);
+        int thumbY = q_ptr->height() / 2;
+        thumbCenter = q_ptr->mapToGlobal(QPoint(thumbX, thumbY));
+    } else {
+        int availableHeight = q_ptr->height() - 2 * padding;
+        int thumbX = q_ptr->width() / 2;
+        int thumbY = q_ptr->height() - padding - static_cast<int>(availableHeight * ratio);
+        thumbCenter = q_ptr->mapToGlobal(QPoint(thumbX, thumbY));
+    }
+    
+    _tooltip->adjustSize();
+    
+    QPoint tooltipPos;
+    if (q_ptr->orientation() == Qt::Horizontal) {
+        tooltipPos = QPoint(thumbCenter.x() - _tooltip->width() / 2,
+                           thumbCenter.y() - _pThumbDiameter / 2 - _tooltip->height() - 5);
+    } else {
+        tooltipPos = QPoint(thumbCenter.x() + _pThumbDiameter / 2 + 5,
+                           thumbCenter.y() - _tooltip->height() / 2);
+    }
+    
+    _tooltip->move(tooltipPos);
+    _tooltip->show();
+}
+
+void NSliderPrivate::hideTooltip() {
+    if (_tooltip && _tooltip->isVisible()) {
+        _tooltip->hide();
+    }
+}
+
+QRect NSliderPrivate::getThumbRect() const {
+    if (!q_ptr || !_sliderStyle)
+        return QRect();
+    
+    return _sliderStyle->calculateThumbRect(q_ptr);
+}
+
+QRect NSliderPrivate::Style::calculateThumbRect(const QWidget* widget) const {
+    const QSlider* slider = qobject_cast<const QSlider*>(widget);
+    if (!slider)
+        return QRect();
+
+    QStyleOptionSlider option;
+    option.initFrom(slider);
+    option.orientation = slider->orientation();
+    option.minimum = slider->minimum();
+    option.maximum = slider->maximum();
+    option.sliderPosition = slider->sliderPosition();
+    option.sliderValue = slider->value();
+    option.singleStep = slider->singleStep();
+    option.pageStep = slider->pageStep();
+    option.upsideDown = slider->invertedAppearance();
+    option.direction = slider->layoutDirection();
+    option.rect = slider->rect();
+
+    int sliderPos = sliderPositionFromValue(option.minimum,
+                                          option.maximum,
+                                          option.sliderPosition,
+                                          option.orientation == Qt::Horizontal
+                                              ? option.rect.width() - d->_pThumbDiameter
+                                              : option.rect.height() - d->_pThumbDiameter,
+                                          option.upsideDown);
+
+    if (option.orientation == Qt::Horizontal) {
+        return QRect(sliderPos + d->_pThumbDiameter / 2,
+                    (option.rect.height() - d->_pThumbDiameter) / 2,
+                    d->_pThumbDiameter,
+                    d->_pThumbDiameter);
+    } else {
+        return QRect((option.rect.width() - d->_pThumbDiameter) / 2,
+                    sliderPos + d->_pThumbDiameter / 2,
+                    d->_pThumbDiameter,
+                    d->_pThumbDiameter);
+    }
 }

@@ -43,7 +43,6 @@ void NCalendarDatePickerPrivate::initUi() {
     QIcon calendarIcon = nIcon->fromRegular(NRegularIconType::CalendarLtr12Regular, 16);
     iconLabel->setPixmap(calendarIcon.pixmap(16, 16));
 
-    // 设置布局，左侧日期，右侧图标
     QHBoxLayout* layout = new QHBoxLayout(contentWidget);
     layout->setContentsMargins(10, 0, 10, 0);
     layout->setSpacing(NSpacingToken(NDesignTokenKey::SpacingM).toInt());
@@ -107,22 +106,20 @@ void NCalendarDatePickerPrivate::updateDisplayText() {
 }
 
 void NCalendarDatePickerPrivate::showCalendarFlyout() {
-    // 如果当前已有flyout显示，则不创建新的
     if (currentFlyout) {
         return;
     }
 
-    // 创建日历组件
     NCalendarWidget* calendarWidget = new NCalendarWidget(q_ptr);
 
     calendarWidget->setLocale(_locale);
     calendarWidget->setDateSelectionMode(_selectionMode);
 
-    // 设置日期范围
+
     calendarWidget->setMinimumDate(_pMinimumDate);
     calendarWidget->setMaximumDate(_pMaximumDate);
 
-    // 根据选择模式设置日期
+
     switch (_selectionMode) {
         case NCalendarWidget::SingleDate:
             if (_pSelectedDate.isValid()) {
@@ -153,10 +150,10 @@ void NCalendarDatePickerPrivate::showCalendarFlyout() {
     flyout->setContentsMargins(0, 0, 0, 0);
     flyout->setPlacement(Qt::BottomEdge);
 
-    // 保存当前flyout引用
+
     currentFlyout = flyout;
 
-    // 连接日历的信号
+
     QObject::connect(calendarWidget, &NCalendarWidget::clicked, this, &NCalendarDatePickerPrivate::handleDateSelection);
 
     QObject::connect(calendarWidget,
@@ -169,15 +166,15 @@ void NCalendarDatePickerPrivate::showCalendarFlyout() {
                      this,
                      &NCalendarDatePickerPrivate::handleDateRangeSelection);
 
-    // 连接Flyout的信号
+
     QObject::connect(flyout, &NFlyout::opened, q_ptr, &NCalendarDatePicker::popupOpened);
     QObject::connect(flyout, &NFlyout::closed, this, [this]() {
-        // 在关闭时重置flyout引用
+
         currentFlyout = nullptr;
         q_ptr->emit popupClosed();
     });
 
-    // 显示弹出层
+
     flyout->showAt(button);
 }
 

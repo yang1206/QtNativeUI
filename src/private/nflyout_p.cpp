@@ -10,7 +10,6 @@
 
 QHash<NFlyoutAnimationType, NFlyoutAnimationManager* (*) (NFlyout*)> NFlyoutAnimationManager::s_managers;
 
-// 动画管理器基类实现
 NFlyoutAnimationManager::NFlyoutAnimationManager(NFlyout* flyout, QObject* parent) : QObject(parent), m_flyout(flyout) {
     m_aniGroup   = new QParallelAnimationGroup(this);
     m_slideAni   = new QPropertyAnimation(flyout, "pos", this);
@@ -33,12 +32,10 @@ void NFlyoutAnimationManager::setup() const {
     m_aniGroup->addAnimation(m_opacityAni);
 }
 
-void NFlyoutAnimationManager::exec(const QPoint& pos) {
-    // 基类中不实现，由子类具体实现
-}
+void NFlyoutAnimationManager::exec(const QPoint& pos) { Q_UNUSED(pos); }
 
 QPoint NFlyoutAnimationManager::position(QWidget* target) {
-    // 基类中不实现，由子类具体实现
+    Q_UNUSED(target);
     return QPoint();
 }
 
@@ -62,12 +59,9 @@ NFlyoutAnimationManager* NFlyoutAnimationManager::create(NFlyoutAnimationType ty
     if (s_managers.contains(type)) {
         return s_managers[type](flyout);
     }
-
-    // 默认使用PULL_UP类型
     return new PullUpAnimationManager(flyout);
 }
 
-// PullUp动画管理器实现
 void PullUpAnimationManager::exec(const QPoint& pos) {
     QPoint adjustedPos = adjustPosition(pos);
     m_slideAni->setStartValue(adjustedPos + QPoint(0, 8));
@@ -82,7 +76,6 @@ QPoint PullUpAnimationManager::position(QWidget* target) {
     return QPoint(x, y);
 }
 
-// DropDown动画管理器实现
 void DropDownAnimationManager::exec(const QPoint& pos) {
     QPoint adjustedPos = adjustPosition(pos);
     m_slideAni->setStartValue(adjustedPos - QPoint(0, 8));
@@ -97,7 +90,6 @@ QPoint DropDownAnimationManager::position(QWidget* target) {
     return QPoint(x, y);
 }
 
-// SlideLeft动画管理器实现
 void SlideLeftAnimationManager::exec(const QPoint& pos) {
     QPoint adjustedPos = adjustPosition(pos);
     m_slideAni->setStartValue(adjustedPos + QPoint(8, 0));
@@ -113,7 +105,6 @@ QPoint SlideLeftAnimationManager::position(QWidget* target) {
     return QPoint(x, y);
 }
 
-// SlideRight动画管理器实现
 void SlideRightAnimationManager::exec(const QPoint& pos) {
     QPoint adjustedPos = adjustPosition(pos);
     m_slideAni->setStartValue(adjustedPos - QPoint(8, 0));
@@ -129,7 +120,6 @@ QPoint SlideRightAnimationManager::position(QWidget* target) {
     return QPoint(x, y);
 }
 
-// FadeIn动画管理器实现
 void FadeInAnimationManager::exec(const QPoint& pos) {
     m_flyout->move(adjustPosition(pos));
     m_aniGroup->removeAnimation(m_slideAni);
@@ -143,7 +133,6 @@ QPoint FadeInAnimationManager::position(QWidget* target) {
     return QPoint(x, y);
 }
 
-// None动画管理器实现
 void NoneAnimationManager::exec(const QPoint& pos) { m_flyout->move(adjustPosition(pos)); }
 
 QPoint NoneAnimationManager::position(QWidget* target) {
@@ -171,13 +160,11 @@ NFlyoutPrivate::NFlyoutPrivate(QObject* parent)
       _fadeOutAnimation(nullptr),
       _shadowEffect(nullptr),
       _mainLayout(nullptr) {
-    // 设置背景色和边框色
     _pLightBackgroundColor = QColor(248, 248, 248);
     _pDarkBackgroundColor  = QColor(40, 40, 40);
     _pLightBorderColor     = NThemeColor(NFluentColorKey::SurfaceStrokeColorFlyout, NThemeType::Light);
     _pDarkBorderColor      = NThemeColor(NFluentColorKey::SurfaceStrokeColorFlyout, NThemeType::Dark);
 
-    // 设置默认属性
     _pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusMedium).toInt();
     _pBorderWidth  = 1;
     _pPlacement    = Qt::BottomEdge;
@@ -194,7 +181,6 @@ void NFlyoutPrivate::setupUI() {
     if (!q)
         return;
 
-    // 创建主布局
     _mainLayout = new QHBoxLayout(q);
     _mainLayout->setContentsMargins(15, 8, 15, 20);
 
@@ -212,10 +198,8 @@ void NFlyoutPrivate::setupUI() {
 
 NFlyoutAnimationManager* NFlyoutPrivate::animationManager() {
     if (!_animManager) {
-        // 根据放置方向选择合适的动画类型
         NFlyoutAnimationType animType = _animationType;
 
-        // 如果没有显式设置动画类型，则根据placement选择
         if (_animationType == NFlyoutAnimationType::PULL_UP) {
             switch (_pPlacement) {
                 case Qt::TopEdge:
@@ -251,46 +235,40 @@ QRect NFlyoutPrivate::calculatePlacement(const QWidget* target, const Qt::Edge p
     QRect  targetRect      = target->rect();
     QPoint targetGlobalPos = target->mapToGlobal(QPoint(0, 0));
 
-    // 在目标控件的位置基础上计算Flyout的位置
     QRect result;
     switch (placement) {
         case Qt::TopEdge:
-            // 在目标控件上方显示
             result = QRect(targetGlobalPos.x() + (targetRect.width() - flyoutSize.width()) / 2,
                            targetGlobalPos.y() - flyoutSize.height() - 10, // 额外空间避免遮挡
                            flyoutSize.width(),
                            flyoutSize.height());
             break;
         case Qt::BottomEdge:
-            // 在目标控件下方显示
             result = QRect(targetGlobalPos.x() + (targetRect.width() - flyoutSize.width()) / 2,
                            targetGlobalPos.y() + targetRect.height() + 10, // 额外空间避免遮挡
                            flyoutSize.width(),
                            flyoutSize.height());
             break;
         case Qt::LeftEdge:
-            // 在目标控件左侧显示
             result = QRect(targetGlobalPos.x() - flyoutSize.width() - 10, // 额外空间避免遮挡
                            targetGlobalPos.y() + (targetRect.height() - flyoutSize.height()) / 2,
                            flyoutSize.width(),
                            flyoutSize.height());
             break;
         case Qt::RightEdge:
-            // 在目标控件右侧显示
+
             result = QRect(targetGlobalPos.x() + targetRect.width() + 10, // 额外空间避免遮挡
                            targetGlobalPos.y() + (targetRect.height() - flyoutSize.height()) / 2,
                            flyoutSize.width(),
                            flyoutSize.height());
             break;
         default:
-            // 默认显示在下方
             result = QRect(targetGlobalPos.x() + (targetRect.width() - flyoutSize.width()) / 2,
                            targetGlobalPos.y() + targetRect.height() + 10,
                            flyoutSize.width(),
                            flyoutSize.height());
     }
 
-    // 确保Flyout不会超出屏幕边界
     QScreen* screen = QGuiApplication::screenAt(targetGlobalPos);
     if (!screen) {
         screen = QGuiApplication::primaryScreen();

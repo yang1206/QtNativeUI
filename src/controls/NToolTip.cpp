@@ -53,43 +53,37 @@ void NToolTip::init() {
     d->_pLightBorderColor = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Light);
     d->_pDarkBorderColor  = NThemeColor(NFluentColorKey::SolidBackgroundFillColorTertiary, NThemeType::Dark);
 
-    // 设置布局
     layout()->setContentsMargins(12, 8, 12, 12);
     layout()->addWidget(d->container);
     d->containerLayout->addWidget(d->label);
     d->containerLayout->setContentsMargins(6, 4, 6, 4);
 
-    // 添加不透明度动画
     d->opacityAnimation = new QPropertyAnimation(this, "windowOpacity", this);
     d->opacityAnimation->setDuration(150);
 
-    // 添加阴影
+#ifndef Q_OS_MACOS
     d->shadowEffect = new QGraphicsDropShadowEffect(this);
     d->shadowEffect->setBlurRadius(25);
     d->shadowEffect->setColor(QColor(0, 0, 0, 50));
     d->shadowEffect->setOffset(0, 5);
     d->container->setGraphicsEffect(d->shadowEffect);
+#endif
 
     d->timer->setSingleShot(true);
     connect(d->timer, &QTimer::timeout, this, &NToolTip::hide);
 
-    // 设置样式
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
 
-    // 设置对象名
     d->container->setObjectName("container");
     d->label->setObjectName("contentLabel");
 
-    // 应用样式
     d->updateStyle();
 
-    // 调整大小
     d->label->adjustSize();
     adjustSize();
 
-    // 监听主题变化
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode mode) {
         Q_D(NToolTip);
         d->themeMode = mode;
@@ -173,14 +167,12 @@ void NToolTip::showText(const QString& text, QWidget* parent, NToolTipPosition p
     tooltip->show();
 }
 
-// NToolTipFilter 实现
 NToolTipFilter::NToolTipFilter(QWidget* parent, int showDelay, NToolTipPosition position)
     : QObject(parent), tooltipDelay(showDelay), position(position) {
     timer = new QTimer(this);
     timer->setSingleShot(true);
     connect(timer, &QTimer::timeout, this, &NToolTipFilter::showToolTip);
 
-    // 安装事件过滤器到父组件
     if (parent) {
         parent->installEventFilter(this);
     }
@@ -196,7 +188,7 @@ NToolTipFilter::~NToolTipFilter() {
 bool NToolTipFilter::eventFilter(QObject* watched, QEvent* event) {
     if (watched == parent()) {
         if (event->type() == QEvent::ToolTip) {
-            return true; // 阻止默认工具提示显示
+            return true;
         } else if (event->type() == QEvent::Hide || event->type() == QEvent::Leave) {
             hideToolTip();
         } else if (event->type() == QEvent::Enter) {
@@ -208,11 +200,9 @@ bool NToolTipFilter::eventFilter(QObject* watched, QEvent* event) {
                     tooltip = createToolTip();
                 }
 
-                // 使用父组件的工具提示显示时间
                 int t = parentWidget->toolTipDuration() > 0 ? parentWidget->toolTipDuration() : -1;
                 tooltip->setDuration(t);
 
-                // 延迟显示工具提示
                 timer->start(tooltipDelay);
             }
         } else if (event->type() == QEvent::MouseButtonPress) {

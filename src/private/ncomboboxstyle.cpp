@@ -126,14 +126,6 @@ void NComboBoxStyle::drawComplexControl(ComplexControl             control,
         }
 
         painter->restore();
-
-        if (!comboOpt->editable) {
-            QRect contentRect = editRect.adjusted(4, 0, -4, 0);
-            QString text = comboOpt->currentText;
-            painter->setPen(textColor);
-            painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, text);
-        }
-
         return;
     }
 
@@ -171,7 +163,7 @@ void NComboBoxStyle::drawControl(ControlElement      element,
             painter->setPen(Qt::NoPen);
             QPainterPath path;
             QRect        optionRect = option->rect;
-            optionRect.adjust(margin, margin, -margin, -margin);
+            optionRect.adjust(0, margin, -margin, -margin);
 #ifndef Q_OS_WIN
             optionRect.adjust(6, 0, -6, 0);
 #endif
@@ -195,10 +187,17 @@ void NComboBoxStyle::drawControl(ControlElement      element,
                 }
             }
             painter->setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, nTheme->themeMode()));
-            painter->drawText(
-                QRect(option->rect.x() + 20, option->rect.y(), option->rect.width() - 20, option->rect.height()),
-                Qt::AlignVCenter,
-                vopt->text);
+            int drawTextLeftOffset = 15;
+#ifndef Q_OS_WIN
+            drawTextLeftOffset = 20;
+#endif
+
+            painter->drawText(QRect(option->rect.x() + drawTextLeftOffset,
+                                    option->rect.y(),
+                                    option->rect.width() - 10,
+                                    option->rect.height()),
+                              Qt::AlignVCenter,
+                              vopt->text);
             painter->restore();
         }
         return;
@@ -208,11 +207,11 @@ void NComboBoxStyle::drawControl(ControlElement      element,
             if (element == CE_ComboBoxLabel) {
                 const QStyleOptionComboBox* comboOpt = qstyleoption_cast<const QStyleOptionComboBox*>(option);
                 if (comboOpt && !comboOpt->editable) {
-                    QRect editRect = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
-                    QRect contentRect = editRect.adjusted(4, 0, -4, 0);
-                    bool isDark = m_styleInterface->isDarkMode();
-                    bool isEnabled = comboOpt->state & QStyle::State_Enabled;
-                    QColor textColor = m_styleInterface->textColorForState(isDark, isEnabled);
+                    QRect  editRect    = subControlRect(CC_ComboBox, comboOpt, SC_ComboBoxEditField, widget);
+                    QRect  contentRect = editRect.adjusted(4, 0, -4, 0);
+                    bool   isDark      = m_styleInterface->isDarkMode();
+                    bool   isEnabled   = comboOpt->state & QStyle::State_Enabled;
+                    QColor textColor   = m_styleInterface->textColorForState(isDark, isEnabled);
                     painter->save();
                     painter->setPen(textColor);
                     painter->drawText(contentRect, Qt::AlignVCenter | Qt::AlignLeft, comboOpt->currentText);
@@ -309,9 +308,24 @@ QSize NComboBoxStyle::sizeFromContents(ContentsType        type,
         return itemSize;
     }
     if (type == CT_ComboBox && qobject_cast<const NComboBox*>(widget)) {
-        QSize newSize = QProxyStyle::sizeFromContents(type, option, size, widget);
-        newSize.setHeight(qMax(newSize.height(), 35));
-        return newSize;
+        const NComboBox* comboBox = qobject_cast<const NComboBox*>(widget);
+
+        QFontMetrics fm(widget->font());
+        int          maxTextWidth = 0;
+
+        for (int i = 0; i < comboBox->count(); ++i) {
+            int textWidth = fm.horizontalAdvance(comboBox->itemText(i));
+            maxTextWidth  = qMax(maxTextWidth, textWidth);
+        }
+
+        int padding          = 16;
+        int arrowWidth       = 32;
+        int scrollBarPadding = 20;
+        int totalWidth       = maxTextWidth + padding + arrowWidth + scrollBarPadding;
+
+        int height = qMax(35, fm.height() + 10);
+
+        return QSize(totalWidth, height);
     }
 
     return QProxyStyle::sizeFromContents(type, option, size, widget);

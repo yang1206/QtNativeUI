@@ -171,7 +171,6 @@ void NTabBar::tabInserted(int index) {
         setupCustomCloseButton(index);
     }
 
-    // 重置工具提示状态，避免索引错误
     d->_tooltipTabIndex = -1;
     if (d->_tooltipTimer) {
         d->_tooltipTimer->stop();
@@ -182,7 +181,6 @@ void NTabBar::tabInserted(int index) {
         d->_currentTooltip = nullptr;
     }
 
-    // 确保标签布局更新后计算正确的矩形
     QTimer::singleShot(0, this, [this]() { update(); });
 }
 
@@ -206,7 +204,6 @@ void NTabBar::setupCustomCloseButton(int index) {
     bool           isVertical = tabShape == QTabBar::RoundedWest || tabShape == QTabBar::RoundedEast ||
                       tabShape == QTabBar::TriangularWest || tabShape == QTabBar::TriangularEast;
 
-    // 创建关闭按钮
     NPushButton* closeBtn = new NPushButton(this);
     closeBtn->setFluentIcon(NRegularIconType::Dismiss20Regular, 12);
     closeBtn->setTransparentBackground(true);
@@ -268,7 +265,6 @@ void NTabBar::onCloseButtonClicked() {
 void NTabBar::mousePressEvent(QMouseEvent* event) {
     Q_D(NTabBar);
 
-    // 不再需要检查关闭按钮点击
     QTabBar::mousePressEvent(event);
     d->_lastDragPix = grab(tabRect(currentIndex()));
     Q_EMIT tabBarPressed(currentIndex());
@@ -277,7 +273,6 @@ void NTabBar::mousePressEvent(QMouseEvent* event) {
 void NTabBar::mouseMoveEvent(QMouseEvent* event) {
     Q_D(NTabBar);
 
-    // 拖拽相关代码保持不变
     QRect moveRect = rect();
     moveRect.adjust(0, -height(), 0, height());
     QPoint currentPos = event->pos();
@@ -461,7 +456,6 @@ void NTabBar::setTabToolTip(int index, const QString& tip) {
     QTabBar::setTabToolTip(index, tip);
     Q_D(NTabBar);
     if (d->_hoverIndex == index && !tip.isEmpty()) {
-        // 清理现有工具提示
         if (d->_currentTooltip) {
             d->_currentTooltip->hide();
             d->_currentTooltip->deleteLater();

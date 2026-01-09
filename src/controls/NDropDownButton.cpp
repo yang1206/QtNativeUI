@@ -1,5 +1,4 @@
 #include "QtNativeUI/NDropDownButton.h"
-#include <QEvent>
 #include <QPainterPath>
 #include "../private/ndropdownbutton_p.h"
 #include "QtNativeUI/NAnimation.h"
@@ -18,7 +17,6 @@ void NDropDownButton::init() {
 
     setShowArrow(true);
 
-    // 初始化箭头动画
     d->_arrowAnimation = new QtNativeUI::NTranslateYAnimation(this, 3.0);
     connect(d->_arrowAnimation, &QtNativeUI::NTranslateYAnimation::yChanged, this, [d](qreal value) {
         d->setArrowYOffset(value);
@@ -32,6 +30,9 @@ void NDropDownButton::init() {
 void NDropDownButton::setMenu(NMenu* menu) {
     Q_D(NDropDownButton);
     d->_menu = menu;
+    if (menu) {
+        menu->setDropDownAnimation(true);
+    }
 }
 
 QMenu* NDropDownButton::menu() const {
@@ -58,6 +59,7 @@ void NDropDownButton::showMenu() {
         return;
     }
 
+    d->_menu->setMinimumWidth(width());
     QPoint pos = mapToGlobal(QPoint(0, height()));
     d->_menu->exec(pos);
 }
@@ -114,7 +116,6 @@ void NDropDownButton::drawDropDownArrow() {
         arrowX = (width() - d->_arrowSize) / 2;
     }
 
-    // 应用Y轴动画偏移
     int arrowY = (height() - d->_arrowSize) / 2 + d->arrowYOffset();
 
     QRect availableRect = rect().adjusted(d->_horizontalPadding, 0, -d->_horizontalPadding, 0);

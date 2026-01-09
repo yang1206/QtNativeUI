@@ -18,9 +18,7 @@ NNavigationFooterDelegate::NNavigationFooterDelegate(QObject* parent) : QStyledI
     setProperty("lastSelectMarkBottom", 10.0);
     setProperty("selectMarkTop", 10.0);
     setProperty("selectMarkBottom", 10.0);
-
-    // Mark向上
-    _lastSelectMarkTopAnimation = new QPropertyAnimation(this, "lastSelectMarkTop");
+ _lastSelectMarkTopAnimation = new QPropertyAnimation(this, "lastSelectMarkTop");
     connect(_lastSelectMarkTopAnimation, &QPropertyAnimation::valueChanged, this, [this](const QVariant& value) {
         _lastSelectMarkTop = value.toReal();
         if (_pListView)
@@ -163,12 +161,12 @@ void NNavigationFooterDelegate::paint(QPainter*                   painter,
     NFilledIconType::Icon  filledIcon  = node->getFilledIcon();
     if (regularIcon != NRegularIconType::None) {
         QIcon iconObj = nIcon->fromRegular(regularIcon);
-        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
+        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 15) / 2, 17, 17);
         iconObj.paint(
             painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
     } else if (filledIcon != NFilledIconType::None) {
         QIcon iconObj = nIcon->fromFilled(filledIcon);
-        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 17) / 2, 17, 17);
+        QRect iconRect(itemRect.x() + (_iconAreaWidth - 17) / 2, itemRect.y() + (itemRect.height() - 15) / 2, 17, 17);
         iconObj.paint(
             painter, iconRect, Qt::AlignCenter, option.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled);
     }

@@ -36,7 +36,6 @@ class NCalendarDatePickerPrivate : public QObject {
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
 
-    // 多选相关
     QList<QDate>                       _selectedDates;
     QPair<QDate, QDate>                _selectedDateRange;
     NCalendarWidget::DateSelectionMode _selectionMode;

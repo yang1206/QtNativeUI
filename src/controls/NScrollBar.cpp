@@ -53,13 +53,11 @@ NScrollBar::NScrollBar(QScrollBar* originScrollBar, QAbstractScrollArea* parent)
     d->_originScrollArea        = parent;
     Qt::Orientation orientation = originScrollBar->orientation();
     setOrientation(orientation);
-    // 隐藏原始滚动条
     orientation == Qt::Horizontal ? parent->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff)
                                   : parent->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     parent->installEventFilter(this);
     d->_originScrollBar = originScrollBar;
     d->_initAllConfig();
-    // 连接信号
     connect(d->_originScrollBar, &QScrollBar::valueChanged, this, [=](int value) {
         d->_handleScrollBarValueChanged(this, value);
     });
@@ -78,23 +76,19 @@ NScrollBar::~NScrollBar() {}
 void NScrollBar::init() {
     Q_D(NScrollBar);
 
-    // 初始化颜色属性
     d->_pLightTrackColor = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Light);
     d->_pDarkTrackColor  = NThemeColor(NFluentColorKey::ControlFillColorTertiary, NThemeType::Dark);
 
-    // 半透明的滑块颜色
     d->_pLightThumbColor = QColor(NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Light));
     d->_pLightThumbColor.setAlphaF(0.3);
     d->_pDarkThumbColor = QColor(NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Dark));
     d->_pDarkThumbColor.setAlphaF(0.3);
 
-    // 悬浮和按下状态的不透明滑块颜色
     d->_pLightThumbHoverColor = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Light);
     d->_pDarkThumbHoverColor  = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Dark);
 
     d->_pLightThumbPressColor = NThemeColor(NFluentColorKey::SurfaceStrokeColorDefault, NThemeType::Light);
     d->_pDarkThumbPressColor  = NThemeColor(NFluentColorKey::SurfaceStrokeColorDefault, NThemeType::Dark);
-    // 箭头颜色
     d->_pLightArrowColor = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Light);
     d->_pDarkArrowColor  = NThemeColor(NFluentColorKey::TextFillColorSecondary, NThemeType::Dark);
 
@@ -104,17 +98,14 @@ void NScrollBar::init() {
     d->_pLightArrowPressColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
     d->_pDarkArrowPressColor  = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
 
-    // 初始化尺寸属性
     d->_pTrackThickness       = 12; // 轨道厚度
     d->_pThumbThickness       = 6;  // 悬浮/按下时的厚度
     d->_pThumbNormalThickness = 3;  // 正常状态下的厚度
     d->_pThumbCornerRadius    = 4;  // 滑块圆角
     d->_pTrackCornerRadius    = 6;  // 轨道圆角
 
-    // 初始化样式
     d->initScrollBarStyle();
 
-    // 监听主题变化
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode mode) {
         Q_D(NScrollBar);
         d->themeMode = mode;
@@ -154,20 +145,16 @@ void NScrollBar::mouseReleaseEvent(QMouseEvent* event) {
 void NScrollBar::mouseMoveEvent(QMouseEvent* event) {
     Q_D(NScrollBar);
 
-    // 获取鼠标所在位置的子控件
     QStyleOptionSlider opt;
     initStyleOption(&opt);
     QStyle::SubControl subControl = style()->hitTestComplexControl(QStyle::CC_ScrollBar, &opt, event->pos(), this);
 
-    // 如果子控件发生变化，更新悬浮状态
     if (subControl != d->hoveredSubControl) {
-        // 重置旧悬浮状态
         if (d->hoveredSubControl == QStyle::SC_ScrollBarAddLine ||
             d->hoveredSubControl == QStyle::SC_ScrollBarSubLine) {
             d->style->setLineHovered(d->hoveredSubControl, false);
         }
 
-        // 设置新悬浮状态
         if (subControl == QStyle::SC_ScrollBarAddLine || subControl == QStyle::SC_ScrollBarSubLine) {
             d->style->setLineHovered(subControl, true);
         }

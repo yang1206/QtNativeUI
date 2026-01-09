@@ -78,17 +78,28 @@ void NRadioButton::init() {
         Q_D(NRadioButton);
         d->_themeMode = themeMode;
         d->_isDark    = nTheme->isDarkMode();
+        
+        d->invalidateColorCache();
+        
         updateAccentColors();
         update();
     });
 
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
+        Q_D(NRadioButton);
+        
+        d->_outerCircleColorCacheValid = false;
+        d->_innerCircleColorCacheValid = false;
+        
         updateAccentColors();
         update();
     });
 
     connect(this, &QRadioButton::toggled, this, [this](bool checked) {
         Q_D(NRadioButton);
+        
+        d->invalidateColorCache();
+        
         if (checked) {
             d->startInnerCircleAnimation(0.6, 1.0);
         } else {
@@ -117,6 +128,7 @@ bool NRadioButton::event(QEvent* event) {
         case QEvent::Enter:
             if (isEnabled()) {
                 d->_isHovered = true;
+                d->invalidateColorCache();
                 if (isChecked()) {
                     d->startInnerCircleAnimation(d->_innerCircleScale, 1.3);
                 }
@@ -126,10 +138,15 @@ bool NRadioButton::event(QEvent* event) {
         case QEvent::Leave:
             if (isEnabled()) {
                 d->_isHovered = false;
+                d->invalidateColorCache();
                 if (isChecked()) {
                     d->startInnerCircleAnimation(d->_innerCircleScale, 1.0);
                 }
             }
+            break;
+
+        case QEvent::EnabledChange:
+            d->invalidateColorCache(); 
             break;
 
         default:
@@ -160,35 +177,63 @@ void NRadioButton::drawRadioButton(QPainter* painter) {
     int centerX     = outerRadius;
     int centerY     = height() / 2;
 
-    QColor outerCircleColor;
-    QColor outerBorderColor;
-    QColor innerCircleColor;
 
-    if (!isEnabled()) {
-        outerCircleColor = d->_isDark ? NThemeColor(NFluentColorKey::ControlFillColorDisabled, NThemeType::Dark)
-                                      : NThemeColor(NFluentColorKey::ControlFillColorDisabled, NThemeType::Light);
-        outerBorderColor = d->_isDark ? d->_pDarkDisabledColor : d->_pLightDisabledColor;
-        innerCircleColor = d->_isDark ? d->_pDarkDisabledColor : d->_pLightDisabledColor;
-    } else if (isChecked()) {
-        if (d->_isPressed) {
-            outerCircleColor = d->_accentPressedColor;
-        } else if (d->_isHovered) {
-            outerCircleColor = d->_accentHoverColor;
+    QColor outerCircleColor;
+    if (!d->_outerCircleColorCacheValid) {
+        if (!isEnabled()) {
+            outerCircleColor = d->_isDark ? NThemeColor(NFluentColorKey::ControlFillColorDisabled, NThemeType::Dark)
+                                          : NThemeColor(NFluentColorKey::ControlFillColorDisabled, NThemeType::Light);
+        } else if (isChecked()) {
+            if (d->_isPressed) {
+                outerCircleColor = d->_accentPressedColor;
+            } else if (d->_isHovered) {
+                outerCircleColor = d->_accentHoverColor;
+            } else {
+                outerCircleColor = d->_accentColor;
+            }
         } else {
-            outerCircleColor = d->_accentColor;
+            if (d->_isPressed) {
+                outerCircleColor = NThemeColor(NFluentColorKey::ControlAltFillColorQuarternary, d->_themeMode);
+            } else if (d->_isHovered) {
+                outerCircleColor = NThemeColor(NFluentColorKey::ControlAltFillColorTertiary, d->_themeMode);
+            } else {
+                outerCircleColor = d->_isDark ? d->_pDarkOuterCircleDefaultColor : d->_pLightOuterCircleDefaultColor;
+            }
         }
-        outerBorderColor = Qt::transparent;
-        innerCircleColor = d->_isDark ? d->_pDarkInnerCircleColor : d->_pLightInnerCircleColor;
+        d->_cachedOuterCircleColor = outerCircleColor;
+        d->_outerCircleColorCacheValid = true;
     } else {
-        if (d->_isPressed) {
-            outerCircleColor = NThemeColor(NFluentColorKey::ControlAltFillColorQuarternary, d->_themeMode);
-        } else if (d->_isHovered) {
-            outerCircleColor = NThemeColor(NFluentColorKey::ControlAltFillColorTertiary, d->_themeMode);
+        outerCircleColor = d->_cachedOuterCircleColor;
+    }
+
+    QColor outerBorderColor;
+    if (!d->_outerBorderColorCacheValid) {
+        if (!isEnabled()) {
+            outerBorderColor = d->_isDark ? d->_pDarkDisabledColor : d->_pLightDisabledColor;
+        } else if (isChecked()) {
+            outerBorderColor = Qt::transparent;
         } else {
-            outerCircleColor = d->_isDark ? d->_pDarkOuterCircleDefaultColor : d->_pLightOuterCircleDefaultColor;
+            outerBorderColor = d->_isDark ? d->_pDarkOuterCircleBorderColor : d->_pLightOuterCircleBorderColor;
         }
-        outerBorderColor = d->_isDark ? d->_pDarkOuterCircleBorderColor : d->_pLightOuterCircleBorderColor;
-        innerCircleColor = Qt::transparent;
+        d->_cachedOuterBorderColor = outerBorderColor;
+        d->_outerBorderColorCacheValid = true;
+    } else {
+        outerBorderColor = d->_cachedOuterBorderColor;
+    }
+
+    QColor innerCircleColor;
+    if (!d->_innerCircleColorCacheValid) {
+        if (!isEnabled()) {
+            innerCircleColor = d->_isDark ? d->_pDarkDisabledColor : d->_pLightDisabledColor;
+        } else if (isChecked()) {
+            innerCircleColor = d->_isDark ? d->_pDarkInnerCircleColor : d->_pLightInnerCircleColor;
+        } else {
+            innerCircleColor = Qt::transparent;
+        }
+        d->_cachedInnerCircleColor = innerCircleColor;
+        d->_innerCircleColorCacheValid = true;
+    } else {
+        innerCircleColor = d->_cachedInnerCircleColor;
     }
 
     painter->setPen(outerBorderColor == Qt::transparent ? Qt::NoPen
@@ -220,10 +265,16 @@ void NRadioButton::drawText(QPainter* painter) {
         d->_pOuterCircleSize + d->_pTextPadding, 0, width() - d->_pOuterCircleSize - d->_pTextPadding, height());
 
     QColor textColor;
-    if (!isEnabled()) {
-        textColor = d->_isDark ? d->_pDarkDisabledColor : d->_pLightDisabledColor;
+    if (!d->_textColorCacheValid) {
+        if (!isEnabled()) {
+            textColor = d->_isDark ? d->_pDarkDisabledColor : d->_pLightDisabledColor;
+        } else {
+            textColor = d->_isDark ? d->_pDarkTextColor : d->_pLightTextColor;
+        }
+        d->_cachedTextColor = textColor;
+        d->_textColorCacheValid = true;
     } else {
-        textColor = d->_isDark ? d->_pDarkTextColor : d->_pLightTextColor;
+        textColor = d->_cachedTextColor;
     }
 
     painter->setPen(textColor);
@@ -237,6 +288,7 @@ void NRadioButton::mousePressEvent(QMouseEvent* event) {
 
     if (event->button() == Qt::LeftButton) {
         d->_isPressed = true;
+        d->invalidateColorCache(); 
 
         if (isChecked()) {
             d->startInnerCircleAnimation(d->_innerCircleScale, 0.8);
@@ -251,6 +303,7 @@ void NRadioButton::mouseReleaseEvent(QMouseEvent* event) {
 
     if (event->button() == Qt::LeftButton) {
         d->_isPressed = false;
+        d->invalidateColorCache();
 
         if (isChecked()) {
             if (rect().contains(event->pos())) {

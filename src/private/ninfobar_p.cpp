@@ -69,7 +69,6 @@ void NInfoBarManager::postInfoBarEndEvent(NInfoBar* infoBar) {
             QVariantMap functionData;
             functionData.insert("TargetPosY", otherInfoBar->d_ptr->_calculateTargetPosY());
             eventData.insert("EventFunctionData", functionData);
-            // 若处于创建动画阶段，则合并事件动画
             if (otherInfoBar->d_ptr->getWorkMode() == WorkStatus::CreateAnimation) {
                 while (eventList.count() > 1) {
                     eventList.removeLast();
@@ -211,18 +210,28 @@ void NInfoBarPrivate::onCloseButtonClicked() {
 void NInfoBarPrivate::_infoBarCreate(int displayMsec) {
     Q_Q(NInfoBar);
     q->show();
-    QFont font = q->font();
-    font.setPixelSize(16);
-    font.setWeight(QFont::Bold);
-    q->setFont(font);
-    int titleWidth = q->fontMetrics().horizontalAdvance(_title);
-    font.setPixelSize(14);
-    font.setWeight(QFont::Medium);
-    q->setFont(font);
-    int textWidth  = q->fontMetrics().horizontalAdvance(_message);
-    int fixedWidth = _closeButtonLeftRightMargin + _leftPadding + _titleLeftSpacing + _textLeftSpacing +
-                     _closeButtonWidth + titleWidth + textWidth + 2 * _shadowBorderWidth;
-    q->setFixedWidth(fixedWidth > 500 ? 500 : fixedWidth);
+    int iconAreaWidth = _leftPadding + _titleLeftSpacing;
+    int closeButtonAreaWidth = _showCloseButton ? (_closeButtonWidth + _closeButtonLeftRightMargin) : 20;
+    int shadowWidth = 2 * _shadowBorderWidth;
+    
+    QFont titleFont = q->font();
+    titleFont.setPixelSize(16);
+    titleFont.setWeight(QFont::Bold);
+    QFontMetrics titleMetrics(titleFont);
+    int titleWidth = titleMetrics.horizontalAdvance(_title);
+    
+    QFont messageFont = q->font();
+    messageFont.setPixelSize(14);
+    messageFont.setWeight(QFont::Medium);
+    QFontMetrics messageMetrics(messageFont);
+    int messageWidth = messageMetrics.horizontalAdvance(_message);
+    
+    int minTextAreaWidth = std::max(titleWidth + _textLeftSpacing + messageWidth, 200);
+    int minTotalWidth = iconAreaWidth + minTextAreaWidth + closeButtonAreaWidth + shadowWidth;
+    
+    int finalWidth = std::max(300, std::min(600, minTotalWidth));
+    q->setFixedWidth(finalWidth);
+    
     NInfoBarManager::getInstance()->postInfoBarCreateEvent(q);
     int startX = 0;
     int startY = 0;
@@ -507,55 +516,46 @@ void NInfoBarPrivate::_initializeInfoBar() {
 void NInfoBarPrivate::_calculateTextLayout() {
     Q_Q(NInfoBar);
 
-    // 计算标题宽度
+    int iconAreaWidth = _leftPadding + _titleLeftSpacing;
+    int closeButtonAreaWidth = _showCloseButton ? (_closeButtonWidth + _closeButtonLeftRightMargin) : 20;
+    int shadowWidth = 2 * _shadowBorderWidth;
+    
+    int textAreaWidth = q->width() - iconAreaWidth - closeButtonAreaWidth - shadowWidth;
+    
+    if (!_additionalWidgets.isEmpty()) {
+        int widgetsWidth = 0;
+        for (auto widget : _additionalWidgets) {
+            widgetsWidth += widget->width() + 8;
+        }
+        textAreaWidth -= (widgetsWidth + 10);
+    }
+
     QFont titleFont = q->font();
     titleFont.setPixelSize(16);
     titleFont.setWeight(QFont::Bold);
     QFontMetrics titleMetrics(titleFont);
-    int          titleWidth  = titleMetrics.horizontalAdvance(_title);
-    int          titleHeight = titleMetrics.height();
+    int titleWidth = titleMetrics.horizontalAdvance(_title);
+    int titleHeight = titleMetrics.height();
 
-    // 计算消息宽度
     QFont messageFont = q->font();
     messageFont.setPixelSize(14);
     messageFont.setWeight(QFont::Medium);
     QFontMetrics messageMetrics(messageFont);
-
-    // 计算可用宽度
-    int closeButtonSpace = _showCloseButton ? (_closeButtonWidth + _closeButtonLeftRightMargin) : 10;
-    int availableWidth   = q->width() - _leftPadding - _titleLeftSpacing - closeButtonSpace - _shadowBorderWidth * 2;
-
-    // 为额外控件预留空间
-    if (!_additionalWidgets.isEmpty()) {
-        int widgetsWidth = 0;
-        for (auto widget : _additionalWidgets) {
-            widgetsWidth += widget->width() + 8; // 8是间距
-        }
-        availableWidth -= (widgetsWidth + 10); // 10是额外的边距
-    }
-
-    // 计算标题后剩余的宽度
-    int remainingWidth = availableWidth - titleWidth - _textLeftSpacing;
-
-    // 计算消息在一行内的宽度
     int messageWidth = messageMetrics.horizontalAdvance(_message);
 
-    // 判断是否需要换行显示消息
-    _isLongMessage = (messageWidth > remainingWidth) || (_message.length() > 40) || (_message.contains('\n'));
+    int singleLineWidth = titleWidth + _textLeftSpacing + messageWidth;
+    _isLongMessage = (singleLineWidth > textAreaWidth) || (_message.length() > 50) || (_message.contains('\n'));
 
-    // 根据是否换行设置控件高度
     if (_isLongMessage) {
-        QRect messageRect(0, 0, availableWidth - 20, 1000);
-        QRect boundingRect =
-            messageMetrics.boundingRect(messageRect, Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop, _message);
-
-        int topMargin           = 15;
+        QRect messageRect(0, 0, textAreaWidth - 20, 1000);
+        QRect boundingRect = messageMetrics.boundingRect(messageRect, Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop, _message);
+        
+        int topMargin = 15;
         int titleMessageSpacing = 8;
-        int bottomMargin        = 15;
-
-        int minHeight = topMargin + titleHeight + titleMessageSpacing + boundingRect.height() + bottomMargin;
-
-        q->setMinimumHeight(std::max(60, minHeight));
+        int bottomMargin = 15;
+        
+        int totalHeight = topMargin + titleHeight + titleMessageSpacing + boundingRect.height() + bottomMargin;
+        q->setMinimumHeight(std::max(60, totalHeight));
     } else {
         q->setMinimumHeight(60);
     }
@@ -566,58 +566,59 @@ void NInfoBarPrivate::_drawText(QPainter* painter) {
 
     QColor textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
     painter->setPen(textColor);
+    int iconAreaWidth = _leftPadding + _titleLeftSpacing;
+    int closeButtonAreaWidth = _showCloseButton ? (_closeButtonWidth + _closeButtonLeftRightMargin) : 20;
+    int shadowWidth = 2 * _shadowBorderWidth;
+    
+    int textAreaX = iconAreaWidth;
+    int textAreaWidth = q->width() - iconAreaWidth - closeButtonAreaWidth - shadowWidth;
+    
+    if (!_additionalWidgets.isEmpty()) {
+        int widgetsWidth = 0;
+        for (auto widget : _additionalWidgets) {
+            widgetsWidth += widget->width() + 8;
+        }
+        textAreaWidth -= (widgetsWidth + 10);
+    }
 
-    // 设置标题字体
-    QFont font = q->font();
-    font.setWeight(QFont::Bold);
-    font.setPixelSize(16);
-    painter->setFont(font);
-
-    int titleX         = _leftPadding + _titleLeftSpacing;
-    int titleTopMargin = 15; // 固定顶部边距
-    int titleY         = _isLongMessage ? titleTopMargin : (q->height() / 2 - painter->fontMetrics().height() / 2);
-
-    painter->drawText(QRect(titleX, titleY, q->width() / 2, painter->fontMetrics().height()),
-                      Qt::AlignLeft | Qt::AlignVCenter,
-                      _title);
-
-    font.setWeight(QFont::Medium);
-    font.setPixelSize(14);
-    painter->setFont(font);
-
-    int closeButtonSpace = _showCloseButton ? (_closeButtonWidth + _closeButtonLeftRightMargin) : 10;
+    QFont titleFont = q->font();
+    titleFont.setWeight(QFont::Bold);
+    titleFont.setPixelSize(16);
+    painter->setFont(titleFont);
+    
+    int titleHeight = painter->fontMetrics().height();
+    int titleWidth = painter->fontMetrics().horizontalAdvance(_title);
 
     if (_isLongMessage) {
-        int messageX     = titleX;
-        int messageY     = titleY + painter->fontMetrics().height() + 8;
-        int messageWidth = q->width() - messageX - closeButtonSpace - 20;
-
-        if (!_additionalWidgets.isEmpty()) {
-            int widgetsWidth = 0;
-            for (auto widget : _additionalWidgets) {
-                widgetsWidth += widget->width() + 8;
-            }
-            messageWidth -= (widgetsWidth + 10);
-        }
-
-        painter->drawText(QRect(messageX, messageY, messageWidth, q->height() - messageY - 10),
-                          Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop,
-                          _message);
+        int titleY = 15;
+        painter->drawText(QRect(textAreaX, titleY, textAreaWidth, titleHeight),
+                         Qt::AlignLeft | Qt::AlignVCenter, _title);
+        
+        QFont messageFont = q->font();
+        messageFont.setWeight(QFont::Medium);
+        messageFont.setPixelSize(14);
+        painter->setFont(messageFont);
+        
+        int messageY = titleY + titleHeight + 8;
+        int messageHeight = q->height() - messageY - 15;
+        
+        painter->drawText(QRect(textAreaX, messageY, textAreaWidth, messageHeight),
+                         Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop, _message);
     } else {
-        int titleWidth   = painter->fontMetrics().horizontalAdvance(_title);
-        int messageX     = titleX + titleWidth + _textLeftSpacing;
-        int messageWidth = q->width() - messageX - closeButtonSpace - 20;
-
-        if (!_additionalWidgets.isEmpty()) {
-            int widgetsWidth = 0;
-            for (auto widget : _additionalWidgets) {
-                widgetsWidth += widget->width() + 8;
-            }
-            messageWidth -= (widgetsWidth + 10);
-        }
-
-        painter->drawText(QRect(messageX, titleY + 1, messageWidth, painter->fontMetrics().height()),
-                          Qt::AlignLeft | Qt::AlignVCenter,
-                          _message);
+        int textY = (q->height() - titleHeight) / 2;
+        
+        painter->drawText(QRect(textAreaX, textY, titleWidth, titleHeight),
+                         Qt::AlignLeft | Qt::AlignVCenter, _title);
+        
+        QFont messageFont = q->font();
+        messageFont.setWeight(QFont::Medium);
+        messageFont.setPixelSize(14);
+        painter->setFont(messageFont);
+        
+        int messageX = textAreaX + titleWidth + _textLeftSpacing;
+        int messageWidth = textAreaWidth - titleWidth - _textLeftSpacing;
+        
+        painter->drawText(QRect(messageX, textY + 1, messageWidth, titleHeight),
+                         Qt::AlignLeft | Qt::AlignVCenter, _message);
     }
 }

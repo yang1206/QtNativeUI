@@ -118,7 +118,6 @@ bool NToggleSwitch::event(QEvent* event) {
         case QEvent::Leave:
             if (isEnabled()) {
                 d->_isHovered = false;
-                // 离开时使用动画恢复原始大小
                 d->startThumbRadiusAnimation(d->_thumbRadius, d->_thumbSize / 2);
             }
             break;

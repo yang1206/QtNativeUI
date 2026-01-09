@@ -30,7 +30,6 @@ void NEditStyle::drawPrimitive(PrimitiveElement    element,
                 bool hasHover  = fopt->state & QStyle::State_MouseOver;
                 bool isDark    = m_styleInterface->isDarkMode();
 
-                // 绘制背景
                 QColor bgColor = m_styleInterface->backgroundColorForState(isDark, isEnabled, hasFocus, hasHover);
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(bgColor);
@@ -38,7 +37,6 @@ void NEditStyle::drawPrimitive(PrimitiveElement    element,
                     foregroundRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
                 if (const QTextEdit* textEdit = qobject_cast<const QTextEdit*>(widget)) {
-                    // 动态设置 viewport 的背景色，确保与控件背景色一致
                     QTextEdit* nonConstTextEdit = const_cast<QTextEdit*>(textEdit);
                     QPalette   pal              = nonConstTextEdit->viewport()->palette();
                     pal.setColor(QPalette::Base, bgColor);
@@ -50,18 +48,18 @@ void NEditStyle::drawPrimitive(PrimitiveElement    element,
                     nonConstPlainTextEdit->viewport()->setPalette(pal);
                 }
 
-                // 绘制边框
+
                 QColor borderColor = m_styleInterface->borderColorForState(isDark, isEnabled);
                 painter->setPen(QPen(borderColor, m_styleInterface->borderWidth()));
                 painter->setBrush(Qt::NoBrush);
                 painter->drawRoundedRect(
                     foregroundRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
-                // 绘制底边线
+
                 QColor bottomLineColor = m_styleInterface->bottomLineColorForState(isDark, isEnabled, hasFocus);
                 int    bottomLineWidth = m_styleInterface->bottomLineWidth(hasFocus);
 
-                // 使用裁剪区域绘制底边线
+
                 int          bottomRectHeight = bottomLineWidth + m_styleInterface->borderRadius() / 2;
                 QRect        bottomRect       = foregroundRect;
                 QPainterPath clipPath;
@@ -111,7 +109,6 @@ void NEditStyle::drawPrimitive(PrimitiveElement    element,
 }
 
 int NEditStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, const QWidget* widget) const {
-    // 禁用默认边框
     if (metric == PM_DefaultFrameWidth && widget) {
         bool isTextInput = qobject_cast<const QLineEdit*>(widget) || qobject_cast<const QTextEdit*>(widget) ||
                            qobject_cast<const QPlainTextEdit*>(widget);

@@ -1,9 +1,10 @@
-﻿#include "controls.h"
+#include "controls.h"
 #include <QGroupBox>
 #include <QVBoxLayout>
 #include <QtNativeUI/NCheckBox.h>
 #include <QtNativeUI/NLineEdit.h>
 #include <QtNativeUI/NPushButton.h>
+#include <QtNativeUI/NRangeSlider.h>
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
 #include <QtNativeUI/NToggleSwitch.h>
@@ -13,6 +14,7 @@
 #include "QtNativeUI/NCalendarWidget.h"
 #include "QtNativeUI/NComboBox.h"
 #include "QtNativeUI/NDoubleSpinBox.h"
+#include "QtNativeUI/NGroupBox.h"
 #include "QtNativeUI/NLabel.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
@@ -43,6 +45,7 @@ void ControlsExample::initUI() {
 
     // 添加各个控件区域
     contentLayout->addWidget(new ExampleSection("Label", createLabels()));
+    contentLayout->addWidget(new ExampleSection("GroupBox", createGroupBoxes()));
     contentLayout->addWidget(new ExampleSection("CheckBox", createCheckBoxes()));
     contentLayout->addWidget(new ExampleSection("ToggleSwitch", createToggleSwitches()));
     contentLayout->addWidget(new ExampleSection("LineEdit", createLineEdits()));
@@ -372,19 +375,43 @@ QWidget* ControlsExample::createSliders() {
     QVBoxLayout* layout    = new QVBoxLayout(container);
     layout->setSpacing(32);
 
+    // === 单滑块 ===
+    QLabel* singleLabel = new QLabel("单滑块 (NSlider):", container);
+    QFont   labelFont   = singleLabel->font();
+    labelFont.setBold(true);
+    singleLabel->setFont(labelFont);
+    layout->addWidget(singleLabel);
+
     // 水平滑块
-    NSlider* horizontalSlider = new NSlider(Qt::Horizontal, container);
+    QHBoxLayout* horizontalLayout = new QHBoxLayout();
+    NSlider*     horizontalSlider = new NSlider(Qt::Horizontal, container);
     horizontalSlider->setRange(0, 100);
     horizontalSlider->setValue(50);
     horizontalSlider->setMinimumWidth(200);
-    layout->addWidget(horizontalSlider);
+    horizontalSlider->setShowTooltip(true);
+    QLabel* horizontalValueLabel = new QLabel("值: 50", container);
+    connect(horizontalSlider, &NSlider::valueChanged, [horizontalValueLabel](int value) {
+        horizontalValueLabel->setText(QString("值: %1").arg(value));
+    });
+    horizontalLayout->addWidget(horizontalSlider);
+    horizontalLayout->addWidget(horizontalValueLabel);
+    horizontalLayout->addStretch();
+    layout->addLayout(horizontalLayout);
 
     // 垂直滑块
-    NSlider* verticalSlider = new NSlider(Qt::Vertical, container);
+    QHBoxLayout* verticalLayout = new QHBoxLayout();
+    NSlider*     verticalSlider = new NSlider(Qt::Vertical, container);
     verticalSlider->setRange(0, 100);
     verticalSlider->setValue(50);
     verticalSlider->setMinimumHeight(200);
-    layout->addWidget(verticalSlider);
+    QLabel* verticalValueLabel = new QLabel("值: 50", container);
+    connect(verticalSlider, &NSlider::valueChanged, [verticalValueLabel](int value) {
+        verticalValueLabel->setText(QString("值: %1").arg(value));
+    });
+    verticalLayout->addWidget(verticalSlider);
+    verticalLayout->addWidget(verticalValueLabel);
+    verticalLayout->addStretch();
+    layout->addLayout(verticalLayout);
 
     // 禁用状态的滑块
     NSlider* disabledSlider = new NSlider(Qt::Horizontal, container);
@@ -403,6 +430,142 @@ QWidget* ControlsExample::createSliders() {
     tickSlider->setMinimumWidth(200);
     layout->addWidget(tickSlider);
 
+    // === 范围滑块 ===
+    QLabel* rangeLabel = new QLabel("范围滑块 (NRangeSlider):", container);
+    rangeLabel->setFont(labelFont);
+    layout->addWidget(rangeLabel);
+
+    // 基本范围滑块
+    QHBoxLayout*  basicRangeLayout = new QHBoxLayout();
+    NRangeSlider* basicRangeSlider = new NRangeSlider(Qt::Horizontal, container);
+    basicRangeSlider->setRange(0, 100);
+    basicRangeSlider->setValues(25, 75);
+    basicRangeSlider->setMinimumWidth(300);
+    QLabel* rangeValueLabel = new QLabel("范围: 25 - 75", container);
+    connect(basicRangeSlider, &NRangeSlider::rangeChanged, [rangeValueLabel](int lower, int upper) {
+        rangeValueLabel->setText(QString("范围: %1 - %2").arg(lower).arg(upper));
+    });
+    basicRangeLayout->addWidget(basicRangeSlider);
+    basicRangeLayout->addWidget(rangeValueLabel);
+    basicRangeLayout->addStretch();
+    layout->addLayout(basicRangeLayout);
+
+    // 垂直范围滑块
+    QHBoxLayout*  verticalRangeLayout = new QHBoxLayout();
+    NRangeSlider* verticalRangeSlider = new NRangeSlider(Qt::Vertical, container);
+    verticalRangeSlider->setRange(0, 100);
+    verticalRangeSlider->setValues(30, 70);
+    verticalRangeSlider->setMinimumHeight(200);
+    QLabel* verticalRangeValueLabel = new QLabel("范围: 30 - 70", container);
+    connect(verticalRangeSlider, &NRangeSlider::rangeChanged, [verticalRangeValueLabel](int lower, int upper) {
+        verticalRangeValueLabel->setText(QString("范围: %1 - %2").arg(lower).arg(upper));
+    });
+    verticalRangeLayout->addWidget(verticalRangeSlider);
+    verticalRangeLayout->addWidget(verticalRangeValueLabel);
+    verticalRangeLayout->addStretch();
+    layout->addLayout(verticalRangeLayout);
+
+    // 禁用状态的范围滑块
+    QHBoxLayout*  disabledRangeLayout = new QHBoxLayout();
+    NRangeSlider* disabledRangeSlider = new NRangeSlider(Qt::Horizontal, container);
+    disabledRangeSlider->setRange(0, 100);
+    disabledRangeSlider->setValues(20, 80);
+    disabledRangeSlider->setEnabled(false);
+    disabledRangeSlider->setMinimumWidth(300);
+    QLabel* disabledRangeLabel = new QLabel("禁用状态 (20 - 80)", container);
+    disabledRangeLayout->addWidget(disabledRangeSlider);
+    disabledRangeLayout->addWidget(disabledRangeLabel);
+    disabledRangeLayout->addStretch();
+    layout->addLayout(disabledRangeLayout);
+
+    // 自定义强调色的范围滑块
+    QHBoxLayout*  accentRangeLayout = new QHBoxLayout();
+    NRangeSlider* accentRangeSlider = new NRangeSlider(Qt::Horizontal, container);
+    accentRangeSlider->setRange(0, 100);
+    accentRangeSlider->setValues(40, 60);
+    accentRangeSlider->setAccentColor(QColor(255, 0, 128)); // 粉红色
+    accentRangeSlider->setMinimumWidth(300);
+    QLabel* accentRangeLabel = new QLabel("自定义颜色 (40 - 60)", container);
+    accentRangeLayout->addWidget(accentRangeSlider);
+    accentRangeLayout->addWidget(accentRangeLabel);
+    accentRangeLayout->addStretch();
+    layout->addLayout(accentRangeLayout);
+
+    // 交互演示
+    QLabel* interactiveLabel = new QLabel("交互演示:", container);
+    interactiveLabel->setFont(labelFont);
+    layout->addWidget(interactiveLabel);
+
+    QHBoxLayout*  interactiveLayout = new QHBoxLayout();
+    NRangeSlider* interactiveSlider = new NRangeSlider(Qt::Horizontal, container);
+    interactiveSlider->setRange(0, 100);
+    interactiveSlider->setValues(10, 90);
+    interactiveSlider->setMinimumWidth(300);
+
+    QLabel* lowerLabel = new QLabel("下限: 10", container);
+    QLabel* upperLabel = new QLabel("上限: 90", container);
+    QLabel* spanLabel  = new QLabel("跨度: 80", container);
+
+    connect(interactiveSlider, &NRangeSlider::lowerValueChanged, [lowerLabel, spanLabel, interactiveSlider](int value) {
+        lowerLabel->setText(QString("下限: %1").arg(value));
+        spanLabel->setText(QString("跨度: %1").arg(interactiveSlider->getUpperValue() - value));
+    });
+    connect(interactiveSlider, &NRangeSlider::upperValueChanged, [upperLabel, spanLabel, interactiveSlider](int value) {
+        upperLabel->setText(QString("上限: %1").arg(value));
+        spanLabel->setText(QString("跨度: %1").arg(value - interactiveSlider->getLowerValue()));
+    });
+
+    QVBoxLayout* labelsLayout = new QVBoxLayout();
+    labelsLayout->addWidget(lowerLabel);
+    labelsLayout->addWidget(upperLabel);
+    labelsLayout->addWidget(spanLabel);
+
+    interactiveLayout->addWidget(interactiveSlider);
+    interactiveLayout->addLayout(labelsLayout);
+    interactiveLayout->addStretch();
+    layout->addLayout(interactiveLayout);
+
+    // Tooltip演示
+    QLabel* tooltipLabel = new QLabel("Tooltip演示:", container);
+    tooltipLabel->setFont(labelFont);
+    layout->addWidget(tooltipLabel);
+
+    // 基本tooltip（拖动和hover时显示）
+    QHBoxLayout*  tooltipBasicLayout = new QHBoxLayout();
+    NRangeSlider* tooltipBasicSlider = new NRangeSlider(Qt::Horizontal, container);
+    tooltipBasicSlider->setRange(0, 100);
+    tooltipBasicSlider->setValues(30, 70);
+    tooltipBasicSlider->setMinimumWidth(300);
+    tooltipBasicSlider->setShowTooltip(true); // 启用tooltip
+    QLabel* tooltipBasicLabel = new QLabel("拖动或悬停显示tooltip (30 - 70)", container);
+    connect(tooltipBasicSlider, &NRangeSlider::rangeChanged, [tooltipBasicLabel](int lower, int upper) {
+        tooltipBasicLabel->setText(QString("拖动或悬停显示tooltip (%1 - %2)").arg(lower).arg(upper));
+    });
+    tooltipBasicLayout->addWidget(tooltipBasicSlider);
+    tooltipBasicLayout->addWidget(tooltipBasicLabel);
+    tooltipBasicLayout->addStretch();
+    layout->addLayout(tooltipBasicLayout);
+
+    // 自定义tooltip格式
+    QHBoxLayout*  tooltipFormatLayout = new QHBoxLayout();
+    NRangeSlider* tooltipFormatSlider = new NRangeSlider(Qt::Horizontal, container);
+    tooltipFormatSlider->setRange(0, 100);
+    tooltipFormatSlider->setValues(40, 60);
+    tooltipFormatSlider->setMinimumWidth(300);
+    tooltipFormatSlider->setShowTooltip(true);
+    tooltipFormatSlider->setTooltipFormatter([](int value) {
+        return QString("%1%").arg(value); // 显示百分号
+    });
+    QLabel* tooltipFormatLabel = new QLabel("自定义格式 (40% - 60%)", container);
+    connect(tooltipFormatSlider, &NRangeSlider::rangeChanged, [tooltipFormatLabel](int lower, int upper) {
+        tooltipFormatLabel->setText(QString("自定义格式 (%1% - %2%)").arg(lower).arg(upper));
+    });
+    tooltipFormatLayout->addWidget(tooltipFormatSlider);
+    tooltipFormatLayout->addWidget(tooltipFormatLabel);
+    tooltipFormatLayout->addStretch();
+    layout->addLayout(tooltipFormatLayout);
+
+    layout->addStretch();
     return container;
 }
 
@@ -1180,6 +1343,7 @@ QWidget* ControlsExample::createComboBoxes() {
     basicComboBox->addItem("选项 2");
     basicComboBox->addItem("选项 3");
     basicComboBox->setMinimumWidth(200);
+    basicComboBox->setFixedWidth(80);
     layout->addWidget(basicComboBox);
 
     // 2. 预设选项的下拉框
@@ -1217,7 +1381,7 @@ QWidget* ControlsExample::createComboBoxes() {
     layout->addWidget(signalLabel);
 
     NComboBox* signalComboBox = new NComboBox(container);
-    signalComboBox->addItems({"红色", "绿色", "蓝色", "黄色", "紫色"});
+    signalComboBox->addItems({"红色", "绿色", "蓝色", "黄色", "紫色", "青色", "白色", "黑色"});
     signalComboBox->setMinimumWidth(200);
     QLabel* selectionLabel = new QLabel("当前选择: 红色", container);
     connect(signalComboBox,
@@ -1482,5 +1646,219 @@ QWidget* ControlsExample::createLabels() {
     layout->addLayout(gridLayout);
     layout->addStretch();
 
+    return container;
+}
+
+QWidget* ControlsExample::createGroupBoxes() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(24);
+
+    // 1. 基本分组框
+    QLabel* basicLabel = new QLabel("基本分组框:", container);
+    QFont   labelFont  = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    NGroupBox* basicGroupBox = new NGroupBox("基本信息", container);
+    basicGroupBox->setMinimumWidth(400);
+
+    QVBoxLayout* basicLayout = new QVBoxLayout(basicGroupBox);
+    basicLayout->addWidget(new NLineEdit("姓名"));
+    basicLayout->addWidget(new NLineEdit("邮箱"));
+    basicLayout->addWidget(new NLineEdit("电话"));
+
+    layout->addWidget(basicGroupBox);
+
+    // 2. 不同样式的分组框
+    QLabel* styleLabel = new QLabel("不同样式:", container);
+    styleLabel->setFont(labelFont);
+    layout->addWidget(styleLabel);
+
+    QHBoxLayout* styleLayout = new QHBoxLayout();
+    styleLayout->setSpacing(16);
+
+    // 标准样式
+    NGroupBox* standardGroupBox = new NGroupBox("标准样式", container);
+    standardGroupBox->setGroupBoxStyle(NGroupBox::Standard);
+    standardGroupBox->setMinimumWidth(180);
+    QVBoxLayout* standardLayout = new QVBoxLayout(standardGroupBox);
+    standardLayout->addWidget(new NCheckBox("选项 1"));
+    standardLayout->addWidget(new NCheckBox("选项 2"));
+    styleLayout->addWidget(standardGroupBox);
+
+    // 卡片样式
+    NGroupBox* cardGroupBox = new NGroupBox("卡片样式", container);
+    cardGroupBox->setGroupBoxStyle(NGroupBox::Card);
+    cardGroupBox->setMinimumWidth(180);
+    QVBoxLayout* cardLayout = new QVBoxLayout(cardGroupBox);
+    cardLayout->addWidget(new NCheckBox("选项 A"));
+    cardLayout->addWidget(new NCheckBox("选项 B"));
+    styleLayout->addWidget(cardGroupBox);
+
+    // 轮廓样式
+    NGroupBox* outlinedGroupBox = new NGroupBox("轮廓样式", container);
+    outlinedGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
+    outlinedGroupBox->setMinimumWidth(180);
+    QVBoxLayout* outlinedLayout = new QVBoxLayout(outlinedGroupBox);
+    outlinedLayout->addWidget(new NCheckBox("选项 X"));
+    outlinedLayout->addWidget(new NCheckBox("选项 Y"));
+    styleLayout->addWidget(outlinedGroupBox);
+
+    styleLayout->addStretch();
+    layout->addLayout(styleLayout);
+
+    // 3. 带图标的分组框
+    QLabel* iconLabel = new QLabel("带图标的分组框:", container);
+    iconLabel->setFont(labelFont);
+    layout->addWidget(iconLabel);
+
+    QHBoxLayout* iconLayout = new QHBoxLayout();
+    iconLayout->setSpacing(16);
+
+    NGroupBox* settingsGroupBox = new NGroupBox("设置", container);
+    settingsGroupBox->setTitleIcon(NRegularIconType::Settings24Regular, 20);
+    settingsGroupBox->setMinimumWidth(200);
+    QVBoxLayout* settingsLayout = new QVBoxLayout(settingsGroupBox);
+    settingsLayout->addWidget(new NToggleSwitch("启用通知"));
+    settingsLayout->addWidget(new NToggleSwitch("自动更新"));
+    iconLayout->addWidget(settingsGroupBox);
+
+    NGroupBox* securityGroupBox = new NGroupBox("安全", container);
+    securityGroupBox->setTitleIcon(NFilledIconType::Shield24Filled, 20);
+    securityGroupBox->setMinimumWidth(200);
+    QVBoxLayout* securityLayout = new QVBoxLayout(securityGroupBox);
+    securityLayout->addWidget(new NCheckBox("启用防火墙"));
+    securityLayout->addWidget(new NCheckBox("自动扫描"));
+    iconLayout->addWidget(securityGroupBox);
+
+    iconLayout->addStretch();
+    layout->addLayout(iconLayout);
+
+    // 4. 可折叠的分组框
+    QLabel* collapsibleLabel = new QLabel("可折叠的分组框:", container);
+    collapsibleLabel->setFont(labelFont);
+    layout->addWidget(collapsibleLabel);
+
+    NGroupBox* collapsibleGroupBox = new NGroupBox("高级设置", container);
+    collapsibleGroupBox->setTitleIcon(NRegularIconType::Options24Regular, 18);
+    collapsibleGroupBox->setCollapsible(true);
+    collapsibleGroupBox->setMinimumWidth(400);
+
+    QVBoxLayout* collapsibleLayout = new QVBoxLayout(collapsibleGroupBox);
+    collapsibleLayout->addWidget(new NLineEdit("服务器地址"));
+    collapsibleLayout->addWidget(new NSpinBox());
+    collapsibleLayout->addWidget(new NCheckBox("启用SSL"));
+    collapsibleLayout->addWidget(new NCheckBox("启用压缩"));
+
+    QLabel* statusLabel = new QLabel("状态: 展开", container);
+    connect(collapsibleGroupBox, &NGroupBox::collapsedChanged, [statusLabel](bool collapsed) {
+        statusLabel->setText(collapsed ? "状态: 折叠" : "状态: 展开");
+    });
+
+    layout->addWidget(collapsibleGroupBox);
+    layout->addWidget(statusLabel);
+
+    // 5. 嵌套分组框
+    QLabel* nestedLabel = new QLabel("嵌套分组框:", container);
+    nestedLabel->setFont(labelFont);
+    layout->addWidget(nestedLabel);
+
+    NGroupBox* parentGroupBox = new NGroupBox("用户配置", container);
+    parentGroupBox->setMinimumWidth(450);
+
+    QVBoxLayout* parentLayout = new QVBoxLayout(parentGroupBox);
+
+    // 个人信息子组
+    NGroupBox* personalGroupBox = new NGroupBox("个人信息", parentGroupBox);
+    personalGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
+    personalGroupBox->setTitleIcon(NRegularIconType::Person24Regular, 16);
+    QVBoxLayout* personalLayout = new QVBoxLayout(personalGroupBox);
+    personalLayout->addWidget(new NLineEdit("用户名"));
+    personalLayout->addWidget(new NLineEdit("显示名称"));
+    parentLayout->addWidget(personalGroupBox);
+
+    // 权限子组
+    NGroupBox* permissionGroupBox = new NGroupBox("权限设置", parentGroupBox);
+    permissionGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
+    permissionGroupBox->setTitleIcon(NRegularIconType::Key24Regular, 16);
+    permissionGroupBox->setCollapsible(true);
+    QVBoxLayout* permissionLayout = new QVBoxLayout(permissionGroupBox);
+    permissionLayout->addWidget(new NCheckBox("管理员权限"));
+    permissionLayout->addWidget(new NCheckBox("读取权限"));
+    permissionLayout->addWidget(new NCheckBox("写入权限"));
+    parentLayout->addWidget(permissionGroupBox);
+
+    layout->addWidget(parentGroupBox);
+
+    // 6. 不同状态的分组框
+    QLabel* stateLabel = new QLabel("不同状态:", container);
+    stateLabel->setFont(labelFont);
+    layout->addWidget(stateLabel);
+
+    QHBoxLayout* stateLayout = new QHBoxLayout();
+    stateLayout->setSpacing(16);
+
+    // 正常状态
+    NGroupBox* normalGroupBox = new NGroupBox("正常状态", container);
+    normalGroupBox->setMinimumWidth(150);
+    QVBoxLayout* normalLayout = new QVBoxLayout(normalGroupBox);
+    normalLayout->addWidget(new NPushButton("按钮"));
+    stateLayout->addWidget(normalGroupBox);
+
+    // 禁用状态
+    NGroupBox* disabledGroupBox = new NGroupBox("禁用状态", container);
+    disabledGroupBox->setEnabled(false);
+    disabledGroupBox->setMinimumWidth(150);
+    QVBoxLayout* disabledLayout = new QVBoxLayout(disabledGroupBox);
+    disabledLayout->addWidget(new NPushButton("按钮"));
+    stateLayout->addWidget(disabledGroupBox);
+
+    // 无边框
+    NGroupBox* noBorderGroupBox = new NGroupBox("无边框", container);
+    noBorderGroupBox->setShowBorder(false);
+    noBorderGroupBox->setMinimumWidth(150);
+    QVBoxLayout* noBorderLayout = new QVBoxLayout(noBorderGroupBox);
+    noBorderLayout->addWidget(new NPushButton("按钮"));
+    stateLayout->addWidget(noBorderGroupBox);
+
+    stateLayout->addStretch();
+    layout->addLayout(stateLayout);
+
+    // 7. 自定义边距和折叠图标
+    QLabel* customLabel = new QLabel("自定义边距和折叠图标:", container);
+    customLabel->setFont(labelFont);
+    layout->addWidget(customLabel);
+
+    QHBoxLayout* customLayout = new QHBoxLayout();
+    customLayout->setSpacing(16);
+
+    // 自定义边距
+    NGroupBox* customMarginGroupBox = new NGroupBox("大边距", container);
+    customMarginGroupBox->setContentMargin(20);
+    customMarginGroupBox->setTitleHeight(40);
+    customMarginGroupBox->setMinimumWidth(200);
+    QVBoxLayout* customMarginLayout = new QVBoxLayout(customMarginGroupBox);
+    customMarginLayout->addWidget(new NCheckBox("选项 1"));
+    customMarginLayout->addWidget(new NCheckBox("选项 2"));
+    customLayout->addWidget(customMarginGroupBox);
+
+    // 自定义折叠图标
+    NGroupBox* customIconGroupBox = new NGroupBox("自定义折叠图标", container);
+    customIconGroupBox->setCollapsible(true);
+    customIconGroupBox->setExpandedIcon(NRegularIconType::ChevronUp16Regular);
+    customIconGroupBox->setCollapsedIcon(NRegularIconType::Add16Regular);
+    customIconGroupBox->setCollapseIndicatorSize(18);
+    customIconGroupBox->setMinimumWidth(200);
+    QVBoxLayout* customIconLayout = new QVBoxLayout(customIconGroupBox);
+    customIconLayout->addWidget(new NLineEdit("内容"));
+    customIconLayout->addWidget(new NCheckBox("选项"));
+    customLayout->addWidget(customIconGroupBox);
+
+    customLayout->addStretch();
+    layout->addLayout(customLayout);
+
+    layout->addStretch();
     return container;
 }

@@ -68,6 +68,9 @@ class QTNATIVEUI_EXPORT NLabel : public QLabel {
      */
     void typeChanged();
 
+  protected:
+    void changeEvent(QEvent* event) override;
+
   private:
     /**
      * @brief 初始化控件

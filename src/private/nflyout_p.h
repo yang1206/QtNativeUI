@@ -10,7 +10,6 @@
 class QHBoxLayout;
 class QVBoxLayout;
 
-// 基础动画管理器
 class NFlyoutAnimationManager : public QObject {
     Q_OBJECT
   public:
@@ -40,7 +39,6 @@ class NFlyoutAnimationManager : public QObject {
     }
 };
 
-// 向上弹出动画
 class PullUpAnimationManager : public NFlyoutAnimationManager {
     Q_OBJECT
   public:
@@ -49,7 +47,6 @@ class PullUpAnimationManager : public NFlyoutAnimationManager {
     QPoint position(QWidget* target) override;
 };
 
-// 向下弹出动画
 class DropDownAnimationManager : public NFlyoutAnimationManager {
     Q_OBJECT
   public:
@@ -58,7 +55,6 @@ class DropDownAnimationManager : public NFlyoutAnimationManager {
     QPoint position(QWidget* target) override;
 };
 
-// 从右向左滑入动画
 class SlideLeftAnimationManager : public NFlyoutAnimationManager {
     Q_OBJECT
   public:
@@ -67,7 +63,6 @@ class SlideLeftAnimationManager : public NFlyoutAnimationManager {
     QPoint position(QWidget* target) override;
 };
 
-// 从左向右滑入动画
 class SlideRightAnimationManager : public NFlyoutAnimationManager {
     Q_OBJECT
   public:
@@ -76,7 +71,6 @@ class SlideRightAnimationManager : public NFlyoutAnimationManager {
     QPoint position(QWidget* target) override;
 };
 
-// 淡入动画
 class FadeInAnimationManager : public NFlyoutAnimationManager {
     Q_OBJECT
   public:
@@ -85,7 +79,6 @@ class FadeInAnimationManager : public NFlyoutAnimationManager {
     QPoint position(QWidget* target) override;
 };
 
-// 无动画
 class NoneAnimationManager : public NFlyoutAnimationManager {
     Q_OBJECT
   public:
@@ -94,7 +87,6 @@ class NoneAnimationManager : public NFlyoutAnimationManager {
     QPoint position(QWidget* target) override;
 };
 
-// Flyout私有数据
 class NFlyoutPrivate : public QObject {
     Q_OBJECT
     Q_PROPERTY_CREATE_D(QColor, LightBackgroundColor)
@@ -112,35 +104,28 @@ class NFlyoutPrivate : public QObject {
     ~NFlyoutPrivate() override;
     Q_D_CREATE(NFlyout)
 
-    // 初始化UI
     void  setupUI();
     void  updateThemeColors();
     QRect calculatePlacement(const QWidget* target, Qt::Edge placement) const;
 
-    // 动画管理器
     NFlyoutAnimationManager* animationManager();
 
-    // 主题相关
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark;
 
-    // 状态
     bool _isHovered;
     bool _isPressed;
     bool _isOpen;
 
-    // 设置
     int                       _shadowBorderWidth;
     NFlyout::LightDismissMode _lightDismissMode;
     NFlyoutAnimationType      _animationType;
     bool                      _isDeleteOnClose;
 
-    // 动画相关
     NFlyoutAnimationManager*   _animManager;
     QPropertyAnimation*        _fadeOutAnimation;
     QGraphicsDropShadowEffect* _shadowEffect;
 
-    // 布局
     QHBoxLayout* _mainLayout;
 };
 

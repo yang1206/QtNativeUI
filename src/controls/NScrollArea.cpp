@@ -95,7 +95,6 @@ void NScrollArea::updateScrollBars() {
     Q_D(NScrollArea);
     
     if (d->_useCustomScrollBars) {
-        // 设置自定义滚动条
         if (d->_horizontalScrollBar) {
             setHorizontalScrollBar(d->_horizontalScrollBar);
         }
@@ -104,7 +103,6 @@ void NScrollArea::updateScrollBars() {
             setVerticalScrollBar(d->_verticalScrollBar);
         }
     } else {
-        // 恢复原始滚动条
         if (d->_originalHorizontalScrollBar) {
             setHorizontalScrollBar(d->_originalHorizontalScrollBar);
         }
@@ -113,7 +111,6 @@ void NScrollArea::updateScrollBars() {
             setVerticalScrollBar(d->_originalVerticalScrollBar);
         }
     }
-    
-    // 更新内容区域
+
     d->updateContentRect();
 }

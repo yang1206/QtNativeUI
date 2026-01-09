@@ -1,11 +1,15 @@
 #ifndef QTNATIVEUI_NTHEME_P_H
 #define QTNATIVEUI_NTHEME_P_H
 
+#include <QCache>
 #include <QColor>
+#include <QPixmap>
+#include <QTimer>
 #include <QVariant>
 #include <QtNativeUI/NColor.h>
 #include <QtNativeUI/NFluentColors.h>
 #include <QtNativeUI/NTheme.h>
+
 
 class NTheme;
 class NThemePrivate {
@@ -23,19 +27,20 @@ class NThemePrivate {
     bool         _useSystemAccentColor;
     QColor       _systemAccentColor;
 
-    // 颜色存储 - 使用枚举键
-    QMap<NFluentColorKey::Key, QColor> _lightColors;
-    QMap<NFluentColorKey::Key, QColor> _darkColors;
+    static const QMap<NFluentColorKey::Key, QColor>* s_lightColors;
+    static const QMap<NFluentColorKey::Key, QColor>* s_darkColors;
+    static bool                                      s_staticDataInitialized;
+
     QMap<NFluentColorKey::Key, QColor> _customColors;
 
-    // 设计令牌 - 按类别存储
-    QHash<NDesignTokenKey::Radius, QVariant>            _radiusTokens;
-    QHash<NDesignTokenKey::Spacing, QVariant>           _spacingTokens;
-    QHash<NDesignTokenKey::FontSize, QVariant>          _fontSizeTokens;
-    QHash<NDesignTokenKey::FontWeight, QVariant>        _fontWeightTokens;
-    QHash<NDesignTokenKey::Elevation, QVariant>         _elevationTokens;
-    QHash<NDesignTokenKey::AnimationDuration, QVariant> _animationDurationTokens;
-    QHash<NDesignTokenKey::AnimationEasing, QVariant>   _animationEasingTokens;
+    // 设计令牌
+    static QHash<NDesignTokenKey::Radius, QVariant>            s_defaultRadiusTokens;
+    static QHash<NDesignTokenKey::Spacing, QVariant>           s_defaultSpacingTokens;
+    static QHash<NDesignTokenKey::FontSize, QVariant>          s_defaultFontSizeTokens;
+    static QHash<NDesignTokenKey::FontWeight, QVariant>        s_defaultFontWeightTokens;
+    static QHash<NDesignTokenKey::Elevation, QVariant>         s_defaultElevationTokens;
+    static QHash<NDesignTokenKey::AnimationDuration, QVariant> s_defaultAnimationDurationTokens;
+    static QHash<NDesignTokenKey::AnimationEasing, QVariant>   s_defaultAnimationEasingTokens;
 
     // 自定义令牌 - 按类别存储
     QHash<NDesignTokenKey::Radius, QVariant>            _customRadiusTokens;
@@ -46,22 +51,29 @@ class NThemePrivate {
     QHash<NDesignTokenKey::AnimationDuration, QVariant> _customAnimationDurationTokens;
     QHash<NDesignTokenKey::AnimationEasing, QVariant>   _customAnimationEasingTokens;
 
-    // 初始化方法
-    void initLightColors();
-    void initDarkColors();
-    void initDesignTokens();
+    mutable QCache<NFluentColorKey::Key, QColor> _colorCache;
 
-    // 系统主题检测
-    bool detectSystemTheme() const;
+    // 移除阴影缓存，新算法本身就很高效
 
+    mutable bool   _systemThemeCacheValid       = false;
+    mutable bool   _systemThemeCache            = false;
+    mutable bool   _systemAccentColorCacheValid = false;
+    mutable QColor _systemAccentColorCache;
+
+    QTimer* _cacheInvalidationTimer;
+
+    static void initializeStaticData();
+
+    bool   detectSystemTheme() const;
     QColor detectSystemAccentColor() const;
 
-    // 颜色解析
     QColor resolveColor(NFluentColorKey::Key key) const;
-
-    // 令牌解析 - 泛型方法
     template <typename T>
     QVariant resolveToken(const T& key) const;
+
+    void setupCacheInvalidationTimer();
+    void invalidateSystemCache();
+    void invalidateColorCache();
 };
 
 template <typename T>

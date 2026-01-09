@@ -7,6 +7,7 @@
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 
+class NPageComponent;
 class NNavigationBarPrivate;
 class NNavigationNode;
 
@@ -14,7 +15,6 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
     Q_OBJECT
     Q_Q_CREATE(NNavigationBar)
     Q_PROPERTY_CREATE_Q_H(bool, IsTransparent)
-
   public:
     explicit NNavigationBar(QWidget* parent = nullptr);
     ~NNavigationBar();
@@ -64,6 +64,16 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
     NNavigationType::NodeOperateReturnType
     addFooterNode(QString footerTitle, QWidget* page, QString& footerKey, int keyPoints, NFilledIconType::Icon icon);
 
+    NNavigationType::NodeOperateReturnType addPageComponent(NPageComponent*        page,
+                                                            NRegularIconType::Icon icon = NRegularIconType::None);
+    NNavigationType::NodeOperateReturnType addPageComponent(NPageComponent* page, NFilledIconType::Icon icon);
+    // 添加页面组件到展开节点
+    NNavigationType::NodeOperateReturnType addPageComponent(NPageComponent*        page,
+                                                            const QString&         expanderKey,
+                                                            NRegularIconType::Icon icon = NRegularIconType::None);
+    NNavigationType::NodeOperateReturnType
+    addPageComponent(NPageComponent* page, const QString& expanderKey, NFilledIconType::Icon icon);
+
     bool getNavigationNodeIsExpanded(QString expanderKey) const;
     void expandNavigationNode(QString expanderKey);
     void collpaseNavigationNode(QString expanderKey);
@@ -71,6 +81,9 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
 
     void setNodeKeyPoints(QString nodeKey, int keyPoints);
     int  getNodeKeyPoints(QString nodeKey) const;
+
+    void setSearchVisible(bool visible);
+    bool isSearchVisible() const;
 
     void navigation(QString pageKey, bool isLogClicked = true);
     void setDisplayMode(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation = true);
@@ -83,6 +96,10 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
 
   protected:
     void paintEvent(QPaintEvent* event) override;
+
+  private slots:
+    void handleRouteChanged(const QString& pageKey, const QVariantMap& params);
+    void handleRouteBack(const QString& fromPageKey, const QString& toPageKey, const QVariantMap& params);
 };
 
 #endif // NNAVIGATIONBAR_H

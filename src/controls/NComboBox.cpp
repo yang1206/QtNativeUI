@@ -2,10 +2,7 @@
 #include <QClipboard>
 #include <QGuiApplication>
 #include <QLayout>
-#include <QLineEdit>
 #include <QListView>
-#include <QPropertyAnimation>
-#include <QStyleOptionComboBox>
 #include <QtNativeUI/NAnimation.h>
 #include <QtNativeUI/NComboBox.h>
 #include <qevent.h>
@@ -70,7 +67,6 @@ void NComboBox::init() {
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
-    // 初始化各种颜色
     d->_pLightBackgroundColor         = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
     d->_pDarkBackgroundColor          = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
     d->_pLightBackgroundHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
@@ -117,12 +113,10 @@ void NComboBox::init() {
     d->_comboBoxStyle = new NComboBoxStyle(d, style());
     setStyle(d->_comboBoxStyle);
 
-    // 初始化箭头动画
     d->_arrowAnimation = new QtNativeUI::NTranslateYAnimation(this, 3.0);
     connect(d->_arrowAnimation, &QtNativeUI::NTranslateYAnimation::yChanged, this, [d](qreal value) {
         d->setArrowYOffset(value);
     });
-
     setObjectName("NComboBox");
     setMinimumHeight(35);
 
@@ -131,7 +125,8 @@ void NComboBox::init() {
     comboBoxView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     NScrollBar* scrollBar = new NScrollBar(this);
     comboBoxView->setVerticalScrollBar(scrollBar);
-    comboBoxView->setAutoScroll(false);
+
+    comboBoxView->setAutoScroll(true);
     comboBoxView->setSelectionMode(QAbstractItemView::NoSelection);
     comboBoxView->setObjectName("NComboBoxView");
     comboBoxView->setStyleSheet("#NComboBoxView{background-color:transparent;}");
@@ -148,10 +143,11 @@ void NComboBox::init() {
         }
         layout->addWidget(view());
         layout->setContentsMargins(6, 0, 6, 6);
+#ifndef Q_OS_WIN
         container->setStyleSheet("background-color:transparent;");
+#endif
     }
     QComboBox::setMaxVisibleItems(5);
-
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode themeMode) {
         Q_D(NComboBox);
         d->_themeMode = themeMode;
@@ -177,85 +173,78 @@ void NComboBox::init() {
 
 QLineEdit* NComboBox::getLineEdit() const { return lineEdit(); }
 
+QSize NComboBox::sizeHint() const { return style()->sizeFromContents(QStyle::CT_ComboBox, nullptr, QSize(), this); }
+
 void NComboBox::showPopup() {
     Q_D(NComboBox);
 
-    // 设置下拉状态
     d->_isDropdownVisible = true;
 
-    // 确保下拉时箭头保持向下位置
     if (d->_arrowAnimation) {
         d->_arrowAnimation->setY(3.0);
     }
 
-    // 原有代码保持不变
     bool oldAnimationEffects = qApp->isEffectEnabled(Qt::UI_AnimateCombo);
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, false);
     QComboBox::showPopup();
     qApp->setEffectEnabled(Qt::UI_AnimateCombo, oldAnimationEffects);
 
-    if (count() > 0) {
-        QWidget* container = this->findChild<QFrame*>();
-        if (container) {
-            // 计算容器高度
-            int containerHeight = 0;
-            if (count() >= maxVisibleItems()) {
-                containerHeight = maxVisibleItems() * 35 + 8;
-            } else {
-                containerHeight = count() * 35 + 8;
-            }
-
-            view()->resize(view()->width(), containerHeight - 8);
-            container->move(container->x(), container->y() + 3);
-
-            QLayout* layout = container->layout();
-            while (layout && layout->count()) {
-                layout->takeAt(0);
-            }
-
-            // 设置高度动画
-            QPropertyAnimation* fixedSizeAnimation = new QPropertyAnimation(container, "maximumHeight");
-            connect(fixedSizeAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
-                container->setFixedHeight(value.toUInt());
-            });
-            fixedSizeAnimation->setStartValue(1);
-            fixedSizeAnimation->setEndValue(containerHeight);
-            fixedSizeAnimation->setEasingCurve(QEasingCurve::OutCubic);
-            fixedSizeAnimation->setDuration(400);
-            fixedSizeAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-
-            QPropertyAnimation* viewPosAnimation = new QPropertyAnimation(view(), "pos");
-            connect(
-                viewPosAnimation, &QPropertyAnimation::finished, this, [this, layout]() { layout->addWidget(view()); });
-            QPoint viewPos = view()->pos();
-            viewPosAnimation->setStartValue(QPoint(viewPos.x(), viewPos.y() - view()->height()));
-            viewPosAnimation->setEndValue(viewPos);
-            viewPosAnimation->setEasingCurve(QEasingCurve::OutCubic);
-            viewPosAnimation->setDuration(400);
-            viewPosAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+    QWidget* container = this->findChild<QFrame*>();
+    if (container && count() > 0) {
+        int itemHeight = view()->sizeHintForRow(0);
+        if (itemHeight <= 0) {
+            itemHeight = 35;
         }
+
+        int viewHeight;
+        int containerHeight;
+        if (count() >= maxVisibleItems()) {
+            viewHeight = maxVisibleItems() * itemHeight;
+        } else {
+            viewHeight = count() * itemHeight;
+        }
+        containerHeight = viewHeight + 8;
+
+        view()->setFixedHeight(viewHeight);
+        container->setFixedHeight(containerHeight);
+        
+        auto* effect = new QGraphicsOpacityEffect(container);
+        container->setGraphicsEffect(effect);
+
+        QPoint startPos = container->pos() - QPoint(0, 20);
+        container->move(startPos);
+        
+        auto* posAni = new QPropertyAnimation(container, "pos");
+        posAni->setDuration(350);
+        posAni->setStartValue(startPos);
+        posAni->setEndValue(startPos + QPoint(0, 20));
+        posAni->setEasingCurve(QEasingCurve::OutCubic);
+        posAni->start(QAbstractAnimation::DeleteWhenStopped);
+
+        auto* opacityAni = new QPropertyAnimation(effect, "opacity");
+        opacityAni->setDuration(300);
+        opacityAni->setStartValue(0.0);
+        opacityAni->setEndValue(1.0);
+        opacityAni->setEasingCurve(QEasingCurve::OutCubic);
+        opacityAni->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }
 
 void NComboBox::hidePopup() {
     Q_D(NComboBox);
 
-    // 更新下拉状态
     d->_isDropdownVisible = false;
 
-    // 确保箭头恢复原位
     if (d->_arrowAnimation) {
         d->_arrowAnimation->setY(0.0);
     }
 
-    // 调用父类实现
     QComboBox::hidePopup();
     d->_isDropdownVisible = false;
 }
 
 void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
     if (!isEditable()) {
-        // 对于不可编辑的ComboBox，使用默认菜单
         QComboBox::contextMenuEvent(event);
         return;
     }
@@ -318,21 +307,17 @@ void NComboBox::contextMenuEvent(QContextMenuEvent* event) {
     menu->exec(event->globalPos());
 }
 
-// 修改mousePressEvent确保按下时触发动画
 void NComboBox::mousePressEvent(QMouseEvent* event) {
     Q_D(NComboBox);
     if (d->_arrowAnimation) {
-        d->_arrowAnimation->setY(3.0); // 按下时向下移动
+        d->_arrowAnimation->setY(3.0);
     }
     QComboBox::mousePressEvent(event);
 }
 
-// 修改mouseReleaseEvent确保释放时恢复动画
 void NComboBox::mouseReleaseEvent(QMouseEvent* event) {
     Q_D(NComboBox);
 
-    // 只有在非下拉状态时才恢复箭头位置
-    // 如果下拉菜单已经显示，由hidePopup处理恢复
     if (d->_arrowAnimation && !d->_isDropdownVisible) {
         d->_arrowAnimation->setY(0.0); // 释放时恢复原位
     }

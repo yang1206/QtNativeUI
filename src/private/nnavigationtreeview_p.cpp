@@ -60,7 +60,10 @@ NNavigationTreeView::NNavigationTreeView(QWidget* parent) : QTreeView(parent) {
     });
 
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &NNavigationTreeView::customContextMenuRequested, this, &NNavigationTreeView::onCustomContextMenuRequested);
+    connect(this,
+            &NNavigationTreeView::customContextMenuRequested,
+            this,
+            &NNavigationTreeView::onCustomContextMenuRequested);
 
     _compactToolTip = new NToolTip();
 }

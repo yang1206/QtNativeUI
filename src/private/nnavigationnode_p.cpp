@@ -12,6 +12,8 @@ NNavigationNode::NNavigationNode(QString nodeTitle, NNavigationNode* parent) : Q
     _pParentNode      = parent;
     _pIsExpanderNode  = false;
     _pIsVisible       = false;
+    _pIcon            = NRegularIconType::None;
+    _pFilledIcon      = NFilledIconType::None;
 }
 
 NNavigationNode::~NNavigationNode() { qDeleteAll(_pChildrenNodes); }

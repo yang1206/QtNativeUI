@@ -58,10 +58,16 @@ class NPushButtonPrivate : public QObject {
         quint32 iconCode  = 0;
         int     size      = 24;
         QColor  customColor;
-        bool    isFluentIcon = false; // 添加这个标志位来区分是否是 Fluent 图标
+        bool    isFluentIcon = false;
     };
 
     FluentIconInfo _fluentIcon;
+    
+    mutable QColor _cachedBackgroundColor;
+    mutable QColor _cachedTextColor;
+    mutable bool _colorCacheValid = false;
+    
+    void invalidateColorCache() { _colorCacheValid = false; }
 };
 
 #endif // QTNATIVEUI_NPUSHBUTTON_P_H

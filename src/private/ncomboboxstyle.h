@@ -1,4 +1,3 @@
-// ncomboboxstyle.h
 #ifndef NCOMBOBOXSTYLE_H
 #define NCOMBOBOXSTYLE_H
 
@@ -22,7 +21,7 @@ class NComboBoxStyleInterface {
     virtual bool   isDarkMode() const                                                                               = 0;
     virtual int    shadowBorderWidth() const                                                                        = 0;
     virtual bool   isDropdownVisible() const                                                                        = 0;
-    virtual qreal  getArrowYOffset() const = 0; // 使用NTranslateYAnimation控制的Y轴偏移
+    virtual qreal  getArrowYOffset() const = 0;
 };
 
 class NComboBoxStyle : public QProxyStyle {

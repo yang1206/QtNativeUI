@@ -1,6 +1,7 @@
 #include "QtNativeUI/NConfig.h"
 #include "../private/ntranslation.h"
 
+#include <QFontDatabase>
 #include <QStyle>
 #include <qfont.h>
 Q_SINGLETON_CREATE_CPP(NConfig)
@@ -15,8 +16,12 @@ void NConfig::initialize() {
 #ifdef Q_OS_WIN
     // qApp->setStyle("Fusion");
 
-    QFont font = qApp->font();
-    font.setFamilies(QStringList() << "Segoe UI Variable" << "Microsoft YaHei" << "PingFang SC");
+    QFont         font = qApp->font();
+    QFontDatabase fontDB;
+    QStringList   families;
+    if (fontDB.families().contains("Segoe UI Variable", Qt::CaseInsensitive))
+        families << "Segoe UI Variable";
+    families << "Microsoft YaHei" << "PingFang SC" << "Segoe UI";
     font.setHintingPreference(QFont::PreferNoHinting);
     qApp->setFont(font);
 #endif

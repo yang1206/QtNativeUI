@@ -9,7 +9,6 @@
 
 using namespace QtNativeUI;
 
-// 动画属性工厂类
 class NAnimationPropertyFactory {
 public:
     using CreatorFunc = std::function<NAnimationPropertyObject*(QObject*)>;
@@ -26,7 +25,6 @@ private:
     QHash<NAnimationProperty::Property, CreatorFunc> m_creators;
 };
 
-// 动画工厂类
 class NAnimationFactory {
 public:
     using CreatorFunc = std::function<NFluentAnimation*(QObject*)>;

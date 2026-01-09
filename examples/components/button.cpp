@@ -27,13 +27,9 @@ ButtonExample::ButtonExample(QWidget* parent) : QWidget(parent) { initUI(); }
 
 void ButtonExample::initUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
 
     // 创建滚动区域
     m_scrollArea = new NScrollArea(this);
-    m_scrollArea->setWidgetResizable(true);
-    m_scrollArea->setFrameShape(QFrame::NoFrame);
     // 创建内容容器
     QWidget*     contentWidget = new QWidget(m_scrollArea);
     QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
@@ -69,12 +65,16 @@ QWidget* ButtonExample::createPushButtons() {
 
     NPushButton* normalBtn   = new NPushButton("Standard");
     NPushButton* disabledBtn = new NPushButton("Disabled");
+    disabledBtn->setFluentIcon(NRegularIconType::NoteAdd16Regular, 16);
     disabledBtn->setDisabled(true);
 
     // 1. 标准图标按钮
     NPushButton* settingsBtn = new NPushButton("Settings");
     settingsBtn->setFixedSize(120, 40);
     settingsBtn->setFluentIcon(NRegularIconType::SettingsChat16Regular, 24);
+    connect(settingsBtn, &NPushButton::clicked, this, [settingsBtn]() {
+        settingsBtn->setFluentIcon(NRegularIconType::Record16Regular, 24);
+    });
 
     // 2. 只有图标的按钮
     NPushButton* searchBtn = new NPushButton;
@@ -155,7 +155,6 @@ QWidget* ButtonExample::createToolButtons() {
     textOnlyBtn->setToolTip("只有文本");
     textOnlyBtn->setFixedSize(80, 40);
     textOnlyBtn->setText("设置");
-    textOnlyBtn->setToolButtonStyle(Qt::ToolButtonTextOnly);
 
     // 文本在图标旁边
     NToolButton* textBesideBtn = new NToolButton();
@@ -175,11 +174,13 @@ QWidget* ButtonExample::createToolButtons() {
 
     // 禁用状态
     NToolButton* disabledBtn = new NToolButton();
+
     disabledBtn->setToolTip("禁用状态");
 
     disabledBtn->setFixedSize(80, 40);
     disabledBtn->setText("禁用");
-    disabledBtn->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    disabledBtn->setFluentIcon(NRegularIconType::NoteAdd16Regular, 16);
+    disabledBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     disabledBtn->setDisabled(true);
 
     iconPositionLayout->addWidget(iconOnlyBtn);
@@ -195,10 +196,9 @@ QWidget* ButtonExample::createToolButtons() {
     buttonTypeLayout->setSpacing(16);
 
     // 标准按钮
-    NToolButton* standardBtn = new NToolButton();
+    NToolButton* standardBtn = new NToolButton("标准");
     standardBtn->setToolTip("标准按钮");
     standardBtn->setFixedSize(120, 40);
-    standardBtn->setText("标准");
     standardBtn->setFluentIcon(NRegularIconType::Document24Regular, 20);
     standardBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
@@ -276,6 +276,7 @@ QWidget* ButtonExample::createRadioButtons() {
     layout->addWidget(radioBtn2);
     layout->addWidget(radioBtn3);
 
+#ifdef Q_OS_WIN
     // 2. 窗口效果切换单选按钮组
     QLabel* windowEffectLabel = new QLabel("切换窗口效果：");
     windowEffectLabel->setStyleSheet("font-weight: bold; margin-top: 16px;");
@@ -288,24 +289,29 @@ QWidget* ButtonExample::createRadioButtons() {
     NRadioButton* micaBtn    = new NRadioButton("Mica (Windows 11)");
     NRadioButton* micaAltBtn = new NRadioButton("MicaAlt (Windows 11 22H2+)");
     NRadioButton* acrylicBtn = new NRadioButton("亚克力效果");
-    NRadioButton* dwmblurBtn = new NRadioButton("DWM模糊效果 (Windows 8)");
+    NRadioButton* dwmblurBtn = new NRadioButton("模糊效果");
 
     effectGroup->addButton(noneBtn, NMainWindow::None);
     effectGroup->addButton(micaBtn, NMainWindow::Mica);
     effectGroup->addButton(micaAltBtn, NMainWindow::MicaAlt);
     effectGroup->addButton(acrylicBtn, NMainWindow::Acrylic);
-    effectGroup->addButton(dwmblurBtn, NMainWindow::DWMBlur);
+    effectGroup->addButton(dwmblurBtn, NMainWindow::Blur);
 
     // 连接信号槽，当选择改变时切换窗口效果
-    connect(effectGroup, QOverload<int>::of(&QButtonGroup::idClicked), this, [this](int id) {
-        if (m_mainWindow) {
-            m_mainWindow->setBackdropEffect(static_cast<NMainWindow::BackdropType>(id));
-        }
-    });
+    connect(
+        effectGroup,
+        QOverload<int>::of(&QButtonGroup::idClicked),
+        this,
+        [this](int id) {
+            if (m_mainWindow) {
+                m_mainWindow->setBackdropType(static_cast<NMainWindow::BackdropType>(id));
+            }
+        },
+        Qt::QueuedConnection);
 
     // 根据当前窗口效果设置选中状态
     if (m_mainWindow) {
-        int              currentEffect = m_mainWindow->backdropEffect();
+        int              currentEffect = m_mainWindow->backdropType();
         QAbstractButton* button        = effectGroup->button(currentEffect);
         if (button) {
             button->setChecked(true);
@@ -317,5 +323,6 @@ QWidget* ButtonExample::createRadioButtons() {
     layout->addWidget(micaAltBtn);
     layout->addWidget(acrylicBtn);
     layout->addWidget(dwmblurBtn);
+#endif
     return container;
 }

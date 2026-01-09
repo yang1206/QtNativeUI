@@ -98,7 +98,7 @@ QWidget* DialogsExample::createInfoBars() {
     connect(errorButton, &NPushButton::clicked, [this]() {
         QString title   = "错误";
         QString message = "操作失败，请检查输入并重试";
-        NInfoBar::error(NInfoBarType::Top, title, message, 3000, this, false);
+        NInfoBar::error(NInfoBarType::Top, title, message, 3000, this, true);
     });
     typeGrid->addWidget(errorButton, 1, 1);
 

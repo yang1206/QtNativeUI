@@ -11,10 +11,8 @@ NFluentIconEngine::NFluentIconEngine(bool isRegular, uint32_t iconCode, int size
 NFluentIconEngine::~NFluentIconEngine() = default;
 
 QColor NFluentIconEngine::getEffectiveColor(QIcon::Mode mode) const {
-    // 如果指定了自定义颜色，使用自定义颜色
     if (customColor.isValid()) {
         if (mode == QIcon::Disabled) {
-            // 对于禁用状态，使颜色变淡
             QColor disabledColor = customColor;
             disabledColor.setAlpha(128);
             return disabledColor;
@@ -38,7 +36,6 @@ void NFluentIconEngine::paint(QPainter* painter, const QRect& rect, QIcon::Mode 
     QColor iconColor = getEffectiveColor(mode);
     painter->setPen(iconColor);
 
-    // 获取字体
     QString fontFamily;
     if (isRegular) {
         fontFamily = nIcon->getRegularFontFamily();
@@ -96,7 +93,6 @@ void NIcon::initFontConfigs() {
     fontConfigs["Regular"] = FontConfig("FluentSystemIcons-Regular", 24);
     fontConfigs["Filled"]  = FontConfig("FluentSystemIcons-Filled", 24);
 
-    // 加载字体文件
     QStringList fontFiles = {":/fonts/fonts/FluentSystemIcons-Regular.ttf",
                              ":/fonts/fonts/FluentSystemIcons-Filled.ttf"};
 
@@ -118,10 +114,8 @@ void NIcon::initFontConfigs() {
 QColor NIcon::getThemeBasedColor() const {
     bool isDark = nTheme->isDarkMode();
     if (isDark) {
-        // 暗色主题返回白色
         return NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::ThemeMode::Dark);
     } else {
-        // 亮色主题返回黑色
         return NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::ThemeMode::Light);
     }
 }
@@ -129,10 +123,8 @@ QColor NIcon::getThemeBasedColor() const {
 QString NIcon::getIconText(uint32_t unicode) {
     QString iconText;
     if (unicode <= 0xFFFF) {
-        // 传统方式处理BMP平面字符
         iconText = QChar(unicode);
     } else {
-        // 使用fromUcs4处理高位Unicode码点
         char32_t ucs4Char = unicode;
         iconText          = QString::fromUcs4(&ucs4Char, 1).toUpper();
     }
@@ -151,12 +143,10 @@ QIcon NIcon::createIcon(const QString& fontFamily,
                         int            height) {
     bool isRegular = fontFamily == fontConfigs["Regular"].fontFamily;
 
-    // 如果没有指定颜色且没有指定宽高，则创建动态图标
     if (!color.isValid() && width == 0 && height == 0) {
         return createThemeAwareIcon(isRegular, unicode, size);
     }
 
-    // 否则创建静态图标
     QFont iconFont(fontFamily);
 
     qreal dpr          = qApp->devicePixelRatio();

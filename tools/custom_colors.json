@@ -1,0 +1,8 @@
+{
+  "custom_colors": {
+    "ControlBaseLine": {
+      "light": "QColor(209, 209, 209)",
+      "dark": "QColor(44, 44, 44)"
+    }
+  }
+}

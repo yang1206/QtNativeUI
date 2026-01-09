@@ -5,6 +5,7 @@
 #include <QEnterEvent>
 #include <QPainter>
 #include <QPainterPath>
+#include <QTimer>
 #include <QtNativeUI/NSlider.h>
 #include "../private/nslider_p.h"
 #include "QtNativeUI/NTheme.h"
@@ -48,17 +49,14 @@ NSlider::~NSlider() {}
 void NSlider::init() {
     Q_D(NSlider);
 
-    // 设置主题和颜色
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
-    // 设置尺寸属性
     d->_pTrackHeight        = 5;
     d->_pThumbDiameter      = 20;
     d->_pThumbInnerDiameter = 10;
     d->_pTrackCornerRadius  = 2;
 
-    // 设置默认颜色
     d->_pLightTrackColor = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Light);
     d->_pDarkTrackColor  = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Dark);
 
@@ -68,8 +66,7 @@ void NSlider::init() {
     d->_pLightThumbOuterColor = NThemeColor(NFluentColorKey::ControlSolidFillColorDefault, NThemeType::Light);
     d->_pDarkThumbOuterColor  = NThemeColor(NFluentColorKey::ControlSolidFillColorDefault, NThemeType::Dark);
 
-    // 初始化刻度相关属性
-    d->_pTickLength    = 5; // 刻度线长度
+    d->_pTickLength    = 6; // 刻度线长度
     d->_pTickThickness = 1; // 刻度线厚度
 
     d->_pLightTickColor         = NThemeColor(NFluentColorKey::ControlStrongFillColorDefault, NThemeType::Light);
@@ -83,6 +80,29 @@ void NSlider::init() {
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
     setFocusPolicy(Qt::StrongFocus);
+
+    d->_showTooltip = true;
+
+    connect(this, &QSlider::sliderPressed, this, [this]() {
+        Q_D(NSlider);
+        if (d->_showTooltip) {
+            d->updateTooltip();
+        }
+    });
+
+    connect(this, &QSlider::sliderReleased, this, [this]() {
+        Q_D(NSlider);
+        if (d->_showTooltip) {
+            d->hideTooltip();
+        }
+    });
+
+    connect(this, &QSlider::valueChanged, this, [this](int) {
+        Q_D(NSlider);
+        if (d->_isDragging && d->_showTooltip) {
+            d->updateTooltip();
+        }
+    });
 
     if (orientation() == Qt::Horizontal) {
         setFixedHeight(d->_pThumbDiameter);
@@ -98,7 +118,6 @@ void NSlider::init() {
         update();
     });
 
-    // 连接强调色变化信号
     connect(nTheme, &NTheme::accentColorChanged, this, [this](const NAccentColor&) {
         updateAccentColors();
         update();
@@ -178,6 +197,11 @@ void NSlider::mousePressEvent(QMouseEvent* event) {
         d->_isPressed  = true;
         d->_isDragging = true;
         d->startThumbAnimation(d->_thumbScale, 0.8);
+
+        if (d->_showTooltip) {
+            d->updateTooltip();
+        }
+
         update();
     }
 
@@ -196,14 +220,50 @@ void NSlider::mouseReleaseEvent(QMouseEvent* event) {
         } else {
             d->startThumbAnimation(d->_thumbScale, 1.0);
         }
+
+        if (d->_showTooltip) {
+            d->hideTooltip();
+        }
+
         update();
     }
 
     QSlider::mouseReleaseEvent(event);
 }
 
+bool NSlider::showTooltip() const {
+    Q_D(const NSlider);
+    return d->_showTooltip;
+}
+
+void NSlider::setShowTooltip(bool show) {
+    Q_D(NSlider);
+    if (d->_showTooltip == show)
+        return;
+
+    d->_showTooltip = show;
+
+    if (!show) {
+        d->hideTooltip();
+    }
+}
+
+void NSlider::setTooltipFormatter(std::function<QString(int)> formatter) {
+    Q_D(NSlider);
+    d->_tooltipFormatter = formatter;
+}
+
 void NSlider::mouseMoveEvent(QMouseEvent* event) {
     Q_D(NSlider);
+
+    if (isEnabled() && d->_isDragging && d->_showTooltip) {
+        QTimer::singleShot(0, this, [this]() {
+            Q_D(NSlider);
+            if (d->_isDragging && d->_showTooltip) {
+                d->updateTooltip();
+            }
+        });
+    }
 
     if (isEnabled() && !d->_isDragging) {
         d->_isHovered = rect().contains(event->pos());

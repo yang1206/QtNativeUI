@@ -182,15 +182,30 @@ enum NodeOperateReturnType {
 };
 Q_ENUM_CREATE(NodeOperateReturnType)
 
+enum PageTransitionType {
+    NoTransition,      // 无过渡效果
+    PopupTransition,   // 弹出过渡
+    ScaleTransition,   // 缩放过渡
+    FlipTransition,    // 翻转过渡
+    BlurTransition,    // 模糊过渡
+    CubeTransition,    // 立方体翻转
+    RippleTransition,  // 波纹扩散
+};
+Q_ENUM_CREATE(PageTransitionType)
+
 Q_END_ENUM_CREATE(NNavigationType)
 
 // 导航路由相关枚举
 Q_BEGIN_ENUM_CREATE(NNavigationRouterType)
 
 enum NavigationRouteType {
-    Success,            // 操作成功
-    ObjectInvalid,      // 对象无效
-    FunctionNameInvalid // 函数名无效
+    Success,             // 操作成功
+    ObjectInvalid,       // 对象无效
+    FunctionNameInvalid, // 函数名无效
+    PageNotFound,
+    RouteRejected,
+    NoHistory
+
 };
 Q_ENUM_CREATE(NavigationRouteType)
 

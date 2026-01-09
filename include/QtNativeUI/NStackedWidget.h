@@ -1,31 +1,36 @@
-//
-// Created by Yang1206 on 2025/6/22.
-//
-
 #ifndef NSTACKEDWIDGET_H
 #define NSTACKEDWIDGET_H
 
 #include <QStackedWidget>
+#include "NEnums.h"
 #include "NTheme.h"
-class NStackedWidget : public QStackedWidget {
+#include "stdafx.h"
+
+class NNavigationAnimationManager;
+
+class QTNATIVEUI_EXPORT NStackedWidget : public QStackedWidget {
     Q_OBJECT
+
   public:
     explicit NStackedWidget(QWidget* parent = nullptr);
     ~NStackedWidget() override;
 
     void   setBackGroundColor(QColor background);
-    QColor backgroundColor() { return m_background; }
+    QColor backgroundColor() const { return m_background; }
 
     void setBorderRadius(int radius);
-    int  borderRadius() { return m_borderRadius; }
+    int  borderRadius() const { return m_borderRadius; }
+
+    void doPageSwitch(NNavigationType::PageTransitionType transitionType, int targetIndex, bool isRouteBack, int duration = 300);
 
   protected:
-    virtual void paintEvent(QPaintEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
 
   private:
-    NThemeType::ThemeMode m_themeMode;
-    int                   m_borderRadius{10};
-    QColor                m_background{};
+    NThemeType::ThemeMode         m_themeMode;
+    int                           m_borderRadius{10};
+    QColor                        m_background{};
+    NNavigationAnimationManager*  m_animationManager{nullptr};
 };
 
 #endif // NSTACKEDWIDGET_H

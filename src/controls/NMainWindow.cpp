@@ -1,261 +1,293 @@
-// NMainWindow.cpp
-#include <QApplication>
-#include <QEvent>
+#include "QtNativeUI/NMainWindow.h"
+
 #include <QPainter>
-#include <QStyleOption>
-#include <QtNativeUI/NMainWindow.h>
+#include <functional>
+
 #include "../private/nmainwindow_p.h"
-#include "../private/nwindoweffect_win.h"
 #include "QtNativeUI/NTheme.h"
+#include "QtNativeUI/NWindowBar.h"
+#include "QtNativeUI/NWindowButton.h"
 
-NMainWindow::NMainWindow(QWidget* parent) : QMainWindow(parent), d_ptr(new NMainWindowPrivate()) {
+#include <QWKWidgets/widgetwindowagent.h>
+
+NMainWindow::NMainWindow(QWidget* parent)
+    : QMainWindow(parent)
+    , d_ptr(new NMainWindowPrivate())
+{
     d_ptr->q_ptr = this;
-    initWindow();
-}
-
-NMainWindow::~NMainWindow() { delete d_ptr; }
-
-void NMainWindow::initWindow() {
-    // 初始化窗口属性
-    setProperty("nMainWindow", true);
+    setAttribute(Qt::WA_DontCreateNativeAncestors);
     setAttribute(Qt::WA_TranslucentBackground);
 
-    // 初始化平台特定效果
-    initPlatformEffect();
+    Q_D(NMainWindow);
+    d->setupWindowAgent();
+    d->setupThemeConnection();
+    setupDefaultWindowBar();
+    connectWindowBarSignals();
+}
 
-    // 设置默认效果
-    applyBackdropEffect(getDefaultEffect());
+NMainWindow::~NMainWindow()
+{
+    delete d_ptr;
+}
 
-    // 设置事件过滤器，处理所有子控件的样式保持
-    installEventFilter(this);
+void NMainWindow::paintEvent(QPaintEvent* event)
+{
+    Q_D(NMainWindow);
 
-    // 连接主题变化信号
-    connect(nTheme, &NTheme::themeModeChanged, this, [this]() {
-        Q_D(NMainWindow);
-        d->isDarkMode = nTheme->isDarkMode();
+    if (d->backdropType == None) {
+        QPainter painter(this);
+        painter.fillRect(event->rect(), d->backgroundColor);
+    }
 
-#ifdef Q_OS_WIN
-        // 更新窗口暗色模式
-        NWindowEffectWin::getInstance()->setDarkMode(this, d->isDarkMode);
+    QMainWindow::paintEvent(event);
+}
 
-        // 如果是None模式，更新背景颜色
-        if (d->backdropEffect == None) {
-            d->updateBackgroundColor();
-            QPalette pal = palette();
-            pal.setColor(QPalette::Window, d->backgroundColor);
-            setPalette(pal);
-            update();
+void NMainWindow::setupDefaultWindowBar()
+{
+    Q_D(NMainWindow);
+
+    d->windowBar = new NWindowBar(this);
+    d->windowBar->setHostWidget(this);
+    d->windowAgent->setTitleBar(d->windowBar);
+    d->registerSystemButtons(d->windowBar);
+    setMenuWidget(d->windowBar);
+}
+
+void NMainWindow::connectWindowBarSignals()
+{
+    Q_D(NMainWindow);
+
+    if (!d->windowBar) return;
+
+    connect(d->windowBar, &NWindowBar::minimizeRequested, this, &QWidget::showMinimized);
+
+    connect(d->windowBar, &NWindowBar::pinRequested, this, [this](bool pinned) {
+        setWindowFlag(Qt::WindowStaysOnTopHint, pinned);
+        show();
+        emit pinButtonToggled(pinned);
+    });
+
+    connect(d->windowBar, &NWindowBar::themeRequested, this, [this]() {
+        auto currentMode = nTheme->themeMode();
+        bool willBeDark;
+        if (currentMode == NThemeType::ThemeMode::Light) {
+            nTheme->setThemeMode(NThemeType::ThemeMode::Dark);
+            willBeDark = true;
+        } else {
+            nTheme->setThemeMode(NThemeType::ThemeMode::Light);
+            willBeDark = false;
         }
-#endif
+        emit themeToggled(willBeDark);
+    });
 
-        // 发送样式更新事件
-        QEvent event(QEvent::StyleChange);
-        QApplication::sendEvent(this, &event);
+    connect(d->windowBar, &NWindowBar::maximizeRequested, this, [this]() {
+        bool willMaximize = !isMaximized();
+        if (willMaximize) {
+            showMaximized();
+        } else {
+            showNormal();
+        }
+        emit maximizeButtonToggled(willMaximize);
+    });
 
-        emit darkModeChanged(d->isDarkMode);
+    connect(d->windowBar, &NWindowBar::closeRequested, this, [this]() {
+        close();
+        emit windowClosed();
     });
 }
 
-void NMainWindow::initPlatformEffect() {
-#ifdef Q_OS_WIN
-    // 初始化效果类
-    NWindowEffectWin::getInstance()->initialize();
+void NMainWindow::setBackdropType(BackdropType type)
+{
+    Q_D(NMainWindow);
 
-    // 初始化窗口效果
-    NWindowEffectWin::getInstance()->extendFrameIntoClientArea(this);
+    if (d->backdropType == type)
+        return;
 
-    // 根据当前主题设置窗口暗色模式
-    NWindowEffectWin::getInstance()->setDarkMode(this, nTheme->isDarkMode());
-#endif
+    d->applyBackdropEffect(type);
+    d->backdropType = type;
+    emit backdropTypeChanged(type);
 }
 
-bool NMainWindow::applyBackdropEffect(BackdropType type) {
+NMainWindow::BackdropType NMainWindow::backdropType() const
+{
+    Q_D(const NMainWindow);
+    return d->backdropType;
+}
+
+int NMainWindow::borderThickness() const
+{
+    Q_D(const NMainWindow);
+    QVariant val = d->windowAgent->windowAttribute(QStringLiteral("border-thickness"));
+    return val.isValid() ? val.toInt() : 0;
+}
+
+int NMainWindow::titleBarHeight() const
+{
+    Q_D(const NMainWindow);
+    QVariant val = d->windowAgent->windowAttribute(QStringLiteral("title-bar-height"));
+    return val.isValid() ? val.toInt() : 32;
+}
+
+#ifdef Q_OS_MAC
+void NMainWindow::setNativeSystemButtonsVisible(bool visible)
+{
     Q_D(NMainWindow);
-    bool success = setPlatformEffect(type);
+    d->windowAgent->setWindowAttribute(QStringLiteral("no-system-buttons"), !visible);
+}
 
-    if (success) {
-        BackdropType oldType = d->backdropEffect;
-        d->setBackdropEffect(type);
+bool NMainWindow::nativeSystemButtonsVisible() const
+{
+    Q_D(const NMainWindow);
+    QVariant val = d->windowAgent->windowAttribute(QStringLiteral("no-system-buttons"));
+    return val.isValid() ? !val.toBool() : true;
+}
 
-        if (oldType != type) {
-            emit backdropEffectChanged(type);
-        }
+void NMainWindow::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback)
+{
+    Q_D(NMainWindow);
+    d->windowAgent->setSystemButtonAreaCallback(callback);
+}
+#endif
+
+bool NMainWindow::setWindowAttribute(const QString& key, const QVariant& value)
+{
+    Q_D(NMainWindow);
+    return d->windowAgent->setWindowAttribute(key, value);
+}
+
+QVariant NMainWindow::windowAttribute(const QString& key) const
+{
+    Q_D(const NMainWindow);
+    return d->windowAgent->windowAttribute(key);
+}
+
+NWindowBar* NMainWindow::windowBar() const
+{
+    Q_D(const NMainWindow);
+    return d->windowBar;
+}
+
+void NMainWindow::setWindowBar(NWindowBar* bar)
+{
+    Q_D(NMainWindow);
+
+    if (d->windowBar) {
+        disconnect(d->windowBar, nullptr, this, nullptr);
+        d->windowBar->deleteLater();
     }
 
-    return success;
+    d->windowBar = bar;
+
+    if (bar) {
+        bar->setHostWidget(this);
+        d->windowAgent->setTitleBar(bar);
+        d->registerSystemButtons(bar);
+        setMenuWidget(bar);
+        connectWindowBarSignals();
+    }
 }
 
-void NMainWindow::setBackdropEffect(BackdropType type) { applyBackdropEffect(type); }
-
-NMainWindow::BackdropType NMainWindow::backdropEffect() const {
-    Q_D(const NMainWindow);
-    return d->backdropEffect;
-}
-
-bool NMainWindow::isDarkMode() const {
-    Q_D(const NMainWindow);
-    return d->isDarkMode;
-}
-
-bool NMainWindow::setPlatformEffect(BackdropType type) {
-#ifdef Q_OS_WIN
+void NMainWindow::setSystemButton(SystemButtonType type, QAbstractButton* button)
+{
     Q_D(NMainWindow);
 
-    // 转换枚举类型
-    NWindowEffectWin::WindowBackdropType winType;
+    if (type == Pin || type == Theme) {
+        d->windowAgent->setHitTestVisible(button, true);
+        return;
+    }
+
+    QWK::WindowAgentBase::SystemButton qwkType;
     switch (type) {
-        case None:
-            winType = NWindowEffectWin::None;
+        case WindowIcon:
+            qwkType = QWK::WindowAgentBase::WindowIcon;
             break;
-        case Mica:
-            winType = NWindowEffectWin::Mica;
+        case Minimize:
+            qwkType = QWK::WindowAgentBase::Minimize;
             break;
-        case Acrylic:
-            winType = NWindowEffectWin::Acrylic;
+        case Maximize:
+            qwkType = QWK::WindowAgentBase::Maximize;
             break;
-        case MicaAlt:
-            winType = NWindowEffectWin::MicaAlt;
-            break;
-        case DWMBlur:
-            winType = NWindowEffectWin::DWMBlur;
+        case Close:
+            qwkType = QWK::WindowAgentBase::Close;
             break;
         default:
-            winType = NWindowEffectWin::Auto;
+            return;
     }
 
-    // 获取旧效果类型
-    NWindowEffectWin::WindowBackdropType oldWinType;
-    switch (d->backdropEffect) {
-        case None:
-            oldWinType = NWindowEffectWin::None;
+    d->windowAgent->setSystemButton(qwkType, button);
+}
+
+NWindowButton* NMainWindow::systemButton(SystemButtonType type) const
+{
+    Q_D(const NMainWindow);
+    if (!d->windowBar) return nullptr;
+
+    NWindowButton::SystemButtonType buttonType;
+    switch (type) {
+        case Theme:
+            buttonType = NWindowButton::Theme;
             break;
-        case Mica:
-            oldWinType = NWindowEffectWin::Mica;
+        case Pin:
+            buttonType = NWindowButton::Pin;
             break;
-        case Acrylic:
-            oldWinType = NWindowEffectWin::Acrylic;
+        case Minimize:
+            buttonType = NWindowButton::Minimize;
             break;
-        case MicaAlt:
-            oldWinType = NWindowEffectWin::MicaAlt;
+        case Maximize:
+            buttonType = NWindowButton::Maximize;
             break;
-        case DWMBlur:
-            oldWinType = NWindowEffectWin::DWMBlur;
+        case Close:
+            buttonType = NWindowButton::Close;
             break;
         default:
-            oldWinType = NWindowEffectWin::Auto;
+            return nullptr;
     }
-
-    bool result = NWindowEffectWin::getInstance()->setWindowEffect(this, winType, oldWinType);
-
-    if (type == None) {
-        // 确保窗口更新
-        update();
-    }
-
-    return result;
-#else
-    Q_UNUSED(type);
-    return true;
-#endif
+    return d->windowBar->systemButton(buttonType);
 }
 
-NMainWindow::BackdropType NMainWindow::getDefaultEffect() {
-#ifdef Q_OS_WIN
-    if (NWindowEffectWin::getInstance()->isWindows11_22H2OrGreater()) {
-        return MicaAlt;
-    } else if (NWindowEffectWin::getInstance()->isWindows11OrGreater()) {
-        return Mica;
-    } else if (NWindowEffectWin::getInstance()->isWindows10OrGreater()) {
-        return Acrylic;
-    } else {
-        return None;
-    }
-#else
-    return None;
-#endif
-}
-
-void NMainWindow::enableWindowAnimation(bool enable) {
-#ifdef Q_OS_WIN
-    HWND  hwnd  = reinterpret_cast<HWND>(this->winId());
-    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
-
-    if (!enable) {
-        style &= ~WS_CAPTION;
-        style &= ~WS_THICKFRAME;
-    } else {
-        style |= WS_CAPTION;
-        style |= WS_THICKFRAME;
-    }
-
-    SetWindowLong(hwnd, GWL_STYLE, style);
-#else
-    Q_UNUSED(enable);
-#endif
-}
-
-void NMainWindow::setRoundedCorners(bool enable) {
-#ifdef Q_OS_WIN
-    if (NWindowEffectWin::getInstance()->isWindows11OrGreater()) {
-        HWND  hwnd  = reinterpret_cast<HWND>(this->winId());
-        DWORD value = enable ? 1 : 0;
-
-        // Windows 11特有的圆角控制
-        NWindowEffectWin::getInstance()->_dwmSetWindowAttribute(
-            hwnd, NWindowEffectWin::DWMWA_WINDOW_CORNER_PREFERENCE, &value, sizeof(value));
-    }
-#else
-    Q_UNUSED(enable);
-#endif
-}
-
-void NMainWindow::setShadowEffect(bool enable) {
-#ifdef Q_OS_WIN
-    HWND    hwnd    = reinterpret_cast<HWND>(this->winId());
-    MARGINS margins = {0};
-
-    if (enable) {
-        // 启用窗口阴影
-        margins.cxLeftWidth = 1;
-    }
-
-    // 设置阴影效果
-    NWindowEffectWin::getInstance()->_dwmExtendFrameIntoClientArea(hwnd, &margins);
-#else
-    Q_UNUSED(enable);
-#endif
-}
-
-bool NMainWindow::eventFilter(QObject* watched, QEvent* event) { return QMainWindow::eventFilter(watched, event); }
-
-void NMainWindow::changeEvent(QEvent* event) {
-    if (event->type() == QEvent::WindowStateChange) {
-        // 窗口状态变化时可能需要重新应用效果
-        applyBackdropEffect(backdropEffect());
-    }
-
-    QMainWindow::changeEvent(event);
-}
-
-bool NMainWindow::nativeEvent(const QByteArray& eventType, void* message, qintptr* result) {
-    return QMainWindow::nativeEvent(eventType, message, result);
-}
-
-void NMainWindow::paintEvent(QPaintEvent* event) {
-#ifdef Q_OS_WIN
+void NMainWindow::setHitTestVisible(QWidget* widget, bool visible)
+{
     Q_D(NMainWindow);
-    // 如果是None模式，确保背景颜色正确
-    if (d->backdropEffect == None) {
-        QPainter painter(this);
-        painter.fillRect(rect(), d->backgroundColor);
+    d->windowAgent->setHitTestVisible(widget, visible);
+}
+
+void NMainWindow::setTitleBarWidget(QWidget* widget)
+{
+    Q_D(NMainWindow);
+    d->windowAgent->setTitleBar(widget);
+    setMenuWidget(widget);
+}
+
+QWidget* NMainWindow::titleBarWidget() const
+{
+    return menuWidget();
+}
+
+QWK::WidgetWindowAgent* NMainWindow::windowAgent() const
+{
+    Q_D(const NMainWindow);
+    return d->windowAgent;
+}
+
+void NMainWindow::setMenuBar(QMenuBar* menuBar)
+{
+    Q_D(NMainWindow);
+
+    if (auto oldMenuBar = this->menuBar()) {
+        setHitTestVisible(oldMenuBar, false);
     }
 
-    // 处理子控件绘制
-    QStyleOption opt;
-    opt.initFrom(this);
-    QPainter p(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+    if (d->windowBar) {
+        d->windowBar->setMenuBar(menuBar);
+    }
 
-#endif
-    QMainWindow::paintEvent(event);
+    if (menuBar) {
+        setHitTestVisible(menuBar, true);
+    }
+}
+
+QMenuBar* NMainWindow::menuBar() const
+{
+    Q_D(const NMainWindow);
+    return d->windowBar ? d->windowBar->menuBar() : nullptr;
 }

@@ -7,7 +7,6 @@
 #include "QtNativeUI/NMenu.h"
 #include "QtNativeUI/NTheme.h"
 
-// 属性创建
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBackgroundColor)
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, DarkBackgroundColor)
 Q_PROPERTY_CREATE_Q_CPP(NDoubleSpinBox, QColor, LightBackgroundHoverColor)
@@ -56,7 +55,6 @@ void NDoubleSpinBox::init() {
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
-    // 初始化颜色
     d->_pLightBackgroundColor         = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Light);
     d->_pDarkBackgroundColor          = NThemeColor(NFluentColorKey::ControlFillColorDefault, NThemeType::Dark);
     d->_pLightBackgroundHoverColor    = NThemeColor(NFluentColorKey::ControlFillColorSecondary, NThemeType::Light);
@@ -76,7 +74,6 @@ void NDoubleSpinBox::init() {
     d->_pLightBottomLineColor         = QColor(0x86, 0x86, 0x86);
     d->_pDarkBottomLineColor          = QColor(0x9A, 0x9A, 0x9A);
 
-    // 按钮颜色
     d->_pLightButtonBgColor       = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Light);
     d->_pDarkButtonBgColor        = NThemeColor(NFluentColorKey::ControlFillColorTransparent, NThemeType::Dark);
     d->_pLightButtonHoverColor    = NThemeColor(NFluentColorKey::SubtleFillColorTertiary, NThemeType::Light);
@@ -100,7 +97,6 @@ void NDoubleSpinBox::init() {
 
     setDecimals(2);
 
-    // 设置样式
     d->_spinBoxStyle = new NSpinBoxStyle(d, style());
     setStyle(d->_spinBoxStyle);
     setObjectName("NDoubleSpinBox");
@@ -192,7 +188,6 @@ void NDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) {
         menu->addSeparator();
     }
 
-    // 数值操作菜单项
     action = menu->addItem(tr("Increase"), NRegularIconType::ChevronUp20Regular);
     action->setEnabled(isEnabled() && value() < maximum());
     connect(action, &QAction::triggered, this, &NDoubleSpinBox::stepUp);
@@ -201,7 +196,6 @@ void NDoubleSpinBox::contextMenuEvent(QContextMenuEvent* event) {
     action->setEnabled(isEnabled() && value() > minimum());
     connect(action, &QAction::triggered, this, &NDoubleSpinBox::stepDown);
 
-    // 小数步长信息
     menu->addSeparator();
     QString  stepInfo       = tr("Step size: %1").arg(QString::number(singleStep(), 'f', decimals()));
     QAction* stepInfoAction = menu->addAction(stepInfo);

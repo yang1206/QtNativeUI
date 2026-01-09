@@ -3,16 +3,24 @@
 
 #include <QtNativeUI/NMainWindow.h>
 
-class NTabWidget;
+class NNavigationView;
 
 class MainWindow : public NMainWindow {
     Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
+  public:
+    explicit MainWindow(QWidget* parent = nullptr);
 
-private:
-    NTabWidget *m_tabWidget;
+  private slots:
+    void onNewFile();
+    void onOpenFile();
+    void onSaveFile();
+    void onAbout();
+
+  private:
+    void setupMenuBar();
+
+    NNavigationView* m_navigationView;
 };
 
 #endif // MAINWINDOW_H

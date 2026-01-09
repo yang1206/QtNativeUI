@@ -34,12 +34,14 @@ class QTNATIVEUI_EXPORT NCheckBox : public QCheckBox {
     virtual void nextCheckState() override;
 
   protected:
-    void paintEvent(QPaintEvent* event) override;
-    void enterEvent(QEnterEvent* event) override;
-    void leaveEvent(QEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void changeEvent(QEvent* event) override;
+    void  paintEvent(QPaintEvent* event) override;
+    void  enterEvent(QEnterEvent* event) override;
+    void  leaveEvent(QEvent* event) override;
+    void  mousePressEvent(QMouseEvent* event) override;
+    void  mouseReleaseEvent(QMouseEvent* event) override;
+    void  changeEvent(QEvent* event) override;
+    QSize sizeHint() const override;
+    bool  hitButton(const QPoint& pos) const override;
 
     void drawCheckBox(QPainter* painter);
     void drawText(QPainter* painter);

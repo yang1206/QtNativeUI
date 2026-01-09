@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QLabel>
-#include <QPropertyAnimation>
 #include <QScreen>
 #include <QStyle>
 #include <QTimer>
@@ -167,9 +166,7 @@ void NContentDialogPrivate::doCloseAnimation() {
         _maskWidget->doMaskAnimation(0);
     }
 
-    // 发送关闭信号
     q->dialogClosed(_dialogResult);
 
-    // 直接关闭对话框
     q->QDialog::close();
 }

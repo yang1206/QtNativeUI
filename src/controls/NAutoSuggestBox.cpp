@@ -112,3 +112,8 @@ void NAutoSuggestBox::clearSuggestions() {
     d->_suggestions.clear();
     d->_model->clearSuggestions();
 }
+
+void NAutoSuggestBox::setFocus() {
+    Q_D(NAutoSuggestBox);
+    d->_lineEdit->setFocus();
+}
