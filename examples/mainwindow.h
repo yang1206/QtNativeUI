@@ -3,7 +3,6 @@
 
 #include <QtNativeUI/NMainWindow.h>
 
-class NTabWidget;
 class NNavigationView;
 
 class MainWindow : public NMainWindow {
@@ -12,8 +11,15 @@ class MainWindow : public NMainWindow {
   public:
     explicit MainWindow(QWidget* parent = nullptr);
 
+  private slots:
+    void onNewFile();
+    void onOpenFile();
+    void onSaveFile();
+    void onAbout();
+
   private:
-    NTabWidget*      m_tabWidget;
+    void setupMenuBar();
+
     NNavigationView* m_navigationView;
 };
 

@@ -30,6 +30,16 @@ set(CMAKE_AUTOUIC ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
+# QWindowKit 配置 - 作为 subproject 引入
+set(QWINDOWKIT_BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(QWINDOWKIT_BUILD_WIDGETS ON CACHE BOOL "" FORCE)
+set(QWINDOWKIT_BUILD_QUICK OFF CACHE BOOL "" FORCE)
+set(QWINDOWKIT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(QWINDOWKIT_BUILD_DOCUMENTATIONS OFF CACHE BOOL "" FORCE)
+set(QWINDOWKIT_INSTALL OFF CACHE BOOL "" FORCE)
+set(QWINDOWKIT_ENABLE_STYLE_AGENT ON CACHE BOOL "" FORCE)
+add_subdirectory(third_party/qwindowkit)
+
 # 收集源文件
 file(GLOB_RECURSE QtNativeUI_SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
@@ -155,15 +165,14 @@ target_compile_options(QtNativeUI PRIVATE
         >
 )
 
-# 链接Qt库
+# 链接Qt库和QWindowKit
 target_link_libraries(QtNativeUI
         PUBLIC
         Qt${QT_VERSION_MAJOR}::Widgets
+        PRIVATE
+        QWKCore
+        QWKWidgets
 )
-
-if (WIN32)
-    target_link_libraries(QtNativeUI PRIVATE dwmapi uxtheme)
-endif ()
 
 # 安装配置
 include(GNUInstallDirs)
