@@ -138,3 +138,8 @@
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
 
+
+.vp-doc table {
+  display: table;
+  width: 100%;
+}

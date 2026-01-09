@@ -19,7 +19,8 @@ export default defineAdditionalConfig({
             { text: '快速开始', link: '/guide/getting-started' },
             { text: '设计理念', link: '/guide/design' },
             { text: '部署指南', link: '/guide/deployment' },
-            { text: '贡献指南', link: '/guide/contributing' }
+            { text: '贡献指南', link: '/guide/contributing' },
+            { text: '致谢', link: '/guide/acknowledgments' }
           ]
         }
       ],
