@@ -64,9 +64,8 @@ void MainWindow::setupMenuBar() {
     auto viewMenu    = menuBar->addMenu("View");
     auto themeAction = viewMenu->addItem("Toggle Theme", NRegularIconType::WeatherMoon16Regular);
     connect(themeAction, &QAction::triggered, this, [this]() {
-        if (auto themeBtn = systemButton(Theme)) {
-            themeBtn->click();
-        }
+        nTheme->isDarkMode() ? nTheme->setThemeMode(NThemeType::ThemeMode::Light)
+                             : nTheme->setThemeMode(NThemeType::ThemeMode::Dark);
     });
 
     viewMenu->addSeparator();

@@ -1,8 +1,7 @@
 #include "QtNativeUI/NMainWindow.h"
 
-#include <QApplication>
 #include <QPainter>
-#include <QStyle>
+#include <functional>
 
 #include "../private/nmainwindow_p.h"
 #include "QtNativeUI/NTheme.h"
@@ -11,29 +10,28 @@
 
 #include <QWKWidgets/widgetwindowagent.h>
 
-NMainWindowPrivate::NMainWindowPrivate()  = default;
-NMainWindowPrivate::~NMainWindowPrivate() = default;
-
-void NMainWindowPrivate::updateBackgroundColor() {
-    Q_Q(NMainWindow);
-    backgroundColor = nTheme->isDarkMode()
-                          ? nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Dark)
-                          : nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Light);
-}
-
-NMainWindow::NMainWindow(QWidget* parent) : QMainWindow(parent), d_ptr(new NMainWindowPrivate()) {
+NMainWindow::NMainWindow(QWidget* parent)
+    : QMainWindow(parent)
+    , d_ptr(new NMainWindowPrivate())
+{
     d_ptr->q_ptr = this;
     setAttribute(Qt::WA_DontCreateNativeAncestors);
     setAttribute(Qt::WA_TranslucentBackground);
 
-    setupWindowAgent();
+    Q_D(NMainWindow);
+    d->setupWindowAgent();
+    d->setupThemeConnection();
     setupDefaultWindowBar();
     connectWindowBarSignals();
 }
 
-NMainWindow::~NMainWindow() { delete d_ptr; }
+NMainWindow::~NMainWindow()
+{
+    delete d_ptr;
+}
 
-void NMainWindow::paintEvent(QPaintEvent* event) {
+void NMainWindow::paintEvent(QPaintEvent* event)
+{
     Q_D(NMainWindow);
 
     if (d->backdropType == None) {
@@ -44,68 +42,19 @@ void NMainWindow::paintEvent(QPaintEvent* event) {
     QMainWindow::paintEvent(event);
 }
 
-void NMainWindow::setupWindowAgent() {
-    Q_D(NMainWindow);
-
-    d->windowAgent = new QWK::WidgetWindowAgent(this);
-    d->windowAgent->setup(this);
-
-#ifdef Q_OS_MAC
-    setAttribute(Qt::WA_ContentsMarginsRespectsSafeArea, false);
-    
-    connect(nTheme, &NTheme::themeModeChanged, this, [this]() {
-        Q_D(NMainWindow);
-        if (d->backdropType == Blur) {
-            d->windowAgent->setWindowAttribute(QStringLiteral("blur-effect"), nTheme->isDarkMode() ? "dark" : "light");
-        }
-        QEvent event(QEvent::StyleChange);
-        QApplication::sendEvent(this, &event);
-    });
-#endif
-
-#ifdef Q_OS_WIN
-    d->windowAgent->setWindowAttribute(QStringLiteral("dark-mode"), nTheme->isDarkMode());
-
-    connect(nTheme, &NTheme::themeModeChanged, this, [this]() {
-        Q_D(NMainWindow);
-        d->windowAgent->setWindowAttribute(QStringLiteral("dark-mode"), nTheme->isDarkMode());
-
-        if (d->backdropType == None) {
-            d->updateBackgroundColor();
-            QPalette pal = palette();
-            pal.setColor(QPalette::Window, d->backgroundColor);
-            setPalette(pal);
-            update();
-        }
-
-        QEvent event(QEvent::StyleChange);
-        QApplication::sendEvent(this, &event);
-    });
-#endif
-}
-
-void NMainWindow::setupDefaultWindowBar() {
+void NMainWindow::setupDefaultWindowBar()
+{
     Q_D(NMainWindow);
 
     d->windowBar = new NWindowBar(this);
     d->windowBar->setHostWidget(this);
-
     d->windowAgent->setTitleBar(d->windowBar);
-
-#ifndef Q_OS_MAC
-    d->windowAgent->setSystemButton(QWK::WindowAgentBase::Minimize, d->windowBar->systemButton(NWindowButton::Minimize));
-    d->windowAgent->setSystemButton(QWK::WindowAgentBase::Maximize, d->windowBar->systemButton(NWindowButton::Maximize));
-    d->windowAgent->setSystemButton(QWK::WindowAgentBase::Close, d->windowBar->systemButton(NWindowButton::Close));
-    d->windowAgent->setHitTestVisible(d->windowBar->systemButton(NWindowButton::Theme), true);
-    d->windowAgent->setHitTestVisible(d->windowBar->systemButton(NWindowButton::Pin), true);
-#else
-    d->windowAgent->setWindowAttribute(QStringLiteral("no-system-buttons"), false);
-#endif
-
+    d->registerSystemButtons(d->windowBar);
     setMenuWidget(d->windowBar);
 }
 
-void NMainWindow::connectWindowBarSignals() {
+void NMainWindow::connectWindowBarSignals()
+{
     Q_D(NMainWindow);
 
     if (!d->windowBar) return;
@@ -147,117 +96,79 @@ void NMainWindow::connectWindowBarSignals() {
     });
 }
 
-void NMainWindow::setBackdropType(BackdropType type) {
+void NMainWindow::setBackdropType(BackdropType type)
+{
     Q_D(NMainWindow);
 
     if (d->backdropType == type)
         return;
 
-    applyBackdropType(type);
+    d->applyBackdropEffect(type);
     d->backdropType = type;
     emit backdropTypeChanged(type);
 }
 
-void NMainWindow::applyBackdropType(BackdropType type) {
-    Q_D(NMainWindow);
-
-    bool needsRepaint = false;
-
-#ifdef Q_OS_WIN
-    static const QStringList effectKeys = {QString(),
-                                           QStringLiteral("dwm-blur"),
-                                           QStringLiteral("acrylic-material"),
-                                           QStringLiteral("mica"),
-                                           QStringLiteral("mica-alt")};
-
-    for (int i = 1; i < effectKeys.size(); ++i) {
-        d->windowAgent->setWindowAttribute(effectKeys[i], false);
-    }
-
-    if (type != None && type < effectKeys.size()) {
-        d->windowAgent->setWindowAttribute(effectKeys[type], true);
-        setPalette(QPalette());
-        if (d->backdropType == None) {
-            needsRepaint = true;
-        }
-    } else {
-        d->updateBackgroundColor();
-        QPalette pal = palette();
-        pal.setColor(QPalette::Window, d->backgroundColor);
-        setPalette(pal);
-        needsRepaint = true;
-    }
-
-#elif defined(Q_OS_MAC)
-    if (type == Blur) {
-        d->windowAgent->setWindowAttribute(QStringLiteral("blur-effect"), nTheme->isDarkMode() ? "dark" : "light");
-        setPalette(QPalette());
-        if (d->backdropType == None) {
-            needsRepaint = true;
-        }
-    } else {
-        d->windowAgent->setWindowAttribute(QStringLiteral("blur-effect"), "none");
-        d->updateBackgroundColor();
-        QPalette pal = palette();
-        pal.setColor(QPalette::Window, d->backgroundColor);
-        setPalette(pal);
-        needsRepaint = true;
-    }
-#else
-    Q_UNUSED(type)
-#endif
-
-    if (needsRepaint) {
-        update();
-    }
-}
-
-NMainWindow::BackdropType NMainWindow::backdropType() const {
+NMainWindow::BackdropType NMainWindow::backdropType() const
+{
     Q_D(const NMainWindow);
     return d->backdropType;
 }
 
-int NMainWindow::borderThickness() const {
+int NMainWindow::borderThickness() const
+{
     Q_D(const NMainWindow);
     QVariant val = d->windowAgent->windowAttribute(QStringLiteral("border-thickness"));
     return val.isValid() ? val.toInt() : 0;
 }
 
-int NMainWindow::titleBarHeight() const {
+int NMainWindow::titleBarHeight() const
+{
     Q_D(const NMainWindow);
     QVariant val = d->windowAgent->windowAttribute(QStringLiteral("title-bar-height"));
     return val.isValid() ? val.toInt() : 32;
 }
 
 #ifdef Q_OS_MAC
-void NMainWindow::setNativeSystemButtonsVisible(bool visible) {
+void NMainWindow::setNativeSystemButtonsVisible(bool visible)
+{
     Q_D(NMainWindow);
     d->windowAgent->setWindowAttribute(QStringLiteral("no-system-buttons"), !visible);
 }
 
-bool NMainWindow::nativeSystemButtonsVisible() const {
+bool NMainWindow::nativeSystemButtonsVisible() const
+{
     Q_D(const NMainWindow);
     QVariant val = d->windowAgent->windowAttribute(QStringLiteral("no-system-buttons"));
     return val.isValid() ? !val.toBool() : true;
 }
+
+void NMainWindow::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback)
+{
+    Q_D(NMainWindow);
+    d->windowAgent->setSystemButtonAreaCallback(callback);
+}
 #endif
 
-bool NMainWindow::setWindowAttribute(const QString& key, const QVariant& value) {
+bool NMainWindow::setWindowAttribute(const QString& key, const QVariant& value)
+{
     Q_D(NMainWindow);
     return d->windowAgent->setWindowAttribute(key, value);
 }
 
-QVariant NMainWindow::windowAttribute(const QString& key) const {
+QVariant NMainWindow::windowAttribute(const QString& key) const
+{
     Q_D(const NMainWindow);
     return d->windowAgent->windowAttribute(key);
 }
 
-NWindowBar* NMainWindow::windowBar() const {
+NWindowBar* NMainWindow::windowBar() const
+{
     Q_D(const NMainWindow);
     return d->windowBar;
 }
 
-void NMainWindow::setWindowBar(NWindowBar* bar) {
+void NMainWindow::setWindowBar(NWindowBar* bar)
+{
     Q_D(NMainWindow);
 
     if (d->windowBar) {
@@ -270,21 +181,14 @@ void NMainWindow::setWindowBar(NWindowBar* bar) {
     if (bar) {
         bar->setHostWidget(this);
         d->windowAgent->setTitleBar(bar);
-
-#ifndef Q_OS_MAC
-        d->windowAgent->setSystemButton(QWK::WindowAgentBase::Minimize, bar->systemButton(NWindowButton::Minimize));
-        d->windowAgent->setSystemButton(QWK::WindowAgentBase::Maximize, bar->systemButton(NWindowButton::Maximize));
-        d->windowAgent->setSystemButton(QWK::WindowAgentBase::Close, bar->systemButton(NWindowButton::Close));
-        d->windowAgent->setHitTestVisible(bar->systemButton(NWindowButton::Theme), true);
-        d->windowAgent->setHitTestVisible(bar->systemButton(NWindowButton::Pin), true);
-#endif
-
+        d->registerSystemButtons(bar);
         setMenuWidget(bar);
         connectWindowBarSignals();
     }
 }
 
-void NMainWindow::setSystemButton(SystemButtonType type, QAbstractButton* button) {
+void NMainWindow::setSystemButton(SystemButtonType type, QAbstractButton* button)
+{
     Q_D(NMainWindow);
 
     if (type == Pin || type == Theme) {
@@ -313,64 +217,11 @@ void NMainWindow::setSystemButton(SystemButtonType type, QAbstractButton* button
     d->windowAgent->setSystemButton(qwkType, button);
 }
 
-void NMainWindow::setSystemButtonVisible(SystemButtonType type, bool visible) {
-    Q_D(NMainWindow);
-    if (d->windowBar) {
-        NWindowButton::SystemButtonType buttonType;
-        switch (type) {
-            case Theme:
-                buttonType = NWindowButton::Theme;
-                break;
-            case Pin:
-                buttonType = NWindowButton::Pin;
-                break;
-            case Minimize:
-                buttonType = NWindowButton::Minimize;
-                break;
-            case Maximize:
-                buttonType = NWindowButton::Maximize;
-                break;
-            case Close:
-                buttonType = NWindowButton::Close;
-                break;
-            default:
-                return;
-        }
-        d->windowBar->setSystemButtonVisible(buttonType, visible);
-    }
-}
-
-bool NMainWindow::systemButtonVisible(SystemButtonType type) const {
-    Q_D(const NMainWindow);
-    if (!d->windowBar) return false;
-    
-    NWindowButton::SystemButtonType buttonType;
-    switch (type) {
-        case Theme:
-            buttonType = NWindowButton::Theme;
-            break;
-        case Pin:
-            buttonType = NWindowButton::Pin;
-            break;
-        case Minimize:
-            buttonType = NWindowButton::Minimize;
-            break;
-        case Maximize:
-            buttonType = NWindowButton::Maximize;
-            break;
-        case Close:
-            buttonType = NWindowButton::Close;
-            break;
-        default:
-            return false;
-    }
-    return d->windowBar->systemButtonVisible(buttonType);
-}
-
-NWindowButton* NMainWindow::systemButton(SystemButtonType type) const {
+NWindowButton* NMainWindow::systemButton(SystemButtonType type) const
+{
     Q_D(const NMainWindow);
     if (!d->windowBar) return nullptr;
-    
+
     NWindowButton::SystemButtonType buttonType;
     switch (type) {
         case Theme:
@@ -394,41 +245,49 @@ NWindowButton* NMainWindow::systemButton(SystemButtonType type) const {
     return d->windowBar->systemButton(buttonType);
 }
 
-void NMainWindow::setHitTestVisible(QWidget* widget, bool visible) {
+void NMainWindow::setHitTestVisible(QWidget* widget, bool visible)
+{
     Q_D(NMainWindow);
     d->windowAgent->setHitTestVisible(widget, visible);
 }
 
-void NMainWindow::setTitleBarWidget(QWidget* widget) {
+void NMainWindow::setTitleBarWidget(QWidget* widget)
+{
     Q_D(NMainWindow);
     d->windowAgent->setTitleBar(widget);
     setMenuWidget(widget);
 }
 
-QWidget* NMainWindow::titleBarWidget() const { return menuWidget(); }
+QWidget* NMainWindow::titleBarWidget() const
+{
+    return menuWidget();
+}
 
-QWK::WidgetWindowAgent* NMainWindow::windowAgent() const {
+QWK::WidgetWindowAgent* NMainWindow::windowAgent() const
+{
     Q_D(const NMainWindow);
     return d->windowAgent;
 }
 
-void NMainWindow::setMenuBar(QMenuBar* menuBar) {
+void NMainWindow::setMenuBar(QMenuBar* menuBar)
+{
     Q_D(NMainWindow);
-    
+
     if (auto oldMenuBar = this->menuBar()) {
         setHitTestVisible(oldMenuBar, false);
     }
-    
+
     if (d->windowBar) {
         d->windowBar->setMenuBar(menuBar);
     }
-    
+
     if (menuBar) {
         setHitTestVisible(menuBar, true);
     }
 }
 
-QMenuBar* NMainWindow::menuBar() const {
+QMenuBar* NMainWindow::menuBar() const
+{
     Q_D(const NMainWindow);
     return d->windowBar ? d->windowBar->menuBar() : nullptr;
 }

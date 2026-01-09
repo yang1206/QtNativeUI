@@ -117,13 +117,15 @@ void NWindowBar::setTitle(const QString& title) {
 
 QIcon NWindowBar::icon() const {
     Q_D(const NWindowBar);
-    if (!d->iconLabel) return QIcon();
+    if (!d->iconLabel)
+        return QIcon();
     return d->iconLabel->pixmap().isNull() ? QIcon() : QIcon(d->iconLabel->pixmap());
 }
 
 void NWindowBar::setIcon(const QIcon& icon) {
     Q_D(NWindowBar);
-    if (!d->iconLabel) return;
+    if (!d->iconLabel)
+        return;
     if (icon.isNull()) {
         d->iconLabel->clear();
     } else {
@@ -152,20 +154,6 @@ void NWindowBar::setIconVisible(bool visible) {
     if (d->iconLabel) {
         d->iconLabel->setVisible(visible);
     }
-}
-
-void NWindowBar::setSystemButtonVisible(NWindowButton::SystemButtonType type, bool visible) {
-    Q_D(NWindowBar);
-    NWindowButton* button = systemButton(type);
-    if (button) {
-        button->setVisible(visible);
-    }
-}
-
-bool NWindowBar::systemButtonVisible(NWindowButton::SystemButtonType type) const {
-    Q_D(const NWindowBar);
-    NWindowButton* button = systemButton(type);
-    return button ? button->isVisible() : false;
 }
 
 NWindowButton* NWindowBar::systemButton(NWindowButton::SystemButtonType type) const {

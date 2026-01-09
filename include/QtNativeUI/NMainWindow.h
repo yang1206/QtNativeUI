@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QVariant>
+#include <functional>
 
 #include "NWindowButton.h"
 #include "stdafx.h"
@@ -137,6 +138,26 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * @see setNativeSystemButtonsVisible()
      */
     bool nativeSystemButtonsVisible() const;
+
+    /**
+     * @brief Set macOS system button area callback
+     * 
+     * Sets a callback function to customize the position of macOS native system buttons
+     * (traffic light buttons). The callback receives the window size and should return
+     * the rectangle area where system buttons should be placed.
+     * 
+     * Example - move buttons to right side:
+     * @code
+     * mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
+     *     constexpr int width = 75;
+     *     return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+     * });
+     * @endcode
+     * 
+     * @param callback Function that returns system button area, pass nullptr to reset to default (top-left)
+     * @note Only effective on macOS platform
+     */
+    void setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback);
 #endif
 
     /**
@@ -211,26 +232,6 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * @see SystemButtonType, setSystemButtonVisible()
      */
     void setSystemButton(SystemButtonType type, QAbstractButton* button);
-
-    /**
-     * @brief Set system button visibility
-     * 
-     * Controls the visibility of the specified type of system button. This is a 
-     * convenience method that internally forwards to windowBar()->setSystemButtonVisible().
-     * 
-     * @param type Button type
-     * @param visible true to show button, false to hide button
-     * @see systemButtonVisible(), systemButton()
-     */
-    void setSystemButtonVisible(SystemButtonType type, bool visible);
-
-    /**
-     * @brief Get system button visibility
-     * @param type Button type
-     * @return true if button is visible, false if hidden
-     * @see setSystemButtonVisible()
-     */
-    bool systemButtonVisible(SystemButtonType type) const;
 
     /**
      * @brief Get system button component of specified type
@@ -370,10 +371,8 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
     void paintEvent(QPaintEvent* event) override;
 
   private:
-    void setupWindowAgent();
     void setupDefaultWindowBar();
     void connectWindowBarSignals();
-    void applyBackdropType(BackdropType type);
 
     NMainWindowPrivate* d_ptr;
     Q_DECLARE_PRIVATE(NMainWindow)
