@@ -20,9 +20,6 @@
 MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     setupMenuBar();
 
-#ifdef Q_OS_WINDOWS
-    setupTitleBarWidgets();
-#endif
     m_navigationView = new NNavigationView(this);
     setCentralWidget(m_navigationView);
 
@@ -133,21 +130,4 @@ void MainWindow::onSaveFile() {
 
 void MainWindow::onAbout() {
     // Placeholder for about dialog
-}
-
-void MainWindow::setupTitleBarWidgets() {
-    // Add a search box to the title bar
-    auto searchBox = new NLineEdit(this);
-    searchBox->setPlaceholderText("Search...");
-
-    setHitTestVisible(searchBox, true);
-
-    // Add the search box to the window bar (between menu and system buttons)
-    windowBar()->addWidget(searchBox);
-
-    // Connect search functionality
-    connect(searchBox, &NLineEdit::textChanged, this, [](const QString& text) {
-        // Handle search logic here
-        qDebug() << "Search:" << text;
-    });
 }

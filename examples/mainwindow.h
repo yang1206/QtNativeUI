@@ -8,19 +8,18 @@ class NNavigationView;
 class MainWindow : public NMainWindow {
     Q_OBJECT
 
-public:
+  public:
     explicit MainWindow(QWidget* parent = nullptr);
 
-private slots:
+  private slots:
     void onNewFile();
     void onOpenFile();
     void onSaveFile();
     void onAbout();
 
-private:
+  private:
     void setupMenuBar();
-    void setupTitleBarWidgets();
-    
+
     NNavigationView* m_navigationView;
 };
 
