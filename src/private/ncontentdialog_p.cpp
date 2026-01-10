@@ -1,4 +1,5 @@
 #include "ncontentdialog_p.h"
+#include "nframelesshelper_p.h"
 
 #include <QApplication>
 #include <QLabel>
@@ -34,6 +35,9 @@ NContentDialogPrivate::~NContentDialogPrivate() {
 
 void NContentDialogPrivate::initialize() {
     Q_Q(NContentDialog);
+
+    _frameless = new NFramelessHelper(q, q);
+    _frameless->setup();
 
     if (q->parentWidget()) {
         _maskWidget = new NMaskWidget(q->parentWidget());
