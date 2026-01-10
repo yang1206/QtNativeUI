@@ -296,10 +296,57 @@ void showSettingsDialog(QWidget* parent)
 
 ### macOS 特定方法
 
+#### 隐藏原生系统按钮（红绿灯）
+
+在 macOS 上使用自定义标题栏或隐藏默认标题栏时，原生的红绿灯按钮默认仍然可见。可以使用以下方法隐藏：
+
+```cpp
+#ifdef Q_OS_MAC
+class MyDialog : public NDialog {
+public:
+    MyDialog(QWidget* parent = nullptr) : NDialog(parent) {}
+
+protected:
+    void showEvent(QShowEvent* event) override {
+        NDialog::showEvent(event);
+        // 隐藏 macOS 红绿灯按钮
+        setNativeSystemButtonsVisible(false);
+    }
+};
+
+MyDialog* dialog = new MyDialog(this);
+dialog->setTitleBar(customTitleBar);  // 或 setWindowBarVisible(false)
+dialog->exec();
+#endif
+```
+
+#### 自定义系统按钮位置
+
+```cpp
+#ifdef Q_OS_MAC
+NDialog* dialog = new NDialog(this);
+
+// 完全隐藏红绿灯（推荐方式）
+dialog->setNativeSystemButtonsVisible(false);
+
+// 或者使用回调自定义位置
+dialog->setSystemButtonAreaCallback([](const QSize& size) {
+    constexpr int width = -75;
+    return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+});
+
+dialog->exec();
+#endif
+```
+
+**重要提示：**
+- 必须在窗口显示后调用，推荐在 `showEvent()` 中调用
+- 当使用 `setTitleBar()` 或 `setWindowBarVisible(false)` 时建议隐藏红绿灯
+- 对于简单隐藏需求，推荐使用 `setNativeSystemButtonsVisible(false)`
+
 | 方法 | 说明 | 返回值 |
 |------|------|--------|
 | `setNativeSystemButtonsVisible(bool visible)` | 设置原生系统按钮可见性 | void |
-| `nativeSystemButtonsVisible() const` | 获取原生系统按钮可见性 | bool |
 | `setSystemButtonAreaCallback(...)` | 设置系统按钮区域回调 | void |
 
 ### 高级功能

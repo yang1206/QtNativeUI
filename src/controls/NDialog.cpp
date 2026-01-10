@@ -56,19 +56,14 @@ int NDialog::titleBarHeight() const {
 }
 
 #ifdef Q_OS_MAC
-void NDialog::setNativeSystemButtonsVisible(bool visible) {
-    Q_D(NDialog);
-    d->frameless->setNativeSystemButtonsVisible(visible);
-}
-
-bool NDialog::nativeSystemButtonsVisible() const {
-    Q_D(const NDialog);
-    return d->frameless->nativeSystemButtonsVisible();
-}
-
 void NDialog::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback) {
     Q_D(NDialog);
     d->frameless->setSystemButtonAreaCallback(callback);
+}
+
+void NDialog::setNativeSystemButtonsVisible(bool visible) {
+    Q_D(NDialog);
+    d->frameless->setNativeSystemButtonsVisible(visible);
 }
 #endif
 

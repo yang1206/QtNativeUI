@@ -116,37 +116,22 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
 
 #ifdef Q_OS_MAC
     /**
-     * @brief Set macOS native system buttons visibility
-     * 
-     * Controls the visibility of macOS native system buttons (traffic light buttons) 
-     * in the top-left corner of the window. These buttons are provided by the macOS 
-     * system and their position and style follow macOS design guidelines.
-     * 
-     * When native buttons are hidden, custom title bar buttons are typically used 
-     * to provide window operation functionality.
-     * 
-     * @param visible true to show native buttons, false to hide native buttons
-     * @note Only effective on macOS platform, this method doesn't exist on other platforms
-     * @see nativeSystemButtonsVisible()
-     */
-    void setNativeSystemButtonsVisible(bool visible);
-
-    /**
-     * @brief Get macOS native system buttons visibility
-     * @return true if native buttons are visible, false if hidden
-     * @note Only effective on macOS platform
-     * @see setNativeSystemButtonsVisible()
-     */
-    bool nativeSystemButtonsVisible() const;
-
-    /**
      * @brief Set macOS system button area callback
      * 
      * Sets a callback function to customize the position of macOS native system buttons
      * (traffic light buttons). The callback receives the window size and should return
      * the rectangle area where system buttons should be placed.
      * 
-     * Example - move buttons to right side:
+     * To hide the traffic light buttons, move them off-screen:
+     * @code
+     * // In showEvent or after window is shown
+     * mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
+     *     constexpr int width = -75;
+     *     return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+     * });
+     * @endcode
+     * 
+     * To move buttons to right side:
      * @code
      * mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
      *     constexpr int width = 75;
@@ -155,9 +140,22 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * @endcode
      * 
      * @param callback Function that returns system button area, pass nullptr to reset to default (top-left)
-     * @note Only effective on macOS platform
+     * @note Must be called after the window is shown for the callback to work properly
      */
     void setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback);
+
+    /**
+     * @brief Set native system buttons visibility (macOS only)
+     * 
+     * Controls the visibility of macOS traffic light buttons. When set to false,
+     * this method calls both setWindowAttribute("no-system-buttons", true) and
+     * setSystemButtonAreaCallback to move buttons off-screen.
+     * 
+     * @param visible Whether system buttons should be visible
+     * @note This method only works on macOS and must be called after the window is shown
+     * @note For custom positioning, use setSystemButtonAreaCallback() directly
+     */
+    void setNativeSystemButtonsVisible(bool visible);
 #endif
 
     /**
@@ -209,7 +207,9 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * 
      * @param bar New title bar component, if nullptr the current title bar is removed
      * @note The old title bar component will be automatically deleted
-     * @see windowBar()
+     * @note On macOS, native system buttons (traffic lights) remain visible by default.
+     *       To hide them, call setNativeSystemButtonsVisible(false) in showEvent.
+     * @see windowBar(), setNativeSystemButtonsVisible()
      */
     void setWindowBar(NWindowBar* bar);
 

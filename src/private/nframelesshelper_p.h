@@ -51,9 +51,8 @@ class NFramelessHelper : public QObject {
     QColor                  backgroundColor() const;
 
 #ifdef Q_OS_MAC
-    void setNativeSystemButtonsVisible(bool visible);
-    bool nativeSystemButtonsVisible() const;
     void setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback);
+    void setNativeSystemButtonsVisible(bool visible);
 #endif
 
     static constexpr bool useNativeSystemButtons() {

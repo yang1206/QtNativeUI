@@ -108,19 +108,14 @@ int NMainWindow::titleBarHeight() const {
 }
 
 #ifdef Q_OS_MAC
-void NMainWindow::setNativeSystemButtonsVisible(bool visible) {
-    Q_D(NMainWindow);
-    d->frameless->setNativeSystemButtonsVisible(visible);
-}
-
-bool NMainWindow::nativeSystemButtonsVisible() const {
-    Q_D(const NMainWindow);
-    return d->frameless->nativeSystemButtonsVisible();
-}
-
 void NMainWindow::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback) {
     Q_D(NMainWindow);
     d->frameless->setSystemButtonAreaCallback(callback);
+}
+
+void NMainWindow::setNativeSystemButtonsVisible(bool visible) {
+    Q_D(NMainWindow);
+    d->frameless->setNativeSystemButtonsVisible(visible);
 }
 #endif
 

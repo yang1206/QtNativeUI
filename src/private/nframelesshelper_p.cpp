@@ -228,26 +228,27 @@ QColor NFramelessHelper::backgroundColor() const
 }
 
 #ifdef Q_OS_MAC
-void NFramelessHelper::setNativeSystemButtonsVisible(bool visible)
-{
-    if (m_windowAgent) {
-        m_windowAgent->setWindowAttribute(QStringLiteral("no-system-buttons"), !visible);
-    }
-}
-
-bool NFramelessHelper::nativeSystemButtonsVisible() const
-{
-    if (m_windowAgent) {
-        QVariant val = m_windowAgent->windowAttribute(QStringLiteral("no-system-buttons"));
-        return val.isValid() ? !val.toBool() : true;
-    }
-    return true;
-}
-
 void NFramelessHelper::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback)
 {
     if (m_windowAgent) {
         m_windowAgent->setSystemButtonAreaCallback(callback);
+    }
+}
+
+void NFramelessHelper::setNativeSystemButtonsVisible(bool visible)
+{
+    if (!m_windowAgent)
+        return;
+
+    if (!visible) {
+        setWindowAttribute(QStringLiteral("no-system-buttons"), true);
+        setSystemButtonAreaCallback([](const QSize& size) {
+            constexpr int width = -75;
+            return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+        });
+    } else {
+        setWindowAttribute(QStringLiteral("no-system-buttons"), false);
+        m_windowAgent->setSystemButtonAreaCallback(nullptr);
     }
 }
 #endif

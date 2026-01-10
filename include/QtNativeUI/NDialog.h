@@ -24,42 +24,55 @@ class QTNATIVEUI_EXPORT NDialog : public QDialog {
     Q_OBJECT
     Q_PROPERTY(BackdropType backdropType READ backdropType WRITE setBackdropType NOTIFY backdropTypeChanged)
 
-public:
-    enum BackdropType {
-        None = 0,
-        Blur,
-        Acrylic,
-        Mica,
-        MicaAlt
-    };
+  public:
+    enum BackdropType { None = 0, Blur, Acrylic, Mica, MicaAlt };
     Q_ENUM(BackdropType)
 
-    enum SystemButtonType {
-        Minimize,
-        Maximize,
-        Close
-    };
+    enum SystemButtonType { Minimize, Maximize, Close };
     Q_ENUM(SystemButtonType)
 
     explicit NDialog(QWidget* parent = nullptr);
     ~NDialog() override;
 
-    void setBackdropType(BackdropType type);
+    void         setBackdropType(BackdropType type);
     BackdropType backdropType() const;
 
     int borderThickness() const;
     int titleBarHeight() const;
 
 #ifdef Q_OS_MAC
-    void setNativeSystemButtonsVisible(bool visible);
-    bool nativeSystemButtonsVisible() const;
+    /**
+     * @brief Set macOS system button area callback
+     * @param callback Function that returns system button area
+     * @note Must be called after the dialog is shown
+     */
     void setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback);
+
+    /**
+     * @brief Set native system buttons visibility (macOS only)
+     *
+     * Controls the visibility of macOS traffic light buttons. When set to false,
+     * this method calls both setWindowAttribute("no-system-buttons", true) and
+     * setSystemButtonAreaCallback to move buttons off-screen.
+     *
+     * @param visible Whether system buttons should be visible
+     * @note This method only works on macOS and must be called after the dialog is shown
+     * @note For custom positioning, use setSystemButtonAreaCallback() directly
+     */
+    void setNativeSystemButtonsVisible(bool visible);
 #endif
 
-    bool setWindowAttribute(const QString& key, const QVariant& value);
+    bool     setWindowAttribute(const QString& key, const QVariant& value);
     QVariant windowAttribute(const QString& key) const;
 
-    void setTitleBar(QWidget* titleBar);
+    /**
+     * @brief Set custom title bar widget
+     * @param titleBar Custom title bar widget, replaces the default NWindowBar
+     * @note On macOS, native system buttons (traffic lights) remain visible by default.
+     *       To hide them, call setNativeSystemButtonsVisible(false) in showEvent.
+     * @see titleBar(), setNativeSystemButtonsVisible()
+     */
+    void     setTitleBar(QWidget* titleBar);
     QWidget* titleBar() const;
 
     NWindowBar* windowBar() const;
@@ -67,7 +80,7 @@ public:
     void setWindowBarVisible(bool visible);
     bool windowBarVisible() const;
 
-    void setContentWidget(QWidget* widget);
+    void     setContentWidget(QWidget* widget);
     QWidget* contentWidget() const;
 
     void setHitTestVisible(QWidget* widget, bool visible = true);
@@ -75,13 +88,13 @@ public:
 
     QWK::WidgetWindowAgent* windowAgent() const;
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void backdropTypeChanged(BackdropType type);
 
-protected:
+  protected:
     void paintEvent(QPaintEvent* event) override;
 
-private:
+  private:
     NDialogPrivate* d_ptr;
     Q_DECLARE_PRIVATE(NDialog)
 };

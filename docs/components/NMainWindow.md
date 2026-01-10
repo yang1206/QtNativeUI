@@ -223,22 +223,57 @@ mainWindow->show();
 
 ### macOS 特定功能
 
+#### 隐藏原生系统按钮（红绿灯）
+
+在 macOS 上，当使用自定义标题栏时，原生的红绿灯按钮默认仍然可见。QtNativeUI 提供了简单的 API 来隐藏这些按钮：
+
+```cpp
+#ifdef Q_OS_MAC
+class MyMainWindow : public NMainWindow {
+public:
+    MyMainWindow(QWidget* parent = nullptr) : NMainWindow(parent) {}
+
+protected:
+    void showEvent(QShowEvent* event) override {
+        NMainWindow::showEvent(event);
+        // 隐藏 macOS 红绿灯按钮
+        setNativeSystemButtonsVisible(false);
+    }
+};
+
+MyMainWindow* mainWindow = new MyMainWindow();
+mainWindow->show();
+#endif
+```
+
+#### 自定义系统按钮位置
+
+如果需要更精细的控制，可以使用回调函数自定义红绿灯按钮的位置：
+
 ```cpp
 #ifdef Q_OS_MAC
 NMainWindow* mainWindow = new NMainWindow();
 
-// 隐藏原生系统按钮 (交通灯按钮)
-mainWindow->setNativeSystemButtonsVisible(false);
-
-// 自定义系统按钮位置 (移动到右侧)
+// 将红绿灯移动到窗口右侧
 mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
     constexpr int width = 75;
     return QRect(QPoint(size.width() - width, 0), QSize(width, 32));
 });
 
+// 完全隐藏红绿灯（移到屏幕外）
+mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
+    constexpr int width = -75;
+    return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+});
+
 mainWindow->show();
 #endif
 ```
+
+**重要提示：**
+- `setNativeSystemButtonsVisible()` 和 `setSystemButtonAreaCallback()` 必须在窗口显示后调用
+- 推荐在 `showEvent()` 中调用，或者在 `show()` 之后立即调用
+- 对于简单的隐藏需求，推荐使用 `setNativeSystemButtonsVisible(false)`
 
 ### 获取系统信息
 
