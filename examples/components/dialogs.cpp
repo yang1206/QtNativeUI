@@ -1006,6 +1006,49 @@ QWidget* DialogsExample::createNDialogs() {
     customLayout->addStretch();
     layout->addLayout(customLayout);
 
+    QLabel* noTitleBarLabel = new QLabel("无标题栏对话框:", container);
+    noTitleBarLabel->setFont(labelFont);
+    layout->addWidget(noTitleBarLabel);
+
+    QHBoxLayout* noTitleBarLayout = new QHBoxLayout();
+    NPushButton* noTitleBarButton = new NPushButton("显示无标题栏对话框", container);
+    connect(noTitleBarButton, &NPushButton::clicked, [this]() {
+        NDialog* dialog = new NDialog(this);
+        dialog->setBackdropType(NDialog::Mica);
+        dialog->resize(400, 300);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+        dialog->setWindowBarVisible(false);
+
+        QWidget*     contentWidget = new QWidget(dialog);
+        QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
+        contentLayout->setContentsMargins(20, 20, 20, 20);
+
+        QLabel* contentLabel = new QLabel("这是一个没有标题栏的对话框，\n适用于需要完全自定义布局的场景。\n\n可以通过 setWindowBarVisible(false) 隐藏默认标题栏。", contentWidget);
+        contentLabel->setWordWrap(true);
+
+        QHBoxLayout* btnLayout = new QHBoxLayout();
+        NPushButton* cancelBtn = new NPushButton("取消", contentWidget);
+        NPushButton* okBtn     = new NPushButton("确定", contentWidget);
+        connect(cancelBtn, &NPushButton::clicked, dialog, &QDialog::reject);
+        connect(okBtn, &NPushButton::clicked, dialog, &QDialog::accept);
+
+        btnLayout->addStretch();
+        btnLayout->addWidget(cancelBtn);
+        btnLayout->addWidget(okBtn);
+
+        contentLayout->addWidget(contentLabel);
+        contentLayout->addStretch();
+        contentLayout->addLayout(btnLayout);
+
+        dialog->setContentWidget(contentWidget);
+
+        dialog->exec();
+    });
+    noTitleBarLayout->addWidget(noTitleBarButton);
+    noTitleBarLayout->addStretch();
+    layout->addLayout(noTitleBarLayout);
+
     layout->addStretch();
     return container;
 }

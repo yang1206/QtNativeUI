@@ -111,6 +111,18 @@ NWindowBar* NDialog::windowBar() const {
     return d->windowBar;
 }
 
+void NDialog::setWindowBarVisible(bool visible) {
+    Q_D(NDialog);
+    if (d->windowBar) {
+        d->windowBar->setVisible(visible);
+    }
+}
+
+bool NDialog::windowBarVisible() const {
+    Q_D(const NDialog);
+    return d->windowBar ? d->windowBar->isVisible() : false;
+}
+
 void NDialog::setContentWidget(QWidget* widget) {
     Q_D(NDialog);
 

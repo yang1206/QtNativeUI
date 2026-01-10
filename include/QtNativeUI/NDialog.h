@@ -64,6 +64,9 @@ public:
 
     NWindowBar* windowBar() const;
 
+    void setWindowBarVisible(bool visible);
+    bool windowBarVisible() const;
+
     void setContentWidget(QWidget* widget);
     QWidget* contentWidget() const;
 
