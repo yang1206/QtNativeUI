@@ -17,6 +17,7 @@ class ViewExample : public QWidget {
 
     QWidget* createListViewSection();
     QWidget* createTreeViewSection();
+    QWidget* createOverlaySection();
 
     NScrollArea* m_scrollArea{nullptr};
 };

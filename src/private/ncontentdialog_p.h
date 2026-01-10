@@ -3,12 +3,14 @@
 
 #include <QLabel>
 #include <QObject>
+#include <QPointer>
 #include <QVBoxLayout>
 #include "QtNativeUI/NContentDialog.h"
 #include "QtNativeUI/NEnums.h"
 
 class NPushButton;
-class NMaskWidget;
+class NOverlay;
+class NFramelessHelper;
 
 class NContentDialogPrivate : public QObject {
     Q_OBJECT
@@ -35,21 +37,21 @@ class NContentDialogPrivate : public QObject {
 
     NThemeType::ThemeMode        _themeMode;
     bool                         _isDark;
-    qint64                       _currentWinID{0};
     NContentDialog::DialogResult _dialogResult{NContentDialog::ResultNone};
 
-    NMaskWidget* _maskWidget{nullptr};
-    QWidget*     _contentWidget{nullptr};
-    QWidget*     _titleBarWidget{nullptr};
-    QWidget*     _buttonWidget{nullptr};
-    QLabel*      _titleLabel{nullptr};
-    QLabel*      _contentLabel{nullptr};
-    QVBoxLayout* _mainLayout{nullptr};
-    QHBoxLayout* _buttonLayout{nullptr};
+    NFramelessHelper*    _frameless{nullptr};
+    QPointer<NOverlay>   _overlay;
+    QWidget*          _contentWidget{nullptr};
+    QWidget*          _titleBarWidget{nullptr};
+    QWidget*          _buttonWidget{nullptr};
+    QLabel*           _titleLabel{nullptr};
+    QLabel*           _contentLabel{nullptr};
+    QVBoxLayout*      _mainLayout{nullptr};
+    QHBoxLayout*      _buttonLayout{nullptr};
 
-    NPushButton* _leftButton{nullptr};   // 对应关闭按钮
-    NPushButton* _middleButton{nullptr}; // 对应次要按钮
-    NPushButton* _rightButton{nullptr};  // 对应主要按钮
+    NPushButton* _leftButton{nullptr};
+    NPushButton* _middleButton{nullptr};
+    NPushButton* _rightButton{nullptr};
 
     int _shadowBorderWidth{3};
 };

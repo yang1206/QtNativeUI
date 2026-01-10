@@ -48,13 +48,6 @@ class QTNATIVEUI_EXPORT NContentDialog : public QDialog {
     void paintEvent(QPaintEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
-#ifdef Q_OS_WIN
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    bool nativeEvent(const QByteArray& eventType, void* message, qintptr* result) override;
-#else
-    bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
-#endif
-#endif
 
     virtual void onPrimaryButtonClicked() {}
     virtual void onSecondaryButtonClicked() {}

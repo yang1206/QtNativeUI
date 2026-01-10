@@ -1,63 +1,51 @@
 #include "QtNativeUI/NMainWindow.h"
 
 #include <QPainter>
-#include <functional>
+#include <qevent.h>
 
+#include "../private/nframelesshelper_p.h"
 #include "../private/nmainwindow_p.h"
 #include "QtNativeUI/NTheme.h"
 #include "QtNativeUI/NWindowBar.h"
 #include "QtNativeUI/NWindowButton.h"
 
-#include <QWKWidgets/widgetwindowagent.h>
-
-NMainWindow::NMainWindow(QWidget* parent)
-    : QMainWindow(parent)
-    , d_ptr(new NMainWindowPrivate())
-{
+NMainWindow::NMainWindow(QWidget* parent) : QMainWindow(parent), d_ptr(new NMainWindowPrivate()) {
     d_ptr->q_ptr = this;
-    setAttribute(Qt::WA_DontCreateNativeAncestors);
-    setAttribute(Qt::WA_TranslucentBackground);
 
     Q_D(NMainWindow);
-    d->setupWindowAgent();
-    d->setupThemeConnection();
+    d->setupFrameless();
     setupDefaultWindowBar();
     connectWindowBarSignals();
 }
 
-NMainWindow::~NMainWindow()
-{
-    delete d_ptr;
-}
+NMainWindow::~NMainWindow() { delete d_ptr; }
 
-void NMainWindow::paintEvent(QPaintEvent* event)
-{
+void NMainWindow::paintEvent(QPaintEvent* event) {
     Q_D(NMainWindow);
 
-    if (d->backdropType == None) {
+    if (d->frameless->backdropType() == NFramelessHelper::None) {
         QPainter painter(this);
-        painter.fillRect(event->rect(), d->backgroundColor);
+        painter.fillRect(event->rect(), d->frameless->backgroundColor());
     }
 
     QMainWindow::paintEvent(event);
 }
 
-void NMainWindow::setupDefaultWindowBar()
-{
+void NMainWindow::setupDefaultWindowBar() {
     Q_D(NMainWindow);
 
     d->windowBar = new NWindowBar(this);
     d->windowBar->setHostWidget(this);
-    d->windowAgent->setTitleBar(d->windowBar);
+    d->frameless->setTitleBar(d->windowBar);
     d->registerSystemButtons(d->windowBar);
     setMenuWidget(d->windowBar);
 }
 
-void NMainWindow::connectWindowBarSignals()
-{
+void NMainWindow::connectWindowBarSignals() {
     Q_D(NMainWindow);
 
-    if (!d->windowBar) return;
+    if (!d->windowBar)
+        return;
 
     connect(d->windowBar, &NWindowBar::minimizeRequested, this, &QWidget::showMinimized);
 
@@ -96,79 +84,62 @@ void NMainWindow::connectWindowBarSignals()
     });
 }
 
-void NMainWindow::setBackdropType(BackdropType type)
-{
+void NMainWindow::setBackdropType(BackdropType type) {
     Q_D(NMainWindow);
-
-    if (d->backdropType == type)
-        return;
-
-    d->applyBackdropEffect(type);
-    d->backdropType = type;
-    emit backdropTypeChanged(type);
+    d->frameless->setBackdropType(static_cast<NFramelessHelper::BackdropType>(type));
+    if (d->frameless->backdropType() == static_cast<NFramelessHelper::BackdropType>(type)) {
+        emit backdropTypeChanged(type);
+    }
 }
 
-NMainWindow::BackdropType NMainWindow::backdropType() const
-{
+NMainWindow::BackdropType NMainWindow::backdropType() const {
     Q_D(const NMainWindow);
-    return d->backdropType;
+    return static_cast<BackdropType>(d->frameless->backdropType());
 }
 
-int NMainWindow::borderThickness() const
-{
+int NMainWindow::borderThickness() const {
     Q_D(const NMainWindow);
-    QVariant val = d->windowAgent->windowAttribute(QStringLiteral("border-thickness"));
-    return val.isValid() ? val.toInt() : 0;
+    return d->frameless->borderThickness();
 }
 
-int NMainWindow::titleBarHeight() const
-{
+int NMainWindow::titleBarHeight() const {
     Q_D(const NMainWindow);
-    QVariant val = d->windowAgent->windowAttribute(QStringLiteral("title-bar-height"));
-    return val.isValid() ? val.toInt() : 32;
+    return d->frameless->titleBarHeight();
 }
 
 #ifdef Q_OS_MAC
-void NMainWindow::setNativeSystemButtonsVisible(bool visible)
-{
+void NMainWindow::setNativeSystemButtonsVisible(bool visible) {
     Q_D(NMainWindow);
-    d->windowAgent->setWindowAttribute(QStringLiteral("no-system-buttons"), !visible);
+    d->frameless->setNativeSystemButtonsVisible(visible);
 }
 
-bool NMainWindow::nativeSystemButtonsVisible() const
-{
+bool NMainWindow::nativeSystemButtonsVisible() const {
     Q_D(const NMainWindow);
-    QVariant val = d->windowAgent->windowAttribute(QStringLiteral("no-system-buttons"));
-    return val.isValid() ? !val.toBool() : true;
+    return d->frameless->nativeSystemButtonsVisible();
 }
 
-void NMainWindow::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback)
-{
+void NMainWindow::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback) {
     Q_D(NMainWindow);
-    d->windowAgent->setSystemButtonAreaCallback(callback);
+    d->frameless->setSystemButtonAreaCallback(callback);
 }
 #endif
 
-bool NMainWindow::setWindowAttribute(const QString& key, const QVariant& value)
-{
+bool NMainWindow::setWindowAttribute(const QString& key, const QVariant& value) {
     Q_D(NMainWindow);
-    return d->windowAgent->setWindowAttribute(key, value);
+    return d->frameless->setWindowAttribute(key, value);
 }
 
-QVariant NMainWindow::windowAttribute(const QString& key) const
-{
+QVariant NMainWindow::windowAttribute(const QString& key) const {
     Q_D(const NMainWindow);
-    return d->windowAgent->windowAttribute(key);
+    return d->frameless->windowAttribute(key);
 }
 
-NWindowBar* NMainWindow::windowBar() const
-{
+NWindowBar* NMainWindow::windowBar() const {
     Q_D(const NMainWindow);
     return d->windowBar;
 }
 
-void NMainWindow::setWindowBar(NWindowBar* bar)
-{
+void NMainWindow::setWindowBar(NWindowBar* bar) {
     Q_D(NMainWindow);
 
     if (d->windowBar) {
@@ -180,47 +151,46 @@ void NMainWindow::setWindowBar(NWindowBar* bar)
 
     if (bar) {
         bar->setHostWidget(this);
-        d->windowAgent->setTitleBar(bar);
+        d->frameless->setTitleBar(bar);
         d->registerSystemButtons(bar);
         setMenuWidget(bar);
         connectWindowBarSignals();
     }
 }
 
-void NMainWindow::setSystemButton(SystemButtonType type, QAbstractButton* button)
-{
+void NMainWindow::setSystemButton(SystemButtonType type, QAbstractButton* button) {
     Q_D(NMainWindow);
 
     if (type == Pin || type == Theme) {
-        d->windowAgent->setHitTestVisible(button, true);
+        d->frameless->setHitTestVisible(button, true);
         return;
     }
 
-    QWK::WindowAgentBase::SystemButton qwkType;
+    NFramelessHelper::SystemButtonType helperType;
     switch (type) {
         case WindowIcon:
-            qwkType = QWK::WindowAgentBase::WindowIcon;
+            helperType = NFramelessHelper::WindowIcon;
             break;
         case Minimize:
-            qwkType = QWK::WindowAgentBase::Minimize;
+            helperType = NFramelessHelper::Minimize;
             break;
         case Maximize:
-            qwkType = QWK::WindowAgentBase::Maximize;
+            helperType = NFramelessHelper::Maximize;
             break;
         case Close:
-            qwkType = QWK::WindowAgentBase::Close;
+            helperType = NFramelessHelper::Close;
             break;
         default:
             return;
     }
 
-    d->windowAgent->setSystemButton(qwkType, button);
+    d->frameless->setSystemButton(helperType, button);
 }
 
-NWindowButton* NMainWindow::systemButton(SystemButtonType type) const
-{
+NWindowButton* NMainWindow::systemButton(SystemButtonType type) const {
     Q_D(const NMainWindow);
-    if (!d->windowBar) return nullptr;
+    if (!d->windowBar)
+        return nullptr;
 
     NWindowButton::SystemButtonType buttonType;
     switch (type) {
@@ -245,32 +215,25 @@ NWindowButton* NMainWindow::systemButton(SystemButtonType type) const
     return d->windowBar->systemButton(buttonType);
 }
 
-void NMainWindow::setHitTestVisible(QWidget* widget, bool visible)
-{
+void NMainWindow::setHitTestVisible(QWidget* widget, bool visible) {
     Q_D(NMainWindow);
-    d->windowAgent->setHitTestVisible(widget, visible);
+    d->frameless->setHitTestVisible(widget, visible);
 }
 
-void NMainWindow::setTitleBarWidget(QWidget* widget)
-{
+void NMainWindow::setTitleBarWidget(QWidget* widget) {
     Q_D(NMainWindow);
-    d->windowAgent->setTitleBar(widget);
+    d->frameless->setTitleBar(widget);
     setMenuWidget(widget);
 }
 
-QWidget* NMainWindow::titleBarWidget() const
-{
-    return menuWidget();
-}
+QWidget* NMainWindow::titleBarWidget() const { return menuWidget(); }
 
-QWK::WidgetWindowAgent* NMainWindow::windowAgent() const
-{
+QWK::WidgetWindowAgent* NMainWindow::windowAgent() const {
     Q_D(const NMainWindow);
-    return d->windowAgent;
+    return d->frameless->windowAgent();
 }
 
-void NMainWindow::setMenuBar(QMenuBar* menuBar)
-{
+void NMainWindow::setMenuBar(QMenuBar* menuBar) {
     Q_D(NMainWindow);
 
     if (auto oldMenuBar = this->menuBar()) {
@@ -286,8 +249,7 @@ void NMainWindow::setMenuBar(QMenuBar* menuBar)
     }
 }
 
-QMenuBar* NMainWindow::menuBar() const
-{
+QMenuBar* NMainWindow::menuBar() const {
     Q_D(const NMainWindow);
     return d->windowBar ? d->windowBar->menuBar() : nullptr;
 }
