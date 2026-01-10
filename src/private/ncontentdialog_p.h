@@ -3,12 +3,13 @@
 
 #include <QLabel>
 #include <QObject>
+#include <QPointer>
 #include <QVBoxLayout>
 #include "QtNativeUI/NContentDialog.h"
 #include "QtNativeUI/NEnums.h"
 
 class NPushButton;
-class NMaskWidget;
+class NOverlay;
 class NFramelessHelper;
 
 class NContentDialogPrivate : public QObject {
@@ -38,8 +39,8 @@ class NContentDialogPrivate : public QObject {
     bool                         _isDark;
     NContentDialog::DialogResult _dialogResult{NContentDialog::ResultNone};
 
-    NFramelessHelper* _frameless{nullptr};
-    NMaskWidget*      _maskWidget{nullptr};
+    NFramelessHelper*    _frameless{nullptr};
+    QPointer<NOverlay>   _overlay;
     QWidget*          _contentWidget{nullptr};
     QWidget*          _titleBarWidget{nullptr};
     QWidget*          _buttonWidget{nullptr};

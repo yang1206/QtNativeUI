@@ -7,9 +7,9 @@
 #include <QStyle>
 #include <QTimer>
 
+#include "QtNativeUI/NOverlay.h"
 #include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NTheme.h"
-#include "nmaskwidget_p.h"
 
 NContentDialogPrivate::NContentDialogPrivate(QObject* parent) : QObject(parent) {
     _pBorderRadius             = NDesignToken(NDesignTokenKey::CornerRadiusMedium).toInt();
@@ -28,8 +28,8 @@ NContentDialogPrivate::NContentDialogPrivate(QObject* parent) : QObject(parent) 
 }
 
 NContentDialogPrivate::~NContentDialogPrivate() {
-    if (_maskWidget) {
-        _maskWidget->deleteLater();
+    if (_overlay) {
+        delete _overlay;
     }
 }
 
@@ -40,10 +40,8 @@ void NContentDialogPrivate::initialize() {
     _frameless->setup();
 
     if (q->parentWidget()) {
-        _maskWidget = new NMaskWidget(q->parentWidget());
-        _maskWidget->move(0, 0);
-        _maskWidget->setFixedSize(q->parentWidget()->size());
-        _maskWidget->setVisible(false);
+        _overlay = new NOverlay(q->parentWidget());
+        _overlay->setOpacity(90);
     }
 
     q->resize(400, 250);
@@ -84,7 +82,6 @@ void NContentDialogPrivate::initialize() {
         _dialogResult = NContentDialog::ResultClose;
         q->closeButtonClicked();
         q->onCloseButtonClicked();
-        _maskWidget->doMaskAnimation(0);
         doCloseAnimation();
     });
     _leftButton->setMinimumSize(0, 0);
@@ -166,8 +163,8 @@ void NContentDialogPrivate::setupContentLayout() {
 
 void NContentDialogPrivate::doCloseAnimation() {
     Q_Q(NContentDialog);
-    if (_maskWidget) {
-        _maskWidget->doMaskAnimation(0);
+    if (_overlay) {
+        _overlay->hideOverlay();
     }
 
     q->dialogClosed(_dialogResult);

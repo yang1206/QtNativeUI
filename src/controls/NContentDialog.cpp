@@ -1,12 +1,12 @@
 #include <QtNativeUI/NContentDialog.h>
 #include "../private/ncontentdialog_p.h"
-#include "../private/nmaskwidget_p.h"
 
 #include <QApplication>
 #include <QPainterPath>
 #include <QResizeEvent>
 #include <QScreen>
 #include <QStyle>
+#include "QtNativeUI/NOverlay.h"
 #include "QtNativeUI/NTheme.h"
 
 Q_PROPERTY_CREATE_Q_CPP(NContentDialog, int, BorderRadius)
@@ -31,8 +31,6 @@ NContentDialog::NContentDialog(QWidget* parent) : QDialog(parent), d_ptr(new NCo
 }
 
 NContentDialog::~NContentDialog() {
-    Q_D(NContentDialog);
-    d->_maskWidget->deleteLater();
 }
 
 void NContentDialog::setContentWidget(QWidget* widget) {
@@ -74,12 +72,9 @@ void NContentDialog::showEvent(QShowEvent* event) {
     Q_D(NContentDialog);
 
     QWidget* activeWindow = QApplication::activeWindow();
-    if (d->_maskWidget && activeWindow) {
-        d->_maskWidget->setParent(activeWindow);
-        d->_maskWidget->setVisible(true);
-        d->_maskWidget->raise();
-        d->_maskWidget->setFixedSize(activeWindow->size());
-        d->_maskWidget->doMaskAnimation(90);
+    if (d->_overlay && activeWindow) {
+        d->_overlay->setParent(activeWindow);
+        d->_overlay->showOverlay();
     }
 
     emit dialogOpened();

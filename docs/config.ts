@@ -99,6 +99,7 @@ export default defineAdditionalConfig({
                         {text: 'NDialog', link: '/components/NDialog'},
                         {text: 'NContentDialog', link: '/components/NContentDialog'},
                         {text: 'NFlyout', link: '/components/NFlyout'},
+                        {text: 'NOverlay', link: '/components/NOverlay'},
                         {text: 'NCalendarWidget', link: '/components/NCalendarWidget'},
                         {text: 'NCalendarDatePicker', link: '/components/NCalendarDatePicker'},
                         {text: 'NInfoBar', link: '/components/NInfoBar'}

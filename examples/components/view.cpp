@@ -3,10 +3,14 @@
 #include <QHBoxLayout>
 #include <QStandardItemModel>
 #include <QStringListModel>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QtNativeUI/NIcon.h>
 #include <QtNativeUI/NLabel.h>
 #include <QtNativeUI/NListView.h>
+#include <QtNativeUI/NOverlay.h>
+#include <QtNativeUI/NProgressRing.h>
+#include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NScrollArea.h>
 #include <QtNativeUI/NSlider.h>
 #include <QtNativeUI/NSpinBox.h>
@@ -32,6 +36,7 @@ void ViewExample::initUI() {
 
     contentLayout->addWidget(new ExampleSection("ListView", createListViewSection()));
     contentLayout->addWidget(new ExampleSection("TreeView", createTreeViewSection()));
+    contentLayout->addWidget(new ExampleSection("Overlay", createOverlaySection()));
 
     contentLayout->addStretch();
 
@@ -275,6 +280,82 @@ QWidget* ViewExample::createTreeViewSection() {
         treeView->setColumnHidden(3, true);
 
         layout->addWidget(treeView);
+    }
+
+    return container;
+}
+
+QWidget* ViewExample::createOverlaySection() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(16);
+
+    {
+        layout->addWidget(new NLabel("基础遮罩层", NLabelType::Subtitle));
+
+        QHBoxLayout* btnLayout = new QHBoxLayout();
+
+        NPushButton* showBtn = new NPushButton("显示遮罩层 (点击关闭)", container);
+        connect(showBtn, &NPushButton::clicked, this, [this]() {
+            NOverlay* overlay = new NOverlay(window());
+            overlay->setAttribute(Qt::WA_DeleteOnClose);
+            overlay->showOverlay();
+        });
+        btnLayout->addWidget(showBtn);
+
+        NPushButton* loadingBtn = new NPushButton("显示加载遮罩 (3秒后关闭)", container);
+        connect(loadingBtn, &NPushButton::clicked, this, [this, loadingBtn]() {
+            NOverlay* overlay = new NOverlay(window());
+            overlay->setAttribute(Qt::WA_DeleteOnClose);
+            overlay->showLoading("正在加载数据...");
+
+            QTimer::singleShot(3000, overlay, &NOverlay::close);
+        });
+        btnLayout->addWidget(loadingBtn);
+
+        NPushButton* localLoadingBtn = new NPushButton("局部加载遮罩", container);
+        connect(localLoadingBtn, &NPushButton::clicked, this, [this, localLoadingBtn]() {
+            NOverlay* overlay = new NOverlay();
+            overlay->setAttribute(Qt::WA_DeleteOnClose);
+            overlay->showLoading(localLoadingBtn, "按钮加载中...");
+
+            QTimer::singleShot(2000, overlay, &NOverlay::close);
+        });
+        btnLayout->addWidget(localLoadingBtn);
+
+        btnLayout->addStretch();
+        layout->addLayout(btnLayout);
+    }
+
+    {
+        layout->addWidget(new NLabel("自定义颜色遮罩", NLabelType::Subtitle));
+
+        QHBoxLayout* btnLayout = new QHBoxLayout();
+
+        NPushButton* blueBtn = new NPushButton("蓝色遮罩", container);
+        connect(blueBtn, &NPushButton::clicked, this, [this]() {
+            NOverlay* overlay = new NOverlay(window());
+            overlay->setAttribute(Qt::WA_DeleteOnClose);
+            overlay->setLightOverlayColor(QColor(0, 100, 200));
+            overlay->setDarkOverlayColor(QColor(0, 80, 160));
+            overlay->setOpacity(120);
+            overlay->showOverlay();
+        });
+        btnLayout->addWidget(blueBtn);
+
+        NPushButton* redBtn = new NPushButton("红色遮罩", container);
+        connect(redBtn, &NPushButton::clicked, this, [this]() {
+            NOverlay* overlay = new NOverlay(window());
+            overlay->setAttribute(Qt::WA_DeleteOnClose);
+            overlay->setLightOverlayColor(QColor(200, 50, 50));
+            overlay->setDarkOverlayColor(QColor(160, 40, 40));
+            overlay->setOpacity(100);
+            overlay->showOverlay();
+        });
+        btnLayout->addWidget(redBtn);
+
+        btnLayout->addStretch();
+        layout->addLayout(btnLayout);
     }
 
     return container;
