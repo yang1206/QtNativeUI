@@ -18,10 +18,9 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '6.8.0'
-          host: mac
-          target: desktop
-          modules: 'qtbase'
+          version: '6.8.*'
+          arch: clang_64
+          tools: 'tools_ninja'
           cache: true
 
       - name: Install Ninja
