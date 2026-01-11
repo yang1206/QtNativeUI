@@ -2,9 +2,9 @@ name: Build Linux
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
           version: '6.8.0'
           host: linux
           target: desktop
-          modules: 'qtbase qttools'
+          modules: 'qtbase'
           cache: true
 
       - name: Install Ninja
@@ -34,6 +34,8 @@ jobs:
 
       - name: Configure
         run: cmake --preset linux
+        env:
+          CMAKE_PREFIX_PATH: ${{ env.Qt6_DIR }}
 
       - name: Build
         run: cmake --build build --config Release

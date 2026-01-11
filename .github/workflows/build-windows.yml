@@ -2,9 +2,9 @@ name: Build Windows
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
           version: '6.8.0'
           host: windows
           target: desktop
-          modules: 'qtbase qttools'
+          modules: 'qtbase'
           cache: true
 
       - name: Setup MSVC
@@ -33,7 +33,7 @@ jobs:
       - name: Configure
         run: cmake --preset windows-msvc
         env:
-          QT_MSVC_DIR: ${{ env.Qt6_DIR }}
+          CMAKE_PREFIX_PATH: ${{ env.Qt6_DIR }}
 
       - name: Build
         run: cmake --build build --config Release
