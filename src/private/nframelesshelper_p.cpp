@@ -39,7 +39,7 @@ void NFramelessHelper::setupThemeConnection()
 {
 #ifdef Q_OS_MAC
     connect(nTheme, &NTheme::themeModeChanged, this, [this]() {
-        if (m_backdropType == Blur) {
+        if (m_windowEffect == Blur) {
             m_windowAgent->setWindowAttribute(QStringLiteral("blur-effect"),
                                               nTheme->isDarkMode() ? "dark" : "light");
         }
@@ -52,7 +52,7 @@ void NFramelessHelper::setupThemeConnection()
     connect(nTheme, &NTheme::themeModeChanged, this, [this]() {
         m_windowAgent->setWindowAttribute(QStringLiteral("dark-mode"), nTheme->isDarkMode());
 
-        if (m_backdropType == None) {
+        if (m_windowEffect == None) {
             updateBackgroundColor();
             QPalette pal = m_host->palette();
             pal.setColor(QPalette::Window, m_backgroundColor);
@@ -73,7 +73,7 @@ void NFramelessHelper::updateBackgroundColor()
         : nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Light);
 }
 
-void NFramelessHelper::applyBackdropEffect(BackdropType type)
+void NFramelessHelper::applyBackdropEffect(WindowEffectType type)
 {
     bool needsRepaint = false;
 
@@ -93,7 +93,7 @@ void NFramelessHelper::applyBackdropEffect(BackdropType type)
     if (type != None && type < effectKeys.size()) {
         m_windowAgent->setWindowAttribute(effectKeys[type], true);
         m_host->setPalette(QPalette());
-        if (m_backdropType == None) {
+        if (m_windowEffect == None) {
             needsRepaint = true;
         }
     } else {
@@ -109,7 +109,7 @@ void NFramelessHelper::applyBackdropEffect(BackdropType type)
         m_windowAgent->setWindowAttribute(QStringLiteral("blur-effect"),
                                           nTheme->isDarkMode() ? "dark" : "light");
         m_host->setPalette(QPalette());
-        if (m_backdropType == None) {
+        if (m_windowEffect == None) {
             needsRepaint = true;
         }
     } else {
@@ -129,19 +129,19 @@ void NFramelessHelper::applyBackdropEffect(BackdropType type)
     }
 }
 
-void NFramelessHelper::setBackdropType(BackdropType type)
+void NFramelessHelper::setWindowEffect(WindowEffectType type)
 {
-    if (m_backdropType == type)
+    if (m_windowEffect == type)
         return;
 
     applyBackdropEffect(type);
-    m_backdropType = type;
-    emit backdropTypeChanged(type);
+    m_windowEffect = type;
+    emit windowEffectChanged(type);
 }
 
-NFramelessHelper::BackdropType NFramelessHelper::backdropType() const
+NFramelessHelper::WindowEffectType NFramelessHelper::windowEffect() const
 {
-    return m_backdropType;
+    return m_windowEffect;
 }
 
 int NFramelessHelper::borderThickness() const
@@ -228,26 +228,27 @@ QColor NFramelessHelper::backgroundColor() const
 }
 
 #ifdef Q_OS_MAC
-void NFramelessHelper::setNativeSystemButtonsVisible(bool visible)
-{
-    if (m_windowAgent) {
-        m_windowAgent->setWindowAttribute(QStringLiteral("no-system-buttons"), !visible);
-    }
-}
-
-bool NFramelessHelper::nativeSystemButtonsVisible() const
-{
-    if (m_windowAgent) {
-        QVariant val = m_windowAgent->windowAttribute(QStringLiteral("no-system-buttons"));
-        return val.isValid() ? !val.toBool() : true;
-    }
-    return true;
-}
-
 void NFramelessHelper::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback)
 {
     if (m_windowAgent) {
         m_windowAgent->setSystemButtonAreaCallback(callback);
+    }
+}
+
+void NFramelessHelper::setNativeSystemButtonsVisible(bool visible)
+{
+    if (!m_windowAgent)
+        return;
+
+    if (!visible) {
+        setWindowAttribute(QStringLiteral("no-system-buttons"), true);
+        setSystemButtonAreaCallback([](const QSize& size) {
+            constexpr int width = -75;
+            return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+        });
+    } else {
+        setWindowAttribute(QStringLiteral("no-system-buttons"), false);
+        m_windowAgent->setSystemButtonAreaCallback(nullptr);
     }
 }
 #endif

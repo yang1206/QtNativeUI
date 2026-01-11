@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(QtNativeUIExamples LANGUAGES CXX)
 
 # 设置CMake变量
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 设置输出目录
@@ -13,21 +13,42 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-# 收集所有源文件
-file(GLOB_RECURSE EXAMPLE_SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/components/*.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/components/*.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/widgets/*.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/widgets/*.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+
+set(EXAMPLE_COMPONENTS_SOURCES
+    components/button.cpp
+    components/button.h
+    components/colors.cpp
+    components/colors.h
+    components/controls.cpp
+    components/controls.h
+    components/dialogs.cpp
+    components/dialogs.h
+    components/icon.cpp
+    components/icon.h
+    components/menu.cpp
+    components/menu.h
+    components/navigation.cpp
+    components/navigation.h
+    components/view.cpp
+    components/view.h
 )
 
-# 单独添加主要文件
-list(APPEND EXAMPLE_SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/mainwindow.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/mainwindow.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
+set(EXAMPLE_WIDGETS_SOURCES
+    widgets/ExampleSection.cpp
+    widgets/ExampleSection.h
+)
+
+set(EXAMPLE_MAIN_SOURCES
+    mainwindow.h
+    mainwindow.cpp
+    main.cpp
+)
+
+# 合并所有源文件
+set(EXAMPLE_SOURCES
+    ${EXAMPLE_COMPONENTS_SOURCES}
+    ${EXAMPLE_WIDGETS_SOURCES}
+    ${EXAMPLE_MAIN_SOURCES}
 )
 
 # 创建可执行文件

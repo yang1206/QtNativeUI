@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     window.resize(800, 600);
     
     // 设置现代窗口背景效果
-    window.setBackdropType(NMainWindow::Mica);
+    window.setWindowEffect(NMainWindow::Mica);
 
     NPushButton *btn = new NPushButton("Hello Fluent Design");
     btn->setToolTip("这是一个现代风格按钮");

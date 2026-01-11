@@ -6,8 +6,10 @@
 #include <QResizeEvent>
 #include <QScreen>
 #include <QStyle>
+
 #include "QtNativeUI/NOverlay.h"
 #include "QtNativeUI/NTheme.h"
+#include "nframelesshelper_p.h"
 
 Q_PROPERTY_CREATE_Q_CPP(NContentDialog, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NContentDialog, QString, Title)
@@ -30,8 +32,7 @@ NContentDialog::NContentDialog(QWidget* parent) : QDialog(parent), d_ptr(new NCo
     d->initialize();
 }
 
-NContentDialog::~NContentDialog() {
-}
+NContentDialog::~NContentDialog() {}
 
 void NContentDialog::setContentWidget(QWidget* widget) {
     Q_D(NContentDialog);
@@ -70,6 +71,10 @@ NContentDialog::DialogResult NContentDialog::result() const {
 
 void NContentDialog::showEvent(QShowEvent* event) {
     Q_D(NContentDialog);
+
+#ifdef Q_OS_MAC
+    d->_frameless->setNativeSystemButtonsVisible(false);
+#endif
 
     QWidget* activeWindow = QApplication::activeWindow();
     if (d->_overlay && activeWindow) {

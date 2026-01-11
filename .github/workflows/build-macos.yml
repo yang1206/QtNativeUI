@@ -1,0 +1,52 @@
+name: Build macOS
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.8.0'
+          host: mac
+          target: desktop
+          modules: 'qtbase qttools'
+          cache: true
+
+      - name: Install CMake and Ninja
+        uses: cmake-actions/setup-cmake@v3
+        with:
+          cmake-version: '3.28'
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Configure
+        run: cmake --preset macos
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Run tests
+        run: ctest --build-config Release --output-on-failure
+        working-directory: build
+        continue-on-error: true
+
+      - name: Upload artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: QtNativeUI-macos
+          path: build/Release/
+          retention-days: 30

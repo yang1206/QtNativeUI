@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     window.resize(800, 600);
     
     // 设置窗口背景效果 (Windows 11 Mica 效果)
-    window.setBackdropType(NMainWindow::Mica);
+    window.setWindowEffect(NMainWindow::Mica);
 
     // 创建一个 Fluent 风格的按钮
     NPushButton *button = new NPushButton("Hello, Fluent Design!");
@@ -123,16 +123,16 @@ QtNativeUI 支持多种现代窗口背景效果，不同平台支持程度不同
 NMainWindow window;
 
 // Mica 效果 (Windows 11+)
-window.setBackdropType(NMainWindow::Mica);
+window.setWindowEffect(NMainWindow::Mica);
 
 // Acrylic 效果 (Windows 10/11)
-window.setBackdropType(NMainWindow::Acrylic);
+window.setWindowEffect(NMainWindow::Acrylic);
 
 // 传统模糊效果 (Windows Vista+)
-window.setBackdropType(NMainWindow::Blur);
+window.setWindowEffect(NMainWindow::Blur);
 
 // 无效果
-window.setBackdropType(NMainWindow::None);
+window.setWindowEffect(NMainWindow::None);
 ```
 
 ### macOS 平台
@@ -141,7 +141,7 @@ window.setBackdropType(NMainWindow::None);
 NMainWindow window;
 
 // 模糊效果 (自动适配亮色/暗色主题)
-window.setBackdropType(NMainWindow::Blur);
+window.setWindowEffect(NMainWindow::Blur);
 
 // 其他效果会自动回退到 Blur 或 None
 ```
@@ -152,7 +152,7 @@ window.setBackdropType(NMainWindow::Blur);
 NMainWindow window;
 
 // Linux 平台所有效果都会回退到 None
-window.setBackdropType(NMainWindow::None);
+window.setWindowEffect(NMainWindow::None);
 ```
 
 ## 主题系统

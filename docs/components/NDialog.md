@@ -15,7 +15,7 @@ dialog->setWindowTitle("设置");
 dialog->resize(400, 300);
 
 // 设置背景效果
-dialog->setBackdropType(NDialog::Mica);
+dialog->setWindowEffect(NDialog::Mica);
 
 // 设置内容
 QWidget* content = new QWidget(dialog);
@@ -40,19 +40,19 @@ NDialog 支持与 NMainWindow 相同的背景效果：
 NDialog* dialog = new NDialog(this);
 
 // 无效果（纯色背景）
-dialog->setBackdropType(NDialog::None);
+dialog->setWindowEffect(NDialog::None);
 
 // 模糊效果
-dialog->setBackdropType(NDialog::Blur);
+dialog->setWindowEffect(NDialog::Blur);
 
 // Acrylic 效果 (Windows 10/11)
-dialog->setBackdropType(NDialog::Acrylic);
+dialog->setWindowEffect(NDialog::Acrylic);
 
 // Mica 效果 (Windows 11)
-dialog->setBackdropType(NDialog::Mica);
+dialog->setWindowEffect(NDialog::Mica);
 
 // MicaAlt 效果 (Windows 11)
-dialog->setBackdropType(NDialog::MicaAlt);
+dialog->setWindowEffect(NDialog::MicaAlt);
 ```
 
 ## 标题栏
@@ -76,7 +76,7 @@ NWindowBar* bar = dialog->windowBar();
 
 ```cpp
 NDialog* dialog = new NDialog(this);
-dialog->setBackdropType(NDialog::Mica);
+dialog->setWindowEffect(NDialog::Mica);
 dialog->resize(450, 350);
 
 // 创建自定义标题栏
@@ -112,7 +112,7 @@ dialog->setHitTestVisible(closeBtn, true);
 
 ```cpp
 NDialog* dialog = new NDialog(this);
-dialog->setBackdropType(NDialog::Mica);
+dialog->setWindowEffect(NDialog::Mica);
 dialog->resize(400, 300);
 
 // 隐藏默认标题栏
@@ -148,7 +148,7 @@ dialog->exec();
 
 ```cpp
 NDialog* dialog = new NDialog(this);
-dialog->setBackdropType(NDialog::Mica);
+dialog->setWindowEffect(NDialog::Mica);
 dialog->resize(400, 300);
 
 // 创建内容控件
@@ -205,7 +205,7 @@ void showSettingsDialog(QWidget* parent)
 {
     NDialog* dialog = new NDialog(parent);
     dialog->setWindowTitle("设置");
-    dialog->setBackdropType(NDialog::Mica);
+    dialog->setWindowEffect(NDialog::Mica);
     dialog->resize(450, 350);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -258,8 +258,8 @@ void showSettingsDialog(QWidget* parent)
 
 | 方法 | 说明 | 返回值 |
 |------|------|--------|
-| `setBackdropType(BackdropType type)` | 设置窗口背景效果 | void |
-| `backdropType() const` | 获取当前背景效果类型 | BackdropType |
+| `setWindowEffect(WindowEffectType type)` | 设置窗口背景效果 | void |
+| `windowEffect() const` | 获取当前背景效果类型 | WindowEffectType |
 
 ### 标题栏
 
@@ -296,10 +296,57 @@ void showSettingsDialog(QWidget* parent)
 
 ### macOS 特定方法
 
+#### 隐藏原生系统按钮（红绿灯）
+
+在 macOS 上使用自定义标题栏或隐藏默认标题栏时，原生的红绿灯按钮默认仍然可见。可以使用以下方法隐藏：
+
+```cpp
+#ifdef Q_OS_MAC
+class MyDialog : public NDialog {
+public:
+    MyDialog(QWidget* parent = nullptr) : NDialog(parent) {}
+
+protected:
+    void showEvent(QShowEvent* event) override {
+        NDialog::showEvent(event);
+        // 隐藏 macOS 红绿灯按钮
+        setNativeSystemButtonsVisible(false);
+    }
+};
+
+MyDialog* dialog = new MyDialog(this);
+dialog->setTitleBar(customTitleBar);  // 或 setWindowBarVisible(false)
+dialog->exec();
+#endif
+```
+
+#### 自定义系统按钮位置
+
+```cpp
+#ifdef Q_OS_MAC
+NDialog* dialog = new NDialog(this);
+
+// 完全隐藏红绿灯（推荐方式）
+dialog->setNativeSystemButtonsVisible(false);
+
+// 或者使用回调自定义位置
+dialog->setSystemButtonAreaCallback([](const QSize& size) {
+    constexpr int width = -75;
+    return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+});
+
+dialog->exec();
+#endif
+```
+
+**重要提示：**
+- 必须在窗口显示后调用，推荐在 `showEvent()` 中调用
+- 当使用 `setTitleBar()` 或 `setWindowBarVisible(false)` 时建议隐藏红绿灯
+- 对于简单隐藏需求，推荐使用 `setNativeSystemButtonsVisible(false)`
+
 | 方法 | 说明 | 返回值 |
 |------|------|--------|
 | `setNativeSystemButtonsVisible(bool visible)` | 设置原生系统按钮可见性 | void |
-| `nativeSystemButtonsVisible() const` | 获取原生系统按钮可见性 | bool |
 | `setSystemButtonAreaCallback(...)` | 设置系统按钮区域回调 | void |
 
 ### 高级功能
@@ -312,11 +359,11 @@ void showSettingsDialog(QWidget* parent)
 
 | 信号 | 说明 | 参数 |
 |------|------|------|
-| `backdropTypeChanged(BackdropType type)` | 背景效果类型已更改 | 新的效果类型 |
+| `windowEffectChanged(WindowEffectType type)` | 背景效果类型已更改 | 新的效果类型 |
 
 ### 枚举类型
 
-#### BackdropType
+#### WindowEffectType
 
 | 值 | 说明 | 平台支持 |
 |----|------|----------|

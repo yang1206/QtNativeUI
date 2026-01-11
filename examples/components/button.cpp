@@ -304,14 +304,14 @@ QWidget* ButtonExample::createRadioButtons() {
         this,
         [this](int id) {
             if (m_mainWindow) {
-                m_mainWindow->setBackdropType(static_cast<NMainWindow::BackdropType>(id));
+                m_mainWindow->setWindowEffect(static_cast<NMainWindow::WindowEffectType>(id));
             }
         },
         Qt::QueuedConnection);
 
     // 根据当前窗口效果设置选中状态
     if (m_mainWindow) {
-        int              currentEffect = m_mainWindow->backdropType();
+        int              currentEffect = m_mainWindow->windowEffect();
         QAbstractButton* button        = effectGroup->button(currentEffect);
         if (button) {
             button->setChecked(true);

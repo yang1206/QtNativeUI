@@ -24,7 +24,7 @@ NDialog::~NDialog() { delete d_ptr; }
 void NDialog::paintEvent(QPaintEvent* event) {
     Q_D(NDialog);
 
-    if (d->frameless->backdropType() == NFramelessHelper::None) {
+    if (d->frameless->windowEffect() == NFramelessHelper::None) {
         QPainter painter(this);
         painter.fillRect(event->rect(), d->frameless->backgroundColor());
     }
@@ -32,17 +32,17 @@ void NDialog::paintEvent(QPaintEvent* event) {
     QDialog::paintEvent(event);
 }
 
-void NDialog::setBackdropType(BackdropType type) {
+void NDialog::setWindowEffect(WindowEffectType type) {
     Q_D(NDialog);
-    d->frameless->setBackdropType(static_cast<NFramelessHelper::BackdropType>(type));
-    if (d->frameless->backdropType() == static_cast<NFramelessHelper::BackdropType>(type)) {
-        emit backdropTypeChanged(type);
+    d->frameless->setWindowEffect(static_cast<NFramelessHelper::WindowEffectType>(type));
+    if (d->frameless->windowEffect() == static_cast<NFramelessHelper::WindowEffectType>(type)) {
+        emit windowEffectChanged(type);
     }
 }
 
-NDialog::BackdropType NDialog::backdropType() const {
+NDialog::WindowEffectType NDialog::windowEffect() const {
     Q_D(const NDialog);
-    return static_cast<BackdropType>(d->frameless->backdropType());
+    return static_cast<WindowEffectType>(d->frameless->windowEffect());
 }
 
 int NDialog::borderThickness() const {
@@ -56,19 +56,14 @@ int NDialog::titleBarHeight() const {
 }
 
 #ifdef Q_OS_MAC
-void NDialog::setNativeSystemButtonsVisible(bool visible) {
-    Q_D(NDialog);
-    d->frameless->setNativeSystemButtonsVisible(visible);
-}
-
-bool NDialog::nativeSystemButtonsVisible() const {
-    Q_D(const NDialog);
-    return d->frameless->nativeSystemButtonsVisible();
-}
-
 void NDialog::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback) {
     Q_D(NDialog);
     d->frameless->setSystemButtonAreaCallback(callback);
+}
+
+void NDialog::setNativeSystemButtonsVisible(bool visible) {
+    Q_D(NDialog);
+    d->frameless->setNativeSystemButtonsVisible(visible);
 }
 #endif
 

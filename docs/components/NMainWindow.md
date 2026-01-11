@@ -32,10 +32,10 @@ NMainWindow* mainWindow = new NMainWindow();
 mainWindow->setWindowTitle("Mica 效果");
 
 // 应用 Mica 背景效果
-mainWindow->setBackdropType(NMainWindow::Mica);
+mainWindow->setWindowEffect(NMainWindow::Mica);
 
 // 检查当前效果
-if (mainWindow->backdropType() == NMainWindow::Mica) {
+if (mainWindow->windowEffect() == NMainWindow::Mica) {
     qDebug() << "Mica 效果已应用";
 }
 
@@ -49,7 +49,7 @@ NMainWindow* mainWindow = new NMainWindow();
 mainWindow->setWindowTitle("Acrylic 效果");
 
 // 应用 Acrylic 背景效果
-mainWindow->setBackdropType(NMainWindow::Acrylic);
+mainWindow->setWindowEffect(NMainWindow::Acrylic);
 
 mainWindow->show();
 ```
@@ -61,7 +61,7 @@ NMainWindow* mainWindow = new NMainWindow();
 mainWindow->setWindowTitle("模糊效果");
 
 // 应用模糊效果 (macOS 原生支持，Windows 使用 DWM 模糊)
-mainWindow->setBackdropType(NMainWindow::Blur);
+mainWindow->setWindowEffect(NMainWindow::Blur);
 
 mainWindow->show();
 ```
@@ -178,7 +178,7 @@ mainWindow->show();
 NMainWindow* mainWindow = new NMainWindow();
 
 // 监听背景效果变化
-connect(mainWindow, &NMainWindow::backdropTypeChanged, [](NMainWindow::BackdropType type) {
+connect(mainWindow, &NMainWindow::windowEffectChanged, [](NMainWindow::WindowEffectType type) {
     switch (type) {
         case NMainWindow::None:
             qDebug() << "背景效果：无";
@@ -223,22 +223,57 @@ mainWindow->show();
 
 ### macOS 特定功能
 
+#### 隐藏原生系统按钮（红绿灯）
+
+在 macOS 上，当使用自定义标题栏时，原生的红绿灯按钮默认仍然可见。QtNativeUI 提供了简单的 API 来隐藏这些按钮：
+
+```cpp
+#ifdef Q_OS_MAC
+class MyMainWindow : public NMainWindow {
+public:
+    MyMainWindow(QWidget* parent = nullptr) : NMainWindow(parent) {}
+
+protected:
+    void showEvent(QShowEvent* event) override {
+        NMainWindow::showEvent(event);
+        // 隐藏 macOS 红绿灯按钮
+        setNativeSystemButtonsVisible(false);
+    }
+};
+
+MyMainWindow* mainWindow = new MyMainWindow();
+mainWindow->show();
+#endif
+```
+
+#### 自定义系统按钮位置
+
+如果需要更精细的控制，可以使用回调函数自定义红绿灯按钮的位置：
+
 ```cpp
 #ifdef Q_OS_MAC
 NMainWindow* mainWindow = new NMainWindow();
 
-// 隐藏原生系统按钮 (交通灯按钮)
-mainWindow->setNativeSystemButtonsVisible(false);
-
-// 自定义系统按钮位置 (移动到右侧)
+// 将红绿灯移动到窗口右侧
 mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
     constexpr int width = 75;
     return QRect(QPoint(size.width() - width, 0), QSize(width, 32));
 });
 
+// 完全隐藏红绿灯（移到屏幕外）
+mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
+    constexpr int width = -75;
+    return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+});
+
 mainWindow->show();
 #endif
 ```
+
+**重要提示：**
+- `setNativeSystemButtonsVisible()` 和 `setSystemButtonAreaCallback()` 必须在窗口显示后调用
+- 推荐在 `showEvent()` 中调用，或者在 `show()` 之后立即调用
+- 对于简单的隐藏需求，推荐使用 `setNativeSystemButtonsVisible(false)`
 
 ### 获取系统信息
 
@@ -274,7 +309,7 @@ int main(int argc, char *argv[])
     mainWindow->resize(1000, 700);
 
     // 应用现代背景效果
-    mainWindow->setBackdropType(NMainWindow::Mica);
+    mainWindow->setWindowEffect(NMainWindow::Mica);
 
     // 创建菜单栏
     QMenuBar* menuBar = new QMenuBar();
@@ -338,8 +373,8 @@ int main(int argc, char *argv[])
 
 | 方法 | 说明 | 返回值 |
 |------|------|--------|
-| `setBackdropType(BackdropType type)` | 设置窗口背景效果 | void |
-| `backdropType() const` | 获取当前背景效果类型 | BackdropType |
+| `setWindowEffect(WindowEffectType type)` | 设置窗口背景效果 | void |
+| `windowEffect() const` | 获取当前背景效果类型 | WindowEffectType |
 
 ### 标题栏
 
@@ -392,7 +427,7 @@ int main(int argc, char *argv[])
 
 | 信号 | 说明 | 参数 |
 |------|------|------|
-| `backdropTypeChanged(BackdropType type)` | 背景效果类型已更改 | 新的效果类型 |
+| `windowEffectChanged(WindowEffectType type)` | 背景效果类型已更改 | 新的效果类型 |
 | `themeToggled(bool isDark)` | 主题已切换 | 是否为暗色主题 |
 | `pinButtonToggled(bool pinned)` | 置顶状态已切换 | 是否已置顶 |
 | `maximizeButtonToggled(bool maximized)` | 最大化状态已切换 | 是否已最大化 |
@@ -400,7 +435,7 @@ int main(int argc, char *argv[])
 
 ### 枚举类型
 
-#### BackdropType
+#### WindowEffectType
 
 | 值 | 说明 | 平台支持 |
 |----|------|----------|

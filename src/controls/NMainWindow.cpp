@@ -23,7 +23,7 @@ NMainWindow::~NMainWindow() { delete d_ptr; }
 void NMainWindow::paintEvent(QPaintEvent* event) {
     Q_D(NMainWindow);
 
-    if (d->frameless->backdropType() == NFramelessHelper::None) {
+    if (d->frameless->windowEffect() == NFramelessHelper::None) {
         QPainter painter(this);
         painter.fillRect(event->rect(), d->frameless->backgroundColor());
     }
@@ -84,17 +84,17 @@ void NMainWindow::connectWindowBarSignals() {
     });
 }
 
-void NMainWindow::setBackdropType(BackdropType type) {
+void NMainWindow::setWindowEffect(WindowEffectType type) {
     Q_D(NMainWindow);
-    d->frameless->setBackdropType(static_cast<NFramelessHelper::BackdropType>(type));
-    if (d->frameless->backdropType() == static_cast<NFramelessHelper::BackdropType>(type)) {
-        emit backdropTypeChanged(type);
+    d->frameless->setWindowEffect(static_cast<NFramelessHelper::WindowEffectType>(type));
+    if (d->frameless->windowEffect() == static_cast<NFramelessHelper::WindowEffectType>(type)) {
+        emit windowEffectChanged(type);
     }
 }
 
-NMainWindow::BackdropType NMainWindow::backdropType() const {
+NMainWindow::WindowEffectType NMainWindow::windowEffect() const {
     Q_D(const NMainWindow);
-    return static_cast<BackdropType>(d->frameless->backdropType());
+    return static_cast<WindowEffectType>(d->frameless->windowEffect());
 }
 
 int NMainWindow::borderThickness() const {
@@ -108,19 +108,14 @@ int NMainWindow::titleBarHeight() const {
 }
 
 #ifdef Q_OS_MAC
-void NMainWindow::setNativeSystemButtonsVisible(bool visible) {
-    Q_D(NMainWindow);
-    d->frameless->setNativeSystemButtonsVisible(visible);
-}
-
-bool NMainWindow::nativeSystemButtonsVisible() const {
-    Q_D(const NMainWindow);
-    return d->frameless->nativeSystemButtonsVisible();
-}
-
 void NMainWindow::setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback) {
     Q_D(NMainWindow);
     d->frameless->setSystemButtonAreaCallback(callback);
+}
+
+void NMainWindow::setNativeSystemButtonsVisible(bool visible) {
+    Q_D(NMainWindow);
+    d->frameless->setNativeSystemButtonsVisible(visible);
 }
 #endif
 

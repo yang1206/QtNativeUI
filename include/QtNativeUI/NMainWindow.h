@@ -18,7 +18,7 @@ class NMainWindowPrivate;
 
 class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
     Q_OBJECT
-    Q_PROPERTY(BackdropType backdropType READ backdropType WRITE setBackdropType NOTIFY backdropTypeChanged)
+    Q_PROPERTY(WindowEffectType windowEffect READ windowEffect WRITE setWindowEffect NOTIFY windowEffectChanged)
 
   public:
     /**
@@ -28,14 +28,14 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * These effects are implemented through the QWindowKit library, which calls 
      * native window APIs on each platform.
      */
-    enum BackdropType { 
+    enum WindowEffectType { 
         None = 0,    ///< No effect, uses standard window background
         Blur,        ///< Blur effect
         Acrylic,     ///< Acrylic material effect
         Mica,        ///< Mica material effect
         MicaAlt      ///< Mica alternative material effect
     };
-    Q_ENUM(BackdropType)
+    Q_ENUM(WindowEffectType)
 
     /**
      * @brief System button type enumeration
@@ -81,16 +81,16 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * @param type The backdrop effect type to set
      * @note After setting effects, the window background becomes transparent to allow effects to show through. 
      *       If the platform doesn't support the specified effect, it will automatically fall back to a supported type
-     * @see backdropType(), BackdropType
+     * @see windowEffect(), WindowEffectType
      */
-    void setBackdropType(BackdropType type);
+    void setWindowEffect(WindowEffectType type);
 
     /**
-     * @brief Get current window backdrop effect type
-     * @return Currently set backdrop effect type
-     * @see setBackdropType()
+     * @brief Get current window effect type
+     * @return Currently set window effect type
+     * @see setWindowEffect()
      */
-    BackdropType backdropType() const;
+    WindowEffectType windowEffect() const;
 
     /**
      * @brief Get window border thickness
@@ -116,37 +116,22 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
 
 #ifdef Q_OS_MAC
     /**
-     * @brief Set macOS native system buttons visibility
-     * 
-     * Controls the visibility of macOS native system buttons (traffic light buttons) 
-     * in the top-left corner of the window. These buttons are provided by the macOS 
-     * system and their position and style follow macOS design guidelines.
-     * 
-     * When native buttons are hidden, custom title bar buttons are typically used 
-     * to provide window operation functionality.
-     * 
-     * @param visible true to show native buttons, false to hide native buttons
-     * @note Only effective on macOS platform, this method doesn't exist on other platforms
-     * @see nativeSystemButtonsVisible()
-     */
-    void setNativeSystemButtonsVisible(bool visible);
-
-    /**
-     * @brief Get macOS native system buttons visibility
-     * @return true if native buttons are visible, false if hidden
-     * @note Only effective on macOS platform
-     * @see setNativeSystemButtonsVisible()
-     */
-    bool nativeSystemButtonsVisible() const;
-
-    /**
      * @brief Set macOS system button area callback
      * 
      * Sets a callback function to customize the position of macOS native system buttons
      * (traffic light buttons). The callback receives the window size and should return
      * the rectangle area where system buttons should be placed.
      * 
-     * Example - move buttons to right side:
+     * To hide the traffic light buttons, move them off-screen:
+     * @code
+     * // In showEvent or after window is shown
+     * mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
+     *     constexpr int width = -75;
+     *     return QRect(QPoint(size.width() - width, 0), QSize(width, size.height()));
+     * });
+     * @endcode
+     * 
+     * To move buttons to right side:
      * @code
      * mainWindow->setSystemButtonAreaCallback([](const QSize& size) {
      *     constexpr int width = 75;
@@ -155,9 +140,22 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * @endcode
      * 
      * @param callback Function that returns system button area, pass nullptr to reset to default (top-left)
-     * @note Only effective on macOS platform
+     * @note Must be called after the window is shown for the callback to work properly
      */
     void setSystemButtonAreaCallback(const std::function<QRect(const QSize&)>& callback);
+
+    /**
+     * @brief Set native system buttons visibility (macOS only)
+     * 
+     * Controls the visibility of macOS traffic light buttons. When set to false,
+     * this method calls both setWindowAttribute("no-system-buttons", true) and
+     * setSystemButtonAreaCallback to move buttons off-screen.
+     * 
+     * @param visible Whether system buttons should be visible
+     * @note This method only works on macOS and must be called after the window is shown
+     * @note For custom positioning, use setSystemButtonAreaCallback() directly
+     */
+    void setNativeSystemButtonsVisible(bool visible);
 #endif
 
     /**
@@ -209,7 +207,9 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * 
      * @param bar New title bar component, if nullptr the current title bar is removed
      * @note The old title bar component will be automatically deleted
-     * @see windowBar()
+     * @note On macOS, native system buttons (traffic lights) remain visible by default.
+     *       To hide them, call setNativeSystemButtonsVisible(false) in showEvent.
+     * @see windowBar(), setNativeSystemButtonsVisible()
      */
     void setWindowBar(NWindowBar* bar);
 
@@ -320,11 +320,11 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
 
   Q_SIGNALS:
     /**
-     * @brief Window backdrop effect type changed signal
-     * @param type New backdrop effect type
-     * @see setBackdropType()
+     * @brief Window effect type changed signal
+     * @param type New window effect type
+     * @see setWindowEffect()
      */
-    void backdropTypeChanged(BackdropType type);
+    void windowEffectChanged(WindowEffectType type);
 
     /**
      * @brief Theme toggle signal

@@ -833,7 +833,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(noneButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("无效果对话框");
-        dialog->setBackdropType(NDialog::None);
+        dialog->setWindowEffect(NDialog::None);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -857,7 +857,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(blurButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("Blur 效果对话框");
-        dialog->setBackdropType(NDialog::Blur);
+        dialog->setWindowEffect(NDialog::Blur);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -881,7 +881,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(acrylicButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("Acrylic 效果对话框");
-        dialog->setBackdropType(NDialog::Acrylic);
+        dialog->setWindowEffect(NDialog::Acrylic);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -905,7 +905,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(micaButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("Mica 效果对话框");
-        dialog->setBackdropType(NDialog::Mica);
+        dialog->setWindowEffect(NDialog::Mica);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -929,7 +929,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(micaAltButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("MicaAlt 效果对话框");
-        dialog->setBackdropType(NDialog::MicaAlt);
+        dialog->setWindowEffect(NDialog::MicaAlt);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -958,8 +958,20 @@ QWidget* DialogsExample::createNDialogs() {
     QHBoxLayout* customLayout = new QHBoxLayout();
     NPushButton* customTitleBarButton = new NPushButton("显示带自定义标题栏的对话框", container);
     connect(customTitleBarButton, &NPushButton::clicked, [this]() {
-        NDialog* dialog = new NDialog(this);
-        dialog->setBackdropType(NDialog::Mica);
+        class CustomTitleBarDialog : public NDialog {
+        public:
+            CustomTitleBarDialog(QWidget* parent) : NDialog(parent) {}
+        protected:
+            void showEvent(QShowEvent* event) override {
+                NDialog::showEvent(event);
+#ifdef Q_OS_MAC
+                setNativeSystemButtonsVisible(false);
+#endif
+            }
+        };
+
+        CustomTitleBarDialog* dialog = new CustomTitleBarDialog(this);
+        dialog->setWindowEffect(NDialog::Mica);
         dialog->resize(450, 350);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -974,7 +986,7 @@ QWidget* DialogsExample::createNDialogs() {
 
         NPushButton* closeBtn = new NPushButton("×", titleBar);
         closeBtn->setFixedSize(30, 30);
-        connect(closeBtn, &NPushButton::clicked, dialog, &QDialog::reject);
+        connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::reject);
 
         titleBarLayout->addWidget(titleLabel);
         titleBarLayout->addStretch();
@@ -988,7 +1000,7 @@ QWidget* DialogsExample::createNDialogs() {
         QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
         contentLayout->setContentsMargins(20, 10, 20, 20);
 
-        QLabel* contentLabel = new QLabel("这个对话框使用了自定义标题栏，\n标题栏区域可以拖动窗口，\n关闭按钮可以正常点击。", contentWidget);
+        QLabel* contentLabel = new QLabel("这个对话框使用了自定义标题栏，\n标题栏区域可以拖动窗口，\n关闭按钮可以正常点击。\n\n在macOS上，原生红绿灯已被隐藏。", contentWidget);
         contentLabel->setWordWrap(true);
 
         NPushButton* okBtn = new NPushButton("确定", contentWidget);
@@ -1013,8 +1025,20 @@ QWidget* DialogsExample::createNDialogs() {
     QHBoxLayout* noTitleBarLayout = new QHBoxLayout();
     NPushButton* noTitleBarButton = new NPushButton("显示无标题栏对话框", container);
     connect(noTitleBarButton, &NPushButton::clicked, [this]() {
-        NDialog* dialog = new NDialog(this);
-        dialog->setBackdropType(NDialog::Mica);
+        class NoTitleBarDialog : public NDialog {
+        public:
+            NoTitleBarDialog(QWidget* parent) : NDialog(parent) {}
+        protected:
+            void showEvent(QShowEvent* event) override {
+                NDialog::showEvent(event);
+#ifdef Q_OS_MAC
+                setNativeSystemButtonsVisible(false);
+#endif
+            }
+        };
+
+        NoTitleBarDialog* dialog = new NoTitleBarDialog(this);
+        dialog->setWindowEffect(NDialog::Mica);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -1024,7 +1048,7 @@ QWidget* DialogsExample::createNDialogs() {
         QVBoxLayout* contentLayout = new QVBoxLayout(contentWidget);
         contentLayout->setContentsMargins(20, 20, 20, 20);
 
-        QLabel* contentLabel = new QLabel("这是一个没有标题栏的对话框，\n适用于需要完全自定义布局的场景。\n\n可以通过 setWindowBarVisible(false) 隐藏默认标题栏。", contentWidget);
+        QLabel* contentLabel = new QLabel("这是一个没有标题栏的对话框，\n适用于需要完全自定义布局的场景。\n\n可以通过 setWindowBarVisible(false) 隐藏默认标题栏。\n\n在macOS上，原生红绿灯已被隐藏。", contentWidget);
         contentLabel->setWordWrap(true);
 
         QHBoxLayout* btnLayout = new QHBoxLayout();
