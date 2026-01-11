@@ -9,14 +9,20 @@
 </p>
 
 <p align="center">
-  <!-- <a href="https://github.com/yang1206/QtNativeUI/actions/workflows/windows.yml">
-    <img src="https://github.com/yang1206/QtNativeUI/actions/workflows/windows.yml/badge.svg" alt="Build Status" />
-  </a> -->
+  <a href="https://github.com/yang1206/QtNativeUI/actions/workflows/build-windows.yml">
+    <img src="https://github.com/yang1206/QtNativeUI/actions/workflows/build-windows.yml/badge.svg" alt="Windows Build" />
+  </a>
+  <a href="https://github.com/yang1206/QtNativeUI/actions/workflows/build-macos.yml">
+    <img src="https://github.com/yang1206/QtNativeUI/actions/workflows/build-macos.yml/badge.svg" alt="macOS Build" />
+  </a>
+  <a href="https://github.com/yang1206/QtNativeUI/actions/workflows/build-linux.yml">
+    <img src="https://github.com/yang1206/QtNativeUI/actions/workflows/build-linux.yml/badge.svg" alt="Linux Build" />
+  </a>
   <a href="https://github.com/yang1206/QtNativeUI/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/yang1206/QtNativeUI" alt="License" />
   </a>
   <a href="https://qt.io">
-    <img src="https://img.shields.io/badge/Qt-6.6%2B-41CD52?logo=qt" alt="Qt Version" />
+    <img src="https://img.shields.io/badge/Qt-6.8%2B-41CD52?logo=qt" alt="Qt Version" />
   </a>
   <a href="#">
     <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-0078D7" alt="Platform" />
@@ -48,7 +54,7 @@
 
 ### 前置要求
 
--   Qt 6.6 或更高版本 (推荐 Qt 6.8+)
+-   Qt 6.8 或更高版本 (推荐 Qt 6.8+)
 -   C++17 编译器
 -   CMake 3.20+ (支持 FetchContent 子模块功能)
 -   Git (用于拉取子模块依赖)
