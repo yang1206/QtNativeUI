@@ -833,7 +833,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(noneButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("无效果对话框");
-        dialog->setBackdropType(NDialog::None);
+        dialog->setWindowEffect(NDialog::None);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -857,7 +857,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(blurButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("Blur 效果对话框");
-        dialog->setBackdropType(NDialog::Blur);
+        dialog->setWindowEffect(NDialog::Blur);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -881,7 +881,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(acrylicButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("Acrylic 效果对话框");
-        dialog->setBackdropType(NDialog::Acrylic);
+        dialog->setWindowEffect(NDialog::Acrylic);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -905,7 +905,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(micaButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("Mica 效果对话框");
-        dialog->setBackdropType(NDialog::Mica);
+        dialog->setWindowEffect(NDialog::Mica);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -929,7 +929,7 @@ QWidget* DialogsExample::createNDialogs() {
     connect(micaAltButton, &NPushButton::clicked, [this]() {
         NDialog* dialog = new NDialog(this);
         dialog->setWindowTitle("MicaAlt 效果对话框");
-        dialog->setBackdropType(NDialog::MicaAlt);
+        dialog->setWindowEffect(NDialog::MicaAlt);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -971,7 +971,7 @@ QWidget* DialogsExample::createNDialogs() {
         };
 
         CustomTitleBarDialog* dialog = new CustomTitleBarDialog(this);
-        dialog->setBackdropType(NDialog::Mica);
+        dialog->setWindowEffect(NDialog::Mica);
         dialog->resize(450, 350);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -1038,7 +1038,7 @@ QWidget* DialogsExample::createNDialogs() {
         };
 
         NoTitleBarDialog* dialog = new NoTitleBarDialog(this);
-        dialog->setBackdropType(NDialog::Mica);
+        dialog->setWindowEffect(NDialog::Mica);
         dialog->resize(400, 300);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 

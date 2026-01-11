@@ -24,7 +24,7 @@ class NFramelessHelper : public QObject {
     Q_OBJECT
 
   public:
-    enum BackdropType { None = 0, Blur, Acrylic, Mica, MicaAlt };
+    enum WindowEffectType { None = 0, Blur, Acrylic, Mica, MicaAlt };
 
     enum SystemButtonType { WindowIcon, Minimize, Maximize, Close };
 
@@ -33,8 +33,8 @@ class NFramelessHelper : public QObject {
 
     void setup();
 
-    void         setBackdropType(BackdropType type);
-    BackdropType backdropType() const;
+    void         setWindowEffect(WindowEffectType type);
+    WindowEffectType windowEffect() const;
 
     int borderThickness() const;
     int titleBarHeight() const;
@@ -80,16 +80,16 @@ class NFramelessHelper : public QObject {
     }
 
   Q_SIGNALS:
-    void backdropTypeChanged(BackdropType type);
+    void windowEffectChanged(WindowEffectType type);
 
   private:
     void setupThemeConnection();
-    void applyBackdropEffect(BackdropType type);
+    void applyBackdropEffect(WindowEffectType type);
     void updateBackgroundColor();
 
     QWidget*                m_host         = nullptr;
     QWK::WidgetWindowAgent* m_windowAgent  = nullptr;
-    BackdropType            m_backdropType = None;
+    WindowEffectType        m_windowEffect = None;
     QColor                  m_backgroundColor;
 };
 

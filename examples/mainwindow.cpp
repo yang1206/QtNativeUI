@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     setWindowIcon(style()->standardIcon(QStyle::SP_ComputerIcon));
     resize(1200, 700);
 
-    setBackdropType(MicaAlt);
+    setWindowEffect(MicaAlt);
 }
 
 void MainWindow::setupMenuBar() {
@@ -66,7 +66,7 @@ void MainWindow::setupMenuBar() {
     });
 
     viewMenu->addSeparator();
-    auto backdropMenu = viewMenu->addSubMenu("Backdrop Effect", NRegularIconType::Window16Regular);
+    auto backdropMenu = viewMenu->addSubMenu("Window Effect", NRegularIconType::Window16Regular);
     auto noneAction   = backdropMenu->addItem("None");
     auto blurAction   = backdropMenu->addItem("Blur");
 #ifdef Q_OS_WIN
@@ -75,12 +75,12 @@ void MainWindow::setupMenuBar() {
     auto micaAltAction = backdropMenu->addItem("Mica Alt");
 #endif
 
-    connect(noneAction, &QAction::triggered, [this]() { setBackdropType(None); });
-    connect(blurAction, &QAction::triggered, [this]() { setBackdropType(Blur); });
+    connect(noneAction, &QAction::triggered, [this]() { setWindowEffect(None); });
+    connect(blurAction, &QAction::triggered, [this]() { setWindowEffect(Blur); });
 #ifdef Q_OS_WIN
-    connect(acrylicAction, &QAction::triggered, [this]() { setBackdropType(Acrylic); });
-    connect(micaAction, &QAction::triggered, [this]() { setBackdropType(Mica); });
-    connect(micaAltAction, &QAction::triggered, [this]() { setBackdropType(MicaAlt); });
+    connect(acrylicAction, &QAction::triggered, [this]() { setWindowEffect(Acrylic); });
+    connect(micaAction, &QAction::triggered, [this]() { setWindowEffect(Mica); });
+    connect(micaAltAction, &QAction::triggered, [this]() { setWindowEffect(MicaAlt); });
 #endif
 
     // Window Menu

@@ -18,7 +18,7 @@ class NMainWindowPrivate;
 
 class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
     Q_OBJECT
-    Q_PROPERTY(BackdropType backdropType READ backdropType WRITE setBackdropType NOTIFY backdropTypeChanged)
+    Q_PROPERTY(WindowEffectType windowEffect READ windowEffect WRITE setWindowEffect NOTIFY windowEffectChanged)
 
   public:
     /**
@@ -28,14 +28,14 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * These effects are implemented through the QWindowKit library, which calls 
      * native window APIs on each platform.
      */
-    enum BackdropType { 
+    enum WindowEffectType { 
         None = 0,    ///< No effect, uses standard window background
         Blur,        ///< Blur effect
         Acrylic,     ///< Acrylic material effect
         Mica,        ///< Mica material effect
         MicaAlt      ///< Mica alternative material effect
     };
-    Q_ENUM(BackdropType)
+    Q_ENUM(WindowEffectType)
 
     /**
      * @brief System button type enumeration
@@ -81,16 +81,16 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * @param type The backdrop effect type to set
      * @note After setting effects, the window background becomes transparent to allow effects to show through. 
      *       If the platform doesn't support the specified effect, it will automatically fall back to a supported type
-     * @see backdropType(), BackdropType
+     * @see windowEffect(), WindowEffectType
      */
-    void setBackdropType(BackdropType type);
+    void setWindowEffect(WindowEffectType type);
 
     /**
-     * @brief Get current window backdrop effect type
-     * @return Currently set backdrop effect type
-     * @see setBackdropType()
+     * @brief Get current window effect type
+     * @return Currently set window effect type
+     * @see setWindowEffect()
      */
-    BackdropType backdropType() const;
+    WindowEffectType windowEffect() const;
 
     /**
      * @brief Get window border thickness
@@ -320,11 +320,11 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
 
   Q_SIGNALS:
     /**
-     * @brief Window backdrop effect type changed signal
-     * @param type New backdrop effect type
-     * @see setBackdropType()
+     * @brief Window effect type changed signal
+     * @param type New window effect type
+     * @see setWindowEffect()
      */
-    void backdropTypeChanged(BackdropType type);
+    void windowEffectChanged(WindowEffectType type);
 
     /**
      * @brief Theme toggle signal

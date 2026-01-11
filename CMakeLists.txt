@@ -40,14 +40,266 @@ set(QWINDOWKIT_INSTALL OFF CACHE BOOL "" FORCE)
 set(QWINDOWKIT_ENABLE_STYLE_AGENT ON CACHE BOOL "" FORCE)
 add_subdirectory(third_party/qwindowkit)
 
-# 收集源文件
-file(GLOB_RECURSE QtNativeUI_SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+
+set(QtNativeUI_CONFIG_SOURCES
+    src/config/NConfig.cpp
+    src/config/NNavigationRouter.cpp
 )
 
-file(GLOB_RECURSE QtNativeUI_HEADERS
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/QtNativeUI/*.h"
+set(QtNativeUI_CONTROLS_SOURCES
+    src/controls/NAnimation.cpp
+    src/controls/NAutoSuggestBox.cpp
+    src/controls/NCalendarDatePicker.cpp
+    src/controls/NCalendarWidget.cpp
+    src/controls/NCheckBox.cpp
+    src/controls/NComboBox.cpp
+    src/controls/NContentDialog.cpp
+    src/controls/NDialog.cpp
+    src/controls/NDoubleSpinBox.cpp
+    src/controls/NDropDownButton.cpp
+    src/controls/NFlyout.cpp
+    src/controls/NGroupBox.cpp
+    src/controls/NHyperlinkButton.cpp
+    src/controls/NIcon.cpp
+    src/controls/NInfoBar.cpp
+    src/controls/NLabel.cpp
+    src/controls/NLineEdit.cpp
+    src/controls/NListView.cpp
+    src/controls/NMainWindow.cpp
+    src/controls/NMenu.cpp
+    src/controls/NMenuBar.cpp
+    src/controls/NNavigationBar.cpp
+    src/controls/NNavigationView.cpp
+    src/controls/NOverlay.cpp
+    src/controls/NPageComponent.cpp
+    src/controls/NPivot.cpp
+    src/controls/NPlainTextEdit.cpp
+    src/controls/NProgressBar.cpp
+    src/controls/NProgressRing.cpp
+    src/controls/NPushButton.cpp
+    src/controls/NRadioButton.cpp
+    src/controls/NRangeSlider.cpp
+    src/controls/NScrollArea.cpp
+    src/controls/NScrollBar.cpp
+    src/controls/NSlider.cpp
+    src/controls/NSpinBox.cpp
+    src/controls/NStackedWidget.cpp
+    src/controls/NTabBar.cpp
+    src/controls/NTabWidget.cpp
+    src/controls/NTextEdit.cpp
+    src/controls/NToggleButton.cpp
+    src/controls/NToggleSwitch.cpp
+    src/controls/NToolButton.cpp
+    src/controls/NToolTip.cpp
+    src/controls/NTreeView.cpp
+    src/controls/NWindowBar.cpp
+    src/controls/NWindowButton.cpp
+)
+
+set(QtNativeUI_PRIVATE_SOURCES
+    src/private/nanimation_p.cpp
+    src/private/nanimation_p.h
+    src/private/nautosuggestbox_p.cpp
+    src/private/nautosuggestbox_p.h
+    src/private/nautosuggestmodel.cpp
+    src/private/nautosuggestmodel.h
+    src/private/nbaselistview.cpp
+    src/private/nbaselistview.h
+    src/private/ncalendardatepicker_p.cpp
+    src/private/ncalendardatepicker_p.h
+    src/private/ncalendardelegate.cpp
+    src/private/ncalendardelegate.h
+    src/private/ncalendarheader.cpp
+    src/private/ncalendarheader.h
+    src/private/ncalendarmodel.cpp
+    src/private/ncalendarmodel.h
+    src/private/ncalendarwidget_p.cpp
+    src/private/ncalendarwidget_p.h
+    src/private/ncheckbox_p.cpp
+    src/private/ncheckbox_p.h
+    src/private/ncombobox_p.cpp
+    src/private/ncombobox_p.h
+    src/private/ncomboboxstyle.cpp
+    src/private/ncomboboxstyle.h
+    src/private/ncontentdialog_p.cpp
+    src/private/ncontentdialog_p.h
+    src/private/ndialog_p.cpp
+    src/private/ndialog_p.h
+    src/private/ndoublespinbox_p.cpp
+    src/private/ndoublespinbox_p.h
+    src/private/ndropdownbutton_p.cpp
+    src/private/ndropdownbutton_p.h
+    src/private/neditstyle.cpp
+    src/private/neditstyle.h
+    src/private/nflyout_p.cpp
+    src/private/nflyout_p.h
+    src/private/nframelesshelper_p.cpp
+    src/private/nframelesshelper_p.h
+    src/private/ngroupbox_p.cpp
+    src/private/ngroupbox_p.h
+    src/private/nhyperlinkbutton_p.cpp
+    src/private/nhyperlinkbutton_p.h
+    src/private/ninfobar_p.cpp
+    src/private/ninfobar_p.h
+    src/private/nlabel_p.cpp
+    src/private/nlabel_p.h
+    src/private/nlineedit_p.cpp
+    src/private/nlineedit_p.h
+    src/private/nlistview_p.cpp
+    src/private/nlistview_p.h
+    src/private/nlistviewstyle_p.cpp
+    src/private/nlistviewstyle_p.h
+    src/private/nmainwindow_p.cpp
+    src/private/nmainwindow_p.h
+    src/private/nmenu_p.cpp
+    src/private/nmenu_p.h
+    src/private/nnavigationanimation_p.cpp
+    src/private/nnavigationanimation_p.h
+    src/private/nnavigationbar_p.cpp
+    src/private/nnavigationbar_p.h
+    src/private/nnavigationfooterdelegate_p.cpp
+    src/private/nnavigationfooterdelegate_p.h
+    src/private/nnavigationfootermodel_p.cpp
+    src/private/nnavigationfootermodel_p.h
+    src/private/nnavigationmanager.cpp
+    src/private/nnavigationmanager.h
+    src/private/nnavigationmodel_p.cpp
+    src/private/nnavigationmodel_p.h
+    src/private/nnavigationnode_p.cpp
+    src/private/nnavigationnode_p.h
+    src/private/nnavigationstyle_p.cpp
+    src/private/nnavigationstyle_p.h
+    src/private/nnavigationtreeview_p.cpp
+    src/private/nnavigationtreeview_p.h
+    src/private/nnavigationview_p.cpp
+    src/private/nnavigationview_p.h
+    src/private/noverlay_p.cpp
+    src/private/noverlay_p.h
+    src/private/npivot_p.cpp
+    src/private/npivot_p.h
+    src/private/nplaintextedit_p.cpp
+    src/private/nplaintextedit_p.h
+    src/private/nprogressbar_p.cpp
+    src/private/nprogressbar_p.h
+    src/private/nprogressring_p.cpp
+    src/private/nprogressring_p.h
+    src/private/npushbutton_p.cpp
+    src/private/npushbutton_p.h
+    src/private/nradiobutton_p.cpp
+    src/private/nradiobutton_p.h
+    src/private/nrangeslider_p.cpp
+    src/private/nrangeslider_p.h
+    src/private/nscrollarea_p.cpp
+    src/private/nscrollarea_p.h
+    src/private/nscrollbar_p.cpp
+    src/private/nscrollbar_p.h
+    src/private/nscrollbarstyle.cpp
+    src/private/nscrollbarstyle.h
+    src/private/nslider_p.cpp
+    src/private/nslider_p.h
+    src/private/nspinbox_p.cpp
+    src/private/nspinbox_p.h
+    src/private/nspinboxstyle.cpp
+    src/private/nspinboxstyle.h
+    src/private/ntabbar_p.cpp
+    src/private/ntabbar_p.h
+    src/private/ntabbarstyle.cpp
+    src/private/ntabbarstyle.h
+    src/private/ntabwidget_p.cpp
+    src/private/ntabwidget_p.h
+    src/private/ntextedit_p.cpp
+    src/private/ntextedit_p.h
+    src/private/ntheme_p.cpp
+    src/private/ntheme_p.h
+    src/private/ntogglebutton_p.cpp
+    src/private/ntogglebutton_p.h
+    src/private/ntoggleswitch_p.cpp
+    src/private/ntoggleswitch_p.h
+    src/private/ntoolbutton_p.cpp
+    src/private/ntoolbutton_p.h
+    src/private/ntooltip_p.cpp
+    src/private/ntooltip_p.h
+    src/private/ntranslation.cpp
+    src/private/ntranslation.h
+    src/private/ntreeview_p.cpp
+    src/private/ntreeview_p.h
+    src/private/ntreeviewstyle_p.cpp
+    src/private/ntreeviewstyle_p.h
+    src/private/nwindowbar_p.h
+    src/private/nwindowbutton_p.h
+)
+
+set(QtNativeUI_THEME_SOURCES
+    src/theme/NColor.cpp
+    src/theme/NTheme.cpp
+)
+
+# 合并所有源文件
+set(QtNativeUI_SOURCES
+    ${QtNativeUI_CONFIG_SOURCES}
+    ${QtNativeUI_CONTROLS_SOURCES}
+    ${QtNativeUI_PRIVATE_SOURCES}
+    ${QtNativeUI_THEME_SOURCES}
+)
+
+# 公共头文件
+set(QtNativeUI_HEADERS
+    include/QtNativeUI/NAnimation.h
+    include/QtNativeUI/NAutoSuggestBox.h
+    include/QtNativeUI/NCalendarDatePicker.h
+    include/QtNativeUI/NCalendarWidget.h
+    include/QtNativeUI/NCheckBox.h
+    include/QtNativeUI/NColor.h
+    include/QtNativeUI/NComboBox.h
+    include/QtNativeUI/NConfig.h
+    include/QtNativeUI/NContentDialog.h
+    include/QtNativeUI/NDialog.h
+    include/QtNativeUI/NDoubleSpinBox.h
+    include/QtNativeUI/NDropDownButton.h
+    include/QtNativeUI/NEnums.h
+    include/QtNativeUI/NFluentColors.h
+    include/QtNativeUI/NFlyout.h
+    include/QtNativeUI/NGroupBox.h
+    include/QtNativeUI/NHyperlinkButton.h
+    include/QtNativeUI/NIcon.h
+    include/QtNativeUI/NIconEnums.h
+    include/QtNativeUI/NInfoBar.h
+    include/QtNativeUI/NLabel.h
+    include/QtNativeUI/NLineEdit.h
+    include/QtNativeUI/NListView.h
+    include/QtNativeUI/NMainWindow.h
+    include/QtNativeUI/NMenu.h
+    include/QtNativeUI/NMenuBar.h
+    include/QtNativeUI/NNavigationBar.h
+    include/QtNativeUI/NNavigationRouter.h
+    include/QtNativeUI/NNavigationView.h
+    include/QtNativeUI/NOverlay.h
+    include/QtNativeUI/NPageComponent.h
+    include/QtNativeUI/NPivot.h
+    include/QtNativeUI/NPlainTextEdit.h
+    include/QtNativeUI/NProgressBar.h
+    include/QtNativeUI/NProgressRing.h
+    include/QtNativeUI/NPushButton.h
+    include/QtNativeUI/NRadioButton.h
+    include/QtNativeUI/NRangeSlider.h
+    include/QtNativeUI/NScrollArea.h
+    include/QtNativeUI/NScrollBar.h
+    include/QtNativeUI/NSlider.h
+    include/QtNativeUI/NSpinBox.h
+    include/QtNativeUI/NStackedWidget.h
+    include/QtNativeUI/NTabBar.h
+    include/QtNativeUI/NTabWidget.h
+    include/QtNativeUI/NTextEdit.h
+    include/QtNativeUI/NTheme.h
+    include/QtNativeUI/NToggleButton.h
+    include/QtNativeUI/NToggleSwitch.h
+    include/QtNativeUI/NToolButton.h
+    include/QtNativeUI/NToolTip.h
+    include/QtNativeUI/NTreeView.h
+    include/QtNativeUI/NWindowBar.h
+    include/QtNativeUI/NWindowButton.h
+    include/QtNativeUI/singleton.h
+    include/QtNativeUI/stdafx.h
 )
 
 set(QtNativeUI_RESOURCES
@@ -137,7 +389,7 @@ install(
 )
 
 # 设置编译选项
-target_compile_features(QtNativeUI PUBLIC cxx_std_20)
+target_compile_features(QtNativeUI PUBLIC cxx_std_17)
 
 # 编译器特定配置
 if (MSVC)

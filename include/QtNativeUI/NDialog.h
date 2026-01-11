@@ -22,11 +22,11 @@ class NWindowBar;
  */
 class QTNATIVEUI_EXPORT NDialog : public QDialog {
     Q_OBJECT
-    Q_PROPERTY(BackdropType backdropType READ backdropType WRITE setBackdropType NOTIFY backdropTypeChanged)
+    Q_PROPERTY(WindowEffectType windowEffect READ windowEffect WRITE setWindowEffect NOTIFY windowEffectChanged)
 
   public:
-    enum BackdropType { None = 0, Blur, Acrylic, Mica, MicaAlt };
-    Q_ENUM(BackdropType)
+    enum WindowEffectType { None = 0, Blur, Acrylic, Mica, MicaAlt };
+    Q_ENUM(WindowEffectType)
 
     enum SystemButtonType { Minimize, Maximize, Close };
     Q_ENUM(SystemButtonType)
@@ -34,8 +34,8 @@ class QTNATIVEUI_EXPORT NDialog : public QDialog {
     explicit NDialog(QWidget* parent = nullptr);
     ~NDialog() override;
 
-    void         setBackdropType(BackdropType type);
-    BackdropType backdropType() const;
+    void         setWindowEffect(WindowEffectType type);
+    WindowEffectType windowEffect() const;
 
     int borderThickness() const;
     int titleBarHeight() const;
@@ -89,7 +89,7 @@ class QTNATIVEUI_EXPORT NDialog : public QDialog {
     QWK::WidgetWindowAgent* windowAgent() const;
 
   Q_SIGNALS:
-    void backdropTypeChanged(BackdropType type);
+    void windowEffectChanged(WindowEffectType type);
 
   protected:
     void paintEvent(QPaintEvent* event) override;
