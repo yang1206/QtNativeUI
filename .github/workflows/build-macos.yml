@@ -16,15 +16,13 @@ jobs:
           submodules: recursive
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.*'
-          arch: clang_64
-          tools: 'tools_ninja'
           cache: true
 
       - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+        run: brew install ninja
 
       - name: Configure
         run: cmake --preset macos
