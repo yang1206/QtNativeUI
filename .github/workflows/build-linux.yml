@@ -29,11 +29,6 @@ jobs:
           modules: 'qtbase qttools'
           cache: true
 
-      - name: Install CMake and Ninja
-        uses: cmake-actions/setup-cmake@v3
-        with:
-          cmake-version: '3.28'
-
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
 
