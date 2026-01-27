@@ -16,6 +16,7 @@
 #include "QtNativeUI/NDoubleSpinBox.h"
 #include "QtNativeUI/NGroupBox.h"
 #include "QtNativeUI/NLabel.h"
+#include "QtNativeUI/NPicker.h"
 #include "QtNativeUI/NPlainTextEdit.h"
 #include "QtNativeUI/NProgressBar.h"
 #include "QtNativeUI/NProgressRing.h"
@@ -62,6 +63,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("ToolTip", createToolTips()));
     contentLayout->addWidget(new ExampleSection("CalendarWidget", createCalendarWidgets()));
     contentLayout->addWidget(new ExampleSection("CalendarDatePicker", createCalendarDatePickers()));
+    contentLayout->addWidget(new ExampleSection("Picker", createPickers()));
     contentLayout->addStretch();
 
     m_scrollArea->setWidget(contentWidget);
@@ -1862,3 +1864,192 @@ QWidget* ControlsExample::createGroupBoxes() {
     layout->addStretch();
     return container;
 }
+
+QWidget* ControlsExample::createPickers() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(24);
+
+    QLabel* titleLabel = new QLabel("滚轮选择器控件演示", container);
+    QFont   titleFont  = titleLabel->font();
+    titleFont.setBold(true);
+    titleFont.setPointSize(titleFont.pointSize() + 2);
+    titleLabel->setFont(titleFont);
+    layout->addWidget(titleLabel);
+
+    QLabel* basicLabel = new QLabel("基本滚轮选择器:", container);
+    QFont   labelFont  = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    QHBoxLayout* basicLayout = new QHBoxLayout();
+    basicLayout->setSpacing(16);
+
+    NPicker* basicPicker = new NPicker(container);
+    QStringList hours;
+    for (int i = 0; i < 24; i++) {
+        hours << QString("%1").arg(i, 2, 10, QChar('0'));
+    }
+    basicPicker->setItems(hours);
+    basicPicker->setCurrentIndex(12);
+    QLabel* basicResultLabel = new QLabel("选择: 12", container);
+    connect(basicPicker, &NPicker::currentDataChanged, [basicResultLabel](const QString& data) {
+        basicResultLabel->setText("选择: " + data);
+    });
+    basicLayout->addWidget(basicPicker);
+    basicLayout->addWidget(basicResultLabel);
+    basicLayout->addStretch();
+    layout->addLayout(basicLayout);
+
+    QLabel* loopLabel = new QLabel("循环模式 vs 非循环模式:", container);
+    loopLabel->setFont(labelFont);
+    layout->addWidget(loopLabel);
+
+    QHBoxLayout* loopLayout = new QHBoxLayout();
+    loopLayout->setSpacing(32);
+
+    QVBoxLayout* loopEnabledLayout = new QVBoxLayout();
+    QLabel*      loopEnabledLabel  = new QLabel("循环模式", container);
+    loopEnabledLabel->setAlignment(Qt::AlignCenter);
+    NPicker* loopEnabledPicker = new NPicker(container);
+    QStringList numbers;
+    for (int i = 1; i <= 10; i++) {
+        numbers << QString::number(i);
+    }
+    loopEnabledPicker->setItems(numbers);
+    loopEnabledPicker->setLoopEnabled(true);
+    loopEnabledPicker->setCurrentIndex(5);
+    loopEnabledLayout->addWidget(loopEnabledLabel);
+    loopEnabledLayout->addWidget(loopEnabledPicker);
+
+    QVBoxLayout* loopDisabledLayout = new QVBoxLayout();
+    QLabel*      loopDisabledLabel  = new QLabel("非循环模式", container);
+    loopDisabledLabel->setAlignment(Qt::AlignCenter);
+    NPicker* loopDisabledPicker = new NPicker(container);
+    loopDisabledPicker->setItems(numbers);
+    loopDisabledPicker->setLoopEnabled(false);
+    loopDisabledPicker->setCurrentIndex(5);
+    loopDisabledLayout->addWidget(loopDisabledLabel);
+    loopDisabledLayout->addWidget(loopDisabledPicker);
+
+    loopLayout->addLayout(loopEnabledLayout);
+    loopLayout->addLayout(loopDisabledLayout);
+    loopLayout->addStretch();
+    layout->addLayout(loopLayout);
+
+    QLabel* containerLabel = new QLabel("Container 模式 (带上下箭头):", container);
+    containerLabel->setFont(labelFont);
+    layout->addWidget(containerLabel);
+
+    QHBoxLayout* containerLayout = new QHBoxLayout();
+    containerLayout->setSpacing(16);
+
+    NPicker* containerPicker = new NPicker(container);
+    QStringList months;
+    for (int i = 1; i <= 12; i++) {
+        months << QString("%1月").arg(i);
+    }
+    containerPicker->setItems(months);
+    containerPicker->setContainer(true);
+    containerPicker->setCurrentIndex(0);
+    QLabel* containerResultLabel = new QLabel("选择: 1月", container);
+    connect(containerPicker, &NPicker::currentDataChanged, [containerResultLabel](const QString& data) {
+        containerResultLabel->setText("选择: " + data);
+    });
+    containerLayout->addWidget(containerPicker);
+    containerLayout->addWidget(containerResultLabel);
+    containerLayout->addStretch();
+    layout->addLayout(containerLayout);
+
+    QLabel* timeLabel = new QLabel("时间选择器组合示例:", container);
+    timeLabel->setFont(labelFont);
+    layout->addWidget(timeLabel);
+
+    QHBoxLayout* timeLayout = new QHBoxLayout();
+    timeLayout->setSpacing(8);
+
+    NPicker* hourPicker = new NPicker(container);
+    hourPicker->setItems(hours);
+    hourPicker->setCurrentIndex(12);
+    timeLayout->addWidget(hourPicker);
+
+    QLabel* colonLabel1 = new QLabel(":", container);
+    QFont   colonFont   = colonLabel1->font();
+    colonFont.setPointSize(20);
+    colonFont.setBold(true);
+    colonLabel1->setFont(colonFont);
+    timeLayout->addWidget(colonLabel1);
+
+    NPicker* minutePicker = new NPicker(container);
+    QStringList minutes;
+    for (int i = 0; i < 60; i++) {
+        minutes << QString("%1").arg(i, 2, 10, QChar('0'));
+    }
+    minutePicker->setItems(minutes);
+    minutePicker->setCurrentIndex(30);
+    timeLayout->addWidget(minutePicker);
+
+    QLabel* colonLabel2 = new QLabel(":", container);
+    colonLabel2->setFont(colonFont);
+    timeLayout->addWidget(colonLabel2);
+
+    NPicker* secondPicker = new NPicker(container);
+    secondPicker->setItems(minutes);
+    secondPicker->setCurrentIndex(0);
+    timeLayout->addWidget(secondPicker);
+
+    QLabel* timeResultLabel = new QLabel("时间: 12:30:00", container);
+    timeResultLabel->setFont(labelFont);
+
+    auto updateTime = [=]() {
+        QString time = QString("%1:%2:%3")
+                           .arg(hourPicker->getCurrentData())
+                           .arg(minutePicker->getCurrentData())
+                           .arg(secondPicker->getCurrentData());
+        timeResultLabel->setText("时间: " + time);
+    };
+
+    connect(hourPicker, &NPicker::currentDataChanged, updateTime);
+    connect(minutePicker, &NPicker::currentDataChanged, updateTime);
+    connect(secondPicker, &NPicker::currentDataChanged, updateTime);
+
+    timeLayout->addWidget(timeResultLabel);
+    timeLayout->addStretch();
+    layout->addLayout(timeLayout);
+
+    QLabel* customLabel = new QLabel("自定义项高度和可见项数:", container);
+    customLabel->setFont(labelFont);
+    layout->addWidget(customLabel);
+
+    QHBoxLayout* customLayout = new QHBoxLayout();
+    customLayout->setSpacing(32);
+
+    QVBoxLayout* tallLayout = new QVBoxLayout();
+    QLabel*      tallLabel  = new QLabel("高项 (50px)", container);
+    tallLabel->setAlignment(Qt::AlignCenter);
+    NPicker* tallPicker = new NPicker(container);
+    tallPicker->setItems(QStringList{"A", "B", "C", "D", "E", "F", "G"});
+    tallPicker->setItemHeight(50);
+    tallPicker->setVisibleItemCount(3);
+    tallLayout->addWidget(tallLabel);
+    tallLayout->addWidget(tallPicker);
+
+    QVBoxLayout* manyLayout = new QVBoxLayout();
+    QLabel*      manyLabel  = new QLabel("多可见项 (7项)", container);
+    manyLabel->setAlignment(Qt::AlignCenter);
+    NPicker* manyPicker = new NPicker(container);
+    manyPicker->setItems(QStringList{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"});
+    manyPicker->setVisibleItemCount(7);
+    manyLayout->addWidget(manyLabel);
+    manyLayout->addWidget(manyPicker);
+
+    customLayout->addLayout(tallLayout);
+    customLayout->addLayout(manyLayout);
+    customLayout->addStretch();
+    layout->addLayout(customLayout);
+
+    layout->addStretch();
+    return container;
+}
+

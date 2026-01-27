@@ -72,6 +72,7 @@ set(QtNativeUI_CONTROLS_SOURCES
     src/controls/NNavigationView.cpp
     src/controls/NOverlay.cpp
     src/controls/NPageComponent.cpp
+    src/controls/NPicker.cpp
     src/controls/NPivot.cpp
     src/controls/NPlainTextEdit.cpp
     src/controls/NProgressBar.cpp
@@ -175,6 +176,8 @@ set(QtNativeUI_PRIVATE_SOURCES
     src/private/nnavigationview_p.h
     src/private/noverlay_p.cpp
     src/private/noverlay_p.h
+    src/private/npicker_p.cpp
+    src/private/npicker_p.h
     src/private/npivot_p.cpp
     src/private/npivot_p.h
     src/private/nplaintextedit_p.cpp
@@ -275,6 +278,7 @@ set(QtNativeUI_HEADERS
     include/QtNativeUI/NNavigationView.h
     include/QtNativeUI/NOverlay.h
     include/QtNativeUI/NPageComponent.h
+    include/QtNativeUI/NPicker.h
     include/QtNativeUI/NPivot.h
     include/QtNativeUI/NPlainTextEdit.h
     include/QtNativeUI/NProgressBar.h

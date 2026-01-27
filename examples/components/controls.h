@@ -29,6 +29,7 @@ class ControlsExample : public QWidget {
     QWidget*     createCalendarDatePickers();
     QWidget*     createLabels();
     QWidget*     createGroupBoxes();
+    QWidget*     createPickers();
     NScrollArea* m_scrollArea;
 };
 

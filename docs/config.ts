@@ -47,7 +47,8 @@ export default defineAdditionalConfig({
                         {text: 'NSlider', link: '/components/NSlider'},
                         {text: 'NRangeSlider', link: '/components/NRangeSlider'},
                         {text: 'NComboBox', link: '/components/NComboBox'},
-                        {text: 'NAutoSuggestBox', link: '/components/NAutoSuggestBox'}
+                        {text: 'NAutoSuggestBox', link: '/components/NAutoSuggestBox'},
+                        {text: 'NPicker', link: '/components/NPicker'}
                     ]
                 },
                 {
