@@ -74,6 +74,7 @@ set(QtNativeUI_CONTROLS_SOURCES
     src/controls/NPageComponent.cpp
     src/controls/NPicker.cpp
     src/controls/NPivot.cpp
+    src/controls/NTimePicker.cpp
     src/controls/NPlainTextEdit.cpp
     src/controls/NProgressBar.cpp
     src/controls/NProgressRing.cpp
@@ -214,6 +215,8 @@ set(QtNativeUI_PRIVATE_SOURCES
     src/private/ntextedit_p.h
     src/private/ntheme_p.cpp
     src/private/ntheme_p.h
+    src/private/ntimepicker_p.cpp
+    src/private/ntimepicker_p.h
     src/private/ntogglebutton_p.cpp
     src/private/ntogglebutton_p.h
     src/private/ntoggleswitch_p.cpp
@@ -295,6 +298,7 @@ set(QtNativeUI_HEADERS
     include/QtNativeUI/NTabWidget.h
     include/QtNativeUI/NTextEdit.h
     include/QtNativeUI/NTheme.h
+    include/QtNativeUI/NTimePicker.h
     include/QtNativeUI/NToggleButton.h
     include/QtNativeUI/NToggleSwitch.h
     include/QtNativeUI/NToolButton.h

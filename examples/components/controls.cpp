@@ -22,6 +22,7 @@
 #include "QtNativeUI/NProgressRing.h"
 #include "QtNativeUI/NScrollArea.h"
 #include "QtNativeUI/NTextEdit.h"
+#include "QtNativeUI/NTimePicker.h"
 #include "QtNativeUI/NToolTip.h"
 #include "widgets/ExampleSection.h"
 
@@ -64,6 +65,7 @@ void ControlsExample::initUI() {
     contentLayout->addWidget(new ExampleSection("CalendarWidget", createCalendarWidgets()));
     contentLayout->addWidget(new ExampleSection("CalendarDatePicker", createCalendarDatePickers()));
     contentLayout->addWidget(new ExampleSection("Picker", createPickers()));
+    contentLayout->addWidget(new ExampleSection("TimePicker", createTimePickers()));
     contentLayout->addStretch();
 
     m_scrollArea->setWidget(contentWidget);
@@ -2053,3 +2055,123 @@ QWidget* ControlsExample::createPickers() {
     return container;
 }
 
+QWidget* ControlsExample::createTimePickers() {
+    QWidget*     container = new QWidget;
+    QVBoxLayout* layout    = new QVBoxLayout(container);
+    layout->setSpacing(24);
+
+    QLabel* titleLabel = new QLabel("时间选择器控件演示", container);
+    QFont   titleFont  = titleLabel->font();
+    titleFont.setBold(true);
+    titleFont.setPointSize(titleFont.pointSize() + 2);
+    titleLabel->setFont(titleFont);
+    layout->addWidget(titleLabel);
+
+    QLabel* basicLabel = new QLabel("基本时间选择器 (24小时制):", container);
+    QFont   labelFont  = basicLabel->font();
+    labelFont.setBold(true);
+    basicLabel->setFont(labelFont);
+    layout->addWidget(basicLabel);
+
+    QHBoxLayout* basicLayout = new QHBoxLayout();
+    basicLayout->setSpacing(16);
+
+    NTimePicker* basicTimePicker = new NTimePicker(container);
+    basicTimePicker->setTime(QTime::currentTime());
+    QLabel* basicResultLabel = new QLabel("选择时间: " + basicTimePicker->getTime().toString("HH:mm"), container);
+    connect(basicTimePicker, &NTimePicker::timeChanged, [basicResultLabel](const QTime& time) {
+        basicResultLabel->setText("选择时间: " + time.toString("HH:mm"));
+    });
+    basicLayout->addWidget(basicTimePicker);
+    basicLayout->addWidget(basicResultLabel);
+    basicLayout->addStretch();
+    layout->addLayout(basicLayout);
+
+    QLabel* secondsLabel = new QLabel("显示秒数:", container);
+    secondsLabel->setFont(labelFont);
+    layout->addWidget(secondsLabel);
+
+    QHBoxLayout* secondsLayout = new QHBoxLayout();
+    secondsLayout->setSpacing(16);
+
+    NTimePicker* secondsTimePicker = new NTimePicker(container);
+    secondsTimePicker->setShowSeconds(true);
+    secondsTimePicker->setTime(QTime::currentTime());
+    secondsTimePicker->setFixedWidth(180);
+    QLabel* secondsResultLabel = new QLabel("选择时间: " + secondsTimePicker->getTime().toString("HH:mm:ss"), container);
+    connect(secondsTimePicker, &NTimePicker::timeChanged, [secondsResultLabel](const QTime& time) {
+        secondsResultLabel->setText("选择时间: " + time.toString("HH:mm:ss"));
+    });
+    secondsLayout->addWidget(secondsTimePicker);
+    secondsLayout->addWidget(secondsResultLabel);
+    secondsLayout->addStretch();
+    layout->addLayout(secondsLayout);
+
+    QLabel* formatLabel = new QLabel("12小时制 vs 24小时制:", container);
+    formatLabel->setFont(labelFont);
+    layout->addWidget(formatLabel);
+
+    QHBoxLayout* formatLayout = new QHBoxLayout();
+    formatLayout->setSpacing(32);
+
+    QVBoxLayout* format24Layout = new QVBoxLayout();
+    QLabel*      format24Label  = new QLabel("24小时制", container);
+    format24Label->setAlignment(Qt::AlignCenter);
+    NTimePicker* format24Picker = new NTimePicker(container);
+    format24Picker->setUse24HourFormat(true);
+    format24Picker->setTime(QTime(14, 30));
+    QLabel* format24Result = new QLabel("14:30", container);
+    format24Result->setAlignment(Qt::AlignCenter);
+    connect(format24Picker, &NTimePicker::timeChanged, [format24Result](const QTime& time) {
+        format24Result->setText(time.toString("HH:mm"));
+    });
+    format24Layout->addWidget(format24Label);
+    format24Layout->addWidget(format24Picker);
+    format24Layout->addWidget(format24Result);
+
+    QVBoxLayout* format12Layout = new QVBoxLayout();
+    QLabel*      format12Label  = new QLabel("12小时制", container);
+    format12Label->setAlignment(Qt::AlignCenter);
+    NTimePicker* format12Picker = new NTimePicker(container);
+    format12Picker->setUse24HourFormat(false);
+    format12Picker->setTime(QTime(14, 30));
+    QLabel* format12Result = new QLabel("02:30 PM", container);
+    format12Result->setAlignment(Qt::AlignCenter);
+    connect(format12Picker, &NTimePicker::timeChanged, [format12Result](const QTime& time) {
+        format12Result->setText(time.toString("hh:mm AP"));
+    });
+    format12Layout->addWidget(format12Label);
+    format12Layout->addWidget(format12Picker);
+    format12Layout->addWidget(format12Result);
+
+    formatLayout->addLayout(format24Layout);
+    formatLayout->addLayout(format12Layout);
+    formatLayout->addStretch();
+    layout->addLayout(formatLayout);
+
+    QLabel* interactiveLabel = new QLabel("交互演示:", container);
+    interactiveLabel->setFont(labelFont);
+    layout->addWidget(interactiveLabel);
+
+    QHBoxLayout* interactiveLayout = new QHBoxLayout();
+    interactiveLayout->setSpacing(16);
+
+    NTimePicker* interactivePicker = new NTimePicker(container);
+    interactivePicker->setShowSeconds(true);
+    interactivePicker->setTime(QTime(9, 0, 0));
+    interactivePicker->setFixedWidth(180);
+
+    QLabel* confirmLabel = new QLabel("确认时间: 09:00:00", container);
+
+    connect(interactivePicker, &NTimePicker::timeChanged, [confirmLabel](const QTime& time) {
+        confirmLabel->setText("确认时间: " + time.toString("HH:mm:ss"));
+    });
+
+    interactiveLayout->addWidget(interactivePicker);
+    interactiveLayout->addWidget(confirmLabel);
+    interactiveLayout->addStretch();
+    layout->addLayout(interactiveLayout);
+
+    layout->addStretch();
+    return container;
+}

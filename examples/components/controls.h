@@ -30,6 +30,7 @@ class ControlsExample : public QWidget {
     QWidget*     createLabels();
     QWidget*     createGroupBoxes();
     QWidget*     createPickers();
+    QWidget*     createTimePickers();
     NScrollArea* m_scrollArea;
 };
 
