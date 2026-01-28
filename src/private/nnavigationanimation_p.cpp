@@ -24,6 +24,18 @@ void NNavigationAnimationManager::executeTransition(NNavigationType::PageTransit
                                                     int                                 targetIndex,
                                                     bool                                isRouteBack,
                                                     int                                 duration) {
+    if (targetIndex < 0 || targetIndex >= m_stackedWidget->count()) {
+        qWarning() << "NNavigationAnimationManager: Invalid target index" << targetIndex;
+        return;
+    }
+
+    QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
+    if (!targetWidget) {
+        qWarning() << "NNavigationAnimationManager: Target widget is null at index" << targetIndex;
+        m_stackedWidget->setCurrentIndex(targetIndex);
+        return;
+    }
+
     m_transitionType = type;
 
     switch (type) {
@@ -33,7 +45,13 @@ void NNavigationAnimationManager::executeTransition(NNavigationType::PageTransit
         }
         case NNavigationType::PopupTransition: {
             QTimer::singleShot(180, this, [=]() {
+                if (targetIndex < 0 || targetIndex >= m_stackedWidget->count()) {
+                    return;
+                }
                 QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
+                if (!targetWidget) {
+                    return;
+                }
                 m_stackedWidget->setCurrentIndex(targetIndex);
                 getTargetStackPix();
                 targetWidget->setVisible(false);
@@ -57,8 +75,10 @@ void NNavigationAnimationManager::executeTransition(NNavigationType::PageTransit
             break;
         }
         case NNavigationType::ScaleTransition: {
-            QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
-            getCurrentStackPix();
+            if (!getCurrentStackPix()) {
+                m_stackedWidget->setCurrentIndex(targetIndex);
+                break;
+            }
             m_stackedWidget->setCurrentIndex(targetIndex);
             getTargetStackPix();
             targetWidget->setVisible(false);
@@ -116,8 +136,10 @@ void NNavigationAnimationManager::executeTransition(NNavigationType::PageTransit
             break;
         }
         case NNavigationType::FlipTransition: {
-            QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
-            getCurrentStackPix();
+            if (!getCurrentStackPix()) {
+                m_stackedWidget->setCurrentIndex(targetIndex);
+                break;
+            }
             m_stackedWidget->setCurrentIndex(targetIndex);
             getTargetStackPix();
             targetWidget->setVisible(false);
@@ -157,8 +179,10 @@ void NNavigationAnimationManager::executeTransition(NNavigationType::PageTransit
             break;
         }
         case NNavigationType::CubeTransition: {
-            QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
-            getCurrentStackPix();
+            if (!getCurrentStackPix()) {
+                m_stackedWidget->setCurrentIndex(targetIndex);
+                break;
+            }
             m_stackedWidget->setCurrentIndex(targetIndex);
             getTargetStackPix();
             targetWidget->setVisible(false);
@@ -180,8 +204,10 @@ void NNavigationAnimationManager::executeTransition(NNavigationType::PageTransit
             break;
         }
         case NNavigationType::RippleTransition: {
-            QWidget* targetWidget = m_stackedWidget->widget(targetIndex);
-            getCurrentStackPix();
+            if (!getCurrentStackPix()) {
+                m_stackedWidget->setCurrentIndex(targetIndex);
+                break;
+            }
             m_stackedWidget->setCurrentIndex(targetIndex);
             getTargetStackPix();
             targetWidget->setVisible(false);
@@ -298,11 +324,20 @@ void NNavigationAnimationManager::paintTransition(QPainter* painter, const QRect
     painter->restore();
 }
 
-void NNavigationAnimationManager::getCurrentStackPix() {
+bool NNavigationAnimationManager::getCurrentStackPix() {
     m_targetStackPix = QPixmap();
-    m_stackedWidget->currentWidget()->setVisible(true);
+    
+    QWidget* current = m_stackedWidget->currentWidget();
+    if (!current) {
+        m_currentStackPix = QPixmap(m_stackedWidget->size());
+        m_currentStackPix.fill(Qt::transparent);
+        return false;
+    }
+    
+    current->setVisible(true);
     m_currentStackPix = m_stackedWidget->grab();
-    m_stackedWidget->currentWidget()->setVisible(false);
+    current->setVisible(false);
+    return true;
 }
 
 void NNavigationAnimationManager::getTargetStackPix() {

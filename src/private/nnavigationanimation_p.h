@@ -49,7 +49,7 @@ class QStackedWidget;
 
 
   private:
-    void getCurrentStackPix();
+    bool getCurrentStackPix();
     void getTargetStackPix();
 
     QStackedWidget*                     m_stackedWidget{nullptr};
