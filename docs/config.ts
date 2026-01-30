@@ -28,29 +28,25 @@ export default defineAdditionalConfig({
                 {
                     text: '基础控件',
                     items: [
-                        {text: 'NLabel', link: '/components/NLabel'},
                         {text: 'NPushButton', link: '/components/NPushButton'},
                         {text: 'NToolButton', link: '/components/NToolButton'},
-                        {text: 'NHyperlinkButton', link: '/components/NHyperlinkButton'},
                         {text: 'NToggleButton', link: '/components/NToggleButton'},
+                        {text: 'NHyperlinkButton', link: '/components/NHyperlinkButton'},
                         {text: 'NDropDownButton', link: '/components/NDropDownButton'}
                     ]
                 },
                 {
                     text: '输入控件',
                     items: [
+                        {text: 'NLabel', link: '/components/NLabel'},
                         {text: 'NLineEdit', link: '/components/NLineEdit'},
                         {text: 'NTextEdit', link: '/components/NTextEdit'},
                         {text: 'NPlainTextEdit', link: '/components/NPlainTextEdit'},
+                        {text: 'NAutoSuggestBox', link: '/components/NAutoSuggestBox'},
                         {text: 'NSpinBox', link: '/components/NSpinBox'},
                         {text: 'NDoubleSpinBox', link: '/components/NDoubleSpinBox'},
-                        {text: 'NSlider', link: '/components/NSlider'},
-                        {text: 'NRangeSlider', link: '/components/NRangeSlider'},
                         {text: 'NComboBox', link: '/components/NComboBox'},
-                        {text: 'NAutoSuggestBox', link: '/components/NAutoSuggestBox'},
-                        {text: 'NPicker', link: '/components/NPicker'},
-                        {text: 'NTimePicker', link: '/components/NTimePicker'},
-                        {text: 'NDatePicker', link: '/components/NDatePicker'}
+                        {text: 'NPicker', link: '/components/NPicker'}
                     ]
                 },
                 {
@@ -58,7 +54,34 @@ export default defineAdditionalConfig({
                     items: [
                         {text: 'NCheckBox', link: '/components/NCheckBox'},
                         {text: 'NRadioButton', link: '/components/NRadioButton'},
-                        {text: 'NToggleSwitch', link: '/components/NToggleSwitch'}
+                        {text: 'NToggleSwitch', link: '/components/NToggleSwitch'},
+                        {text: 'NSlider', link: '/components/NSlider'},
+                        {text: 'NRangeSlider', link: '/components/NRangeSlider'}
+                    ]
+                },
+                {
+                    text: '日期时间',
+                    items: [
+                        {text: 'NCalendarWidget', link: '/components/NCalendarWidget'},
+                        {text: 'NCalendarDatePicker', link: '/components/NCalendarDatePicker'},
+                        {text: 'NDatePicker', link: '/components/NDatePicker'},
+                        {text: 'NTimePicker', link: '/components/NTimePicker'}
+                    ]
+                },
+                {
+                    text: '进度指示',
+                    items: [
+                        {text: 'NProgressBar', link: '/components/NProgressBar'},
+                        {text: 'NProgressRing', link: '/components/NProgressRing'}
+                    ]
+                },
+                {
+                    text: '容器',
+                    items: [
+                        {text: 'NGroupBox', link: '/components/NGroupBox'},
+                        {text: 'NScrollArea', link: '/components/NScrollArea'},
+                        {text: 'NStackedWidget', link: '/components/NStackedWidget'},
+                        {text: 'NOverlay', link: '/components/NOverlay'}
                     ]
                 },
                 {
@@ -72,40 +95,27 @@ export default defineAdditionalConfig({
                     ]
                 },
                 {
-                    text: '容器',
+                    text: '消息反馈',
                     items: [
-                        {text: 'NMainWindow', link: '/components/NMainWindow'},
-                        {text: 'NGroupBox', link: '/components/NGroupBox'},
-                        {text: 'NStackedWidget', link: '/components/NStackedWidget'},
-                        {text: 'NScrollArea', link: '/components/NScrollArea'}
-                    ]
-                },
-                {
-                    text: '显示控件',
-                    items: [
-                        {text: 'NProgressBar', link: '/components/NProgressBar'},
-                        {text: 'NProgressRing', link: '/components/NProgressRing'},
-                        {text: 'NScrollBar', link: '/components/NScrollBar'},
+                        {text: 'NContentDialog', link: '/components/NContentDialog'},
+                        {text: 'NFlyout', link: '/components/NFlyout'},
+                        {text: 'NInfoBar', link: '/components/NInfoBar'},
                         {text: 'NToolTip', link: '/components/NToolTip'}
                     ]
                 },
                 {
-                    text: '项目视图',
+                    text: '窗口',
                     items: [
-                        {text: 'NListView', link: '/components/NListView'},
-                        {text: 'NTreeView', link: '/components/NTreeView'}
+                        {text: 'NDialog', link: '/components/NDialog'},
+                        {text: 'NMainWindow', link: '/components/NMainWindow'},
+                        {text: 'NScrollBar', link: '/components/NScrollBar'}
                     ]
                 },
                 {
-                    text: '对话框和弹出窗口',
+                    text: '列表视图',
                     items: [
-                        {text: 'NDialog', link: '/components/NDialog'},
-                        {text: 'NContentDialog', link: '/components/NContentDialog'},
-                        {text: 'NFlyout', link: '/components/NFlyout'},
-                        {text: 'NOverlay', link: '/components/NOverlay'},
-                        {text: 'NCalendarWidget', link: '/components/NCalendarWidget'},
-                        {text: 'NCalendarDatePicker', link: '/components/NCalendarDatePicker'},
-                        {text: 'NInfoBar', link: '/components/NInfoBar'}
+                        {text: 'NListView', link: '/components/NListView'},
+                        {text: 'NTreeView', link: '/components/NTreeView'}
                     ]
                 }
             ],
