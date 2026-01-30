@@ -176,6 +176,10 @@ void NCalendarDatePicker::changeEvent(QEvent* event) {
             d->_pPlaceholderText = tr("Pick a date");
             d->updateDisplayText();
         }
+    } else if (event->type() == QEvent::EnabledChange) {
+        Q_D(NCalendarDatePicker);
+        d->button->setEnabled(isEnabled());
+        d->updateDisplayText();
     }
     QWidget::changeEvent(event);
 }

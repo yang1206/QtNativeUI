@@ -125,15 +125,27 @@ void NTimePicker::paintEvent([[maybe_unused]] QPaintEvent* event) {
 
     QRect baseRect = rect();
     baseRect.adjust(1, 1, -1, -1);
+    
+    QColor bgColor;
+    if (!isEnabled()) {
+        bgColor = NThemeColor(NFluentColorKey::ControlFillColorDisabled, d->_themeMode);
+    } else if (underMouse()) {
+        bgColor = NThemeColor(NFluentColorKey::ControlFillColorSecondary, d->_themeMode);
+    } else {
+        bgColor = NThemeColor(NFluentColorKey::ControlFillColorDefault, d->_themeMode);
+    }
+    
     painter.setPen(NThemeColor(NFluentColorKey::ControlStrokeColorDefault, d->_themeMode));
-    painter.setBrush(underMouse() ? NThemeColor(NFluentColorKey::ControlFillColorSecondary, d->_themeMode)
-                                  : NThemeColor(NFluentColorKey::ControlFillColorDefault, d->_themeMode));
+    painter.setBrush(bgColor);
     painter.drawRoundedRect(baseRect, d->_pBorderRadius, d->_pBorderRadius);
+
+    QColor textColor = isEnabled() ? NThemeColor(NFluentColorKey::TextFillColorPrimary, d->_themeMode)
+                                   : NThemeColor(NFluentColorKey::TextFillColorDisabled, d->_themeMode);
 
     int pickerXOffset = 0;
     for (int i = 0; i < d->_timePickerContainer->_pickerList.count(); i++) {
         auto picker = d->_timePickerContainer->_pickerList[i];
-        painter.setPen(NThemeColor(NFluentColorKey::TextFillColorPrimary, d->_themeMode));
+        painter.setPen(textColor);
         int     pickerWidth = picker->width();
         QString text        = picker->getCurrentData();
         painter.drawText(QRect(pickerXOffset, baseRect.y(), pickerWidth, baseRect.height()), Qt::AlignCenter, text);

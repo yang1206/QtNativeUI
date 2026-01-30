@@ -92,10 +92,14 @@ void NCalendarDatePickerPrivate::updateDisplayText() {
     dateLabel->setText(displayText);
 
     QColor textColor;
-    if (_isDark) {
-        textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+    if (!q_ptr->isEnabled()) {
+        textColor = NThemeColor(NFluentColorKey::TextFillColorDisabled, _themeMode);
     } else {
-        textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+        if (_isDark) {
+            textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Dark);
+        } else {
+            textColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, NThemeType::Light);
+        }
     }
 
     QString colorStyle = QString("color: %1;").arg(textColor.name());

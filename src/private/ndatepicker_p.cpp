@@ -141,7 +141,9 @@ void NDatePickerContainer::paintEvent([[maybe_unused]] QPaintEvent* event) {
             painter.drawRoundedRect(_cancelButtonRect, 5, 5);
         }
 
-        QColor iconColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
+        QColor iconColor = (parentWidget() && parentWidget()->isEnabled())
+                               ? NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode)
+                               : NThemeColor(NFluentColorKey::TextFillColorDisabled, _themeMode);
         int    iconSize  = 16;
 
         QIcon confirmIcon = nIcon->fromRegular(NRegularIconType::Checkmark16Regular, iconSize, iconColor);

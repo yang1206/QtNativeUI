@@ -134,7 +134,11 @@ void NTimePickerContainer::paintEvent([[maybe_unused]] QPaintEvent* event) {
             painter.drawRoundedRect(_cancelButtonRect, 5, 5);
         }
 
-        QColor iconColor = NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode);
+        NTimePicker* timePicker = qobject_cast<NTimePicker*>(parentWidget());
+        bool isEnabled = timePicker ? timePicker->isEnabled() : true;
+        
+        QColor iconColor = isEnabled ? NThemeColor(NFluentColorKey::TextFillColorPrimary, _themeMode)
+                                     : NThemeColor(NFluentColorKey::TextFillColorDisabled, _themeMode);
         int    iconSize  = 16;
 
         QIcon confirmIcon = nIcon->fromRegular(NRegularIconType::Checkmark16Regular, iconSize, iconColor);
