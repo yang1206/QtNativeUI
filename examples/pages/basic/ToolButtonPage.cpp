@@ -1,4 +1,4 @@
-#include "ToolButtonPage.h"
+#include "./ToolButtonPage.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>

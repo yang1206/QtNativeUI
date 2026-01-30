@@ -17,42 +17,42 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(EXAMPLE_PAGES_SOURCES
         pages/BasePage.cpp
         pages/BasePage.h
-        pages/buttons/PushButtonPage.cpp
-        pages/buttons/PushButtonPage.h
-        pages/buttons/ToolButtonPage.cpp
-        pages/buttons/ToolButtonPage.h
-        pages/buttons/ToggleButtonPage.cpp
-        pages/buttons/ToggleButtonPage.h
-        pages/buttons/HyperlinkButtonPage.cpp
-        pages/buttons/HyperlinkButtonPage.h
-        pages/buttons/DropDownButtonPage.cpp
-        pages/buttons/DropDownButtonPage.h
-        pages/inputs/LabelPage.cpp
-        pages/inputs/LabelPage.h
-        pages/inputs/LineEditPage.cpp
-        pages/inputs/LineEditPage.h
-        pages/inputs/TextEditPage.cpp
-        pages/inputs/TextEditPage.h
-        pages/inputs/PlainTextEditPage.cpp
-        pages/inputs/PlainTextEditPage.h
-        pages/inputs/AutoSuggestBoxPage.cpp
-        pages/inputs/AutoSuggestBoxPage.h
-        pages/inputs/SpinBoxPage.cpp
-        pages/inputs/SpinBoxPage.h
-        pages/inputs/DoubleSpinBoxPage.cpp
-        pages/inputs/DoubleSpinBoxPage.h
-        pages/inputs/ComboBoxPage.cpp
-        pages/inputs/ComboBoxPage.h
-        pages/inputs/PickerPage.cpp
-        pages/inputs/PickerPage.h
-        pages/selections/CheckBoxPage.cpp
-        pages/selections/CheckBoxPage.h
-        pages/selections/RadioButtonPage.cpp
-        pages/selections/RadioButtonPage.h
-        pages/selections/ToggleSwitchPage.cpp
-        pages/selections/ToggleSwitchPage.h
-        pages/selections/SliderPage.cpp
-        pages/selections/SliderPage.h
+        pages/basic/LabelPage.cpp
+        pages/basic/LabelPage.h
+        pages/basic/PushButtonPage.cpp
+        pages/basic/PushButtonPage.h
+        pages/basic/ToolButtonPage.cpp
+        pages/basic/ToolButtonPage.h
+        pages/basic/HyperlinkButtonPage.cpp
+        pages/basic/HyperlinkButtonPage.h
+        pages/basic/ToggleButtonPage.cpp
+        pages/basic/ToggleButtonPage.h
+        pages/basic/DropDownButtonPage.cpp
+        pages/basic/DropDownButtonPage.h
+        pages/input/LineEditPage.cpp
+        pages/input/LineEditPage.h
+        pages/input/TextEditPage.cpp
+        pages/input/TextEditPage.h
+        pages/input/PlainTextEditPage.cpp
+        pages/input/PlainTextEditPage.h
+        pages/input/AutoSuggestBoxPage.cpp
+        pages/input/AutoSuggestBoxPage.h
+        pages/input/ComboBoxPage.cpp
+        pages/input/ComboBoxPage.h
+        pages/input/SpinBoxPage.cpp
+        pages/input/SpinBoxPage.h
+        pages/input/DoubleSpinBoxPage.cpp
+        pages/input/DoubleSpinBoxPage.h
+        pages/input/CheckBoxPage.cpp
+        pages/input/CheckBoxPage.h
+        pages/input/RadioButtonPage.cpp
+        pages/input/RadioButtonPage.h
+        pages/input/ToggleSwitchPage.cpp
+        pages/input/ToggleSwitchPage.h
+        pages/input/SliderPage.cpp
+        pages/input/SliderPage.h
+        pages/input/PickerPage.cpp
+        pages/input/PickerPage.h
         pages/datetime/CalendarWidgetPage.cpp
         pages/datetime/CalendarWidgetPage.h
         pages/datetime/CalendarDatePickerPage.cpp
@@ -61,22 +61,20 @@ set(EXAMPLE_PAGES_SOURCES
         pages/datetime/DatePickerPage.h
         pages/datetime/TimePickerPage.cpp
         pages/datetime/TimePickerPage.h
-        pages/progress/ProgressBarPage.cpp
-        pages/progress/ProgressBarPage.h
-        pages/progress/ProgressRingPage.cpp
-        pages/progress/ProgressRingPage.h
-        pages/containers/GroupBoxPage.cpp
-        pages/containers/GroupBoxPage.h
-        pages/containers/ScrollAreaPage.cpp
-        pages/containers/ScrollAreaPage.h
-        pages/containers/StackedWidgetPage.cpp
-        pages/containers/StackedWidgetPage.h
-        pages/containers/OverlayPage.cpp
-        pages/containers/OverlayPage.h
+        pages/container/GroupBoxPage.cpp
+        pages/container/GroupBoxPage.h
+        pages/container/ScrollAreaPage.cpp
+        pages/container/ScrollAreaPage.h
+        pages/container/StackedWidgetPage.cpp
+        pages/container/StackedWidgetPage.h
+        pages/container/OverlayPage.cpp
+        pages/container/OverlayPage.h
         pages/navigation/NavigationViewPage.cpp
         pages/navigation/NavigationViewPage.h
         pages/navigation/TabWidgetPage.cpp
         pages/navigation/TabWidgetPage.h
+        pages/navigation/TabBarPage.cpp
+        pages/navigation/TabBarPage.h
         pages/navigation/PivotPage.cpp
         pages/navigation/PivotPage.h
         pages/navigation/MenuPage.cpp
@@ -89,18 +87,26 @@ set(EXAMPLE_PAGES_SOURCES
         pages/feedback/InfoBarPage.h
         pages/feedback/ToolTipPage.cpp
         pages/feedback/ToolTipPage.h
-        pages/windows/DialogPage.cpp
-        pages/windows/DialogPage.h
-        pages/windows/MainWindowPage.cpp
-        pages/windows/MainWindowPage.h
-        pages/windows/WindowBarPage.cpp
-        pages/windows/WindowBarPage.h
-        pages/windows/ScrollBarPage.cpp
-        pages/windows/ScrollBarPage.h
-        pages/tools/ColorsPage.cpp
-        pages/tools/ColorsPage.h
-        pages/tools/IconsPage.cpp
-        pages/tools/IconsPage.h
+        pages/feedback/ProgressBarPage.cpp
+        pages/feedback/ProgressBarPage.h
+        pages/feedback/ProgressRingPage.cpp
+        pages/feedback/ProgressRingPage.h
+        pages/list/ListViewPage.cpp
+        pages/list/ListViewPage.h
+        pages/list/TreeViewPage.cpp
+        pages/list/TreeViewPage.h
+        pages/window/DialogPage.cpp
+        pages/window/DialogPage.h
+        pages/window/MainWindowPage.cpp
+        pages/window/MainWindowPage.h
+        pages/window/WindowBarPage.cpp
+        pages/window/WindowBarPage.h
+        pages/window/ScrollBarPage.cpp
+        pages/window/ScrollBarPage.h
+        pages/tool/ColorsPage.cpp
+        pages/tool/ColorsPage.h
+        pages/tool/IconsPage.cpp
+        pages/tool/IconsPage.h
         pages/settings/SettingsPage.cpp
         pages/settings/SettingsPage.h
 )

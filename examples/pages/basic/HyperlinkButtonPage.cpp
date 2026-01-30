@@ -1,4 +1,4 @@
-#include "HyperlinkButtonPage.h"
+#include "./HyperlinkButtonPage.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>
