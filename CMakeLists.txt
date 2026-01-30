@@ -54,6 +54,7 @@ set(QtNativeUI_CONTROLS_SOURCES
     src/controls/NCheckBox.cpp
     src/controls/NComboBox.cpp
     src/controls/NContentDialog.cpp
+    src/controls/NDatePicker.cpp
     src/controls/NDialog.cpp
     src/controls/NDoubleSpinBox.cpp
     src/controls/NDropDownButton.cpp
@@ -125,6 +126,8 @@ set(QtNativeUI_PRIVATE_SOURCES
     src/private/ncomboboxstyle.h
     src/private/ncontentdialog_p.cpp
     src/private/ncontentdialog_p.h
+    src/private/ndatepicker_p.cpp
+    src/private/ndatepicker_p.h
     src/private/ndialog_p.cpp
     src/private/ndialog_p.h
     src/private/ndoublespinbox_p.cpp
@@ -259,6 +262,7 @@ set(QtNativeUI_HEADERS
     include/QtNativeUI/NComboBox.h
     include/QtNativeUI/NConfig.h
     include/QtNativeUI/NContentDialog.h
+    include/QtNativeUI/NDatePicker.h
     include/QtNativeUI/NDialog.h
     include/QtNativeUI/NDoubleSpinBox.h
     include/QtNativeUI/NDropDownButton.h

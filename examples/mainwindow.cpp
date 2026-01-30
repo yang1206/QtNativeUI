@@ -19,6 +19,7 @@
 #include "pages/containers/StackedWidgetPage.h"
 #include "pages/datetime/CalendarDatePickerPage.h"
 #include "pages/datetime/CalendarWidgetPage.h"
+#include "pages/datetime/DatePickerPage.h"
 #include "pages/datetime/TimePickerPage.h"
 #include "pages/feedback/ContentDialogPage.h"
 #include "pages/feedback/FlyoutPage.h"
@@ -90,6 +91,7 @@ MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
         "CalendarWidget", new CalendarWidgetPage(this), datetimeGroup, NRegularIconType::None);
     m_navigationView->addPageNode(
         "CalendarDatePicker", new CalendarDatePickerPage(this), datetimeGroup, NRegularIconType::None);
+    m_navigationView->addPageNode("DatePicker", new DatePickerPage(this), datetimeGroup, NRegularIconType::None);
     m_navigationView->addPageNode("TimePicker", new TimePickerPage(this), datetimeGroup, NRegularIconType::None);
 
     QString progressGroup;

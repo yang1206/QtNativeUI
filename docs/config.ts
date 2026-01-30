@@ -49,7 +49,8 @@ export default defineAdditionalConfig({
                         {text: 'NComboBox', link: '/components/NComboBox'},
                         {text: 'NAutoSuggestBox', link: '/components/NAutoSuggestBox'},
                         {text: 'NPicker', link: '/components/NPicker'},
-                        {text: 'NTimePicker', link: '/components/NTimePicker'}
+                        {text: 'NTimePicker', link: '/components/NTimePicker'},
+                        {text: 'NDatePicker', link: '/components/NDatePicker'}
                     ]
                 },
                 {

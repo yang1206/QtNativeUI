@@ -57,6 +57,8 @@ set(EXAMPLE_PAGES_SOURCES
         pages/datetime/CalendarWidgetPage.h
         pages/datetime/CalendarDatePickerPage.cpp
         pages/datetime/CalendarDatePickerPage.h
+        pages/datetime/DatePickerPage.cpp
+        pages/datetime/DatePickerPage.h
         pages/datetime/TimePickerPage.cpp
         pages/datetime/TimePickerPage.h
         pages/progress/ProgressBarPage.cpp

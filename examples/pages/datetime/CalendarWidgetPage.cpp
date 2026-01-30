@@ -11,13 +11,11 @@
 
 CalendarWidgetPage::CalendarWidgetPage(QWidget* parent)
     : BasePage("CalendarWidget 日历控件", "CalendarWidget 提供日历视图，支持单日期、多日期和日期范围选择。", parent) {
-
     QHBoxLayout* singleLayout = new QHBoxLayout();
     singleLayout->setSpacing(24);
 
     NCalendarWidget* singleCalendar = new NCalendarWidget(this);
     singleCalendar->setDateSelectionMode(NCalendarWidget::SingleDate);
-    singleCalendar->setFixedSize(350, 320);
 
     QLabel* selectedDateLabel = new QLabel("选择的日期：无", this);
     connect(singleCalendar, &NCalendarWidget::clicked, [selectedDateLabel](QDate date) {
@@ -39,7 +37,6 @@ CalendarWidgetPage::CalendarWidgetPage(QWidget* parent)
 
     NCalendarWidget* multipleCalendar = new NCalendarWidget(this);
     multipleCalendar->setDateSelectionMode(NCalendarWidget::MultipleDate);
-    multipleCalendar->setFixedSize(350, 320);
 
     QLabel* multipleDatesLabel = new QLabel("选择的日期：无", this);
     connect(multipleCalendar, &NCalendarWidget::selectedDatesChanged, [multipleDatesLabel](const QList<QDate>& dates) {
@@ -69,19 +66,19 @@ CalendarWidgetPage::CalendarWidgetPage(QWidget* parent)
 
     NCalendarWidget* rangeCalendar = new NCalendarWidget(this);
     rangeCalendar->setDateSelectionMode(NCalendarWidget::DateRange);
-    rangeCalendar->setFixedSize(350, 320);
 
     QLabel* rangeDatesLabel = new QLabel("选择的日期范围：无", this);
-    connect(rangeCalendar, &NCalendarWidget::selectedDateRangeChanged, [rangeDatesLabel](const QPair<QDate, QDate>& range) {
-        if (range.first.isValid() && range.second.isValid()) {
-            rangeDatesLabel->setText("选择的日期范围：\n" + range.first.toString("yyyy-MM-dd") + " 至 " +
-                                     range.second.toString("yyyy-MM-dd"));
-        } else if (range.first.isValid()) {
-            rangeDatesLabel->setText("选择的日期：" + range.first.toString("yyyy-MM-dd"));
-        } else {
-            rangeDatesLabel->setText("选择的日期范围：无");
-        }
-    });
+    connect(
+        rangeCalendar, &NCalendarWidget::selectedDateRangeChanged, [rangeDatesLabel](const QPair<QDate, QDate>& range) {
+            if (range.first.isValid() && range.second.isValid()) {
+                rangeDatesLabel->setText("选择的日期范围：\n" + range.first.toString("yyyy-MM-dd") + " 至 " +
+                                         range.second.toString("yyyy-MM-dd"));
+            } else if (range.first.isValid()) {
+                rangeDatesLabel->setText("选择的日期：" + range.first.toString("yyyy-MM-dd"));
+            } else {
+                rangeDatesLabel->setText("选择的日期范围：无");
+            }
+        });
 
     QVBoxLayout* rangeInfoLayout = new QVBoxLayout();
     rangeInfoLayout->addWidget(rangeDatesLabel);
