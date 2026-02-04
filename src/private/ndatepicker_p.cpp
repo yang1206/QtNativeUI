@@ -29,7 +29,7 @@ void NDatePickerContainer::doPickerAnimation() {
     if (!_animationPix.isNull()) {
         _animationPix = QPixmap();
     }
-    _animationPix = this->grab(rect());
+    _animationPix                       = this->grab(rect());
     QPropertyAnimation* offsetAnimation = new QPropertyAnimation(this, "pAnimationPixOffsetY");
     connect(offsetAnimation, &QPropertyAnimation::finished, this, [=]() {
         _animationPix = QPixmap();
@@ -114,10 +114,8 @@ void NDatePickerContainer::paintEvent([[maybe_unused]] QPaintEvent* event) {
         for (int i = 0; i < _pickerList.count(); i++) {
             pickerXOffset += _pickerList[i]->width();
             if (i != _pickerList.count() - 1) {
-                painter.drawLine(pickerXOffset,
-                                 foregroundRect.y(),
-                                 pickerXOffset,
-                                 foregroundRect.bottom() - _pButtonAreaHeight);
+                painter.drawLine(
+                    pickerXOffset, foregroundRect.y(), pickerXOffset, foregroundRect.bottom() - _pButtonAreaHeight);
             }
         }
 
@@ -130,8 +128,10 @@ void NDatePickerContainer::paintEvent([[maybe_unused]] QPaintEvent* event) {
                                    foregroundRect.bottom() - _pButtonAreaHeight + _buttonMargin,
                                    (foregroundRect.width() - 2 * _buttonMargin - _buttonSpacing) / 2,
                                    _pButtonAreaHeight - 2 * _buttonMargin + 1);
-        _cancelButtonRect =
-            QRect(_confirmButtonRect.right() + _buttonSpacing, _confirmButtonRect.y(), _confirmButtonRect.width(), _confirmButtonRect.height());
+        _cancelButtonRect  = QRect(_confirmButtonRect.right() + _buttonSpacing,
+                                  _confirmButtonRect.y(),
+                                  _confirmButtonRect.width(),
+                                  _confirmButtonRect.height());
 
         painter.setPen(Qt::NoPen);
         painter.setBrush(NThemeColor(NFluentColorKey::SubtleFillColorSecondary, _themeMode));
@@ -183,11 +183,11 @@ NDatePickerPrivate::~NDatePickerPrivate() {}
 
 void NDatePickerPrivate::onDatePickerClicked() {
     Q_Q(NDatePicker);
-    QPoint targetPos(
-        q->mapToGlobal(QPoint(-6, (q->height() - _datePickerContainer->height() + _datePickerContainer->getButtonAreaHeight()) / 2)));
+    QPoint targetPos(q->mapToGlobal(
+        QPoint(-6, (q->height() - _datePickerContainer->height() + _datePickerContainer->getButtonAreaHeight()) / 2)));
     _datePickerContainer->show();
-    _datePickerContainer->setGeometry(
-        QRect(targetPos, QSize(_getPickerTotalWidth() + 12, _pickerHeight + _datePickerContainer->getButtonAreaHeight())));
+    _datePickerContainer->setGeometry(QRect(
+        targetPos, QSize(_getPickerTotalWidth() + 12, _pickerHeight + _datePickerContainer->getButtonAreaHeight())));
     _datePickerContainer->doPickerAnimation();
 }
 
@@ -199,13 +199,9 @@ void NDatePickerPrivate::onConfirmButtonClicked() {
 
 void NDatePickerPrivate::onCancelButtonClicked() {}
 
-void NDatePickerPrivate::onYearChanged() {
-    updateDayPicker();
-}
+void NDatePickerPrivate::onYearChanged() { updateDayPicker(); }
 
-void NDatePickerPrivate::onMonthChanged() {
-    updateDayPicker();
-}
+void NDatePickerPrivate::onMonthChanged() { updateDayPicker(); }
 
 void NDatePickerPrivate::addPicker(const QStringList& itemList, bool isEnableLoop, int width) {
     Q_Q(NDatePicker);
@@ -235,11 +231,21 @@ void NDatePickerPrivate::updatePickersFromDate() {
 
 void NDatePickerPrivate::rebuildPickers() {
     Q_Q(NDatePicker);
-    for (auto picker : _datePickerContainer->_pickerList) {
-        _containerLayout->removeWidget(picker);
-        picker->deleteLater();
+
+    // 先断开信号连接，避免删除过程中触发信号
+    if (_yearPicker) {
+        disconnect(_yearPicker, &NPicker::currentDataChanged, this, &NDatePickerPrivate::onYearChanged);
     }
-    _datePickerContainer->_pickerList.clear();
+    if (_monthPicker) {
+        disconnect(_monthPicker, &NPicker::currentDataChanged, this, &NDatePickerPrivate::onMonthChanged);
+    }
+
+    // 使用 while 循环和 delete 立即删除，避免 Debug 模式下的迭代器问题
+    while (!_datePickerContainer->_pickerList.isEmpty()) {
+        NPicker* picker = _datePickerContainer->_pickerList.takeLast();
+        _containerLayout->removeWidget(picker);
+        delete picker;
+    }
     _yearPicker  = nullptr;
     _monthPicker = nullptr;
     _dayPicker   = nullptr;
@@ -249,21 +255,30 @@ void NDatePickerPrivate::rebuildPickers() {
         years.append(QString::number(i));
     }
     addPicker(years, false, 80);
+    if (_datePickerContainer->_pickerList.isEmpty()) {
+        return;
+    }
     _yearPicker = _datePickerContainer->_pickerList.last();
     connect(_yearPicker, &NPicker::currentDataChanged, this, &NDatePickerPrivate::onYearChanged);
 
     QStringList months;
-    QFontMetrics fm(q->font());
-    int maxMonthWidth = 0;
     for (int i = 1; i <= 12; i++) {
         QString monthName = _pLocale.monthName(i, QLocale::ShortFormat);
         months.append(monthName);
-        int width = fm.horizontalAdvance(monthName);
-        maxMonthWidth = qMax(maxMonthWidth, width);
     }
-    int monthPickerWidth = maxMonthWidth + 20;
-    monthPickerWidth = qMax(60, qMin(monthPickerWidth, 100));
-    
+
+    // 使用字符串长度估算宽度，避免 MSVC Debug 模式下 QFontMetrics 的问题
+    // 对于不同语言，我们使用不同的估算系数
+    int maxMonthLength = 0;
+    for (const QString& monthName : months) {
+        maxMonthLength = qMax(maxMonthLength, monthName.length());
+    }
+    // 西方字符约 8px/字符，CJK 字符约 14px/字符
+    // 使用保守估计，假设混合情况
+    int estimatedCharWidth = 10;
+    int maxMonthWidth      = maxMonthLength * estimatedCharWidth;
+    int monthPickerWidth   = qMax(60, qMin(maxMonthWidth + 20, 100));
+
     addPicker(months, true, monthPickerWidth);
     _monthPicker = _datePickerContainer->_pickerList.last();
     connect(_monthPicker, &NPicker::currentDataChanged, this, &NDatePickerPrivate::onMonthChanged);
@@ -277,7 +292,8 @@ void NDatePickerPrivate::rebuildPickers() {
     _dayPicker = _datePickerContainer->_pickerList.last();
 
     updatePickersFromDate();
-    _datePickerContainer->resize(_getPickerTotalWidth() + 12, _pickerHeight + _datePickerContainer->getButtonAreaHeight());
+    _datePickerContainer->resize(_getPickerTotalWidth() + 12,
+                                 _pickerHeight + _datePickerContainer->getButtonAreaHeight());
 }
 
 void NDatePickerPrivate::updateDayPicker() {
@@ -286,9 +302,9 @@ void NDatePickerPrivate::updateDayPicker() {
     }
 
     int year = _yearPicker->getCurrentData().toInt();
-    
+
     QString monthData = _monthPicker->getCurrentData();
-    int month = 0;
+    int     month     = 0;
     for (int i = 1; i <= 12; i++) {
         if (_pLocale.monthName(i, QLocale::ShortFormat) == monthData) {
             month = i;
