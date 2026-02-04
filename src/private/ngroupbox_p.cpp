@@ -9,23 +9,13 @@ NGroupBoxPrivate::NGroupBoxPrivate(QObject* parent) : QObject(parent) {
 NGroupBoxPrivate::~NGroupBoxPrivate() {}
 
 QRect NGroupBoxPrivate::calculateTitleRect(const QRect& rect) const {
-    return QRect(
-        rect.x() + _pContentMargin, rect.y() + _pContentMargin, rect.width() - 2 * _pContentMargin, _pTitleHeight);
+    return QRect(rect.x(), rect.y(), rect.width(), _pTitleHeight);
 }
 
 QRect NGroupBoxPrivate::calculateContentRect(const QRect& rect) const {
-    int contentY = _pContentMargin + _pTitleHeight + _pContentMargin;
+    int contentY = _pTitleHeight + 4 + _pContentMargin;
     return QRect(rect.x() + _pContentMargin,
                  rect.y() + contentY,
                  rect.width() - 2 * _pContentMargin,
                  rect.height() - contentY - _pContentMargin);
-}
-
-QRect NGroupBoxPrivate::calculateCollapseIndicatorRect(const QRect& titleRect) const {
-    int indicatorSize = _pCollapseIndicatorSize;
-    int rightMargin   = _pContentMargin;
-    return QRect(titleRect.right() - rightMargin - indicatorSize,
-                 titleRect.y() + (titleRect.height() - indicatorSize) / 2,
-                 indicatorSize,
-                 indicatorSize);
 }

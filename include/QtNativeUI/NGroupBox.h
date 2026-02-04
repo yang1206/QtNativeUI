@@ -1,14 +1,19 @@
 #ifndef QTNATIVEUI_NGROUPBOX_H
 #define QTNATIVEUI_NGROUPBOX_H
 
-#include <QGroupBox>
+#include <QWidget>
 #include "NIconEnums.h"
 #include "stdafx.h"
 
 class NGroupBoxPrivate;
-class QTNATIVEUI_EXPORT NGroupBox : public QGroupBox {
+class QTNATIVEUI_EXPORT NGroupBox : public QWidget {
     Q_OBJECT
     Q_Q_CREATE(NGroupBox)
+    Q_PROPERTY(QString title READ title WRITE setTitle)
+    Q_PROPERTY(Qt::Alignment alignment READ alignment WRITE setAlignment)
+    Q_PROPERTY(bool flat READ isFlat WRITE setFlat)
+    Q_PROPERTY(bool checkable READ isCheckable WRITE setCheckable)
+    Q_PROPERTY(bool checked READ isChecked WRITE setChecked NOTIFY toggled USER true)
     Q_PROPERTY_CREATE_Q_H(int, BorderRadius)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBackgroundColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundColor)
@@ -20,43 +25,39 @@ class QTNATIVEUI_EXPORT NGroupBox : public QGroupBox {
     Q_PROPERTY_CREATE_Q_H(bool, ShowBorder)
     Q_PROPERTY_CREATE_Q_H(int, ContentMargin)
     Q_PROPERTY_CREATE_Q_H(int, TitleHeight)
-    Q_PROPERTY_CREATE_Q_H(int, CollapseIndicatorSize)
 
   public:
-    enum GroupBoxStyle {
-        Standard,    // 标准样式
-        Card,        // 卡片样式
-        Outlined     // 轮廓样式
-    };
+    enum GroupBoxStyle { Standard, Card, Outlined };
     Q_ENUM(GroupBoxStyle)
 
     explicit NGroupBox(QWidget* parent = nullptr);
     explicit NGroupBox(const QString& title, QWidget* parent = nullptr);
     ~NGroupBox();
 
-    void setGroupBoxStyle(GroupBoxStyle style);
+    void          setGroupBoxStyle(GroupBoxStyle style);
     GroupBoxStyle groupBoxStyle() const;
+
+    void    setTitle(const QString& title);
+    QString title() const;
+
+    void          setAlignment(Qt::Alignment alignment);
+    Qt::Alignment alignment() const;
+
+    void setFlat(bool flat);
+    bool isFlat() const;
+
+    void setCheckable(bool checkable);
+    bool isCheckable() const;
+
+    void setChecked(bool checked);
+    bool isChecked() const;
 
     void setTitleIcon(NRegularIconType::Icon icon, int size = 16);
     void setTitleIcon(NFilledIconType::Icon icon, int size = 16);
     void clearTitleIcon();
 
-    void setExpandedIcon(NRegularIconType::Icon icon);
-    void setExpandedIcon(NFilledIconType::Icon icon);
-    void setCollapsedIcon(NRegularIconType::Icon icon);
-    void setCollapsedIcon(NFilledIconType::Icon icon);
-
-    void setCollapsible(bool collapsible);
-    bool isCollapsible() const;
-
-    void setCollapsed(bool collapsed);
-    bool isCollapsed() const;
-
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
-
   signals:
-    void collapsedChanged(bool collapsed);
+    void toggled(bool checked);
 
   protected:
     void paintEvent(QPaintEvent* event) override;
@@ -67,7 +68,6 @@ class QTNATIVEUI_EXPORT NGroupBox : public QGroupBox {
     void drawBackground(QPainter* painter);
     void drawBorder(QPainter* painter);
     void drawTitle(QPainter* painter);
-    void drawCollapseIndicator(QPainter* painter);
 
     QRect titleRect() const;
     QRect contentRect() const;
@@ -75,8 +75,7 @@ class QTNATIVEUI_EXPORT NGroupBox : public QGroupBox {
   private:
     void init();
     void updateLayout();
-    void updateChildrenVisibility(bool visible);
     void updateTitleIcon();
+    void updateChildrenEnabled();
 };
-
 #endif // QTNATIVEUI_NGROUPBOX_H

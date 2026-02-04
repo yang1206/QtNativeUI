@@ -1,5 +1,4 @@
 #include "GroupBoxPage.h"
-#include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QtNativeUI/NCheckBox.h>
 #include <QtNativeUI/NGroupBox.h>
@@ -10,13 +9,11 @@
 #include <QtNativeUI/NToggleSwitch.h>
 
 GroupBoxPage::GroupBoxPage(QWidget* parent)
-    : BasePage("GroupBox 分组框", "GroupBox 用于将相关控件分组显示，支持多种样式和可折叠功能。", parent) {
-
+    : BasePage("GroupBox 分组框", "GroupBox 用于将相关控件分组显示，支持多种样式。", parent) {
     QVBoxLayout* basicLayout = new QVBoxLayout();
     basicLayout->setSpacing(16);
 
     NGroupBox* basicGroupBox = new NGroupBox("基本信息", this);
-    basicGroupBox->setMinimumWidth(400);
 
     QVBoxLayout* basicContentLayout = new QVBoxLayout(basicGroupBox);
     basicContentLayout->addWidget(new NLineEdit("姓名"));
@@ -81,30 +78,6 @@ GroupBoxPage::GroupBoxPage(QWidget* parent)
 
     addSection("带图标的分组框", iconLayout);
 
-    QVBoxLayout* collapsibleLayout = new QVBoxLayout();
-    collapsibleLayout->setSpacing(16);
-
-    NGroupBox* collapsibleGroupBox = new NGroupBox("高级设置", this);
-    collapsibleGroupBox->setTitleIcon(NRegularIconType::Options24Regular, 18);
-    collapsibleGroupBox->setCollapsible(true);
-    collapsibleGroupBox->setMinimumWidth(400);
-
-    QVBoxLayout* collapsibleContentLayout = new QVBoxLayout(collapsibleGroupBox);
-    collapsibleContentLayout->addWidget(new NLineEdit("服务器地址"));
-    collapsibleContentLayout->addWidget(new NSpinBox());
-    collapsibleContentLayout->addWidget(new NCheckBox("启用SSL"));
-    collapsibleContentLayout->addWidget(new NCheckBox("启用压缩"));
-
-    QLabel* statusLabel = new QLabel("状态: 展开", this);
-    connect(collapsibleGroupBox, &NGroupBox::collapsedChanged, [statusLabel](bool collapsed) {
-        statusLabel->setText(collapsed ? "状态: 折叠" : "状态: 展开");
-    });
-
-    collapsibleLayout->addWidget(collapsibleGroupBox);
-    collapsibleLayout->addWidget(statusLabel);
-
-    addSection("可折叠的分组框", collapsibleLayout);
-
     QVBoxLayout* nestedLayout = new QVBoxLayout();
     nestedLayout->setSpacing(16);
 
@@ -124,7 +97,6 @@ GroupBoxPage::GroupBoxPage(QWidget* parent)
     NGroupBox* permissionGroupBox = new NGroupBox("权限设置", parentGroupBox);
     permissionGroupBox->setGroupBoxStyle(NGroupBox::Outlined);
     permissionGroupBox->setTitleIcon(NRegularIconType::Key24Regular, 16);
-    permissionGroupBox->setCollapsible(true);
     QVBoxLayout* permissionLayout = new QVBoxLayout(permissionGroupBox);
     permissionLayout->addWidget(new NCheckBox("管理员权限"));
     permissionLayout->addWidget(new NCheckBox("读取权限"));
@@ -162,6 +134,28 @@ GroupBoxPage::GroupBoxPage(QWidget* parent)
 
     addSection("不同状态", stateLayout);
 
+    QVBoxLayout* checkableLayout = new QVBoxLayout();
+    checkableLayout->setSpacing(16);
+
+    NGroupBox* checkableGroupBox = new NGroupBox("可选中的分组框", this);
+    checkableGroupBox->setCheckable(true);
+    checkableGroupBox->setChecked(true);
+    checkableGroupBox->setMinimumWidth(400);
+    QVBoxLayout* checkableContentLayout = new QVBoxLayout(checkableGroupBox);
+    checkableContentLayout->addWidget(new NLineEdit("服务器地址"));
+    checkableContentLayout->addWidget(new NSpinBox());
+    checkableContentLayout->addWidget(new NCheckBox("启用SSL"));
+
+    QLabel* checkStatusLabel = new QLabel("状态: 已选中", this);
+    connect(checkableGroupBox, &NGroupBox::toggled, [checkStatusLabel](bool checked) {
+        checkStatusLabel->setText(checked ? "状态: 已选中" : "状态: 未选中");
+    });
+
+    checkableLayout->addWidget(checkableGroupBox);
+    checkableLayout->addWidget(checkStatusLabel);
+
+    addSection("可选中的分组框", checkableLayout);
+
     QHBoxLayout* customLayout = new QHBoxLayout();
     customLayout->setSpacing(16);
 
@@ -173,19 +167,16 @@ GroupBoxPage::GroupBoxPage(QWidget* parent)
     customMarginLayout->addWidget(new NCheckBox("选项 1"));
     customMarginLayout->addWidget(new NCheckBox("选项 2"));
 
-    NGroupBox* customIconGroupBox = new NGroupBox("自定义折叠图标", this);
-    customIconGroupBox->setCollapsible(true);
-    customIconGroupBox->setExpandedIcon(NRegularIconType::ChevronUp16Regular);
-    customIconGroupBox->setCollapsedIcon(NRegularIconType::Add16Regular);
-    customIconGroupBox->setCollapseIndicatorSize(18);
-    customIconGroupBox->setMinimumWidth(200);
-    QVBoxLayout* customIconLayout = new QVBoxLayout(customIconGroupBox);
-    customIconLayout->addWidget(new NLineEdit("内容"));
-    customIconLayout->addWidget(new NCheckBox("选项"));
+    NGroupBox* customRadiusGroupBox = new NGroupBox("大圆角", this);
+    customRadiusGroupBox->setBorderRadius(16);
+    customRadiusGroupBox->setMinimumWidth(200);
+    QVBoxLayout* customRadiusLayout = new QVBoxLayout(customRadiusGroupBox);
+    customRadiusLayout->addWidget(new NLineEdit("内容"));
+    customRadiusLayout->addWidget(new NCheckBox("选项"));
 
     customLayout->addWidget(customMarginGroupBox);
-    customLayout->addWidget(customIconGroupBox);
+    customLayout->addWidget(customRadiusGroupBox);
     customLayout->addStretch();
 
-    addSection("自定义边距和折叠图标", customLayout);
+    addSection("自定义样式", customLayout);
 }

@@ -4,6 +4,10 @@
 #include <QtNativeUI/NEnums.h>
 #include <QtNativeUI/NGroupBox.h>
 
+#include "QtNativeUI/NCheckBox.h"
+
+class QVBoxLayout;
+
 class NGroupBoxPrivate : public QObject {
     Q_OBJECT
     Q_PROPERTY_CREATE_D(int, BorderRadius)
@@ -17,7 +21,6 @@ class NGroupBoxPrivate : public QObject {
     Q_PROPERTY_CREATE_D(bool, ShowBorder)
     Q_PROPERTY_CREATE_D(int, ContentMargin)
     Q_PROPERTY_CREATE_D(int, TitleHeight)
-    Q_PROPERTY_CREATE_D(int, CollapseIndicatorSize)
 
   public:
     explicit NGroupBoxPrivate(QObject* parent = nullptr);
@@ -29,14 +32,12 @@ class NGroupBoxPrivate : public QObject {
     bool                     _isDark;
     NGroupBox::GroupBoxStyle _groupBoxStyle{NGroupBox::Standard};
 
-    // 折叠功能
-    bool _isCollapsible{false};
-    bool _isCollapsed{false};
-    int  _expandedHeight{0};
-    int  _collapsedHeight{0};
-    bool _isAnimating{false};
+    QString       _title;
+    Qt::Alignment _alignment{Qt::AlignLeft};
+    bool          _flat{false};
+    bool          _checkable{false};
+    bool          _checked{false};
 
-    // 标题图标
     struct TitleIconInfo {
         bool    isRegular = true;
         quint32 iconCode  = 0;
@@ -45,14 +46,7 @@ class NGroupBoxPrivate : public QObject {
     };
     TitleIconInfo _titleIcon;
 
-    // 折叠指示器图标
-    struct CollapseIconInfo {
-        bool    isRegular     = true;
-        quint32 iconCode      = 0;
-        bool    hasCustomIcon = false;
-    };
-    CollapseIconInfo _expandedIcon;
-    CollapseIconInfo _collapsedIcon;
+    NCheckBox* _checkBox{nullptr};
 
     int _borderWidth{1};
 
@@ -62,7 +56,6 @@ class NGroupBoxPrivate : public QObject {
 
     QRect calculateTitleRect(const QRect& rect) const;
     QRect calculateContentRect(const QRect& rect) const;
-    QRect calculateCollapseIndicatorRect(const QRect& titleRect) const;
 };
 
 #endif // QTNATIVEUI_NGROUPBOX_P_H
