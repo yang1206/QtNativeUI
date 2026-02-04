@@ -27,17 +27,17 @@ DatePickerPage::DatePickerPage(QWidget* parent)
     QGridLayout* localeLayout = new QGridLayout();
     localeLayout->setSpacing(16);
     localeLayout->setColumnStretch(2, 1);
-    
+
     int row = 0;
-    
+
     // 1. 中文 (简体)
     {
-        NLabel* flagLabel = new NLabel("🇨🇳", this);
+        NLabel* flagLabel = new NLabel("CN", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("中文 (简体)", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::Chinese, QLocale::China);
+        QLocale      locale(QLocale::Chinese, QLocale::China);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("yyyy-MM-dd"), this);
@@ -54,12 +54,12 @@ DatePickerPage::DatePickerPage(QWidget* parent)
 
     // 2. English (US)
     {
-        NLabel* flagLabel = new NLabel("🇺🇸", this);
+        NLabel* flagLabel = new NLabel("US", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("English (US)", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::English, QLocale::UnitedStates);
+        QLocale      locale(QLocale::English, QLocale::UnitedStates);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("M/d/yy"), this);
@@ -76,12 +76,12 @@ DatePickerPage::DatePickerPage(QWidget* parent)
 
     // 3. English (UK)
     {
-        NLabel* flagLabel = new NLabel("🇬🇧", this);
+        NLabel* flagLabel = new NLabel("UK", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("English (UK)", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::English, QLocale::UnitedKingdom);
+        QLocale      locale(QLocale::English, QLocale::UnitedKingdom);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("dd/MM/yyyy"), this);
@@ -98,12 +98,12 @@ DatePickerPage::DatePickerPage(QWidget* parent)
 
     // 4. Français
     {
-        NLabel* flagLabel = new NLabel("🇫🇷", this);
+        NLabel* flagLabel = new NLabel("FR", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("Français", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::French, QLocale::France);
+        QLocale      locale(QLocale::French, QLocale::France);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("dd/MM/yyyy"), this);
@@ -120,12 +120,12 @@ DatePickerPage::DatePickerPage(QWidget* parent)
 
     // 5. Deutsch
     {
-        NLabel* flagLabel = new NLabel("🇩🇪", this);
+        NLabel* flagLabel = new NLabel("DE", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("Deutsch", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::German, QLocale::Germany);
+        QLocale      locale(QLocale::German, QLocale::Germany);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("dd.MM.yyyy"), this);
@@ -142,12 +142,12 @@ DatePickerPage::DatePickerPage(QWidget* parent)
 
     // 6. 日本語
     {
-        NLabel* flagLabel = new NLabel("🇯🇵", this);
+        NLabel* flagLabel = new NLabel("JP", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("日本語", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::Japanese, QLocale::Japan);
+        QLocale      locale(QLocale::Japanese, QLocale::Japan);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("yyyy/MM/dd"), this);
@@ -162,36 +162,14 @@ DatePickerPage::DatePickerPage(QWidget* parent)
         row++;
     }
 
-    // 7. 한국어
-    {
-        NLabel* flagLabel = new NLabel("🇰🇷", this);
-        flagLabel->setFixedWidth(30);
-        NLabel* nameLabel = new NLabel("한국어", this);
-        nameLabel->setFixedWidth(120);
-        NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::Korean, QLocale::SouthKorea);
-        localePicker->setLocale(locale);
-        localePicker->setDate(QDate::currentDate());
-        NLabel* resultLabel = new NLabel(localePicker->getDate().toString("yyyy-MM-dd"), this);
-        resultLabel->setMinimumWidth(150);
-        connect(localePicker, &NDatePicker::dateChanged, [resultLabel, locale](const QDate& date) {
-            resultLabel->setText(date.toString(locale.dateFormat(QLocale::ShortFormat)));
-        });
-        localeLayout->addWidget(flagLabel, row, 0);
-        localeLayout->addWidget(nameLabel, row, 1);
-        localeLayout->addWidget(localePicker, row, 2);
-        localeLayout->addWidget(resultLabel, row, 3);
-        row++;
-    }
-
     // 8. Español
     {
-        NLabel* flagLabel = new NLabel("🇪🇸", this);
+        NLabel* flagLabel = new NLabel("ES", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("Español", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::Spanish, QLocale::Spain);
+        QLocale      locale(QLocale::Spanish, QLocale::Spain);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("d/M/yy"), this);
@@ -208,12 +186,12 @@ DatePickerPage::DatePickerPage(QWidget* parent)
 
     // 9. Italiano
     {
-        NLabel* flagLabel = new NLabel("🇮🇹", this);
+        NLabel* flagLabel = new NLabel("IT", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("Italiano", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::Italian, QLocale::Italy);
+        QLocale      locale(QLocale::Italian, QLocale::Italy);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("dd/MM/yyyy"), this);
@@ -230,12 +208,12 @@ DatePickerPage::DatePickerPage(QWidget* parent)
 
     // 10. Русский
     {
-        NLabel* flagLabel = new NLabel("🇷🇺", this);
+        NLabel* flagLabel = new NLabel("RU", this);
         flagLabel->setFixedWidth(30);
         NLabel* nameLabel = new NLabel("Русский", this);
         nameLabel->setFixedWidth(120);
         NDatePicker* localePicker = new NDatePicker(this);
-        QLocale locale(QLocale::Russian, QLocale::Russia);
+        QLocale      locale(QLocale::Russian, QLocale::Russia);
         localePicker->setLocale(locale);
         localePicker->setDate(QDate::currentDate());
         NLabel* resultLabel = new NLabel(localePicker->getDate().toString("dd.MM.yyyy"), this);
