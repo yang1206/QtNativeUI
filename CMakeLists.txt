@@ -58,6 +58,7 @@ set(QtNativeUI_CONTROLS_SOURCES
     src/controls/NDialog.cpp
     src/controls/NDoubleSpinBox.cpp
     src/controls/NDropDownButton.cpp
+    src/controls/NExpander.cpp
     src/controls/NFlyout.cpp
     src/controls/NGroupBox.cpp
     src/controls/NHyperlinkButton.cpp
@@ -136,6 +137,8 @@ set(QtNativeUI_PRIVATE_SOURCES
     src/private/ndropdownbutton_p.h
     src/private/neditstyle.cpp
     src/private/neditstyle.h
+    src/private/nexpander_p.cpp
+    src/private/nexpander_p.h
     src/private/nflyout_p.cpp
     src/private/nflyout_p.h
     src/private/nframelesshelper_p.cpp
@@ -267,6 +270,7 @@ set(QtNativeUI_HEADERS
     include/QtNativeUI/NDoubleSpinBox.h
     include/QtNativeUI/NDropDownButton.h
     include/QtNativeUI/NEnums.h
+    include/QtNativeUI/NExpander.h
     include/QtNativeUI/NFluentColors.h
     include/QtNativeUI/NFlyout.h
     include/QtNativeUI/NGroupBox.h

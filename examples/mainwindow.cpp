@@ -14,6 +14,7 @@
 #include "pages/basic/PushButtonPage.h"
 #include "pages/basic/ToggleButtonPage.h"
 #include "pages/basic/ToolButtonPage.h"
+#include "pages/container/ExpanderPage.h"
 #include "pages/container/GroupBoxPage.h"
 #include "pages/container/OverlayPage.h"
 #include "pages/container/ScrollAreaPage.h"
@@ -102,6 +103,7 @@ MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     QString containerGroup;
     m_navigationView->addExpanderNode("布局容器", containerGroup, NRegularIconType::Box16Regular);
     m_navigationView->addPageNode("GroupBox", new GroupBoxPage(this), containerGroup, NRegularIconType::None);
+    m_navigationView->addPageNode("Expander", new ExpanderPage(this), containerGroup, NRegularIconType::None);
     m_navigationView->addPageNode("ScrollArea", new ScrollAreaPage(this), containerGroup, NRegularIconType::None);
     m_navigationView->addPageNode("StackedWidget", new StackedWidgetPage(this), containerGroup, NRegularIconType::None);
     m_navigationView->addPageNode("Overlay", new OverlayPage(this), containerGroup, NRegularIconType::None);

@@ -63,6 +63,8 @@ set(EXAMPLE_PAGES_SOURCES
         pages/datetime/TimePickerPage.h
         pages/container/GroupBoxPage.cpp
         pages/container/GroupBoxPage.h
+        pages/container/ExpanderPage.cpp
+        pages/container/ExpanderPage.h
         pages/container/ScrollAreaPage.cpp
         pages/container/ScrollAreaPage.h
         pages/container/StackedWidgetPage.cpp
