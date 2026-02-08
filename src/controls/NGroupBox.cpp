@@ -221,8 +221,7 @@ void NGroupBox::drawBackground(QPainter* painter) {
         painter->setPen(Qt::NoPen);
         painter->setBrush(bgColor);
         
-        QRect bgRect = rect();
-        bgRect.setTop(d->_pTitleHeight + 4);
+        QRect bgRect = rect().adjusted(0, d->_pTitleHeight + 4, -1, -1);
         
         painter->drawRoundedRect(bgRect, d->_pBorderRadius, d->_pBorderRadius);
         painter->restore();
