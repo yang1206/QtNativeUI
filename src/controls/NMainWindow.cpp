@@ -56,9 +56,9 @@ void NMainWindow::connectWindowBarSignals() {
     });
 
     connect(d->windowBar, &NWindowBar::themeRequested, this, [this]() {
-        auto currentMode = nTheme->themeMode();
+        const bool isDark = nTheme->isDarkMode();
         bool willBeDark;
-        if (currentMode == NThemeType::ThemeMode::Light) {
+        if (!isDark) {
             nTheme->setThemeMode(NThemeType::ThemeMode::Dark);
             willBeDark = true;
         } else {
