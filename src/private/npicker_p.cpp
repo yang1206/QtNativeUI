@@ -6,7 +6,15 @@ NPickerPrivate::NPickerPrivate(QObject* parent) : QObject(parent) {}
 NPickerPrivate::~NPickerPrivate() {}
 
 void NPickerPrivate::_scroll(int delta) {
-    int steps             = delta / 120;
+    _deltaAccumulator += delta;
+    int steps = _deltaAccumulator / 120;
+
+    if (steps == 0) {
+        return;
+    }
+
+    _deltaAccumulator -= steps * 120;
+
     _targetScrollOffset -= steps * _pItemHeight;
     _targetScrollOffset   = qRound(_targetScrollOffset / _pItemHeight) * _pItemHeight;
 

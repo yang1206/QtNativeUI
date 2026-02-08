@@ -38,6 +38,7 @@ class NPickerPrivate : public QObject {
     QTimer*               _repeatScrollTimer{nullptr};
     qreal                 _targetScrollOffset{0};
     QPoint                _mousePoint;
+    int                   _deltaAccumulator{0};
 
     void _scroll(int delta);
 };
