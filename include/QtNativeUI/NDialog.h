@@ -1,6 +1,7 @@
 #ifndef QTNATIVEUI_NDIALOG_H
 #define QTNATIVEUI_NDIALOG_H
 
+#include <QColor>
 #include <QDialog>
 #include <QVariant>
 
@@ -25,7 +26,15 @@ class QTNATIVEUI_EXPORT NDialog : public QDialog {
     Q_PROPERTY(WindowEffectType windowEffect READ windowEffect WRITE setWindowEffect NOTIFY windowEffectChanged)
 
   public:
-    enum WindowEffectType { None = 0, Blur, Acrylic, Mica, MicaAlt };
+    enum WindowEffectType {
+        None = 0,
+        Blur,
+        Acrylic,
+        Mica,
+        MicaAlt,
+        GlassRegular,
+        GlassClear
+    };
     Q_ENUM(WindowEffectType)
 
     enum SystemButtonType { Minimize, Maximize, Close };
@@ -36,6 +45,13 @@ class QTNATIVEUI_EXPORT NDialog : public QDialog {
 
     void         setWindowEffect(WindowEffectType type);
     WindowEffectType windowEffect() const;
+
+    void  setGlassCornerRadius(qreal radius);
+    qreal glassCornerRadius() const;
+    void  setGlassTintColor(const QColor& color);
+    QColor glassTintColor() const;
+
+    static bool isGlassEffectSupported();
 
     int borderThickness() const;
     int titleBarHeight() const;

@@ -24,7 +24,7 @@ class NFramelessHelper : public QObject {
     Q_OBJECT
 
   public:
-    enum WindowEffectType { None = 0, Blur, Acrylic, Mica, MicaAlt };
+    enum WindowEffectType { None = 0, Blur, Acrylic, Mica, MicaAlt, GlassRegular, GlassClear };
 
     enum SystemButtonType { WindowIcon, Minimize, Maximize, Close };
 
@@ -35,6 +35,11 @@ class NFramelessHelper : public QObject {
 
     void         setWindowEffect(WindowEffectType type);
     WindowEffectType windowEffect() const;
+
+    void  setGlassCornerRadius(qreal radius);
+    qreal glassCornerRadius() const;
+    void  setGlassTintColor(const QColor& color);
+    QColor glassTintColor() const;
 
     int borderThickness() const;
     int titleBarHeight() const;
@@ -79,18 +84,24 @@ class NFramelessHelper : public QObject {
 #endif
     }
 
+    static bool isGlassEffectSupported();
+
   Q_SIGNALS:
     void windowEffectChanged(WindowEffectType type);
 
   private:
     void setupThemeConnection();
-    void applyBackdropEffect(WindowEffectType type);
+    WindowEffectType applyBackdropEffect(WindowEffectType type);
+    void clearMacBackdropEffects();
     void updateBackgroundColor();
+    bool isGlassEffect(WindowEffectType type) const;
 
     QWidget*                m_host         = nullptr;
     QWK::WidgetWindowAgent* m_windowAgent  = nullptr;
     WindowEffectType        m_windowEffect = None;
     QColor                  m_backgroundColor;
+    qreal                   m_glassCornerRadius = 0;
+    QColor                  m_glassTintColor;
 };
 
 #endif // QTNATIVEUI_NFRAMELESSHELPER_P_H

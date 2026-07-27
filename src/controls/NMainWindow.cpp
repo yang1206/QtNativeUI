@@ -86,15 +86,41 @@ void NMainWindow::connectWindowBarSignals() {
 
 void NMainWindow::setWindowEffect(WindowEffectType type) {
     Q_D(NMainWindow);
+    const WindowEffectType previous = windowEffect();
     d->frameless->setWindowEffect(static_cast<NFramelessHelper::WindowEffectType>(type));
-    if (d->frameless->windowEffect() == static_cast<NFramelessHelper::WindowEffectType>(type)) {
-        emit windowEffectChanged(type);
+    const WindowEffectType current = windowEffect();
+    if (current != previous) {
+        emit windowEffectChanged(current);
     }
 }
 
 NMainWindow::WindowEffectType NMainWindow::windowEffect() const {
     Q_D(const NMainWindow);
     return static_cast<WindowEffectType>(d->frameless->windowEffect());
+}
+
+void NMainWindow::setGlassCornerRadius(qreal radius) {
+    Q_D(NMainWindow);
+    d->frameless->setGlassCornerRadius(radius);
+}
+
+qreal NMainWindow::glassCornerRadius() const {
+    Q_D(const NMainWindow);
+    return d->frameless->glassCornerRadius();
+}
+
+void NMainWindow::setGlassTintColor(const QColor& color) {
+    Q_D(NMainWindow);
+    d->frameless->setGlassTintColor(color);
+}
+
+QColor NMainWindow::glassTintColor() const {
+    Q_D(const NMainWindow);
+    return d->frameless->glassTintColor();
+}
+
+bool NMainWindow::isGlassEffectSupported() {
+    return NFramelessHelper::isGlassEffectSupported();
 }
 
 int NMainWindow::borderThickness() const {

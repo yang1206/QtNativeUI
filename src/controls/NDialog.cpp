@@ -34,15 +34,41 @@ void NDialog::paintEvent(QPaintEvent* event) {
 
 void NDialog::setWindowEffect(WindowEffectType type) {
     Q_D(NDialog);
+    const WindowEffectType previous = windowEffect();
     d->frameless->setWindowEffect(static_cast<NFramelessHelper::WindowEffectType>(type));
-    if (d->frameless->windowEffect() == static_cast<NFramelessHelper::WindowEffectType>(type)) {
-        emit windowEffectChanged(type);
+    const WindowEffectType current = windowEffect();
+    if (current != previous) {
+        emit windowEffectChanged(current);
     }
 }
 
 NDialog::WindowEffectType NDialog::windowEffect() const {
     Q_D(const NDialog);
     return static_cast<WindowEffectType>(d->frameless->windowEffect());
+}
+
+void NDialog::setGlassCornerRadius(qreal radius) {
+    Q_D(NDialog);
+    d->frameless->setGlassCornerRadius(radius);
+}
+
+qreal NDialog::glassCornerRadius() const {
+    Q_D(const NDialog);
+    return d->frameless->glassCornerRadius();
+}
+
+void NDialog::setGlassTintColor(const QColor& color) {
+    Q_D(NDialog);
+    d->frameless->setGlassTintColor(color);
+}
+
+QColor NDialog::glassTintColor() const {
+    Q_D(const NDialog);
+    return d->frameless->glassTintColor();
+}
+
+bool NDialog::isGlassEffectSupported() {
+    return NFramelessHelper::isGlassEffectSupported();
 }
 
 int NDialog::borderThickness() const {

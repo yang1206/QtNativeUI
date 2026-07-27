@@ -2,6 +2,7 @@
 
 #include <QAbstractButton>
 #include <QApplication>
+#include <QOperatingSystemVersion>
 #include <QPalette>
 #include <QWidget>
 
@@ -73,9 +74,33 @@ void NFramelessHelper::updateBackgroundColor()
         : nTheme->getColorForTheme(NFluentColorKey::SolidBackgroundFillColorBase, NThemeType::Light);
 }
 
-void NFramelessHelper::applyBackdropEffect(WindowEffectType type)
+bool NFramelessHelper::isGlassEffectSupported()
+{
+#ifdef Q_OS_MAC
+    const auto version = QOperatingSystemVersion::current();
+    return version.type() == QOperatingSystemVersion::MacOS && version.majorVersion() >= 26;
+#else
+    return false;
+#endif
+}
+
+bool NFramelessHelper::isGlassEffect(WindowEffectType type) const
+{
+    return type == GlassRegular || type == GlassClear;
+}
+
+void NFramelessHelper::clearMacBackdropEffects()
+{
+#ifdef Q_OS_MAC
+    m_windowAgent->setWindowAttribute(QStringLiteral("blur-effect"), QStringLiteral("none"));
+    m_windowAgent->setWindowAttribute(QStringLiteral("glass-effect"), QStringLiteral("none"));
+#endif
+}
+
+NFramelessHelper::WindowEffectType NFramelessHelper::applyBackdropEffect(WindowEffectType type)
 {
     bool needsRepaint = false;
+    WindowEffectType applied = type;
 
 #ifdef Q_OS_WIN
     static const QStringList effectKeys = {
@@ -106,14 +131,34 @@ void NFramelessHelper::applyBackdropEffect(WindowEffectType type)
 
 #elif defined(Q_OS_MAC)
     if (type == Blur) {
+        m_windowAgent->setWindowAttribute(QStringLiteral("glass-effect"), QStringLiteral("none"));
         m_windowAgent->setWindowAttribute(QStringLiteral("blur-effect"),
                                           nTheme->isDarkMode() ? "dark" : "light");
         m_host->setPalette(QPalette());
         if (m_windowEffect == None) {
             needsRepaint = true;
         }
+    } else if (isGlassEffect(type)) {
+        m_windowAgent->setWindowAttribute(QStringLiteral("blur-effect"), QStringLiteral("none"));
+        m_windowAgent->setWindowAttribute(QStringLiteral("glass-corner-radius"), m_glassCornerRadius);
+        m_windowAgent->setWindowAttribute(QStringLiteral("glass-tint-color"),
+                                          m_glassTintColor.isValid()
+                                              ? QVariant::fromValue(m_glassTintColor)
+                                              : QVariant(QStringLiteral("none")));
+        const QString effect = type == GlassRegular ? QStringLiteral("regular")
+                                                    : QStringLiteral("clear");
+        if (!m_windowAgent->setWindowAttribute(QStringLiteral("glass-effect"), effect)) {
+            m_windowAgent->setWindowAttribute(QStringLiteral("glass-effect"), QStringLiteral("none"));
+            m_windowAgent->setWindowAttribute(QStringLiteral("blur-effect"),
+                                              nTheme->isDarkMode() ? "dark" : "light");
+            applied = Blur;
+        }
+        m_host->setPalette(QPalette());
+        if (m_windowEffect == None) {
+            needsRepaint = true;
+        }
     } else {
-        m_windowAgent->setWindowAttribute(QStringLiteral("blur-effect"), "none");
+        clearMacBackdropEffects();
         updateBackgroundColor();
         QPalette pal = m_host->palette();
         pal.setColor(QPalette::Window, m_backgroundColor);
@@ -127,6 +172,8 @@ void NFramelessHelper::applyBackdropEffect(WindowEffectType type)
     if (needsRepaint) {
         m_host->update();
     }
+
+    return applied;
 }
 
 void NFramelessHelper::setWindowEffect(WindowEffectType type)
@@ -134,14 +181,48 @@ void NFramelessHelper::setWindowEffect(WindowEffectType type)
     if (m_windowEffect == type)
         return;
 
-    applyBackdropEffect(type);
-    m_windowEffect = type;
-    emit windowEffectChanged(type);
+    const WindowEffectType applied = applyBackdropEffect(type);
+    m_windowEffect = applied;
+    emit windowEffectChanged(applied);
 }
 
 NFramelessHelper::WindowEffectType NFramelessHelper::windowEffect() const
 {
     return m_windowEffect;
+}
+
+void NFramelessHelper::setGlassCornerRadius(qreal radius)
+{
+    if (qFuzzyCompare(m_glassCornerRadius, radius))
+        return;
+
+    m_glassCornerRadius = radius;
+    if (isGlassEffect(m_windowEffect)) {
+        m_windowAgent->setWindowAttribute(QStringLiteral("glass-corner-radius"), radius);
+    }
+}
+
+qreal NFramelessHelper::glassCornerRadius() const
+{
+    return m_glassCornerRadius;
+}
+
+void NFramelessHelper::setGlassTintColor(const QColor& color)
+{
+    if (m_glassTintColor == color)
+        return;
+
+    m_glassTintColor = color;
+    if (isGlassEffect(m_windowEffect)) {
+        m_windowAgent->setWindowAttribute(QStringLiteral("glass-tint-color"),
+                                          color.isValid() ? QVariant::fromValue(color)
+                                                          : QVariant(QStringLiteral("none")));
+    }
+}
+
+QColor NFramelessHelper::glassTintColor() const
+{
+    return m_glassTintColor;
 }
 
 int NFramelessHelper::borderThickness() const

@@ -1,6 +1,7 @@
 #ifndef QTNATIVEUI_NMAINWINDOW_H
 #define QTNATIVEUI_NMAINWINDOW_H
 
+#include <QColor>
 #include <QMainWindow>
 #include <QVariant>
 #include <functional>
@@ -33,7 +34,9 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
         Blur,        ///< Blur effect
         Acrylic,     ///< Acrylic material effect
         Mica,        ///< Mica material effect
-        MicaAlt      ///< Mica alternative material effect
+        MicaAlt,     ///< Mica alternative material effect
+        GlassRegular,///< macOS 26+ Liquid Glass regular effect
+        GlassClear   ///< macOS 26+ Liquid Glass clear effect
     };
     Q_ENUM(WindowEffectType)
 
@@ -73,7 +76,11 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * **macOS Platform:**
      * - None: Standard window background
      * - Blur: NSVisualEffectView blur effect, supports automatic light/dark mode switching
-     * - Other types: Fall back to Blur or None
+     * - GlassRegular: macOS 26+ Liquid Glass regular effect
+     * - GlassClear: macOS 26+ Liquid Glass clear effect
+     * - Acrylic/Mica/MicaAlt: Not supported, fall back to None
+     * 
+     * On macOS versions below 26, GlassRegular and GlassClear automatically fall back to Blur.
      * 
      * **Linux Platform:**
      * - All effect types fall back to None due to lack of unified window effect APIs in X11/Wayland
@@ -91,6 +98,24 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * @see setWindowEffect()
      */
     WindowEffectType windowEffect() const;
+
+    /**
+     * @brief Set Liquid Glass corner radius (macOS 26+)
+     * @param radius Corner radius in pixels
+     * @note Only takes effect when windowEffect is GlassRegular or GlassClear
+     */
+    void  setGlassCornerRadius(qreal radius);
+    qreal glassCornerRadius() const;
+
+    /**
+     * @brief Set Liquid Glass tint color (macOS 26+)
+     * @param color Tint color, pass invalid QColor to clear tint
+     * @note Only takes effect when windowEffect is GlassRegular or GlassClear
+     */
+    void   setGlassTintColor(const QColor& color);
+    QColor glassTintColor() const;
+
+    static bool isGlassEffectSupported();
 
     /**
      * @brief Get window border thickness
@@ -168,8 +193,11 @@ class QTNATIVEUI_EXPORT NMainWindow : public QMainWindow {
      * Common attributes include:
      * - "dark-mode": Set window dark mode state (Windows)
      * - "blur-effect": Set blur effect type (macOS)
+     * - "glass-effect": Set Liquid Glass effect type (macOS 26+)
+     * - "glass-corner-radius": Set Liquid Glass corner radius (macOS 26+)
+     * - "glass-tint-color": Set Liquid Glass tint color (macOS 26+)
+     * - "no-system-buttons": Set macOS system buttons visibility
      * - "border-thickness": Window border thickness
-     * - "title-bar-height": Title bar height
      * 
      * @param key Attribute name
      * @param value Attribute value

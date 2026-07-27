@@ -1,4 +1,5 @@
 #include "MainWindowPage.h"
+#include <QColor>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>
@@ -118,11 +119,63 @@ MainWindowPage::MainWindowPage(QWidget* parent)
         window->show();
     });
 
+#ifdef Q_OS_MAC
+    NPushButton* glassRegularButton = new NPushButton("Glass Regular");
+    glassRegularButton->setFixedSize(140, 40);
+    connect(glassRegularButton, &NPushButton::clicked, this, []() {
+        NMainWindow* window = new NMainWindow();
+        window->setWindowTitle("Glass Regular 主窗口");
+        window->setWindowEffect(NMainWindow::GlassRegular);
+        window->resize(800, 600);
+        window->setAttribute(Qt::WA_DeleteOnClose);
+
+        QWidget*     central = new QWidget(window);
+        QVBoxLayout* layout  = new QVBoxLayout(central);
+        layout->setContentsMargins(20, 20, 20, 20);
+
+        QLabel* label = new QLabel("macOS 26+ Liquid Glass regular 效果", central);
+        layout->addWidget(label);
+        layout->addStretch();
+
+        window->setCentralWidget(central);
+        window->show();
+    });
+
+    NPushButton* glassRoundedButton = new NPushButton("Glass 圆角");
+    glassRoundedButton->setFixedSize(140, 40);
+    connect(glassRoundedButton, &NPushButton::clicked, this, []() {
+        NMainWindow* window = new NMainWindow();
+        window->setWindowTitle("Glass 圆角主窗口");
+        window->setWindowEffect(NMainWindow::GlassRegular);
+        window->setGlassCornerRadius(24);
+        window->setGlassTintColor(QColor(255, 255, 255, 46));
+        window->resize(800, 600);
+        window->setAttribute(Qt::WA_DeleteOnClose);
+
+        QWidget*     central = new QWidget(window);
+        QVBoxLayout* layout  = new QVBoxLayout(central);
+        layout->setContentsMargins(20, 20, 20, 20);
+
+        QLabel* label = new QLabel("Liquid Glass + 圆角 + 浅色 tint", central);
+        layout->addWidget(label);
+        layout->addStretch();
+
+        window->setCentralWidget(central);
+        window->show();
+    });
+#endif
+
     effectLayout->addWidget(noneButton);
     effectLayout->addWidget(blurButton);
     effectLayout->addWidget(acrylicButton);
     effectLayout->addWidget(micaButton);
     effectLayout->addWidget(micaAltButton);
+#ifdef Q_OS_MAC
+    if (NMainWindow::isGlassEffectSupported()) {
+        effectLayout->addWidget(glassRegularButton);
+        effectLayout->addWidget(glassRoundedButton);
+    }
+#endif
     effectLayout->addStretch();
 
     addSection("窗口效果", effectLayout);
