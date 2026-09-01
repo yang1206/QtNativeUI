@@ -126,6 +126,39 @@ InfoBarPage::InfoBarPage(QWidget* parent)
 
     addSection("自定义显示时间", durationLayout);
 
+    QHBoxLayout* dismissLayout = new QHBoxLayout();
+    dismissLayout->setSpacing(16);
+
+    NPushButton* showPersistentButton = new NPushButton("显示持久通知");
+    showPersistentButton->setFixedSize(140, 40);
+    connect(showPersistentButton, &NPushButton::clicked, this, [this]() {
+        if (_persistentInfoBar) {
+            return;
+        }
+        _persistentInfoBar = NInfoBar::information(
+            NInfoBarType::Top,
+            "处理中",
+            "任务进行中，完成后可点击右侧按钮关闭",
+            0,
+            this);
+    });
+
+    NPushButton* dismissPersistentButton = new NPushButton("代码关闭通知");
+    dismissPersistentButton->setFixedSize(140, 40);
+    connect(dismissPersistentButton, &NPushButton::clicked, this, [this]() {
+        if (!_persistentInfoBar) {
+            return;
+        }
+        _persistentInfoBar->dismiss();
+        _persistentInfoBar = nullptr;
+    });
+
+    dismissLayout->addWidget(showPersistentButton);
+    dismissLayout->addWidget(dismissPersistentButton);
+    dismissLayout->addStretch();
+
+    addSection("代码关闭通知", dismissLayout);
+
     QHBoxLayout* stackLayout = new QHBoxLayout();
     stackLayout->setSpacing(16);
 

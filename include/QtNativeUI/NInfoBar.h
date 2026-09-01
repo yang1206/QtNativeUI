@@ -18,31 +18,33 @@ class QTNATIVEUI_EXPORT NInfoBar : public QWidget {
                       QWidget*               parent          = nullptr,
                       bool                   showCloseButton = false);
 
-    void        addWidget(QWidget* widget);
-    static void information(NInfoBarType::PositionPolicy position,
-                            QString                      title,
-                            QString                      message,
-                            int                          displayDuration = 3000,
-                            QWidget*                     parent          = nullptr,
-                            bool                         showCloseButton = true);
-    static void success(NInfoBarType::PositionPolicy position,
-                        QString                      title,
-                        QString                      message,
-                        int                          displayDuration = 3000,
-                        QWidget*                     parent          = nullptr,
-                        bool                         showCloseButton = true);
-    static void warning(NInfoBarType::PositionPolicy position,
-                        QString                      title,
-                        QString                      message,
-                        int                          displayDuration = 3000,
-                        QWidget*                     parent          = nullptr,
-                        bool                         showCloseButton = true);
-    static void error(NInfoBarType::PositionPolicy position,
-                      QString                      title,
-                      QString                      message,
-                      int                          displayDuration = 3000,
-                      QWidget*                     parent          = nullptr,
-                      bool                         showCloseButton = true);
+    void addWidget(QWidget* widget);
+    void dismiss();
+
+    static NInfoBar* information(NInfoBarType::PositionPolicy position,
+                                 QString                      title,
+                                 QString                      message,
+                                 int                          displayDuration = 3000,
+                                 QWidget*                     parent          = nullptr,
+                                 bool                         showCloseButton = true);
+    static NInfoBar* success(NInfoBarType::PositionPolicy position,
+                             QString                      title,
+                             QString                      message,
+                             int                          displayDuration = 3000,
+                             QWidget*                     parent          = nullptr,
+                             bool                         showCloseButton = true);
+    static NInfoBar* warning(NInfoBarType::PositionPolicy position,
+                             QString                      title,
+                             QString                      message,
+                             int                          displayDuration = 3000,
+                             QWidget*                     parent          = nullptr,
+                             bool                         showCloseButton = true);
+    static NInfoBar* error(NInfoBarType::PositionPolicy position,
+                           QString                      title,
+                           QString                      message,
+                           int                          displayDuration = 3000,
+                           QWidget*                     parent          = nullptr,
+                           bool                         showCloseButton = true);
 
   protected:
     void paintEvent(QPaintEvent* event) override;

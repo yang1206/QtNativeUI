@@ -11,6 +11,24 @@
 #include "QtNativeUI/NPushButton.h"
 #include "QtNativeUI/NTheme.h"
 
+namespace {
+
+QWidget* resolveInfoBarParent(QWidget* parent) {
+    if (parent) {
+        return parent;
+    }
+
+    const QList<QWidget*> widgetList = QApplication::topLevelWidgets();
+    for (QWidget* widget : widgetList) {
+        if (widget->isVisible() && widget->windowType() != Qt::Desktop) {
+            return widget;
+        }
+    }
+    return nullptr;
+}
+
+} // namespace
+
 NInfoBar::NInfoBar(NInfoBarType::PositionPolicy position,
                    NInfoBarType::InfoMode       severity,
                    QString&                     title,
@@ -20,8 +38,9 @@ NInfoBar::NInfoBar(NInfoBarType::PositionPolicy position,
                    bool                         showCloseButton)
     : QWidget{parent}, d_ptr(new NInfoBarPrivate()) {
     Q_D(NInfoBar);
-    d->q_ptr            = this;
-    d->_borderRadius    = 6;
+    d->q_ptr                   = this;
+    d->_isFloatingNotification = true;
+    d->_borderRadius           = 6;
     d->_title           = title;
     d->_message         = message;
     d->_position        = position;
@@ -89,28 +108,27 @@ NInfoBar::NInfoBar(NInfoBarType::PositionPolicy position,
 
 NInfoBar::~NInfoBar() {}
 
-void NInfoBar::information(NInfoBarType::PositionPolicy position,
-                           QString                      title,
-                           QString                      message,
-                           int                          displayDuration,
-                           QWidget*                     parent,
-                           bool                         showCloseButton) {
+void NInfoBar::dismiss() {
+    Q_D(NInfoBar);
+    if (d->_isFloatingNotification) {
+        d->requestDismiss();
+        return;
+    }
+    close();
+}
+
+NInfoBar* NInfoBar::information(NInfoBarType::PositionPolicy position,
+                                QString                      title,
+                                QString                      message,
+                                int                          displayDuration,
+                                QWidget*                     parent,
+                                bool                         showCloseButton) {
+    parent = resolveInfoBarParent(parent);
     if (!parent) {
-        QList<QWidget*> widgetList = QApplication::topLevelWidgets();
-        for (auto widget : widgetList) {
-            if (widget->isVisible() && widget->windowType() != Qt::Desktop) {
-                parent = widget;
-                break;
-            }
-        }
-        if (!parent) {
-            return;
-        }
+        return nullptr;
     }
 
-    NInfoBar* infoBar =
-        new NInfoBar(position, NInfoBarType::Information, title, message, displayDuration, parent, showCloseButton);
-    Q_UNUSED(infoBar);
+    return new NInfoBar(position, NInfoBarType::Information, title, message, displayDuration, parent, showCloseButton);
 }
 
 NInfoBar::NInfoBar(NInfoBarType::InfoMode severity,
@@ -120,8 +138,9 @@ NInfoBar::NInfoBar(NInfoBarType::InfoMode severity,
                    bool                   showCloseButton)
     : QWidget{parent}, d_ptr(new NInfoBarPrivate()) {
     Q_D(NInfoBar);
-    d->q_ptr            = this;
-    d->_borderRadius    = 6;
+    d->q_ptr                   = this;
+    d->_isFloatingNotification = false;
+    d->_borderRadius           = 6;
     d->_title           = title;
     d->_message         = message;
     d->_position        = NInfoBarType::Top;
@@ -194,76 +213,46 @@ void NInfoBar::addWidget(QWidget* widget) {
     }
 }
 
-void NInfoBar::success(NInfoBarType::PositionPolicy position,
-                       QString                      title,
-                       QString                      message,
-                       int                          displayDuration,
-                       QWidget*                     parent,
-                       bool                         showCloseButton) {
+NInfoBar* NInfoBar::success(NInfoBarType::PositionPolicy position,
+                            QString                      title,
+                            QString                      message,
+                            int                          displayDuration,
+                            QWidget*                     parent,
+                            bool                         showCloseButton) {
+    parent = resolveInfoBarParent(parent);
     if (!parent) {
-        QList<QWidget*> widgetList = QApplication::topLevelWidgets();
-        for (auto widget : widgetList) {
-            if (widget->isVisible() && widget->windowType() != Qt::Desktop) {
-                parent = widget;
-                break;
-            }
-        }
-        if (!parent) {
-            return;
-        }
+        return nullptr;
     }
 
-    NInfoBar* infoBar =
-        new NInfoBar(position, NInfoBarType::Success, title, message, displayDuration, parent, showCloseButton);
-    Q_UNUSED(infoBar);
+    return new NInfoBar(position, NInfoBarType::Success, title, message, displayDuration, parent, showCloseButton);
 }
 
-void NInfoBar::warning(NInfoBarType::PositionPolicy position,
-                       QString                      title,
-                       QString                      message,
-                       int                          displayDuration,
-                       QWidget*                     parent,
-                       bool                         showCloseButton) {
+NInfoBar* NInfoBar::warning(NInfoBarType::PositionPolicy position,
+                            QString                      title,
+                            QString                      message,
+                            int                          displayDuration,
+                            QWidget*                     parent,
+                            bool                         showCloseButton) {
+    parent = resolveInfoBarParent(parent);
     if (!parent) {
-        QList<QWidget*> widgetList = QApplication::topLevelWidgets();
-        for (auto widget : widgetList) {
-            if (widget->isVisible() && widget->windowType() != Qt::Desktop) {
-                parent = widget;
-                break;
-            }
-        }
-        if (!parent) {
-            return;
-        }
+        return nullptr;
     }
 
-    NInfoBar* infoBar =
-        new NInfoBar(position, NInfoBarType::Warning, title, message, displayDuration, parent, showCloseButton);
-    Q_UNUSED(infoBar);
+    return new NInfoBar(position, NInfoBarType::Warning, title, message, displayDuration, parent, showCloseButton);
 }
 
-void NInfoBar::error(NInfoBarType::PositionPolicy position,
-                     QString                      title,
-                     QString                      message,
-                     int                          displayDuration,
-                     QWidget*                     parent,
-                     bool                         showCloseButton) {
+NInfoBar* NInfoBar::error(NInfoBarType::PositionPolicy position,
+                          QString                      title,
+                          QString                      message,
+                          int                          displayDuration,
+                          QWidget*                     parent,
+                          bool                         showCloseButton) {
+    parent = resolveInfoBarParent(parent);
     if (!parent) {
-        QList<QWidget*> widgetList = QApplication::topLevelWidgets();
-        for (auto widget : widgetList) {
-            if (widget->isVisible() && widget->windowType() != Qt::Desktop) {
-                parent = widget;
-                break;
-            }
-        }
-        if (!parent) {
-            return;
-        }
+        return nullptr;
     }
 
-    NInfoBar* infoBar =
-        new NInfoBar(position, NInfoBarType::Error, title, message, displayDuration, parent, showCloseButton);
-    Q_UNUSED(infoBar);
+    return new NInfoBar(position, NInfoBarType::Error, title, message, displayDuration, parent, showCloseButton);
 }
 
 void NInfoBar::paintEvent(QPaintEvent* event) {

@@ -50,6 +50,7 @@ class NInfoBarPrivate : public QObject {
     WorkStatus       getWorkMode() const;
     Q_INVOKABLE void onOtherInfoBarEnd(QVariantMap eventData);
     Q_INVOKABLE void infoBarEnd(const QVariantMap& eventData);
+    void             requestDismiss();
     Q_SLOT void      onCloseButtonClicked();
 
   private:
@@ -82,6 +83,7 @@ class NInfoBarPrivate : public QObject {
     bool             _isReadyToEnd{false};
     bool             _isNormalDisplay{false};
     bool             _isInfoBarEventAnimationStart{false};
+    bool             _isFloatingNotification{false};
     NPushButton*     _closeButton{nullptr};
     bool             _showCloseButton{true};
     Q_INVOKABLE void _infoBarCreate(int displayMsec);

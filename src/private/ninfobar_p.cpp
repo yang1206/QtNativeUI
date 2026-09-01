@@ -188,13 +188,19 @@ void NInfoBarPrivate::infoBarEnd(const QVariantMap& eventData) {
 }
 
 void NInfoBarPrivate::onCloseButtonClicked() {
+    requestDismiss();
+}
+
+void NInfoBarPrivate::requestDismiss() {
     Q_Q(NInfoBar);
     if (_isReadyToEnd) {
         return;
     }
     _isReadyToEnd    = true;
     _isNormalDisplay = false;
-    NInfoBarManager::getInstance()->forcePostInfoBarEndEvent(q);
+    if (_isFloatingNotification) {
+        NInfoBarManager::getInstance()->forcePostInfoBarEndEvent(q);
+    }
     QGraphicsOpacityEffect* opacityEffect = new QGraphicsOpacityEffect(q);
     q->setGraphicsEffect(opacityEffect);
 
