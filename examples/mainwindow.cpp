@@ -41,6 +41,7 @@
 #include "pages/input/TextEditPage.h"
 #include "pages/input/ToggleSwitchPage.h"
 #include "pages/list/ListViewPage.h"
+#include "pages/list/TableViewPage.h"
 #include "pages/list/TreeViewPage.h"
 #include "pages/navigation/MenuPage.h"
 #include "pages/navigation/NavigationViewPage.h"
@@ -126,6 +127,7 @@ MainWindow::MainWindow(QWidget* parent) : NMainWindow(parent) {
     QString listGroup;
     m_navigationView->addExpanderNode("列表组件", listGroup, NRegularIconType::List16Regular);
     m_navigationView->addPageNode("ListView", new ListViewPage(this), listGroup, NRegularIconType::None);
+    m_navigationView->addPageNode("TableView", new TableViewPage(this), listGroup, NRegularIconType::None);
     m_navigationView->addPageNode("TreeView", new TreeViewPage(this), listGroup, NRegularIconType::None);
 
     QString windowGroup;

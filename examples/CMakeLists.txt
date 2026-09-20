@@ -93,6 +93,8 @@ set(EXAMPLE_PAGES_SOURCES
         pages/feedback/ProgressRingPage.h
         pages/list/ListViewPage.cpp
         pages/list/ListViewPage.h
+        pages/list/TableViewPage.cpp
+        pages/list/TableViewPage.h
         pages/list/TreeViewPage.cpp
         pages/list/TreeViewPage.h
         pages/window/DialogPage.cpp

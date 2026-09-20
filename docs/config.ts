@@ -97,7 +97,8 @@ export default defineAdditionalConfig({
                     text: '列表组件',
                     items: [
                         {text: 'NListView', link: '/components/NListView'},
-                        {text: 'NTreeView', link: '/components/NTreeView'}
+                        {text: 'NTreeView', link: '/components/NTreeView'},
+                        {text: 'NTableView', link: '/components/NTableView'}
                     ]
                 },
                 {

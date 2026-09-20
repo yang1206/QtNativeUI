@@ -88,6 +88,7 @@ set(QtNativeUI_CONTROLS_SOURCES
         src/controls/NSlider.cpp
         src/controls/NSpinBox.cpp
         src/controls/NStackedWidget.cpp
+        src/controls/NTableView.cpp
         src/controls/NTabBar.cpp
         src/controls/NTabWidget.cpp
         src/controls/NTextEdit.cpp
@@ -101,6 +102,9 @@ set(QtNativeUI_CONTROLS_SOURCES
 )
 
 set(QtNativeUI_PRIVATE_SOURCES
+        src/private/naccessible_p.cpp
+        src/private/naccessible_p.h
+        src/private/naccessibleconfig_p.h
         src/private/nanimation_p.cpp
         src/private/nanimation_p.h
         src/private/nautosuggestbox_p.cpp
@@ -155,6 +159,8 @@ set(QtNativeUI_PRIVATE_SOURCES
         src/private/nlistview_p.h
         src/private/nlistviewstyle_p.cpp
         src/private/nlistviewstyle_p.h
+        src/private/nlogicalitemaccessible_p.cpp
+        src/private/nlogicalitemaccessible_p.h
         src/private/nmainwindow_p.cpp
         src/private/nmainwindow_p.h
         src/private/nmenu_p.cpp
@@ -215,6 +221,10 @@ set(QtNativeUI_PRIVATE_SOURCES
         src/private/ntabbarstyle.h
         src/private/ntabwidget_p.cpp
         src/private/ntabwidget_p.h
+        src/private/ntableview_p.cpp
+        src/private/ntableview_p.h
+        src/private/nvalueaccessible_p.cpp
+        src/private/nvalueaccessible_p.h
         src/private/ntextedit_p.cpp
         src/private/ntextedit_p.h
         src/private/ntheme_p.cpp
@@ -299,6 +309,7 @@ set(QtNativeUI_HEADERS
         include/QtNativeUI/NSlider.h
         include/QtNativeUI/NSpinBox.h
         include/QtNativeUI/NStackedWidget.h
+        include/QtNativeUI/NTableView.h
         include/QtNativeUI/NTabBar.h
         include/QtNativeUI/NTabWidget.h
         include/QtNativeUI/NTextEdit.h
