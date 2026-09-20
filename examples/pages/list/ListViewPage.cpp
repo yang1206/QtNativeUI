@@ -2,12 +2,13 @@
 #include <QHBoxLayout>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
-#include <QtNativeUI/NLabel.h>
+#include <QtNativeUI/NEnums.h>
 #include <QtNativeUI/NListView.h>
+
+#include "QtNativeUI/NLabel.h"
 
 ListViewPage::ListViewPage(QWidget* parent)
     : BasePage("ListView 列表视图", "ListView 提供列表视图控件，支持单选、多选和自定义样式。", parent) {
-
     QHBoxLayout* basicLayout = new QHBoxLayout();
     basicLayout->setSpacing(16);
 
@@ -72,7 +73,7 @@ ListViewPage::ListViewPage(QWidget* parent)
     iconListView->setMinimumSize(250, 250);
 
     QStandardItemModel* iconModel = new QStandardItemModel(iconListView);
-    QStringList items = {"首页", "文档", "设置", "帮助", "关于"};
+    QStringList         items     = {"首页", "文档", "设置", "帮助", "关于"};
     for (const QString& text : items) {
         QStandardItem* item = new QStandardItem(text);
         item->setIcon(style()->standardIcon(QStyle::SP_FileIcon));
@@ -99,7 +100,8 @@ ListViewPage::ListViewPage(QWidget* parent)
     interactiveListView->setModel(interactiveModel);
 
     QLabel* selectionLabel = new QLabel("选中项: 无", this);
-    connect(interactiveListView->selectionModel(), &QItemSelectionModel::currentChanged,
+    connect(interactiveListView->selectionModel(),
+            &QItemSelectionModel::currentChanged,
             [selectionLabel](const QModelIndex& current, const QModelIndex&) {
                 if (current.isValid()) {
                     selectionLabel->setText("选中项: " + current.data().toString());
@@ -117,4 +119,63 @@ ListViewPage::ListViewPage(QWidget* parent)
     interactiveLayout->addStretch();
 
     addSection("交互示例", interactiveLayout);
+
+    QHBoxLayout* fluentLayout = new QHBoxLayout();
+    fluentLayout->setSpacing(16);
+
+    NListView* emptyListView = new NListView(this);
+    emptyListView->setMinimumSize(220, 200);
+    emptyListView->setPlaceholderText(QStringLiteral("暂无数据"));
+    emptyListView->setModel(new QStandardItemModel(emptyListView));
+
+    NListView* richListView = new NListView(this);
+    richListView->setMinimumSize(280, 260);
+    QStandardItemModel* richModel  = new QStandardItemModel(richListView);
+    auto                addRichRow = [&](const QString& title, const QString& subtitle, bool chevron, bool checkable) {
+        QStandardItem* item = new QStandardItem(title);
+        item->setData(subtitle, NListViewType::SubtitleRole);
+        if (!subtitle.isEmpty())
+            item->setData(subtitle, Qt::AccessibleDescriptionRole);
+        if (chevron)
+            item->setData(true, NListViewType::ShowChevronRole);
+        if (checkable) {
+            item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        }
+        item->setIcon(richListView->style()->standardIcon(QStyle::SP_DirIcon));
+        richModel->appendRow(item);
+    };
+    addRichRow(QStringLiteral("账户"), QStringLiteral("管理登录与安全选项"), true, false);
+    addRichRow(QStringLiteral("通知"), QStringLiteral("选择提醒方式"), true, false);
+    addRichRow(QStringLiteral("同步任务"), QStringLiteral("后台自动同步"), false, true);
+    richListView->setModel(richModel);
+
+    QVBoxLayout* emptyCol = new QVBoxLayout();
+    emptyCol->addWidget(new QLabel(QStringLiteral("空状态占位:"), this));
+    emptyCol->addWidget(emptyListView);
+    QVBoxLayout* richCol = new QVBoxLayout();
+    richCol->addWidget(new QLabel(QStringLiteral("副标题 / 箭头 / 复选:"), this));
+    richCol->addWidget(richListView);
+    fluentLayout->addLayout(emptyCol);
+    fluentLayout->addLayout(richCol);
+    fluentLayout->addStretch();
+    addSection("Fluent 行样式", fluentLayout);
+
+    QHBoxLayout* editLayout = new QHBoxLayout();
+    NListView*   editList   = new NListView(this);
+    editList->setMinimumSize(300, 200);
+    editList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked | QAbstractItemView::EditKeyPressed);
+    auto* editModel = new QStandardItemModel(editList);
+    auto* textItem  = new QStandardItem(QStringLiteral("双击编辑文本"));
+    textItem->setFlags(textItem->flags() | Qt::ItemIsEditable);
+    editModel->appendRow(textItem);
+    auto* comboItem = new QStandardItem(QStringLiteral("选项 A"));
+    comboItem->setFlags(comboItem->flags() | Qt::ItemIsEditable);
+    comboItem->setData(QStringList{QStringLiteral("选项 A"), QStringLiteral("选项 B"), QStringLiteral("选项 C")},
+                       NListViewType::ComboChoicesRole);
+    editModel->appendRow(comboItem);
+    editList->setModel(editModel);
+    editLayout->addWidget(editList);
+    editLayout->addStretch();
+    addSection(QStringLiteral("内联编辑 (NLineEdit / NComboBox)"), editLayout);
 }

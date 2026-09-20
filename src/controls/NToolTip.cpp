@@ -81,9 +81,6 @@ void NToolTip::init() {
 
     d->updateStyle();
 
-    d->label->adjustSize();
-    adjustSize();
-
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode mode) {
         Q_D(NToolTip);
         d->themeMode = mode;
@@ -103,8 +100,11 @@ void NToolTip::setText(const QString& text) {
     Q_D(NToolTip);
     d->text = text;
     d->label->setText(text);
-    d->container->adjustSize();
-    adjustSize();
+    if (d->layoutSized) {
+        d->label->adjustSize();
+        d->container->adjustSize();
+        adjustSize();
+    }
 }
 
 int NToolTip::duration() const {
@@ -125,6 +125,7 @@ void NToolTip::adjustPosition(QWidget* widget, NToolTipPosition position) {
 
 void NToolTip::showEvent(QShowEvent* event) {
     Q_D(NToolTip);
+    d->ensureLayoutSized();
 
     d->opacityAnimation->setStartValue(0.0);
     d->opacityAnimation->setEndValue(1.0);

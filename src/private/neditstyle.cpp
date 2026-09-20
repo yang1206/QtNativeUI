@@ -55,10 +55,8 @@ void NEditStyle::drawPrimitive(PrimitiveElement    element,
                 painter->drawRoundedRect(
                     foregroundRect, m_styleInterface->borderRadius(), m_styleInterface->borderRadius());
 
-
                 QColor bottomLineColor = m_styleInterface->bottomLineColorForState(isDark, isEnabled, hasFocus);
                 int    bottomLineWidth = m_styleInterface->bottomLineWidth(hasFocus);
-
 
                 int          bottomRectHeight = bottomLineWidth + m_styleInterface->borderRadius() / 2;
                 QRect        bottomRect       = foregroundRect;

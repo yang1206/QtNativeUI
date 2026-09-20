@@ -31,27 +31,31 @@ NAutoSuggestBox::FilterMode NAutoSuggestBox::filterMode() const {
 
 QString NAutoSuggestBox::text() const {
     Q_D(const NAutoSuggestBox);
-    return d->_lineEdit->text();
+    return d->_lineEdit ? d->_lineEdit->text() : QString();
 }
 
 void NAutoSuggestBox::setText(const QString& text) {
     Q_D(NAutoSuggestBox);
-    d->_lineEdit->setText(text);
+    if (d->_lineEdit)
+        d->_lineEdit->setText(text);
 }
 
 void NAutoSuggestBox::clear() {
     Q_D(NAutoSuggestBox);
-    d->_lineEdit->clear();
+    if (d->_lineEdit)
+        d->_lineEdit->clear();
 }
 
 void NAutoSuggestBox::setPlaceholderText(const QString& placeholderText) {
     Q_D(NAutoSuggestBox);
-    d->_lineEdit->setPlaceholderText(placeholderText);
+    d->_placeholderText = placeholderText;
+    if (d->_lineEdit)
+        d->_lineEdit->setPlaceholderText(placeholderText);
 }
 
 QString NAutoSuggestBox::placeholderText() const {
     Q_D(const NAutoSuggestBox);
-    return d->_lineEdit->placeholderText();
+    return d->_lineEdit ? d->_lineEdit->placeholderText() : d->_placeholderText;
 }
 
 QString NAutoSuggestBox::addSuggestion(const QString& text, const QVariantMap& data) {
@@ -92,7 +96,8 @@ void NAutoSuggestBox::removeSuggestion(const QString& key) {
             break;
         }
     }
-    d->onTextChanged(d->_lineEdit->text());
+    if (d->_lineEdit)
+        d->onTextChanged(d->_lineEdit->text());
 }
 
 void NAutoSuggestBox::removeSuggestion(int index) {
@@ -102,7 +107,8 @@ void NAutoSuggestBox::removeSuggestion(int index) {
         suggestion->deleteLater();
 
         // 更新过滤后的列表
-        d->onTextChanged(d->_lineEdit->text());
+        if (d->_lineEdit)
+            d->onTextChanged(d->_lineEdit->text());
     }
 }
 
@@ -115,5 +121,6 @@ void NAutoSuggestBox::clearSuggestions() {
 
 void NAutoSuggestBox::setFocus() {
     Q_D(NAutoSuggestBox);
-    d->_lineEdit->setFocus();
+    if (d->_lineEdit)
+        d->_lineEdit->setFocus();
 }

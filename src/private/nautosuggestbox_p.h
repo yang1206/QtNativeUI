@@ -62,6 +62,7 @@ class NAutoSuggestBoxPrivate : public QObject {
 
   private:
     void setupUI();
+    void setupLineEdit();
     void selectNextSuggestion();
     void selectPreviousSuggestion();
     void applySelectedSuggestion();
@@ -71,6 +72,7 @@ class NAutoSuggestBoxPrivate : public QObject {
     void _startCloseAnimation();
 
     NThemeType::ThemeMode _themeMode{NThemeType::Light};
+    QString               _placeholderText;
     NLineEdit*            _lineEdit{nullptr};
     NAutoSuggestPopup*    _popup{nullptr};
     NBaseListView*        _listView{nullptr};

@@ -211,4 +211,13 @@ Q_ENUM_CREATE(NavigationRouteType)
 
 Q_END_ENUM_CREATE(NNavigationRouterType)
 
+Q_BEGIN_ENUM_CREATE(NListViewType)
+enum ItemDataRole {
+    SubtitleRole     = Qt::UserRole + 1,
+    ShowChevronRole  = Qt::UserRole + 2,
+    ComboChoicesRole = Qt::UserRole + 3,
+};
+Q_ENUM_CREATE(ItemDataRole)
+Q_END_ENUM_CREATE(NListViewType)
+
 #endif // QTNATIVEUI_NENUMS_H

@@ -101,8 +101,10 @@ class NToolTipPrivate : public QObject {
 
     NThemeType::ThemeMode themeMode;
     bool                  isDark = false;
+    bool                  layoutSized = false;
 
     void updateStyle();
+    void ensureLayoutSized();
 };
 
 #endif // NTOOLTIP_P_H

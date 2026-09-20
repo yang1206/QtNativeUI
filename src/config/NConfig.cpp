@@ -1,29 +1,29 @@
 #include "QtNativeUI/NConfig.h"
 #include "../private/ntranslation.h"
 
-#include <QFontDatabase>
-#include <QStyle>
-#include <qfont.h>
+#include <QFont>
+#include <QtGlobal>
+
 Q_SINGLETON_CREATE_CPP(NConfig)
+
+void NConfig::prepareQtEnvironment() {
+#if defined(Q_OS_WIN)
+    if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM"))
+        qputenv("QT_QPA_PLATFORM", "windows:fontengine=freetype");
+#endif
+}
 
 NConfig::NConfig(QObject* parent) : QObject(parent) {}
 
-NConfig::~NConfig() {
-
-};
+NConfig::~NConfig() {}
 
 void NConfig::initialize() {
 #ifdef Q_OS_WIN
-    // qApp->setStyle("Fusion");
-
-    QFont         font = qApp->font();
-    QFontDatabase fontDB;
-    QStringList   families;
-    if (fontDB.families().contains("Segoe UI Variable", Qt::CaseInsensitive))
-        families << "Segoe UI Variable";
-    families << "Microsoft YaHei" << "PingFang SC" << "Segoe UI";
-    font.setHintingPreference(QFont::PreferNoHinting);
-    qApp->setFont(font);
+    if (qApp) {
+        QFont font = qApp->font();
+        font.setHintingPreference(QFont::PreferNoHinting);
+        qApp->setFont(font);
+    }
 #endif
     nTranslation->setLanguage(QLocale::system().name());
 }

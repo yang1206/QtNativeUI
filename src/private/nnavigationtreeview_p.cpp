@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QModelIndex>
 #include <QMouseEvent>
+#include <QPalette>
 #include <QScroller>
 
 #include "QtNativeUI/NScrollBar.h"
@@ -15,7 +16,11 @@
 
 NNavigationTreeView::NNavigationTreeView(QWidget* parent) : QTreeView(parent) {
     setObjectName("NNavigationTreeView");
-    setStyleSheet("#NNavigationTreeView{background-color:transparent;}");
+    setAutoFillBackground(false);
+    QPalette viewPalette = palette();
+    viewPalette.setColor(QPalette::Base, Qt::transparent);
+    viewPalette.setColor(QPalette::Window, Qt::transparent);
+    setPalette(viewPalette);
     setAnimated(true);
     setHeaderHidden(true);
     setRootIsDecorated(false);
@@ -65,10 +70,15 @@ NNavigationTreeView::NNavigationTreeView(QWidget* parent) : QTreeView(parent) {
             this,
             &NNavigationTreeView::onCustomContextMenuRequested);
 
-    _compactToolTip = new NToolTip();
 }
 
 NNavigationTreeView::~NNavigationTreeView() {}
+
+NToolTip* NNavigationTreeView::compactToolTip() {
+    if (!_compactToolTip)
+        _compactToolTip = new NToolTip(QString(), this);
+    return _compactToolTip;
+}
 
 void NNavigationTreeView::navigationNodeStateChange(QVariantMap data) {
     this->_navigationStyle->navigationNodeStateChange(data);
@@ -94,15 +104,16 @@ void NNavigationTreeView::mouseMoveEvent(QMouseEvent* event) {
     if (width() <= 60) {
         QModelIndex posIndex = indexAt(event->pos());
         if (!posIndex.isValid()) {
-            _compactToolTip->hide();
+            compactToolTip()->hide();
             return;
         }
 
         NNavigationNode* posNode = static_cast<NNavigationNode*>(posIndex.internalPointer());
-        _compactToolTip->setText(posNode->getNodeTitle());
-        _compactToolTip->move(mapToGlobal(QPoint(width() + 5, event->pos().y() - _compactToolTip->height() / 2)));
-        _compactToolTip->show();
-    } else {
+        NToolTip*        tip     = compactToolTip();
+        tip->setText(posNode->getNodeTitle());
+        tip->move(mapToGlobal(QPoint(width() + 5, event->pos().y() - tip->height() / 2)));
+        tip->show();
+    } else if (_compactToolTip) {
         _compactToolTip->hide();
     }
 
@@ -135,16 +146,16 @@ bool NNavigationTreeView::eventFilter(QObject* watched, QEvent* event) {
             if (width() <= 60) {
                 QModelIndex posIndex = indexAt(mapFromGlobal(QCursor::pos()));
                 if (!posIndex.isValid()) {
-                    _compactToolTip->hide();
+                    compactToolTip()->hide();
                     break;
                 }
 
                 NNavigationNode* posNode = static_cast<NNavigationNode*>(posIndex.internalPointer());
-                _compactToolTip->setText(posNode->getNodeTitle());
-                _compactToolTip->move(
-                    mapToGlobal(QPoint(width() + 5, QCursor::pos().y() - _compactToolTip->height() / 2)));
-                _compactToolTip->show();
-            } else {
+                NToolTip*        tip     = compactToolTip();
+                tip->setText(posNode->getNodeTitle());
+                tip->move(mapToGlobal(QPoint(width() + 5, QCursor::pos().y() - tip->height() / 2)));
+                tip->show();
+            } else if (_compactToolTip) {
                 _compactToolTip->hide();
             }
             break;

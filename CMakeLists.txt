@@ -157,6 +157,16 @@ set(QtNativeUI_PRIVATE_SOURCES
         src/private/nlineedit_p.h
         src/private/nlistview_p.cpp
         src/private/nlistview_p.h
+        src/private/ncheckboxindicator_p.cpp
+        src/private/ncheckboxindicator_p.h
+        src/private/nitemeditor_p.cpp
+        src/private/nitemeditor_p.h
+        src/private/nlistitemdelegate_p.cpp
+        src/private/nlistitemdelegate_p.h
+        src/private/nlistviewselectmark_p.cpp
+        src/private/nlistviewselectmark_p.h
+        src/private/nselectionindicator_p.cpp
+        src/private/nselectionindicator_p.h
         src/private/nlistviewstyle_p.cpp
         src/private/nlistviewstyle_p.h
         src/private/nlogicalitemaccessible_p.cpp

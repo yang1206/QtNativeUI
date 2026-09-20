@@ -29,6 +29,8 @@ class NNavigationTreeView : public QTreeView {
     virtual bool eventFilter(QObject* watched, QEvent* event) override;
 
   private:
+    NToolTip* compactToolTip();
+
     NNavigationStyle* _navigationStyle{nullptr};
     NToolTip*         _compactToolTip{nullptr};
 };

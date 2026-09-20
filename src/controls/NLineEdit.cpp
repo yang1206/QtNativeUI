@@ -1,6 +1,9 @@
+#include <QApplication>
 #include <QClipboard>
 #include <QEnterEvent>
 #include <QFocusEvent>
+#include <QFrame>
+#include <QMetaObject>
 #include <QStyle>
 #include <QtNativeUI/NLineEdit.h>
 #include "../private/nlineedit_p.h"
@@ -38,7 +41,13 @@ Q_PROPERTY_CREATE_Q_CPP(NLineEdit, QColor, DarkSelectionTextColor)
 Q_PROPERTY_CREATE_Q_CPP(NLineEdit, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NLineEdit, int, BorderWidth)
 
-NLineEdit::NLineEdit(QWidget* parent) : QLineEdit(parent), d_ptr(new NLineEditPrivate()) { init(); }
+NLineEdit::NLineEdit(QWidget* parent) : QLineEdit(nullptr), d_ptr(new NLineEditPrivate()) {
+    Q_D(NLineEdit);
+    d->q_ptr = this;
+    if (parent)
+        setParent(parent);
+    QMetaObject::invokeMethod(this, [this]() { init(); }, Qt::QueuedConnection);
+}
 
 NLineEdit::NLineEdit(const QString& text, QWidget* parent) : NLineEdit(parent) { setText(text); }
 
@@ -46,7 +55,9 @@ NLineEdit::~NLineEdit() {}
 
 void NLineEdit::init() {
     Q_D(NLineEdit);
-    d->q_ptr      = this;
+    if (d->_initialized)
+        return;
+    d->_initialized = true;
     d->_themeMode = nTheme->themeMode();
     d->_isDark    = nTheme->isDarkMode();
 
@@ -86,10 +97,11 @@ void NLineEdit::init() {
     d->_pBorderRadius = NDesignToken(NDesignTokenKey::CornerRadiusDefault).toInt();
     d->_pBorderWidth  = 1;
     setObjectName("NLineEdit");
-    setStyleSheet("#QLineEdit{border: none;}");
-    setStyleSheet("#NLineEdit{background-color:transparent;}");
+    setFrame(false);
+    setAttribute(Qt::WA_TranslucentBackground, true);
 
-    d->_lineEditStyle = new NEditStyle(d, style());
+    QStyle* baseStyle = QApplication::style();
+    d->_lineEditStyle = new NEditStyle(d, baseStyle);
     setStyle(d->_lineEditStyle);
 
     setMouseTracking(true);
@@ -99,6 +111,7 @@ void NLineEdit::init() {
     int horizontalSpacing = NDesignToken(NDesignTokenKey::SpacingM).toInt();
     int verticalSpacing   = NDesignToken(NDesignTokenKey::SpacingS).toInt();
     setTextMargins(horizontalSpacing, verticalSpacing, horizontalSpacing, verticalSpacing);
+
     QFont font = this->font();
     font.setPixelSize(NDesignToken(NDesignTokenKey::FontSizeBody).toInt());
     setFont(font);

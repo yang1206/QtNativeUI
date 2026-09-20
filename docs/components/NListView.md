@@ -315,12 +315,75 @@ styledList->setLightBorderColor(QColor(200, 200, 200));
 | `darkTextColor` | 暗黑主题文本色 | `QColor` |
 | `lightBorderColor` | 明亮主题边框色 | `QColor` |
 | `darkBorderColor` | 暗黑主题边框色 | `QColor` |
+| `lightPlaceholderTextColor` | 明亮主题占位文本色 | `QColor` |
+| `darkPlaceholderTextColor` | 暗黑主题占位文本色 | `QColor` |
+
+### 行为属性
+
+| 属性 | 说明 | 类型 |
+|------|------|------|
+| `placeholderText` | 模型无行时居中占位文案 | `QString` |
+| `borderVisible` | 是否绘制外框描边 | `bool` |
+| `backgroundVisible` | 是否绘制控件背景 | `bool` |
+| `selectionIndicatorVisible` | 是否绘制左侧选中指示条 | `bool` |
+
+`SingleSelection` 下左侧指示条由 `NSelectionIndicatorMotion` 驱动（约 270ms，`cubic-bezier(0.45, 0.05, 0.25, 1)`，旧行先收、新行后展）；`MultiSelection` / `ExtendedSelection` 为每行静态指示条。
+
+`isShowingPlaceholder()` 在设置了 `placeholderText` 且 `rowCount()==0` 时为 `true`。模型先于视图析构时不会再访问已释放的 `model()`（退出时安全）。
+
+### 内联编辑
+
+默认 `NListItemDelegate` 通过 `NItemEditor` 创建编辑器，样式与 `NTableView` 文本单元格一致（`NLineEdit`：`borderWidth=1`，圆角为 `itemBorderRadius()`）。几何与 `NTableView` 相同方式：`option.rect.adjusted(margins)`，列表左侧边距与行内文字起点对齐（基础 `14px`，含勾选列或图标时递增），上下边距为 `3px`。
+
+```cpp
+NListView* list = new NListView();
+list->setEditTriggers(QAbstractItemView::DoubleClicked
+                      | QAbstractItemView::SelectedClicked
+                      | QAbstractItemView::EditKeyPressed);
+
+QStandardItem* item = new QStandardItem(QStringLiteral("可编辑"));
+item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+// 下拉编辑：ComboChoicesRole 为 QStringList（兼容 Qt::UserRole）
+item->setData(QStringList{QStringLiteral("A"), QStringLiteral("B")}, NListViewType::ComboChoicesRole);
+```
+
+数值列按 `Qt::EditRole` 的元类型自动使用 `NSpinBox` / `NDoubleSpinBox`。调用 `setItemDelegate()` 后需自行处理 `createEditor` / `updateEditorGeometry`。
+
+### 默认行 delegate 数据角色
+
+内置 `NListItemDelegate` 读取以下角色（见 `NListViewType::ItemDataRole`）：
+
+| 角色 | 用途 |
+|------|------|
+| `Qt::DisplayRole` | 主标题 |
+| `NListViewType::SubtitleRole` | 副标题（双行布局） |
+| `NListViewType::ShowChevronRole` | 右侧 `Chevron`（`bool`） |
+| `Qt::CheckStateRole` + `ItemIsUserCheckable` | 行首 `NCheckBox` 风格指示器（绘制） |
+| `Qt::ItemIsEditable` + `Qt::EditRole` | 内联编辑：`NLineEdit` / `NSpinBox` / `NDoubleSpinBox` |
+| `NListViewType::ComboChoicesRole`（`QStringList`） | 内联编辑：`NComboBox`（未设置时可回退 `Qt::UserRole` 中的 `QStringList`） |
+
+自定义 delegate 时请自行绘制 Fluent 行样式；若保留内联编辑，可参考 `NItemEditor::createEditor` 与 `listCellMargins()`。
+
+### 无障碍
+
+使用 Qt 内置 `QAccessibleList`（与 `QListView` 相同），无需自定义工厂。
+
+- 为控件设置 `accessibleName`（例如「设置列表」）。
+- 空数据且设置了 `placeholderText` 时，会写入控件的 `accessibleDescription`。
+- 行标题用 `Qt::DisplayRole`；读屏副文案用 `Qt::AccessibleTextRole` 或 `Qt::AccessibleDescriptionRole`（`NListViewType::SubtitleRole` 仅用于绘制，不会自动进无障碍）。
+
+```cpp
+item->setData(subtitle, NListViewType::SubtitleRole);
+item->setData(subtitle, Qt::AccessibleDescriptionRole); // 读屏
+```
 
 ### 继承的 API
 
 NListView 继承自 `QListView`，支持所有标准 QListView 的方法和信号：
 
-- `setModel()` / `model()` - 设置/获取数据模型
+- `setModel()` / `model()` - 设置/获取数据模型（切换模型时会断开旧模型的信号连接）
+- `setEditTriggers()` / `editTriggers()` - 内联编辑触发方式（默认与 `QListView` 相同）
 - `setSelectionMode()` / `selectionMode()` - 设置/获取选择模式
 - `setViewMode()` / `viewMode()` - 设置/获取视图模式
 - `setGridSize()` / `gridSize()` - 设置/获取网格大小
@@ -334,9 +397,9 @@ NListView 继承自 `QListView`，支持所有标准 QListView 的方法和信�
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| 项目高度 | `32px` | 列表项目默认高度 |
+| 项目高度 | `36px` | 列表项目默认高度 |
 | 项目圆角 | `4px` | 列表项目圆角半径 |
-| 边框圆角 | `6px` | 列表边框圆角半径 |
+| 边框圆角 | `8px` | 列表边框圆角半径 |
 | 项目间距 | `2px` | 列表项目间距 |
 
 ### 主题适配

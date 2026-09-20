@@ -32,11 +32,15 @@ void NListViewStyle::drawPrimitive(PrimitiveElement    element,
             path.addRoundedRect(itemRect, _itemBorderRadius, _itemBorderRadius);
 
             if (vopt->state & QStyle::State_Selected) {
-                if (vopt->state & QStyle::State_MouseOver) {
+                if (vopt->state & QStyle::State_Sunken) {
+                    painter->fillPath(path, _itemPressedColor);
+                } else if (vopt->state & QStyle::State_MouseOver) {
                     painter->fillPath(path, _itemHoverColor);
                 } else {
                     painter->fillPath(path, _itemSelectedColor);
                 }
+            } else if (vopt->state & QStyle::State_Sunken) {
+                painter->fillPath(path, _itemPressedColor);
             } else if (vopt->state & QStyle::State_MouseOver) {
                 painter->fillPath(path, _itemHoverColor);
             }
@@ -58,12 +62,14 @@ void NListViewStyle::drawControl(ControlElement      element,
                                  const QWidget*      widget) const {
     switch (element) {
         case CE_ShapedFrame: {
+            if (!m_borderVisible && !m_backgroundVisible)
+                return;
             QRect frameRect = option->rect;
             frameRect.adjust(1, 1, -1, -1);
             painter->save();
             painter->setRenderHints(QPainter::Antialiasing);
-            painter->setPen(QPen(_borderColor, 1));
-            painter->setBrush(_backgroundColor);
+            painter->setPen(m_borderVisible ? QPen(_borderColor, 1) : Qt::NoPen);
+            painter->setBrush(m_backgroundVisible ? _backgroundColor : Qt::NoBrush);
             painter->drawRoundedRect(frameRect, _borderRadius, _borderRadius);
             painter->restore();
             return;
@@ -165,3 +171,7 @@ void NListViewStyle::setItemHeight(int height) { _itemHeight = height; }
 void NListViewStyle::setItemBorderRadius(int radius) { _itemBorderRadius = radius; }
 
 void NListViewStyle::setLeftPadding(int padding) { _leftPadding = padding; }
+
+void NListViewStyle::setBorderVisible(bool visible) { m_borderVisible = visible; }
+
+void NListViewStyle::setBackgroundVisible(bool visible) { m_backgroundVisible = visible; }

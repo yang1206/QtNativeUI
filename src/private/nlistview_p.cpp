@@ -3,11 +3,28 @@
 //
 
 #include "nlistview_p.h"
+#include "nlistitemdelegate_p.h"
 #include "QtNativeUI/NTheme.h"
 
 NListViewPrivate::NListViewPrivate(QObject* parent) : QObject(parent) {}
 
-NListViewPrivate::~NListViewPrivate() {}
+NListViewPrivate::~NListViewPrivate() = default;
+
+QColor NListViewPrivate::itemHoverColor() const { return isDark ? _pDarkItemHoverColor : _pLightItemHoverColor; }
+
+QColor NListViewPrivate::itemSelectedColor() const {
+    return isDark ? _pDarkItemSelectedColor : _pLightItemSelectedColor;
+}
+
+QColor NListViewPrivate::itemPressedColor() const {
+    return isDark ? _pDarkItemPressedColor : _pLightItemPressedColor;
+}
+
+QColor NListViewPrivate::textColor() const { return isDark ? _pDarkTextColor : _pLightTextColor; }
+
+QColor NListViewPrivate::placeholderTextColor() const {
+    return isDark ? _pDarkPlaceholderTextColor : _pLightPlaceholderTextColor;
+}
 
 void NListViewPrivate::initStyle() {
     Q_Q(NListView);
@@ -19,7 +36,6 @@ void NListViewPrivate::initStyle() {
 void NListViewPrivate::updateStyle() {
     if (!style)
         return;
-
     if (isDark) {
         style->setBackgroundColor(_pDarkBackgroundColor);
         style->setBorderColor(_pDarkBorderColor);
@@ -35,13 +51,16 @@ void NListViewPrivate::updateStyle() {
         style->setItemPressedColor(_pLightItemPressedColor);
         style->setTextColor(_pLightTextColor);
     }
-
     NAccentColor accentColor = nTheme->accentColor();
     style->setAccentColor(accentColor.normal());
     style->setBorderRadius(_pBorderRadius);
     style->setItemHeight(_pItemHeight);
     style->setItemBorderRadius(_pItemBorderRadius);
-
+    style->setBorderVisible(_pBorderVisible);
+    style->setBackgroundVisible(_pBackgroundVisible);
     Q_Q(NListView);
     q->update();
+    if (q->viewport())
+        q->viewport()->update();
 }
+

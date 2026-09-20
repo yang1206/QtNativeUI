@@ -12,7 +12,8 @@ class QTNATIVEUI_EXPORT NConfig : public QObject {
     Q_SINGLETON_CREATE_H(NConfig)
 
   public:
-    void initialize();
+    static void prepareQtEnvironment();
+    void        initialize();
 
     bool        setLanguage(const QString& locale);
     QString     currentLanguage() const;

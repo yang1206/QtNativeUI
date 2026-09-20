@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QKeyEvent>
+#include <QMetaObject>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPropertyAnimation>
@@ -29,7 +30,8 @@ NAutoSuggestion::~NAutoSuggestion() {}
 
 NAutoSuggestPopup::NAutoSuggestPopup(QWidget* parent) : QWidget(parent) {
     setObjectName("NAutoSuggestPopup");
-    setStyleSheet("#NAutoSuggestPopup{background-color:transparent}");
+    setAttribute(Qt::WA_TranslucentBackground);
+    setAutoFillBackground(false);
     setContentsMargins(8, 8, 8, 8);
 
     _themeMode = nTheme->themeMode();
@@ -55,21 +57,32 @@ NAutoSuggestBoxPrivate::NAutoSuggestBoxPrivate(QObject* parent) : QObject(parent
 
 NAutoSuggestBoxPrivate::~NAutoSuggestBoxPrivate() {}
 
-void NAutoSuggestBoxPrivate::setupUI() {
+void NAutoSuggestBoxPrivate::setupLineEdit() {
     Q_Q(NAutoSuggestBox);
-
+    if (_lineEdit)
+        return;
     _lineEdit = new NLineEdit(q);
     _lineEdit->setFixedHeight(35);
-    _lineEdit->setPlaceholderText("查找功能");
+    if (!_placeholderText.isEmpty())
+        _lineEdit->setPlaceholderText(_placeholderText);
+    else
+        _lineEdit->setPlaceholderText(QStringLiteral("查找功能"));
     _lineEdit->setClearButtonEnabled(true);
     _lineEdit->addAction(NRegularIconType::Search16Regular, NLineEdit::TrailingPosition);
     _lineEdit->installEventFilter(this);
+    if (auto* mainLayout = qobject_cast<QVBoxLayout*>(q->layout()))
+        mainLayout->insertWidget(0, _lineEdit);
+    connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
+    connect(_lineEdit, &NLineEdit::focusIn, this, &NAutoSuggestBoxPrivate::onTextChanged);
+    connect(_lineEdit, &NLineEdit::focusOut, this, [this]() { _startCloseAnimation(); });
+}
+
+void NAutoSuggestBoxPrivate::setupUI() {
+    Q_Q(NAutoSuggestBox);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(q);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
-    mainLayout->addWidget(_lineEdit);
-
 
     _popup = new NAutoSuggestPopup(q->window());
 
@@ -88,10 +101,8 @@ void NAutoSuggestBoxPrivate::setupUI() {
     _listView->installEventFilter(this);
     _popup->hide();
 
-    connect(_lineEdit, &NLineEdit::textChanged, this, &NAutoSuggestBoxPrivate::onTextChanged);
-    connect(_lineEdit, &NLineEdit::focusIn, this, &NAutoSuggestBoxPrivate::onTextChanged);
-    connect(_lineEdit, &NLineEdit::focusOut, this, [this]() { _startCloseAnimation(); });
     connect(_listView, &NBaseListView::pressed, this, &NAutoSuggestBoxPrivate::onSuggestionSelected);
+    setupLineEdit();
 }
 
 void NAutoSuggestBoxPrivate::onTextChanged(const QString& text) {
@@ -162,7 +173,8 @@ void NAutoSuggestBoxPrivate::onSuggestionSelected(const QModelIndex& index) {
         return;
     }
 
-    _lineEdit->setText(suggestion->getText());
+    if (_lineEdit)
+        _lineEdit->setText(suggestion->getText());
     Q_EMIT q->suggestionClicked(suggestion->getText(), suggestion->getData());
     _startCloseAnimation();
 }
@@ -230,7 +242,7 @@ void NAutoSuggestBoxPrivate::_startCloseAnimation() {
 bool NAutoSuggestBoxPrivate::eventFilter(QObject* watched, QEvent* event) {
     Q_Q(NAutoSuggestBox);
 
-    if (watched == _lineEdit && event->type() == QEvent::KeyPress) {
+    if (_lineEdit && watched == _lineEdit && event->type() == QEvent::KeyPress) {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
         if (_popup->isVisible()) {
             if (keyEvent->key() == Qt::Key_Down) {

@@ -152,3 +152,11 @@ void NToolTipPrivate::updateStyle() {
     shadowEffect->setBlurRadius(_pShadowRadius);
     shadowEffect->setOffset(0, 5);
 }
+
+void NToolTipPrivate::ensureLayoutSized() {
+    if (layoutSized || !q_ptr || !label)
+        return;
+    label->adjustSize();
+    q_ptr->adjustSize();
+    layoutSized = true;
+}

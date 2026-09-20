@@ -14,9 +14,9 @@
 #include <QTimer>
 
 #include "../private/naccessible_p.h"
+#include "../private/nitemeditor_p.h"
 #include "../private/ntableview_p.h"
 #include "QtNativeUI/NFluentColors.h"
-#include "QtNativeUI/NLineEdit.h"
 #include "QtNativeUI/NScrollBar.h"
 #include "QtNativeUI/NTheme.h"
 
@@ -442,27 +442,16 @@ class NTableViewCellDelegate final : public QStyledItemDelegate {
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
         if (!m_view || !index.isValid())
             return QStyledItemDelegate::createEditor(parent, option, index);
-        auto* editor = new NLineEdit(parent);
-        editor->setBorderWidth(1);
-        editor->setBorderRadius(qMax(4, m_view->getBorderRadius() / 2));
-        editor->setText(index.data(Qt::EditRole).toString());
-        return editor;
+        const int radius = qMax(4, m_view->getBorderRadius() / 2);
+        return NItemEditor::createLineEdit(parent, radius, index.data(Qt::EditRole).toString());
     }
 
     void setEditorData(QWidget* editor, const QModelIndex& index) const override {
-        auto* line = qobject_cast<NLineEdit*>(editor);
-        if (line)
-            line->setText(index.data(Qt::EditRole).toString());
-        else
-            QStyledItemDelegate::setEditorData(editor, index);
+        NItemEditor::setEditorData(editor, index);
     }
 
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
-        auto* line = qobject_cast<NLineEdit*>(editor);
-        if (line)
-            model->setData(index, line->text(), Qt::EditRole);
-        else
-            QStyledItemDelegate::setModelData(editor, model, index);
+        NItemEditor::setModelData(editor, model, index);
     }
 
     void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
@@ -470,8 +459,7 @@ class NTableViewCellDelegate final : public QStyledItemDelegate {
             QStyledItemDelegate::updateEditorGeometry(editor, option, index);
             return;
         }
-        const int pad = m_view->getCellHorizontalPadding();
-        editor->setGeometry(option.rect.adjusted(pad - 4, 3, -pad + 4, -3));
+        NItemEditor::placeEditor(editor, option.rect, NItemEditor::tableCellMargins(m_view->getCellHorizontalPadding()));
     }
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override {

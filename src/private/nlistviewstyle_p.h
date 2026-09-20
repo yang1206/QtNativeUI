@@ -41,8 +41,12 @@ class NListViewStyle : public QProxyStyle {
     void setItemHeight(int height);
     void setItemBorderRadius(int radius);
     void setLeftPadding(int padding);
+    void setBorderVisible(bool visible);
+    void setBackgroundVisible(bool visible);
 
   private:
+    bool m_borderVisible{true};
+    bool m_backgroundVisible{true};
     QColor _backgroundColor;
     QColor _borderColor;
     int    _borderRadius{8};
