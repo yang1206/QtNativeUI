@@ -6,7 +6,6 @@
 #define NLISTVIEWSTYLE_P_H
 
 #include <QProxyStyle>
-#include "QtNativeUI/NEnums.h"
 
 class NListViewStyle : public QProxyStyle {
     Q_OBJECT
@@ -33,30 +32,17 @@ class NListViewStyle : public QProxyStyle {
     void setBackgroundColor(const QColor& color);
     void setBorderColor(const QColor& color);
     void setBorderRadius(int radius);
-    void setItemHoverColor(const QColor& color);
-    void setItemSelectedColor(const QColor& color);
-    void setItemPressedColor(const QColor& color);
-    void setTextColor(const QColor& color);
-    void setAccentColor(const QColor& color);
     void setItemHeight(int height);
-    void setItemBorderRadius(int radius);
-    void setLeftPadding(int padding);
     void setBorderVisible(bool visible);
     void setBackgroundVisible(bool visible);
 
   private:
-    bool m_borderVisible{true};
-    bool m_backgroundVisible{true};
+    bool   m_borderVisible{true};
+    bool   m_backgroundVisible{true};
     QColor _backgroundColor;
     QColor _borderColor;
     int    _borderRadius{8};
-    QColor _itemHoverColor;
-    QColor _itemSelectedColor;
-    QColor _itemPressedColor;
-    QColor _textColor;
-    QColor _accentColor;
     int    _itemHeight{36};
-    int    _itemBorderRadius{4};
     int    _leftPadding{12};
 };
 

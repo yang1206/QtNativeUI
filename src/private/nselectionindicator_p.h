@@ -52,6 +52,7 @@ qreal trailingProgress(qreal progress);
 QRectF interpolatedMarkRect(const QRectF& previous, const QRectF& target, qreal progress,
                             NSelectionIndicatorMotion::Direction direction);
 void paintMark(QPainter* painter, const QRectF& markRect, const QColor& accentColor);
+QRectF revealedMarkRect(const QRectF& baseRect, qreal progress);
 
 } // namespace NSelectionIndicator
 

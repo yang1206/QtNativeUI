@@ -216,6 +216,8 @@ enum ItemDataRole {
     SubtitleRole     = Qt::UserRole + 1,
     ShowChevronRole  = Qt::UserRole + 2,
     ComboChoicesRole = Qt::UserRole + 3,
+    SectionRole           = Qt::UserRole + 4,
+    SectionForegroundRole = Qt::UserRole + 5,
 };
 Q_ENUM_CREATE(ItemDataRole)
 Q_END_ENUM_CREATE(NListViewType)

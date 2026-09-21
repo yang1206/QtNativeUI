@@ -163,6 +163,10 @@ set(QtNativeUI_PRIVATE_SOURCES
         src/private/nitemeditor_p.h
         src/private/nlistitemdelegate_p.cpp
         src/private/nlistitemdelegate_p.h
+        src/private/nlistviewreorder_p.cpp
+        src/private/nlistviewreorder_p.h
+        src/private/nlistviewdragreorder_p.cpp
+        src/private/nlistviewdragreorder_p.h
         src/private/nlistviewselectmark_p.cpp
         src/private/nlistviewselectmark_p.h
         src/private/nselectionindicator_p.cpp

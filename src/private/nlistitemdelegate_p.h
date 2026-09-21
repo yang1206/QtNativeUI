@@ -1,6 +1,7 @@
 #ifndef NLISTITEMDELEGATE_P_H
 #define NLISTITEMDELEGATE_P_H
 
+#include <QColor>
 #include <QStyledItemDelegate>
 
 class NListView;
@@ -19,11 +20,17 @@ class NListItemDelegate : public QStyledItemDelegate {
     void     setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
     void     updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option,
                                   const QModelIndex& index) const override;
+    void     paintStickySection(QWidget* viewport) const;
 
   private:
     void paintListRow(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
     void paintIconRow(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
     QRect checkBoxRect(const QRect& itemRect) const;
+    QRect iconCheckBoxRect(const QRect& tileRect) const;
+    bool  rowStartsSection(const QModelIndex& index) const;
+    int   sectionHeaderHeight() const;
+    void  paintSectionHeader(QPainter* painter, const QRect& itemRect, const QString& title,
+                             const QColor& textColor) const;
     NListView*        m_view{nullptr};
     NListViewPrivate* m_data{nullptr};
 };

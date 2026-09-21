@@ -255,6 +255,23 @@ enum NNavigationRouterType::NavigationRouteType {
 };
 ```
 
+### 列表数据角色
+
+`NListView` 内置 delegate 读取的 `Qt::UserRole` 扩展，数值从 `Qt::UserRole + 1` 起：
+
+```cpp
+enum NListViewType::ItemDataRole {
+    SubtitleRole = Qt::UserRole + 1, // 副标题
+    ShowChevronRole,                 // 右侧箭头
+    ComboChoicesRole,                // 内联 NComboBox 选项 (QStringList)
+    SectionRole,                     // 分组标题
+    SectionForegroundRole            // 分组标题颜色 (QColor)
+};
+
+item->setData(QStringLiteral("副标题"), NListViewType::SubtitleRole);
+item->setData(QStringLiteral("工作"), NListViewType::SectionRole);
+```
+
 ## 最佳实践
 
 ### 1. 使用设计令牌保持一致性
@@ -307,3 +324,4 @@ label->setFont(QFont("Segoe UI", fontSize));
 | `NLabelType::Type` | 10 个值 | 标签类型 |
 | `NNavigationType::NavigationDisplayMode` | 4 个值 | 导航显示模式 |
 | `NNavigationType::PageTransitionType` | 7 个值 | 页面过渡类型 |
+| `NListViewType::ItemDataRole` | 5 个值 | 列表副标题 / 分组 / 下拉选项 |

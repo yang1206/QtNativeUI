@@ -3,7 +3,13 @@
 //
 
 #include "nlistview_p.h"
-#include "nlistitemdelegate_p.h"
+
+#include <QAbstractItemView>
+#include <QLabel>
+#include <QListView>
+
+#include "QtNativeUI/NEnums.h"
+#include "QtNativeUI/NFluentColors.h"
 #include "QtNativeUI/NTheme.h"
 
 NListViewPrivate::NListViewPrivate(QObject* parent) : QObject(parent) {}
@@ -16,14 +22,20 @@ QColor NListViewPrivate::itemSelectedColor() const {
     return isDark ? _pDarkItemSelectedColor : _pLightItemSelectedColor;
 }
 
-QColor NListViewPrivate::itemPressedColor() const {
-    return isDark ? _pDarkItemPressedColor : _pLightItemPressedColor;
-}
+QColor NListViewPrivate::itemPressedColor() const { return isDark ? _pDarkItemPressedColor : _pLightItemPressedColor; }
 
 QColor NListViewPrivate::textColor() const { return isDark ? _pDarkTextColor : _pLightTextColor; }
 
 QColor NListViewPrivate::placeholderTextColor() const {
     return isDark ? _pDarkPlaceholderTextColor : _pLightPlaceholderTextColor;
+}
+
+QColor NListViewPrivate::sectionTextColor() const {
+    return isDark ? _pDarkSectionTextColor : _pLightSectionTextColor;
+}
+
+QColor NListViewPrivate::backgroundColor() const {
+    return isDark ? _pDarkBackgroundColor : _pLightBackgroundColor;
 }
 
 void NListViewPrivate::initStyle() {
@@ -39,23 +51,12 @@ void NListViewPrivate::updateStyle() {
     if (isDark) {
         style->setBackgroundColor(_pDarkBackgroundColor);
         style->setBorderColor(_pDarkBorderColor);
-        style->setItemHoverColor(_pDarkItemHoverColor);
-        style->setItemSelectedColor(_pDarkItemSelectedColor);
-        style->setItemPressedColor(_pDarkItemPressedColor);
-        style->setTextColor(_pDarkTextColor);
     } else {
         style->setBackgroundColor(_pLightBackgroundColor);
         style->setBorderColor(_pLightBorderColor);
-        style->setItemHoverColor(_pLightItemHoverColor);
-        style->setItemSelectedColor(_pLightItemSelectedColor);
-        style->setItemPressedColor(_pLightItemPressedColor);
-        style->setTextColor(_pLightTextColor);
     }
-    NAccentColor accentColor = nTheme->accentColor();
-    style->setAccentColor(accentColor.normal());
     style->setBorderRadius(_pBorderRadius);
     style->setItemHeight(_pItemHeight);
-    style->setItemBorderRadius(_pItemBorderRadius);
     style->setBorderVisible(_pBorderVisible);
     style->setBackgroundVisible(_pBackgroundVisible);
     Q_Q(NListView);
@@ -64,3 +65,59 @@ void NListViewPrivate::updateStyle() {
         q->viewport()->update();
 }
 
+void NListViewPrivate::applyReorderConfiguration() {
+    Q_Q(NListView);
+    q->setDragEnabled(false);
+    q->setAcceptDrops(false);
+    q->setDropIndicatorShown(false);
+    q->setDragDropMode(QAbstractItemView::NoDragDrop);
+}
+
+void NListViewPrivate::updateHeaderFooterStyle() {
+    if (!headerLabel && !footerLabel)
+        return;
+    const QColor textColor =
+        NThemeColor(NFluentColorKey::TextFillColorSecondary, isDark ? NThemeType::Dark : NThemeType::Light);
+    QFont font = headerLabel ? headerLabel->font() : footerLabel->font();
+    font.setPixelSize(NFontSizeToken(NDesignTokenKey::FontSizeCaption).toInt());
+    font.setWeight(QFont::DemiBold);
+    if (headerLabel) {
+        headerLabel->setFont(font);
+        headerLabel->setStyleSheet(QStringLiteral("background:transparent;color:%1;").arg(textColor.name()));
+    }
+    if (footerLabel) {
+        footerLabel->setFont(font);
+        footerLabel->setStyleSheet(QStringLiteral("background:transparent;color:%1;").arg(textColor.name()));
+    }
+}
+
+void NListViewPrivate::layoutHeaderFooter() {
+    Q_Q(NListView);
+    constexpr int kSideMargin   = 4;
+    constexpr int kHeaderHeight = 28;
+    constexpr int kFooterHeight = 24;
+    int           topMargin     = kSideMargin;
+    int           bottomMargin  = kSideMargin;
+    const int     innerWidth    = qMax(0, q->width() - kSideMargin * 2);
+    if (headerLabel) {
+        if (_pHeaderText.isEmpty()) {
+            headerLabel->hide();
+        } else {
+            headerLabel->setText(_pHeaderText);
+            headerLabel->setGeometry(kSideMargin, kSideMargin, innerWidth, kHeaderHeight);
+            headerLabel->show();
+            topMargin += kHeaderHeight;
+        }
+    }
+    if (footerLabel) {
+        if (_pFooterText.isEmpty()) {
+            footerLabel->hide();
+        } else {
+            footerLabel->setText(_pFooterText);
+            footerLabel->setGeometry(kSideMargin, q->height() - kSideMargin - kFooterHeight, innerWidth, kFooterHeight);
+            footerLabel->show();
+            bottomMargin += kFooterHeight;
+        }
+    }
+    q->setViewportMargins(kSideMargin, topMargin, kSideMargin, bottomMargin);
+}

@@ -124,6 +124,15 @@ QRectF interpolatedMarkRect(const QRectF& previous, const QRectF& target, qreal 
     return QRectF(QPointF(normalizedLeft, normalizedTop), QPointF(normalizedRight, normalizedBottom));
 }
 
+QRectF revealedMarkRect(const QRectF& baseRect, qreal progress) {
+    if (baseRect.isEmpty())
+        return {};
+    const qreal clamped = qBound(0.0, progress, 1.0);
+    const qreal scale   = 0.35 + 0.65 * clamped;
+    const qreal height  = baseRect.height() * scale;
+    return QRectF(baseRect.left(), baseRect.center().y() - height / 2.0, baseRect.width(), height);
+}
+
 void paintMark(QPainter* painter, const QRectF& markRect, const QColor& accentColor) {
     if (!painter || markRect.isEmpty())
         return;

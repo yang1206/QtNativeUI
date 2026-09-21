@@ -14,7 +14,9 @@
 #include "QtNativeUI/NEnums.h"
 #include "nlistviewstyle_p.h"
 
+class QLabel;
 class NListItemDelegate;
+class NListViewDragReorderController;
 class NListViewSelectMarkController;
 
 class NListViewPrivate : public QObject {
@@ -40,6 +42,15 @@ class NListViewPrivate : public QObject {
     Q_PROPERTY_CREATE_D(bool, BorderVisible)
     Q_PROPERTY_CREATE_D(bool, BackgroundVisible)
     Q_PROPERTY_CREATE_D(bool, SelectionIndicatorVisible)
+    Q_PROPERTY_CREATE_D(QString, HeaderText)
+    Q_PROPERTY_CREATE_D(QString, FooterText)
+    Q_PROPERTY_CREATE_D(bool, SectionsEnabled)
+    Q_PROPERTY_CREATE_D(int, SectionHeaderHeight)
+    Q_PROPERTY_CREATE_D(QColor, LightSectionTextColor)
+    Q_PROPERTY_CREATE_D(QColor, DarkSectionTextColor)
+    Q_PROPERTY_CREATE_D(QFont, SectionHeaderFont)
+    Q_PROPERTY_CREATE_D(bool, SelectionIndicatorAnimated)
+    Q_PROPERTY_CREATE_D(bool, ReorderEnabled)
 
   public:
     explicit NListViewPrivate(QObject* parent = nullptr);
@@ -61,11 +72,23 @@ class NListViewPrivate : public QObject {
     QColor itemPressedColor() const;
     QColor textColor() const;
     QColor placeholderTextColor() const;
+    QColor sectionTextColor() const;
+    QColor backgroundColor() const;
+    QFont  sectionHeaderFont() const { return _pSectionHeaderFont; }
     int    itemHeight() const { return _pItemHeight; }
     int    itemBorderRadius() const { return _pItemBorderRadius; }
+    int    sectionHeaderHeight() const { return qMax(0, _pSectionHeaderHeight); }
 
     void updateStyle();
     void initStyle();
+    void applyReorderConfiguration();
+    void layoutHeaderFooter();
+    void updateHeaderFooterStyle();
+
+    NListViewDragReorderController* dragReorder{nullptr};
+
+    QLabel*               headerLabel{nullptr};
+    QLabel*               footerLabel{nullptr};
 };
 
 #endif // NLISTVIEW_P_H

@@ -2,282 +2,155 @@
 
 ### 介绍
 
-列表视图用于显示数据项的列表，支持选择、排序和自定义显示。NListView 基于 Qt 的 QListView，提供了现代化的外观和丰富的交互功能。
+NListView 基于 `QListView`，API 与 Qt 列表视图兼容，并增加 Fluent 行样式：圆角卡片、主题色、覆盖式 `NScrollBar`、空状态占位、头尾文字、分组吸顶、拖拽重排与左侧选中指示条。
+
+C++ 属性访问为 `setXxx` / `getXxx`（例如 `setItemHeight` / `getItemHeight`）。模型、选择、滚动、`viewMode` 等仍走 `QListView`。
 
 ### 基本用法
 
 ```cpp
-// 创建列表视图
-NListView* listView = new NListView();
+NListView* list = new NListView();
+auto* model = new QStandardItemModel(list);
+model->appendRow(new QStandardItem(QStringLiteral("项目 1")));
+model->appendRow(new QStandardItem(QStringLiteral("项目 2")));
+list->setModel(model);
 
-// 创建数据模型
-QStringListModel* model = new QStringListModel();
-QStringList items = {"项目1", "项目2", "项目3", "项目4", "项目5"};
-model->setStringList(items);
+connect(list->selectionModel(), &QItemSelectionModel::currentChanged,
+        [](const QModelIndex& current, const QModelIndex&) {
+            if (current.isValid())
+                qDebug() << current.data().toString();
+        });
+```
 
-// 设置模型
-listView->setModel(model);
+### Fluent 行样式
 
-// 监听选择变化
-connect(listView->selectionModel(), &QItemSelectionModel::currentChanged,
-        [](const QModelIndex& current, const QModelIndex& previous) {
-    if (current.isValid()) {
-        qDebug() << "选择了：" << current.data().toString();
-    }
+内置 `NListItemDelegate` 在 **ListMode** 读取下列角色（`NListViewType::ItemDataRole`）：
+
+| 角色 | 用途 |
+|------|------|
+| `Qt::DisplayRole` | 主标题 |
+| `Qt::DecorationRole` | 行图标 |
+| `NListViewType::SubtitleRole` | 副标题（双行，行高自动加约 18px） |
+| `NListViewType::ShowChevronRole` | 右侧 Chevron（`bool`） |
+| `Qt::CheckStateRole` + `ItemIsUserCheckable` | 行首复选指示器 |
+| `NListViewType::ComboChoicesRole` | 内联下拉选项（`QStringList`） |
+| `NListViewType::SectionRole` | 分组标题（相邻相同字符串为一组） |
+| `NListViewType::SectionForegroundRole` | 该组标题颜色（`QColor`） |
+
+```cpp
+QStandardItem* item = new QStandardItem(QStringLiteral("账户"));
+item->setIcon(style()->standardIcon(QStyle::SP_DirIcon));
+item->setData(QStringLiteral("管理登录与安全"), NListViewType::SubtitleRole);
+item->setData(QStringLiteral("管理登录与安全"), Qt::AccessibleDescriptionRole);
+item->setData(true, NListViewType::ShowChevronRole);
+```
+
+`SubtitleRole` 只用于绘制，不会自动进入读屏。需要无障碍时再写 `Qt::AccessibleDescriptionRole`。
+
+### 空状态与头尾文字
+
+```cpp
+list->setPlaceholderText(QStringLiteral("暂无数据"));
+list->setHeaderText(QStringLiteral("任务"));
+list->setFooterText(QStringLiteral("共 3 项"));
+```
+
+`isShowingPlaceholder()` 在设置了 `placeholderText` 且 `rowCount()==0` 时为 `true`。头尾文字画在视口外边距里，不占用 item 布局。
+
+### 分组与吸顶
+
+默认关闭。打开后，相邻 `SectionRole` 相同的行合成一组；组头高度由 `sectionHeaderHeight` 控制（默认 28），字体用 `QFont`，不要再拆字号/字重 API。
+
+```cpp
+list->setSectionsEnabled(true);
+list->setSectionHeaderHeight(36);
+QFont sectionFont = list->font();
+sectionFont.setPixelSize(16);
+sectionFont.setWeight(QFont::DemiBold);
+list->setSectionHeaderFont(sectionFont);
+
+auto* work = new QStandardItem(QStringLiteral("写周报"));
+work->setData(QStringLiteral("工作"), NListViewType::SectionRole);
+work->setData(nTheme->accentColor().normal(), NListViewType::SectionForegroundRole);
+```
+
+ListMode 下分组标题会吸顶：当前组头滚出视口后钉在视口顶，下一组上来时把它顶走。IconMode、拖拽重排过程中不画吸顶。没有单独的「吸顶开关」。
+
+### 拖拽重排
+
+```cpp
+list->setReorderEnabled(true);
+list->setSelectionMode(QAbstractItemView::SingleSelection);
+item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled
+               | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+
+connect(list, &NListView::rowsReordered, [](int from, int to) {
+    qDebug() << from << "->" << to;
 });
 ```
 
-### 文件列表
+这是自定义鼠标拖放（幽灵行 + 落点线 + 行位移），**不是** `QDrag` / `InternalMove`。约束：
+
+- 仅 ListMode。
+- `QStandardItemModel` 走 `takeRow` / `insertRow`；其它模型需要 `moveRow` 真能改数据。
+- 视图会关掉 Qt 拖放（`NoDragDrop`），外部文件拖入不做。
+- 成功后发 `rowsReordered(sourceRow, destinationRow)`。
+
+### 图标网格（IconMode）
+
+网格用 Qt 自己的 API，不要再加属性：
 
 ```cpp
-// 创建文件列表
-NListView* fileList = new NListView();
+list->setViewMode(QListView::IconMode);
+list->setWrapping(true);
+list->setFlow(QListView::LeftToRight);
+list->setResizeMode(QListView::Adjust);
+list->setMovement(QListView::Static);
+list->setIconSize(QSize(48, 48));
+list->setGridSize(QSize(104, 112));
+list->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-// 使用标准文件系统模型
-QFileSystemModel* fileModel = new QFileSystemModel();
-fileModel->setRootPath(QDir::homePath());
-fileModel->setFilter(QDir::Files | QDir::NoDotAndDotDot);
-
-fileList->setModel(fileModel);
-fileList->setRootIndex(fileModel->index(QDir::homePath()));
-
-// 双击打开文件
-connect(fileList, &QListView::doubleClicked, [](const QModelIndex& index) {
-    QFileSystemModel* model = qobject_cast<QFileSystemModel*>(fileList->model());
-    if (model) {
-        QString filePath = model->filePath(index);
-        QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
-    }
-});
+auto* tile = new QStandardItem(QStringLiteral("文档"));
+tile->setIcon(style()->standardIcon(QStyle::SP_FileIcon));
+tile->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 ```
 
-### 联系人列表
+`QStandardItem` 默认带 `ItemIsEditable`。IconMode 的内置 delegate **不创建编辑器**；演示里仍建议 `NoEditTriggers` 并去掉可编辑标志。IconMode 不做分组吸顶、拖拽重排和左侧选中指示条。只设 `IconMode` 不设 `wrapping` / `gridSize` 不会变成网格。
+
+### 内联编辑（ListMode）
+
+默认触发器与 `QListView` 相同。需要编辑时自行打开，项上要有 `ItemIsEditable`：
 
 ```cpp
-// 创建联系人数据模型
-class ContactModel : public QAbstractListModel {
-public:
-    struct Contact {
-        QString name;
-        QString phone;
-        QString email;
-        QPixmap avatar;
-    };
+list->setEditTriggers(QAbstractItemView::DoubleClicked
+                      | QAbstractItemView::SelectedClicked
+                      | QAbstractItemView::EditKeyPressed);
 
-    void addContact(const Contact& contact) {
-        beginInsertRows(QModelIndex(), contacts.size(), contacts.size());
-        contacts.append(contact);
-        endInsertRows();
-    }
+QStandardItem* text = new QStandardItem(QStringLiteral("可编辑"));
+text->setFlags(text->flags() | Qt::ItemIsEditable);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override {
-        return contacts.size();
-    }
-
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
-        if (!index.isValid() || index.row() >= contacts.size()) {
-            return QVariant();
-        }
-
-        const Contact& contact = contacts[index.row()];
-        switch (role) {
-            case Qt::DisplayRole:
-                return contact.name;
-            case Qt::UserRole:
-                return contact.phone;
-            case Qt::UserRole + 1:
-                return contact.email;
-            case Qt::DecorationRole:
-                return contact.avatar;
-        }
-        return QVariant();
-    }
-
-private:
-    QList<Contact> contacts;
-};
-
-// 使用联系人模型
-NListView* contactList = new NListView();
-ContactModel* contactModel = new ContactModel();
-
-// 添加联系人
-ContactModel::Contact contact1{"张三", "138-0000-0000", "zhang@example.com", QPixmap()};
-ContactModel::Contact contact2{"李四", "139-0000-0000", "li@example.com", QPixmap()};
-contactModel->addContact(contact1);
-contactModel->addContact(contact2);
-
-contactList->setModel(contactModel);
+QStandardItem* combo = new QStandardItem(QStringLiteral("A"));
+combo->setFlags(combo->flags() | Qt::ItemIsEditable);
+combo->setData(QStringList{QStringLiteral("A"), QStringLiteral("B")},
+               NListViewType::ComboChoicesRole);
 ```
 
-### 任务列表
+编辑器与 `NTableView` 文本单元格一致：`NLineEdit` / `NComboBox`，数值按 `Qt::EditRole` 元类型用 `NSpinBox` / `NDoubleSpinBox`。`ComboChoicesRole` 未设时，可回退 `Qt::UserRole` 里的 `QStringList`。调用 `setItemDelegate()` 后需自己处理 `createEditor`。
+
+### 选中指示条
+
+`selectionIndicatorVisible` 默认 `true`。`SingleSelection` 下由 `NSelectionIndicatorMotion` 驱动（约 270ms）；`MultiSelection` / `ExtendedSelection` 为每行静态条。`selectionIndicatorAnimated` 只影响单选动画。
+
+### 过滤
+
+过滤用 Qt 的 `QSortFilterProxyModel`，视图不包一层：
 
 ```cpp
-// 创建任务列表
-class TaskModel : public QAbstractListModel {
-public:
-    struct Task {
-        QString title;
-        QString description;
-        bool completed;
-        QDateTime dueDate;
-        int priority; // 1-高, 2-中, 3-低
-    };
-
-    void addTask(const Task& task) {
-        beginInsertRows(QModelIndex(), tasks.size(), tasks.size());
-        tasks.append(task);
-        endInsertRows();
-    }
-
-    void toggleTask(int index) {
-        if (index >= 0 && index < tasks.size()) {
-            tasks[index].completed = !tasks[index].completed;
-            emit dataChanged(createIndex(index, 0), createIndex(index, 0));
-        }
-    }
-
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override {
-        return tasks.size();
-    }
-
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
-        if (!index.isValid() || index.row() >= tasks.size()) {
-            return QVariant();
-        }
-
-        const Task& task = tasks[index.row()];
-        switch (role) {
-            case Qt::DisplayRole:
-                return task.title;
-            case Qt::ToolTipRole:
-                return task.description;
-            case Qt::CheckStateRole:
-                return task.completed ? Qt::Checked : Qt::Unchecked;
-            case Qt::UserRole:
-                return task.priority;
-        }
-        return QVariant();
-    }
-
-    Qt::ItemFlags flags(const QModelIndex& index) const override {
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
-    }
-
-private:
-    QList<Task> tasks;
-};
-
-NListView* taskList = new NListView();
-TaskModel* taskModel = new TaskModel();
-
-// 添加任务
-TaskModel::Task task1{"完成项目文档", "编写用户手册和API文档", false, QDateTime::currentDateTime().addDays(3), 1};
-TaskModel::Task task2{"代码审查", "审查新功能的代码实现", false, QDateTime::currentDateTime().addDays(1), 2};
-taskModel->addTask(task1);
-taskModel->addTask(task2);
-
-taskList->setModel(taskModel);
-
-// 双击切换任务状态
-connect(taskList, &QListView::doubleClicked, [=](const QModelIndex& index) {
-    taskModel->toggleTask(index.row());
-});
-```
-
-### 图片画廊
-
-```cpp
-// 创建图片画廊
-NListView* gallery = new NListView();
-gallery->setViewMode(QListView::IconMode);
-gallery->setResizeMode(QListView::Adjust);
-gallery->setGridSize(QSize(150, 150));
-
-// 图片模型
-QStandardItemModel* imageModel = new QStandardItemModel();
-
-// 添加图片项
-QStringList imagePaths = {":/images/photo1.jpg", ":/images/photo2.jpg", ":/images/photo3.jpg"};
-for (const QString& path : imagePaths) {
-    QStandardItem* item = new QStandardItem();
-    
-    QPixmap pixmap(path);
-    QPixmap thumbnail = pixmap.scaled(120, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    
-    item->setIcon(QIcon(thumbnail));
-    item->setText(QFileInfo(path).baseName());
-    item->setData(path, Qt::UserRole);
-    
-    imageModel->appendRow(item);
-}
-
-gallery->setModel(imageModel);
-
-// 双击查看大图
-connect(gallery, &QListView::doubleClicked, [](const QModelIndex& index) {
-    QString imagePath = index.data(Qt::UserRole).toString();
-    // 打开图片查看器
-    QDesktopServices::openUrl(QUrl::fromLocalFile(imagePath));
-});
-```
-
-### 搜索过滤
-
-```cpp
-// 创建可搜索的列表
-QWidget* searchableList = new QWidget();
-QVBoxLayout* layout = new QVBoxLayout(searchableList);
-
-// 搜索框
-NLineEdit* searchEdit = new NLineEdit();
-searchEdit->setPlaceholderText("搜索...");
-searchEdit->addAction(NRegularIconType::Search24Regular, QLineEdit::LeadingPosition);
-
-// 列表视图
-NListView* filteredList = new NListView();
-
-// 数据模型
-QStringListModel* dataModel = new QStringListModel();
-QStringList allItems = {
-    "苹果", "香蕉", "橙子", "葡萄", "草莓",
-    "西瓜", "芒果", "菠萝", "柠檬", "樱桃"
-};
-dataModel->setStringList(allItems);
-
-// 过滤代理模型
-QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
-proxyModel->setSourceModel(dataModel);
-proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-
-filteredList->setModel(proxyModel);
-
-layout->addWidget(searchEdit);
-layout->addWidget(filteredList);
-
-// 搜索过滤
-connect(searchEdit, &QLineEdit::textChanged, [=](const QString& text) {
-    proxyModel->setFilterFixedString(text);
-});
-```
-
-### 自定义样式
-
-```cpp
-NListView* styledList = new NListView();
-
-// 设置项目高度和圆角
-styledList->setItemHeight(48);
-styledList->setItemBorderRadius(6);
-styledList->setBorderRadius(8);
-
-// 自定义颜色
-styledList->setLightBackgroundColor(QColor(255, 255, 255));
-styledList->setLightItemHoverColor(QColor(245, 245, 245));
-styledList->setLightItemSelectedColor(QColor(0, 120, 215));
-styledList->setLightItemPressedColor(QColor(0, 100, 195));
-styledList->setLightTextColor(QColor(32, 32, 32));
-styledList->setLightBorderColor(QColor(200, 200, 200));
+auto* proxy = new QSortFilterProxyModel(list);
+proxy->setSourceModel(model);
+proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+list->setModel(proxy);
+connect(searchEdit, &QLineEdit::textChanged, proxy, &QSortFilterProxyModel::setFilterFixedString);
 ```
 
 ## API
@@ -288,125 +161,53 @@ styledList->setLightBorderColor(QColor(200, 200, 200));
 |---------|------|
 | `NListView(QWidget* parent = nullptr)` | 创建列表视图 |
 
-### 样式属性
+### 布局与外观
 
-| 方法 | 说明 | 参数 |
-|------|------|------|
-| `setItemHeight(int height)` | 设置项目高度 | 高度像素值 |
-| `itemHeight()` | 获取项目高度 | - |
-| `setItemBorderRadius(int radius)` | 设置项目圆角 | 圆角半径 |
-| `itemBorderRadius()` | 获取项目圆角 | - |
-| `setBorderRadius(int radius)` | 设置列表边框圆角 | 圆角半径 |
-| `borderRadius()` | 获取列表边框圆角 | - |
+| 属性 | 方法 | 说明 | 默认 |
+|------|------|------|------|
+| `itemHeight` | `setItemHeight` / `getItemHeight` | ListMode 行高；有副标题时会加高 | `36` |
+| `itemBorderRadius` | `setItemBorderRadius` / `getItemBorderRadius` | 行圆角 | `4` |
+| `borderRadius` | `setBorderRadius` / `getBorderRadius` | 外框圆角 | `8` |
+| `borderVisible` | `setBorderVisible` / `getBorderVisible` | 外框描边 | `true` |
+| `backgroundVisible` | `setBackgroundVisible` / `getBackgroundVisible` | 控件背景 | `true` |
+| `placeholderText` | `setPlaceholderText` / `getPlaceholderText` | 空数据占位 | 空 |
+| `headerText` | `setHeaderText` / `getHeaderText` | 视口上方标题 | 空 |
+| `footerText` | `setFooterText` / `getFooterText` | 视口下方页脚 | 空 |
+| `isShowingPlaceholder()` | — | 当前是否在画占位 | — |
+
+### 分组
+
+| 属性 | 方法 | 说明 | 默认 |
+|------|------|------|------|
+| `sectionsEnabled` | `setSectionsEnabled` / `getSectionsEnabled` | 按 `SectionRole` 分组，并启用吸顶 | `false` |
+| `sectionHeaderHeight` | `setSectionHeaderHeight` / `getSectionHeaderHeight` | 组头高度 | `28` |
+| `sectionHeaderFont` | `setSectionHeaderFont` / `getSectionHeaderFont` | 组头字体 | Caption 字号 |
+| `lightSectionTextColor` / `darkSectionTextColor` | `set*` / `get*` | 组头默认颜色 | Secondary 文本色 |
+
+### 交互
+
+| 属性 / 信号 | 方法 | 说明 | 默认 |
+|-------------|------|------|------|
+| `selectionIndicatorVisible` | `setSelectionIndicatorVisible` / `getSelectionIndicatorVisible` | 左侧选中条 | `true` |
+| `selectionIndicatorAnimated` | `setSelectionIndicatorAnimated` / `getSelectionIndicatorAnimated` | 单选指示条动画 | `true` |
+| `reorderEnabled` | `setReorderEnabled` / `getReorderEnabled` | ListMode 鼠标重排 | `false` |
+| `rowsReordered(int, int)` | — | 重排完成 | — |
 
 ### 颜色属性
 
-| 属性 | 说明 | 类型 |
-|------|------|------|
-| `lightBackgroundColor` | 明亮主题背景色 | `QColor` |
-| `darkBackgroundColor` | 暗黑主题背景色 | `QColor` |
-| `lightItemHoverColor` | 明亮主题项目悬停色 | `QColor` |
-| `darkItemHoverColor` | 暗黑主题项目悬停色 | `QColor` |
-| `lightItemSelectedColor` | 明亮主题项目选中色 | `QColor` |
-| `darkItemSelectedColor` | 暗黑主题项目选中色 | `QColor` |
-| `lightItemPressedColor` | 明亮主题项目按下色 | `QColor` |
-| `darkItemPressedColor` | 暗黑主题项目按下色 | `QColor` |
-| `lightTextColor` | 明亮主题文本色 | `QColor` |
-| `darkTextColor` | 暗黑主题文本色 | `QColor` |
-| `lightBorderColor` | 明亮主题边框色 | `QColor` |
-| `darkBorderColor` | 暗黑主题边框色 | `QColor` |
-| `lightPlaceholderTextColor` | 明亮主题占位文本色 | `QColor` |
-| `darkPlaceholderTextColor` | 暗黑主题占位文本色 | `QColor` |
-
-### 行为属性
-
-| 属性 | 说明 | 类型 |
-|------|------|------|
-| `placeholderText` | 模型无行时居中占位文案 | `QString` |
-| `borderVisible` | 是否绘制外框描边 | `bool` |
-| `backgroundVisible` | 是否绘制控件背景 | `bool` |
-| `selectionIndicatorVisible` | 是否绘制左侧选中指示条 | `bool` |
-
-`SingleSelection` 下左侧指示条由 `NSelectionIndicatorMotion` 驱动（约 270ms，`cubic-bezier(0.45, 0.05, 0.25, 1)`，旧行先收、新行后展）；`MultiSelection` / `ExtendedSelection` 为每行静态指示条。
-
-`isShowingPlaceholder()` 在设置了 `placeholderText` 且 `rowCount()==0` 时为 `true`。模型先于视图析构时不会再访问已释放的 `model()`（退出时安全）。
-
-### 内联编辑
-
-默认 `NListItemDelegate` 通过 `NItemEditor` 创建编辑器，样式与 `NTableView` 文本单元格一致（`NLineEdit`：`borderWidth=1`，圆角为 `itemBorderRadius()`）。几何与 `NTableView` 相同方式：`option.rect.adjusted(margins)`，列表左侧边距与行内文字起点对齐（基础 `14px`，含勾选列或图标时递增），上下边距为 `3px`。
-
-```cpp
-NListView* list = new NListView();
-list->setEditTriggers(QAbstractItemView::DoubleClicked
-                      | QAbstractItemView::SelectedClicked
-                      | QAbstractItemView::EditKeyPressed);
-
-QStandardItem* item = new QStandardItem(QStringLiteral("可编辑"));
-item->setFlags(item->flags() | Qt::ItemIsEditable);
-
-// 下拉编辑：ComboChoicesRole 为 QStringList（兼容 Qt::UserRole）
-item->setData(QStringList{QStringLiteral("A"), QStringLiteral("B")}, NListViewType::ComboChoicesRole);
-```
-
-数值列按 `Qt::EditRole` 的元类型自动使用 `NSpinBox` / `NDoubleSpinBox`。调用 `setItemDelegate()` 后需自行处理 `createEditor` / `updateEditorGeometry`。
-
-### 默认行 delegate 数据角色
-
-内置 `NListItemDelegate` 读取以下角色（见 `NListViewType::ItemDataRole`）：
-
-| 角色 | 用途 |
-|------|------|
-| `Qt::DisplayRole` | 主标题 |
-| `NListViewType::SubtitleRole` | 副标题（双行布局） |
-| `NListViewType::ShowChevronRole` | 右侧 `Chevron`（`bool`） |
-| `Qt::CheckStateRole` + `ItemIsUserCheckable` | 行首 `NCheckBox` 风格指示器（绘制） |
-| `Qt::ItemIsEditable` + `Qt::EditRole` | 内联编辑：`NLineEdit` / `NSpinBox` / `NDoubleSpinBox` |
-| `NListViewType::ComboChoicesRole`（`QStringList`） | 内联编辑：`NComboBox`（未设置时可回退 `Qt::UserRole` 中的 `QStringList`） |
-
-自定义 delegate 时请自行绘制 Fluent 行样式；若保留内联编辑，可参考 `NItemEditor::createEditor` 与 `listCellMargins()`。
-
-### 无障碍
-
-使用 Qt 内置 `QAccessibleList`（与 `QListView` 相同），无需自定义工厂。
-
-- 为控件设置 `accessibleName`（例如「设置列表」）。
-- 空数据且设置了 `placeholderText` 时，会写入控件的 `accessibleDescription`。
-- 行标题用 `Qt::DisplayRole`；读屏副文案用 `Qt::AccessibleTextRole` 或 `Qt::AccessibleDescriptionRole`（`NListViewType::SubtitleRole` 仅用于绘制，不会自动进无障碍）。
-
-```cpp
-item->setData(subtitle, NListViewType::SubtitleRole);
-item->setData(subtitle, Qt::AccessibleDescriptionRole); // 读屏
-```
+Light / Dark 成对：`background`、`itemHover`、`itemSelected`、`itemPressed`、`text`、`placeholderText`、`border`、`sectionText`。随 `NTheme` 切换，无需手写 `themeModeChanged`。
 
 ### 继承的 API
 
-NListView 继承自 `QListView`，支持所有标准 QListView 的方法和信号：
+- `setModel()` / `model()`：切换模型时会断开旧模型信号
+- `setSelectionMode()` / `setSelectionModel()`
+- `setViewMode()` / `setWrapping()` / `setGridSize()` / `setIconSize()` / `setFlow()` / `setResizeMode()`
+- `setEditTriggers()` / `editTriggers()`
+- `visualRect()`：拖拽位移绘制期间会偏移，命中测试仍用布局矩形
+- 信号：`clicked`、`doubleClicked`、`activated`
 
-- `setModel()` / `model()` - 设置/获取数据模型（切换模型时会断开旧模型的信号连接）
-- `setEditTriggers()` / `editTriggers()` - 内联编辑触发方式（默认与 `QListView` 相同）
-- `setSelectionMode()` / `selectionMode()` - 设置/获取选择模式
-- `setViewMode()` / `viewMode()` - 设置/获取视图模式
-- `setGridSize()` / `gridSize()` - 设置/获取网格大小
-- `setResizeMode()` / `resizeMode()` - 设置/获取调整模式
-- `clicked()` / `doubleClicked()` - 点击/双击信号
-- `activated()` - 激活信号
+有垂直或水平滚动范围时，滚轮事件会被 `accept()`，避免嵌套在页面里时滚出到父级。
 
-## 主题定制
+### 无障碍
 
-### 样式变量
-
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| 项目高度 | `36px` | 列表项目默认高度 |
-| 项目圆角 | `4px` | 列表项目圆角半径 |
-| 边框圆角 | `8px` | 列表边框圆角半径 |
-| 项目间距 | `2px` | 列表项目间距 |
-
-### 主题适配
-
-```cpp
-// 列表视图会自动响应主题变化
-connect(nTheme, &NTheme::themeModeChanged, [](NThemeType::ThemeMode mode) {
-    // 列表颜色会自动更新
-});
-```
+使用 Qt 内置 `QAccessibleList`，无需自定义工厂。给控件设 `accessibleName`；空数据且有 `placeholderText` 时会写入 `accessibleDescription`。模型先于视图析构时不会再访问已释放的 `model()`。
