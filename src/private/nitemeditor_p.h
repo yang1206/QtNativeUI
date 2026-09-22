@@ -14,6 +14,7 @@ QWidget* createLineEdit(QWidget* parent, int borderRadius, const QString& text =
 QWidget* createEditor(QWidget* parent, const QModelIndex& index, int borderRadius);
 QMargins tableCellMargins(int cellHorizontalPadding);
 QMargins listCellMargins(const QModelIndex& index);
+QMargins treeCellMargins(const QModelIndex& index);
 void     placeEditor(QWidget* editor, const QRect& cellRect, const QMargins& margins);
 void     setEditorData(QWidget* editor, const QModelIndex& index);
 void     setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index);

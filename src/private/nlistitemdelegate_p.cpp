@@ -186,7 +186,7 @@ void NListItemDelegate::updateEditorGeometry(QWidget* editor, const QStyleOption
 }
 
 QRect NListItemDelegate::checkBoxRect(const QRect& itemRect) const {
-    constexpr int size = 18;
+    constexpr int size = 21;
     QRect         inner(itemRect);
     inner.adjust(2, 2, -2, -2);
     return QRect(inner.left() + 10, inner.center().y() - size / 2, size, size);
@@ -284,7 +284,7 @@ void NListItemDelegate::paintListRow(QPainter* painter, const QStyleOptionViewIt
 }
 
 QRect NListItemDelegate::iconCheckBoxRect(const QRect& tileRect) const {
-    constexpr int size = 18;
+    constexpr int size = 21;
     return QRect(tileRect.right() - size - 6, tileRect.top() + 6, size, size);
 }
 

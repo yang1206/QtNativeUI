@@ -213,7 +213,7 @@ ListViewPage::ListViewPage(QWidget* parent)
     editList->setMinimumSize(300, 200);
     editList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked | QAbstractItemView::EditKeyPressed);
     auto* editModel = new QStandardItemModel(editList);
-    auto* textItem  = new QStandardItem(QStringLiteral("双击编辑文本"));
+    auto* textItem  = new QStandardItem(QStringLiteral("文本项"));
     textItem->setFlags(textItem->flags() | Qt::ItemIsEditable);
     editModel->appendRow(textItem);
     auto* comboItem = new QStandardItem(QStringLiteral("选项 A"));
@@ -224,7 +224,7 @@ ListViewPage::ListViewPage(QWidget* parent)
     editList->setModel(editModel);
     editLayout->addWidget(editList);
     editLayout->addStretch();
-    addSection(QStringLiteral("内联编辑 (NLineEdit / NComboBox)"), editLayout);
+    addSection(QStringLiteral("内联编辑"), editLayout);
 
     QHBoxLayout* groupLayout = new QHBoxLayout();
     groupLayout->setSpacing(24);
@@ -285,10 +285,10 @@ ListViewPage::ListViewPage(QWidget* parent)
     customGroupList->setModel(customGroupModel);
 
     QVBoxLayout* defaultGroupCol = new QVBoxLayout();
-    defaultGroupCol->addWidget(new QLabel(QStringLiteral("默认：滚一下看分组吸顶"), this));
+    defaultGroupCol->addWidget(new QLabel(QStringLiteral("默认分组:"), this));
     defaultGroupCol->addWidget(defaultGroupList);
     QVBoxLayout* customGroupCol = new QVBoxLayout();
-    customGroupCol->addWidget(new QLabel(QStringLiteral("自定义：16px / DemiBold + 分组着色"), this));
+    customGroupCol->addWidget(new QLabel(QStringLiteral("自定义分组:"), this));
     customGroupCol->addWidget(customGroupList);
     groupLayout->addLayout(defaultGroupCol);
     groupLayout->addLayout(customGroupCol);
@@ -338,21 +338,17 @@ ListViewPage::ListViewPage(QWidget* parent)
         advancedModel->appendRow(item);
     }
     advancedList->setModel(advancedModel);
-    advancedList->setFooterText(
-        QStringLiteral("共 %1 项 · 拖到新位置可重排").arg(advancedModel->rowCount()));
+    advancedList->setFooterText(QStringLiteral("共 %1 项").arg(advancedModel->rowCount()));
 
-    QLabel* reorderHint = new QLabel(QStringLiteral("重排: 尚未拖动"), this);
-    reorderHint->setWordWrap(true);
-    connect(advancedList, &NListView::rowsReordered, this, [advancedList, reorderHint](int from, int to) {
-        reorderHint->setText(QStringLiteral("重排: 行 %1 → %2").arg(from + 1).arg(to + 1));
+    connect(advancedList, &NListView::rowsReordered, this, [advancedList](int, int) {
         QAbstractItemModel* m = advancedList->model();
         if (m)
-            advancedList->setFooterText(QStringLiteral("共 %1 项 · 拖到新位置可重排").arg(m->rowCount()));
+            advancedList->setFooterText(QStringLiteral("共 %1 项").arg(m->rowCount()));
     });
 
     QVBoxLayout* controlCol = new QVBoxLayout();
     controlCol->setSpacing(8);
-    controlCol->addWidget(new QLabel(QStringLiteral("开关（即时生效）:"), this));
+    controlCol->addWidget(new QLabel(QStringLiteral("开关:"), this));
 
     auto wireToggle = [&](const QString& label, bool checked, auto setter) {
         NCheckBox* box = new NCheckBox(label, this);
@@ -360,28 +356,16 @@ ListViewPage::ListViewPage(QWidget* parent)
         connect(box, &NCheckBox::toggled, this, [advancedList, setter](bool on) { setter(advancedList, on); });
         controlCol->addWidget(box);
     };
-    wireToggle(QStringLiteral("分组 (SectionRole)"), true,
-               [](NListView* v, bool on) { v->setSectionsEnabled(on); });
-    wireToggle(QStringLiteral("拖拽重排 (鼠标拖放)"), true,
-               [](NListView* v, bool on) { v->setReorderEnabled(on); });
+    wireToggle(QStringLiteral("分组"), true, [](NListView* v, bool on) { v->setSectionsEnabled(on); });
+    wireToggle(QStringLiteral("拖拽重排"), true, [](NListView* v, bool on) { v->setReorderEnabled(on); });
     wireToggle(QStringLiteral("选中指示条动画"), true,
                [](NListView* v, bool on) { v->setSelectionIndicatorAnimated(on); });
     wireToggle(QStringLiteral("显示选中指示条"), true,
                [](NListView* v, bool on) { v->setSelectionIndicatorVisible(on); });
-
-    controlCol->addSpacing(12);
-    controlCol->addWidget(new QLabel(QStringLiteral("操作提示:"), this));
-    QLabel* tips = new QLabel(
-        QStringLiteral("· 单击选中后按住行拖动重排（与 Fluent-Qt 相同，不用 QDrag）\n"
-                       "· 多选指示条见上方「不同选择模式」"),
-        this);
-    tips->setWordWrap(true);
-    controlCol->addWidget(tips);
-    controlCol->addWidget(reorderHint);
     controlCol->addStretch();
 
     QVBoxLayout* listCol = new QVBoxLayout();
-    listCol->addWidget(new QLabel(QStringLiteral("头尾文字 + 分组 + 重排:"), this));
+    listCol->addWidget(new QLabel(QStringLiteral("综合:"), this));
     listCol->addWidget(advancedList);
 
     advancedLayout->addLayout(listCol);

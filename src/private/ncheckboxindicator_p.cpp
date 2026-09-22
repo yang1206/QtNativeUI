@@ -1,9 +1,8 @@
 #include "ncheckboxindicator_p.h"
 
 #include <QPainter>
-#include <QPainterPath>
+#include <QPixmap>
 
-#include "QtNativeUI/NColor.h"
 #include "QtNativeUI/NFluentColors.h"
 #include "QtNativeUI/NIcon.h"
 #include "QtNativeUI/NTheme.h"
@@ -35,14 +34,14 @@ void paint(QPainter* painter, const QRect& rect, Qt::CheckState state, bool enab
         bg     = NThemeColor(NFluentColorKey::ControlFillColorDisabled, themeMode);
         border = NThemeColor(NFluentColorKey::ControlStrongStrokeColorDisabled, themeMode);
     } else if (hovered) {
-        bg     = NThemeColor(NFluentColorKey::SubtleFillColorSecondary, themeMode);
+        bg     = NThemeColor(NFluentColorKey::ControlFillColorSecondary, themeMode);
         border = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, themeMode);
     } else {
         bg     = NThemeColor(NFluentColorKey::ControlFillColorDefault, themeMode);
         border = NThemeColor(NFluentColorKey::ControlStrokeColorDefault, themeMode);
     }
     painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
     painter->setPen(Qt::NoPen);
     painter->setBrush(bg);
     painter->drawRoundedRect(inner, borderRadius, borderRadius);
@@ -53,15 +52,28 @@ void paint(QPainter* painter, const QRect& rect, Qt::CheckState state, bool enab
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(inner, borderRadius, borderRadius);
     }
-    if (state == Qt::Checked) {
-        const QIcon icon = nIcon->fromRegular(NRegularIconType::Checkmark16Regular);
-        icon.paint(painter, inner.adjusted(2, 2, -2, -2), Qt::AlignCenter, enabled ? QIcon::Normal : QIcon::Disabled);
-    } else if (state == Qt::PartiallyChecked) {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(enabled ? nTheme->accentColor().normal()
-                                  : NThemeColor(NFluentColorKey::TextFillColorDisabled, themeMode));
-        const QRect mark(inner.center().x() - 4, inner.center().y() - 1, 8, 2);
-        painter->drawRoundedRect(mark, 1, 1);
+    if (state == Qt::Checked || state == Qt::PartiallyChecked) {
+        const QColor iconColor =
+            enabled ? NThemeColor(NFluentColorKey::TextOnAccentFillColorPrimary, themeMode)
+                    : NThemeColor(NFluentColorKey::TextOnAccentFillColorDisabled, themeMode);
+        if (state == Qt::PartiallyChecked) {
+            painter->setPen(QPen(iconColor, 2));
+            const int lineWidth = inner.width() * 0.6;
+            const int y         = inner.center().y();
+            painter->drawLine(inner.center().x() - lineWidth / 2, y, inner.center().x() + lineWidth / 2, y);
+        } else {
+            const int iconSize = qRound(box.width() * 0.75);
+            const QIcon icon =
+                nIcon->fromFilled(NFilledIconType::Checkmark24Filled, iconSize, iconColor);
+            const QRect iconRect(inner.x() + (inner.width() - iconSize) / 2,
+                                 inner.y() + (inner.height() - iconSize) / 2,
+                                 iconSize,
+                                 iconSize);
+            const qreal dpr = painter->device() ? painter->device()->devicePixelRatioF() : 1.0;
+            QPixmap     pixmap = icon.pixmap(QSize(iconSize, iconSize) * dpr);
+            pixmap.setDevicePixelRatio(dpr);
+            painter->drawPixmap(iconRect, pixmap);
+        }
     }
     painter->restore();
 }

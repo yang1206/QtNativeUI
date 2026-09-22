@@ -65,6 +65,17 @@ QMargins listCellMargins(const QModelIndex& index) {
     return QMargins(left, 3, 12, 3);
 }
 
+QMargins treeCellMargins(const QModelIndex& index) {
+    int left = 12;
+    if (index.flags() & Qt::ItemIsUserCheckable)
+        left += 26;
+    left += 24;
+    const QVariant decoration = index.data(Qt::DecorationRole);
+    if (decoration.isValid() && !decoration.isNull())
+        left += 24;
+    return QMargins(left, 3, 8, 3);
+}
+
 void placeEditor(QWidget* editor, const QRect& cellRect, const QMargins& margins) {
     if (!editor)
         return;

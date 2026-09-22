@@ -257,6 +257,8 @@ set(QtNativeUI_PRIVATE_SOURCES
         src/private/ntranslation.h
         src/private/ntreeview_p.cpp
         src/private/ntreeview_p.h
+        src/private/ntreeitemdelegate_p.cpp
+        src/private/ntreeitemdelegate_p.h
         src/private/ntreeviewstyle_p.cpp
         src/private/ntreeviewstyle_p.h
         src/private/nwindowbar_p.h
