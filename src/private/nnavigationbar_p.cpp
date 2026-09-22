@@ -42,7 +42,16 @@ void NNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool isL
         }
 
         if (node->getIsExpanderNode()) {
-            if (node->getIsHasChild()) {
+            if (_currentDisplayMode == NNavigationType::Compact) {
+                if (_navigationView->isExpanded(index)) {
+                    QVariantMap data;
+                    data.insert("Collapse", QVariant::fromValue(node));
+                    node->setIsExpanded(false);
+                    _navigationView->navigationNodeStateChange(data);
+                    _navigationView->collapse(index);
+                }
+                _expandOrCollpaseExpanderNode(node, true);
+            } else if (node->getIsHasChild()) {
                 QVariantMap data;
                 if (_navigationView->isExpanded(index)) {
                     data.insert("Collapse", QVariant::fromValue(node));
@@ -237,28 +246,27 @@ void NNavigationBarPrivate::_expandSelectedNodeParent() {
 
 void NNavigationBarPrivate::_expandOrCollpaseExpanderNode(NNavigationNode* node, bool isExpand) {
     if (_currentDisplayMode == NNavigationType::Compact) {
-        if (node->getIsHasPageChild()) {
-            // 展开菜单
-            NMenu* menu = _compactMenuMap.value(node);
-            if (menu) {
-                QPoint nodeTopRight =
-                    _navigationView->mapToGlobal(_navigationView->visualRect(node->getModelIndex()).topRight());
-                menu->popup(QPoint(nodeTopRight.x() + 10, nodeTopRight.y()));
-            }
-        }
+        if (!node->getIsHasPageChild())
+            return;
+        NMenu* menu = _compactMenuMap.value(node);
+        if (!menu)
+            menu = _compactMenuMap.value(node->getOriginalNode());
+        if (!menu)
+            return;
+        QPoint nodeTopRight =
+            _navigationView->mapToGlobal(_navigationView->visualRect(node->getModelIndex()).topRight());
+        menu->popup(QPoint(nodeTopRight.x() + 10, nodeTopRight.y()));
     } else {
         QModelIndex index      = node->getModelIndex();
         bool        isExpanded = _navigationView->isExpanded(index);
         if (node->getIsHasChild() && isExpand != isExpanded) {
             QVariantMap data;
             if (isExpanded) {
-                // 收起
                 data.insert("Collapse", QVariant::fromValue(node));
                 node->setIsExpanded(isExpand);
                 _navigationView->navigationNodeStateChange(data);
                 _navigationView->collapse(index);
             } else {
-                // 展开
                 data.insert("Expand", QVariant::fromValue(node));
                 node->setIsExpanded(true);
                 _navigationView->navigationNodeStateChange(data);
