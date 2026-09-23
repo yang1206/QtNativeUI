@@ -40,7 +40,6 @@ class NLineEditPrivate : public QObject, public NEditStyleInterface {
 
     NThemeType::ThemeMode _themeMode;
     bool                  _isDark{false};
-    bool                  _initialized{false};
     int                   _shadowBorderWidth{3};
 
     NEditStyle* _lineEditStyle{nullptr};
