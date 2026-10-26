@@ -6,8 +6,10 @@
 #define NTREEVIEW_H
 
 #include <QTreeView>
+#include <QItemSelectionModel>
 
 class QItemSelection;
+class QKeyEvent;
 class QMouseEvent;
 class QPaintEvent;
 class QResizeEvent;
@@ -19,6 +21,8 @@ class QWheelEvent;
 class NTreeViewPrivate;
 class QTNATIVEUI_EXPORT NTreeView : public QTreeView {
     Q_OBJECT
+    Q_PROPERTY(bool animated READ isAnimated WRITE setAnimated)
+    Q_PROPERTY(bool revealAnimationEnabled READ isRevealAnimationEnabled WRITE setRevealAnimationEnabled)
     Q_Q_CREATE(NTreeView)
     Q_PROPERTY_CREATE_Q_H(QColor, LightBackgroundColor)
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBackgroundColor)
@@ -49,6 +53,14 @@ class QTNATIVEUI_EXPORT NTreeView : public QTreeView {
     ~NTreeView() override;
 
     void setModel(QAbstractItemModel* model) override;
+    void setSelectionModel(QItemSelectionModel* selectionModel) override;
+    void setRootIndex(const QModelIndex& index) override;
+    void reset() override;
+    void setAnimated(bool enable);
+    bool isAnimated() const;
+    void setRevealAnimationEnabled(bool enable);
+    bool isRevealAnimationEnabled() const;
+    QModelIndex indexAt(const QPoint& point) const override;
     bool isShowingPlaceholder() const;
     void  expandAll();
     void  collapseAll();
@@ -61,6 +73,11 @@ class QTNATIVEUI_EXPORT NTreeView : public QTreeView {
     void wheelEvent(QWheelEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    bool viewportEvent(QEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index,
+                                                        const QEvent* event = nullptr) const override;
     void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
     void scrollContentsBy(int dx, int dy) override;

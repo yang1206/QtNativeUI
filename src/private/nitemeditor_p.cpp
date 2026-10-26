@@ -67,9 +67,11 @@ QMargins listCellMargins(const QModelIndex& index) {
 
 QMargins treeCellMargins(const QModelIndex& index) {
     int left = 12;
-    if (index.flags() & Qt::ItemIsUserCheckable)
-        left += 26;
-    left += 24;
+    if (index.column() == 0) {
+        if (index.flags() & Qt::ItemIsUserCheckable)
+            left += 26;
+        left += 24;
+    }
     const QVariant decoration = index.data(Qt::DecorationRole);
     if (decoration.isValid() && !decoration.isNull())
         left += 24;

@@ -114,13 +114,13 @@ TreeViewPage::TreeViewPage(QWidget* parent)
     selectionTreeView->setModel(selectionModel);
     selectionTreeView->expand(selectionModel->index(0, 0));
 
-    QLabel* selectionLabel = new QLabel(QStringLiteral("选中项: 无"), this);
+    QLabel* selectionLabel = new QLabel(QStringLiteral("当前项: 无"), this);
     connect(selectionTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
             [selectionLabel](const QModelIndex& current, const QModelIndex&) {
                 if (current.isValid())
-                    selectionLabel->setText(QStringLiteral("选中项: ") + current.data().toString());
+                    selectionLabel->setText(QStringLiteral("当前项: ") + current.data().toString());
                 else
-                    selectionLabel->setText(QStringLiteral("选中项: 无"));
+                    selectionLabel->setText(QStringLiteral("当前项: 无"));
             });
 
     QVBoxLayout* selectionInfoLayout = new QVBoxLayout();

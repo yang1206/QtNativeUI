@@ -19,6 +19,7 @@ class QVariantAnimation;
 #include "ntreeviewstyle_p.h"
 
 class NTreeItemDelegate;
+class NTreeCheckController;
 
 class NTreeViewPrivate : public QObject {
     Q_OBJECT
@@ -55,19 +56,27 @@ class NTreeViewPrivate : public QObject {
     NTreeViewStyle*                 style{nullptr};
     NTreeItemDelegate*              itemDelegate{nullptr};
     NSelectionIndicatorSession*     selectMark{nullptr};
+    NTreeCheckController*            checks{nullptr};
     QLabel*                         headerLabel{nullptr};
     QVariantAnimation*              expandRevealAnim{nullptr};
     QPersistentModelIndex           pressedIndex;
+    QPersistentModelIndex           hoveredIndex;
     QPersistentModelIndex           currentIndicatorIndex;
     QPersistentModelIndex           animParent;
     qreal                           animSubtreeHeight{0.0};
     bool                            animExpanding{true};
     bool                            pendingCollapseFinalize{false};
     bool                            revealAnimationsEnabled{true};
+    bool                            revealAnimationEnabled{true};
+    bool                            ignoreRevealRelease{false};
     bool                            isDark{false};
     NThemeType::ThemeMode           themeMode{NThemeType::Light};
     QString                         automaticAccessibleDescription;
     QVector<QMetaObject::Connection> modelConnections;
+    QVector<QMetaObject::Connection> selectionModelConnections;
+    int                             modelChangeDepth{0};
+    QVector<QPersistentModelIndex> checkRepairs;
+    QVector<QPersistentModelIndex> checkAncestorRepairs;
 
     QColor itemHoverColor() const;
     QColor itemSelectedColor() const;
@@ -81,8 +90,16 @@ class NTreeViewPrivate : public QObject {
     bool   selectionIndicatorVisible() const { return _pSelectionIndicatorVisible; }
 
     QRectF selectionMarkRect(const QModelIndex& index) const;
-    void   updateSelectionMark(const QModelIndex& previousHint = QModelIndex());
+    void   clearSelectionMark();
+    void   clearTransientState();
+    void   updateSelectionMark();
     void   paintSelectionMark(QPainter* painter) const;
+    bool   usesCheckState(const QModelIndex& index) const;
+    bool   isItemSelected(const QModelIndex& index) const;
+    QRect  revealClipRect(const QModelIndex& index) const;
+    void   paintRowBackground(QPainter* painter, const QStyleOptionViewItem& option,
+                              const QModelIndex& index) const;
+    bool   affectsReveal(const QModelIndex& parent, int first, int last, bool removing) const;
     void   updateStyle();
     void   initStyle();
     void   layoutHeader();

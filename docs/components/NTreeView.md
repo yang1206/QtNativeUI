@@ -80,6 +80,8 @@ item->setFlags(item->flags() | Qt::ItemIsEditable);
 | `expandAll()` / `collapseAll()` | 展开 / 折叠全部 |
 | `toggleExpanded(index)` | 切换展开并播动画 |
 | `chevronRotation(index)` | chevron 旋转插值 `[0,1]` |
+| `setRevealAnimationEnabled(bool)` / `isRevealAnimationEnabled()` | 开关自定义展开 reveal 与箭头旋转，默认开启 |
+| `setAnimated(bool)` / `isAnimated()` | 自定义动效开关的兼容入口；Qt 内置展开动画始终关闭 |
 
 ### 样式属性
 
@@ -107,6 +109,21 @@ item->setFlags(item->flags() | Qt::ItemIsEditable);
 ### 继承的 API
 
 NTreeView 继承自 `QTreeView`，模型、选择、编辑、滚动等仍用标准接口。`setModel()` 会接上模型信号以刷新空状态占位和无障碍描述。
+
+### 多选与勾选
+
+- 普通单选和不带复选框的多选，继续使用 `QItemSelectionModel` 表达选择。
+- 多选模式下，首列可勾选节点的选中背景、蓝色标记以 `Qt::CheckStateRole == Qt::Checked` 为准；未勾选不高亮，半选只显示半选复选框。
+- 点击可勾选行的正文或复选框、按空格键，使用同一套父子勾选联动；点击箭头只展开或折叠。禁用节点保留原有勾选值。
+- `currentIndex()` 表示键盘焦点所在项；获取业务勾选结果应读取模型的 `Qt::CheckStateRole`，不能用 `selectedIndexes()` 代替。
+- 大子树的勾选联动分批返回事件循环执行，处理中父节点显示半选，完成后汇总祖先状态。界面仍可滚动和响应输入；模型清空、销毁或相关结构改变会取消旧任务并校正仍然有效的父节点。
+- 右键保留原选择。菜单目标用 `indexAt(viewportPosition)` 获取；动画尚未揭露的区域返回无效索引。
+
+### 动效与多列
+
+展开 reveal 只裁剪子树，不平移 Qt 布局中的后续行，绘制与鼠标命中保持相同位置。动画范围和高度查询限制在视口内；无关分支的行插入不会结束当前动画。`setRevealAnimationEnabled(false)` 会立即收尾当前动画；Qt 属性 `animated` 也映射到该开关。
+
+整行圆角背景只绘制一次，复选框和箭头只出现在首列；其他列的正文与编辑器按各自单元格边界布局。默认代理使用统一行高并开启 `uniformRowHeights`，替换为不等高的自定义代理时请调用 `setUniformRowHeights(false)`。
 
 ### 无障碍
 

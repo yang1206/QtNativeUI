@@ -2,6 +2,7 @@
 #define NTREEITEMDELEGATE_P_H
 
 #include <QStyledItemDelegate>
+#include <QIcon>
 
 class NTreeView;
 class NTreeViewPrivate;
@@ -28,6 +29,8 @@ class NTreeItemDelegate : public QStyledItemDelegate {
   private:
     NTreeView*        m_view{nullptr};
     NTreeViewPrivate* m_data{nullptr};
+    mutable QIcon    m_chevron;
+    mutable QColor   m_chevronColor;
 };
 
 #endif
