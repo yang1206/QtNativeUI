@@ -18,6 +18,7 @@ class QTNATIVEUI_EXPORT NTabWidget : public QTabWidget {
     Q_PROPERTY_CREATE_Q_H(int, BorderWidth)
     Q_PROPERTY_CREATE_Q_H(bool, AddButtonVisible)
     Q_PROPERTY_CREATE_Q_H(bool, TransparentBackground)
+    Q_PROPERTY_CREATE_Q_H(int, TabBarOuterMargin)
     Q_PROPERTY(bool tabsClosable READ tabsClosable WRITE setTabsClosable)
 
   public:

@@ -51,12 +51,13 @@ class TabWidgetStyle : public QProxyStyle {
         if (!tabs || !frame)
             return QProxyStyle::subElementRect(element, option, widget);
 
-        const int   border     = tabs->documentMode() ? 0 : qMax(0, tabs->getBorderWidth());
-        const QRect inner      = frame->rect.adjusted(border, border, -border, -border);
-        const int   spacing    = NSpacingToken(NDesignTokenKey::SpacingM).toInt();
-        const bool  horizontal = tabs->tabPosition() == QTabWidget::North || tabs->tabPosition() == QTabWidget::South;
-        const bool  addVisible = tabs->getAddButtonVisible() && (!tabs->tabBarAutoHide() || tabs->count() > 1);
-        const int   addSpace   = addVisible ? 5 * spacing : 0;
+        const int   border      = tabs->documentMode() ? 0 : qMax(0, tabs->getBorderWidth());
+        const QRect inner       = frame->rect.adjusted(border, border, -border, -border);
+        const int   spacing     = NSpacingToken(NDesignTokenKey::SpacingM).toInt();
+        const int   outerMargin = qMax(0, tabs->getTabBarOuterMargin());
+        const bool  horizontal  = tabs->tabPosition() == QTabWidget::North || tabs->tabPosition() == QTabWidget::South;
+        const bool  addVisible  = tabs->getAddButtonVisible() && (!tabs->tabBarAutoHide() || tabs->count() > 1);
+        const int   addSpace    = addVisible ? 5 * spacing : 0;
         const bool  stripVisible =
             !frame->tabBarSize.isEmpty() || addVisible ||
             (horizontal && (!frame->leftCornerWidgetSize.isEmpty() || !frame->rightCornerWidgetSize.isEmpty()));
@@ -65,7 +66,7 @@ class TabWidgetStyle : public QProxyStyle {
         const int cornerCross =
             horizontal ? qMax(frame->leftCornerWidgetSize.height(), frame->rightCornerWidgetSize.height()) : 0;
         const int stripCross     = stripVisible ? qMax(barCross, cornerCross) : 0;
-        const int stripInset     = stripVisible ? spacing + stripCross - 1 : 0;
+        const int stripInset     = stripVisible ? outerMargin + stripCross - 1 : 0;
         const int leadingCorner  = horizontal ? frame->leftCornerWidgetSize.width() : 0;
         const int trailingCorner = horizontal ? frame->rightCornerWidgetSize.width() : 0;
         const int available      = qMax(
@@ -78,7 +79,7 @@ class TabWidgetStyle : public QProxyStyle {
             case QTabWidget::North:
                 pane.setTop(inner.top() + stripInset);
                 bar = QRect(inner.left() + spacing + leadingCorner,
-                            inner.top() + spacing + stripCross - barCross,
+                            inner.top() + outerMargin + stripCross - barCross,
                             barLength,
                             barCross);
                 break;
@@ -88,7 +89,7 @@ class TabWidgetStyle : public QProxyStyle {
                 break;
             case QTabWidget::West:
                 pane.setLeft(inner.left() + stripInset);
-                bar = QRect(inner.left() + spacing, inner.top() + spacing, barCross, barLength);
+                bar = QRect(inner.left() + outerMargin, inner.top() + spacing, barCross, barLength);
                 break;
             case QTabWidget::East:
                 pane.setRight(inner.right() - stripInset);

@@ -25,9 +25,10 @@ QSize framePadding(const NTabWidget* tabs) {
     const bool stripVisible =
         (!tabs->tabBar()->isHidden() && !tabs->tabBar()->sizeHint().isEmpty()) || addVisible || hasCorner;
     if (stripVisible) {
-        const int spacing  = NSpacingToken(NDesignTokenKey::SpacingM).toInt();
-        const int addSpace = addVisible ? 5 * spacing : 0;
-        extra += horizontal ? QSize(2 * spacing + addSpace, spacing) : QSize(spacing, 2 * spacing + addSpace);
+        const int spacing     = NSpacingToken(NDesignTokenKey::SpacingM).toInt();
+        const int outerMargin = qMax(0, tabs->getTabBarOuterMargin());
+        const int addSpace    = addVisible ? 5 * spacing : 0;
+        extra += horizontal ? QSize(2 * spacing + addSpace, outerMargin) : QSize(outerMargin, 2 * spacing + addSpace);
     }
     return extra;
 }
@@ -41,6 +42,7 @@ Q_PROPERTY_CREATE_Q_CPP(NTabWidget, QColor, DarkBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NTabWidget, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NTabWidget, int, BorderWidth)
 Q_PROPERTY_CREATE_Q_CPP(NTabWidget, bool, TransparentBackground)
+Q_PROPERTY_CREATE_Q_CPP(NTabWidget, int, TabBarOuterMargin)
 
 NTabWidget::NTabWidget(QWidget* parent) : QTabWidget(parent), d_ptr(new NTabWidgetPrivate()) { init(); }
 
@@ -59,6 +61,7 @@ void NTabWidget::init() {
     d->_pBorderRadius            = NRadiusToken(NDesignTokenKey::CornerRadiusMedium).toInt();
     d->_pBorderWidth             = 1;
     d->_pTransparentBackground   = false;
+    d->_pTabBarOuterMargin       = NSpacingToken(NDesignTokenKey::SpacingM).toInt();
 
     setObjectName(QStringLiteral("NTabWidget"));
     setAccessibleName(QStringLiteral("标签页控件"));
@@ -76,6 +79,7 @@ void NTabWidget::init() {
     connect(this, &NTabWidget::pBorderRadiusChanged, this, &NTabWidget::adjustContentMargins);
     connect(this, &NTabWidget::pBorderWidthChanged, this, &NTabWidget::adjustContentMargins);
     connect(this, &NTabWidget::pTransparentBackgroundChanged, this, &NTabWidget::updatePalette);
+    connect(this, &NTabWidget::pTabBarOuterMarginChanged, this, &NTabWidget::adjustContentMargins);
     connect(this, &QTabWidget::currentChanged, this, [this]() { update(); });
     connect(tabBar(), &QTabBar::tabMoved, this, [this]() { update(); });
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode mode) {

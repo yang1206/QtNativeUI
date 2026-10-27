@@ -236,6 +236,9 @@ styledTabWidget->setDarkBorderColor(QColor(100, 100, 100));
 
 // 透出父容器背景，不要使用全局 QTabWidget::pane 样式表
 styledTabWidget->setTransparentBackground(true);
+
+// 调整标签栏与组件外边缘的距离；0 表示紧贴外边缘
+styledTabWidget->setTabBarOuterMargin(0);
 ```
 
 ## API
@@ -264,6 +267,8 @@ styledTabWidget->setTransparentBackground(true);
 | `borderWidth()` | 获取边框宽度 | - |
 | `setTransparentBackground(bool transparent)` | 设置组件表面和内容区是否透明 | `true` / `false` |
 | `getTransparentBackground()` | 获取透明背景状态 | - |
+| `setTabBarOuterMargin(int margin)` | 设置标签栏与对应外边缘的距离 | 非负逻辑像素 |
+| `getTabBarOuterMargin()` | 获取标签栏外边距 | - |
 
 ### 颜色属性
 

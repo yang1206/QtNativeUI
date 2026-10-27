@@ -21,6 +21,8 @@ namespace {
 
 class InspectableTabWidget : public NTabWidget {
   public:
+    using NTabWidget::NTabWidget;
+
     QRect contentRect() const {
         QStyleOptionTabWidgetFrame option;
         initStyleOption(&option);
@@ -104,6 +106,7 @@ class TestNTabs : public QObject {
     void accessibilityExposesTabsAndActions();
     void documentModeKeepsQtSemantics();
     void transparentBackgroundIsOptIn();
+    void tabBarOuterMarginIsConfigurable();
     void selectedTabJoinsSurface_data();
     void selectedTabJoinsSurface();
     void outerTabFeetAreNotClipped_data();
@@ -491,6 +494,24 @@ void TestNTabs::transparentBackgroundIsOptIn() {
     settle();
     QCOMPARE(tabs.palette().color(QPalette::Window), QColor(Qt::white));
     QCOMPARE(snapshot(host, 1.0).pixelColor(paneSample), QColor(Qt::white));
+}
+
+void TestNTabs::tabBarOuterMarginIsConfigurable() {
+    NTabWidget tabs;
+    tabs.setBorderWidth(0);
+    tabs.addTab(new QWidget, QStringLiteral("first"));
+    tabs.resize(480, 240);
+    tabs.show();
+    settle();
+
+    const int defaultMargin = tabs.getTabBarOuterMargin();
+    QVERIFY(defaultMargin > 0);
+    QCOMPARE(tabs.tabBar()->geometry().top(), defaultMargin);
+
+    tabs.setTabBarOuterMargin(0);
+    settle();
+    QCOMPARE(tabs.getTabBarOuterMargin(), 0);
+    QCOMPARE(tabs.tabBar()->geometry().top(), 0);
 }
 
 void TestNTabs::selectedTabJoinsSurface_data() {
