@@ -208,7 +208,7 @@ void nPaintTabToolButton(QPainter* painter, const QStyleOptionToolButton& option
         const QRect iconRect(option.rect.center() - QPoint(size.width() / 2, size.height() / 2), size);
         option.icon.paint(painter, iconRect, Qt::AlignCenter, enabled ? QIcon::Normal : QIcon::Disabled);
     }
-    if (option.state & QStyle::State_HasFocus) {
+    if (nShouldPaintFocusVisual(option.state)) {
         const int radius = qMax(0, NRadiusToken(NDesignTokenKey::CornerRadiusDefault).toInt() - 1);
         paintFocusVisual(painter, option.rect, radius);
     }
@@ -344,7 +344,7 @@ void NTabBarStyle::drawControl(ControlElement      element,
             const int flags = Qt::AlignVCenter | Qt::AlignLeading | Qt::TextShowMnemonic;
             painter->drawText(text, flags, tab->text);
         }
-        if (tab->state & State_HasFocus) {
+        if (nShouldPaintFocusVisual(tab->state)) {
             paintFocusVisual(painter, QRectF(0, 0, size.width(), size.height()), qMax(0, bar->getBorderRadius() - 1));
         }
     }

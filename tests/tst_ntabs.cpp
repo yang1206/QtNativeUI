@@ -15,6 +15,7 @@
 #include <QtMath>
 #include <QtNativeUI/NTabWidget.h>
 #include <QtNativeUI/NTheme.h>
+#include "ntabbarstyle.h"
 
 namespace {
 
@@ -97,10 +98,12 @@ class TestNTabs : public QObject {
     void compactModeOnlyCollapsesIconTabs();
     void sizeToContentKeepsFullTextWhenTabsFit();
     void tabDragApiDelegatesToTabBar();
+    void focusVisualRequiresKeyboardFocus();
     void explicitTabTextColorIsPainted();
     void shortcutsWorkInsideCurrentPage();
     void accessibilityExposesTabsAndActions();
     void documentModeKeepsQtSemantics();
+    void transparentBackgroundIsOptIn();
     void selectedTabJoinsSurface_data();
     void selectedTabJoinsSurface();
     void outerTabFeetAreNotClipped_data();
@@ -369,6 +372,13 @@ void TestNTabs::tabDragApiDelegatesToTabBar() {
     QVERIFY(tabs.tabBar()->acceptDrops());
 }
 
+void TestNTabs::focusVisualRequiresKeyboardFocus() {
+    QVERIFY(!nShouldPaintFocusVisual(QStyle::State_None));
+    QVERIFY(!nShouldPaintFocusVisual(QStyle::State_HasFocus));
+    QVERIFY(!nShouldPaintFocusVisual(QStyle::State_KeyboardFocusChange));
+    QVERIFY(nShouldPaintFocusVisual(QStyle::State_HasFocus | QStyle::State_KeyboardFocusChange));
+}
+
 void TestNTabs::explicitTabTextColorIsPainted() {
     InspectableTabBar bar;
     bar.addTab(QStringLiteral("Colored"));
@@ -457,6 +467,30 @@ void TestNTabs::documentModeKeepsQtSemantics() {
     tabs.setDocumentMode(false);
     QVERIFY(!tabs.tabBar()->documentMode());
     QVERIFY(!tabs.tabBar()->drawBase());
+}
+
+void TestNTabs::transparentBackgroundIsOptIn() {
+    QWidget host;
+    setHostBackground(host);
+    InspectableTabWidget tabs(&host);
+    configureSurface(tabs);
+    tabs.setGeometry(12, 12, 576, 296);
+
+    QVERIFY(!tabs.getTransparentBackground());
+    QCOMPARE(tabs.palette().color(QPalette::Window), QColor(Qt::white));
+    tabs.setTransparentBackground(true);
+    QCOMPARE(tabs.palette().color(QPalette::Window), QColor(Qt::transparent));
+    QCOMPARE(tabs.palette().color(QPalette::Base), QColor(Qt::transparent));
+
+    host.show();
+    settle();
+    const QPoint paneSample = tabs.mapTo(&host, tabs.contentRect().center());
+    QCOMPARE(snapshot(host, 1.0).pixelColor(paneSample), QColor(180, 70, 120));
+
+    tabs.setTransparentBackground(false);
+    settle();
+    QCOMPARE(tabs.palette().color(QPalette::Window), QColor(Qt::white));
+    QCOMPARE(snapshot(host, 1.0).pixelColor(paneSample), QColor(Qt::white));
 }
 
 void TestNTabs::selectedTabJoinsSurface_data() {

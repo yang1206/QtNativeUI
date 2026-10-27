@@ -6,6 +6,7 @@
 #include <QtNativeUI/NLabel.h>
 #include <QtNativeUI/NPushButton.h>
 #include <QtNativeUI/NTabWidget.h>
+#include <QtNativeUI/NToggleSwitch.h>
 
 TabWidgetPage::TabWidgetPage(QWidget* parent)
     : BasePage("TabWidget 标签页控件", "TabWidget 提供标签页导航，支持多个页面的切换。", parent) {
@@ -41,6 +42,43 @@ TabWidgetPage::TabWidgetPage(QWidget* parent)
     basicLayout->addWidget(basicTabWidget);
 
     addSection("基本标签页", basicLayout);
+
+    QVBoxLayout* transparentLayout = new QVBoxLayout();
+    transparentLayout->setSpacing(16);
+
+    NTabWidget* transparentTabWidget = new NTabWidget(this);
+    transparentTabWidget->setMinimumHeight(200);
+    transparentTabWidget->setAccessibleName(QStringLiteral("透明背景标签页"));
+    transparentTabWidget->setTransparentBackground(true);
+
+    for (int i = 1; i <= 3; ++i) {
+        QWidget*     tab       = new QWidget(transparentTabWidget);
+        QVBoxLayout* tabLayout = new QVBoxLayout(tab);
+        tabLayout->addWidget(new NLabel(QStringLiteral("透明背景页面 %1").arg(i), NLabelType::Title, tab));
+        tabLayout->addWidget(
+            new NLabel(QStringLiteral("标签栏空白区和内容区会透出示例页面背景。"), NLabelType::Body, tab));
+        tabLayout->addStretch();
+        transparentTabWidget->addTab(tab, QStringLiteral("页面 %1").arg(i));
+    }
+
+    QHBoxLayout* transparentControlLayout = new QHBoxLayout();
+    transparentControlLayout->setSpacing(16);
+    auto* transparentSwitch = new NToggleSwitch(QStringLiteral("透明背景"), this);
+    transparentSwitch->setAccessibleName(QStringLiteral("切换标签页透明背景"));
+    transparentSwitch->setChecked(true);
+    connect(transparentSwitch,
+            &NToggleSwitch::checkedChanged,
+            transparentTabWidget,
+            [transparentTabWidget](bool checked) { transparentTabWidget->setTransparentBackground(checked); });
+    transparentControlLayout->addWidget(transparentSwitch);
+    transparentControlLayout->addWidget(
+        new NLabel(QStringLiteral("透明时仍保留选中标签、边框和分隔线。"), NLabelType::Caption, this));
+    transparentControlLayout->addStretch();
+
+    transparentLayout->addWidget(transparentTabWidget);
+    transparentLayout->addLayout(transparentControlLayout);
+
+    addSection("透明背景", transparentLayout);
 
     QVBoxLayout* closableLayout = new QVBoxLayout();
     closableLayout->setSpacing(16);

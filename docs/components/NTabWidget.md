@@ -85,6 +85,10 @@ connect(tabWidget, &NTabWidget::tabAddRequested, tabWidget, [tabWidget]() {
 `heightForWidth()`、角落控件、自定义页签按钮、逐页文字颜色、自动隐藏、溢出滚动、选择移除策略
 和页签重排继续遵循 Qt 语义。
 
+不要在应用级样式表中设置全局 `QTabWidget::pane` 规则。Qt 的 `QStyleSheetStyle` 会在命中该规则时
+绕过 `NTabWidget` 的自定义 pane/tab-bar 几何。需要透出父容器背景时，使用
+`setTransparentBackground(true)`；它只关闭组件表面和内容区填充，选中标签、边框与分隔线仍会保留。
+
 `removeTab()` / `clear()` 与 Qt 一样只从容器移除页面，不负责销毁页面。`tabCloseRequested()`
 也只表示用户请求关闭，业务应保存数据、判断能否关闭，然后调用 `removeTab()` 和 `deleteLater()`。
 
@@ -229,6 +233,9 @@ styledTabWidget->setLightSelectedBackground(QColor(240, 248, 255));
 styledTabWidget->setDarkSelectedBackground(QColor(45, 45, 45));
 styledTabWidget->setLightBorderColor(QColor(200, 200, 200));
 styledTabWidget->setDarkBorderColor(QColor(100, 100, 100));
+
+// 透出父容器背景，不要使用全局 QTabWidget::pane 样式表
+styledTabWidget->setTransparentBackground(true);
 ```
 
 ## API
@@ -255,6 +262,8 @@ styledTabWidget->setDarkBorderColor(QColor(100, 100, 100));
 | `borderRadius()` | 获取边框圆角 | - |
 | `setBorderWidth(int width)` | 设置边框宽度 | 边框宽度 |
 | `borderWidth()` | 获取边框宽度 | - |
+| `setTransparentBackground(bool transparent)` | 设置组件表面和内容区是否透明 | `true` / `false` |
+| `getTransparentBackground()` | 获取透明背景状态 | - |
 
 ### 颜色属性
 

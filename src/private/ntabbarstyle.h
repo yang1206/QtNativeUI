@@ -5,7 +5,10 @@
 #include "QtNativeUI/NEnums.h"
 
 class QStyleOptionToolButton;
-void nPaintTabToolButton(QPainter* painter, const QStyleOptionToolButton& option, const QWidget* widget);
+void        nPaintTabToolButton(QPainter* painter, const QStyleOptionToolButton& option, const QWidget* widget);
+inline bool nShouldPaintFocusVisual(QStyle::State state) {
+    return state.testFlag(QStyle::State_HasFocus) && state.testFlag(QStyle::State_KeyboardFocusChange);
+}
 
 class NTabBarStyle : public QProxyStyle {
     Q_OBJECT

@@ -19,6 +19,7 @@ class NTabWidgetPrivate : public QObject {
     Q_PROPERTY_CREATE_D(int, BorderRadius)
     Q_PROPERTY_CREATE_D(int, BorderWidth)
     Q_PROPERTY_CREATE_D(bool, AddButtonVisible)
+    Q_PROPERTY_CREATE_D(bool, TransparentBackground)
 
   public:
     explicit NTabWidgetPrivate(QObject* parent = nullptr);

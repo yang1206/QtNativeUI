@@ -40,6 +40,7 @@ Q_PROPERTY_CREATE_Q_CPP(NTabWidget, QColor, LightBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NTabWidget, QColor, DarkBorderColor)
 Q_PROPERTY_CREATE_Q_CPP(NTabWidget, int, BorderRadius)
 Q_PROPERTY_CREATE_Q_CPP(NTabWidget, int, BorderWidth)
+Q_PROPERTY_CREATE_Q_CPP(NTabWidget, bool, TransparentBackground)
 
 NTabWidget::NTabWidget(QWidget* parent) : QTabWidget(parent), d_ptr(new NTabWidgetPrivate()) { init(); }
 
@@ -57,6 +58,7 @@ void NTabWidget::init() {
     d->_pDarkBorderColor         = NThemeColor(NFluentColorKey::CardStrokeColorDefault, NThemeType::Dark);
     d->_pBorderRadius            = NRadiusToken(NDesignTokenKey::CornerRadiusMedium).toInt();
     d->_pBorderWidth             = 1;
+    d->_pTransparentBackground   = false;
 
     setObjectName(QStringLiteral("NTabWidget"));
     setAccessibleName(QStringLiteral("标签页控件"));
@@ -73,6 +75,7 @@ void NTabWidget::init() {
     connect(this, &NTabWidget::pDarkBorderColorChanged, this, &NTabWidget::updatePalette);
     connect(this, &NTabWidget::pBorderRadiusChanged, this, &NTabWidget::adjustContentMargins);
     connect(this, &NTabWidget::pBorderWidthChanged, this, &NTabWidget::adjustContentMargins);
+    connect(this, &NTabWidget::pTransparentBackgroundChanged, this, &NTabWidget::updatePalette);
     connect(this, &QTabWidget::currentChanged, this, [this]() { update(); });
     connect(tabBar(), &QTabBar::tabMoved, this, [this]() { update(); });
     connect(nTheme, &NTheme::themeModeChanged, this, [this](NThemeType::ThemeMode mode) {
@@ -88,9 +91,10 @@ void NTabWidget::updatePalette() {
     Q_D(NTabWidget);
     if (d->updatingPalette)
         return;
-    d->updatingPalette      = true;
-    QPalette     pal        = palette();
-    const QColor background = d->_isDark ? d->_pDarkSelectedBackground : d->_pLightSelectedBackground;
+    d->updatingPalette              = true;
+    QPalette     pal                = palette();
+    const QColor selectedBackground = d->_isDark ? d->_pDarkSelectedBackground : d->_pLightSelectedBackground;
+    const QColor background         = d->_pTransparentBackground ? Qt::transparent : selectedBackground;
     const QColor foreground =
         NThemeColor(NFluentColorKey::TextFillColorPrimary, d->_isDark ? NThemeType::Dark : NThemeType::Light);
     pal.setColor(QPalette::Window, background);
@@ -134,11 +138,13 @@ void NTabWidget::paintEvent(QPaintEvent* event) {
         surface.addRoundedRect(QRectF(rect()), radius, radius);
     else
         surface.addRect(QRectF(rect()));
-    painter.fillPath(surface, stripBackground);
-    painter.save();
-    painter.setClipPath(surface);
-    painter.fillRect(pane, background);
-    painter.restore();
+    if (!d->_pTransparentBackground) {
+        painter.fillPath(surface, stripBackground);
+        painter.save();
+        painter.setClipPath(surface);
+        painter.fillRect(pane, background);
+        painter.restore();
+    }
 
     if (borderWidth > 0 && pane.isValid() && pane != inner) {
         // 内容区只保留与标签栏相邻的分隔线，不再单独绘制圆角外框。
