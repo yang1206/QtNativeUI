@@ -4,6 +4,11 @@
 
 选项卡控件用于在多个页面之间切换，每个选项卡对应一个页面内容。NTabWidget 基于 Qt 的 QTabWidget，提供了现代化的外观和增强的功能。
 
+标签栏与页面共用一个完整外框，标签栏两端和空白区使用 `SolidBackgroundFillColorBase`，
+选中页签与页面沿用 `LightSelectedBackground` / `DarkSelectedBackground`。
+`setBorderRadius()` 控制整体外框圆角，默认取 `CornerRadiusMedium`；`setBorderWidth()` 控制外框线宽。
+内部只绘制标签栏与页面的分隔线，并在当前页签处断开。
+
 ### 基本用法
 
 ```cpp
@@ -51,6 +56,41 @@ connect(closableTabWidget, &QTabWidget::tabCloseRequested, [=](int index) {
     widget->deleteLater();
 });
 ```
+
+### 标签布局与新增按钮
+
+```cpp
+tabWidget->setTabWidthMode(NTabBar::TabWidthMode::SizeToContent);
+tabWidget->setCloseButtonDisplayMode(NTabBar::CloseButtonDisplayMode::OnHover);
+tabWidget->setTabClosable(0, false);
+tabWidget->setMovable(true);
+tabWidget->setTabDragEnabled(true);
+tabWidget->setAddButtonVisible(true); // 默认隐藏
+connect(tabWidget, &NTabWidget::tabAddRequested, tabWidget, [tabWidget]() {
+    const int index = tabWidget->addTab(new QWidget(), "新标签");
+    tabWidget->setCurrentIndex(index);
+});
+```
+
+新增按钮及 Ctrl+T 发出 `tabAddRequested`，不会自动创建业务页面。
+中键、Ctrl+W 和 Ctrl+F4 发出关闭请求，遵守全局及逐页关闭权限。
+这些快捷键使用 `WidgetWithChildrenShortcut`，即使焦点位于当前页的文本编辑器等子控件中也有效。
+重排时页面由 Qt 同步移动。组件保留页面显式设置的调色板和背景填充策略。
+`Compact` 模式只折叠带图标的非当前标签；无图标标签会按内容显示，不会全部退化成省略号。
+
+### QTabWidget 兼容性
+
+默认 `documentMode` 与 `QTabWidget` 一致为 `false`，显示完整 Fluent 外框。调用
+`setDocumentMode(true)` 后去除外层圆角和外框，保留页签与内容区分隔线，适合嵌入主窗口文档区。
+`heightForWidth()`、角落控件、自定义页签按钮、逐页文字颜色、自动隐藏、溢出滚动、选择移除策略
+和页签重排继续遵循 Qt 语义。
+
+`removeTab()` / `clear()` 与 Qt 一样只从容器移除页面，不负责销毁页面。`tabCloseRequested()`
+也只表示用户请求关闭，业务应保存数据、判断能否关闭，然后调用 `removeTab()` 和 `deleteLater()`。
+
+`setMovable(true)` 提供同一标签栏内的原生重排；`setTabDragEnabled(true)` 在指针越过标签栏边界后
+自动启动栏外拖拽。页签拖出窗口后的页面所有权迁移属于文档管理器能力，不是 `QTabWidget`
+自带能力，跨窗口接收和转移仍由业务实现。
 
 ### 带图标的选项卡
 
@@ -244,6 +284,28 @@ NTabWidget 继承自 `QTabWidget`，支持所有标准 QTabWidget 的方法和�
 - `tabCloseRequested(int)` - 选项卡关闭请求信号
 - `tabBarClicked(int)` - 选项卡栏点击信号
 
+### 增强 API
+
+- `setTabClosable(int, bool)` / `getTabClosable(int)` - 逐页控制关闭权限
+- `setTabWidthMode()` / `getTabWidthMode()` - 等宽、适应内容或紧凑模式
+- `setCloseButtonDisplayMode()` / `getCloseButtonDisplayMode()` - 始终、悬停或从不显示关闭按钮
+- `setTabDragEnabled(bool)` / `getTabDragEnabled()` - 启用越过标签栏边界后的栏外拖拽
+- `setAddButtonVisible(bool)` / `getAddButtonVisible()` - 显示内建新增按钮
+- `tabAddRequested()` - 新增按钮或 Ctrl+T 的请求信号
+
+## 无障碍
+
+`NTabWidget` 和内建标签栏、添加按钮、关闭按钮均提供默认可访问名称；标签项继续使用 Qt 原生
+`PageTabList` / `PageTab` 语义、选择接口和按压动作。键盘焦点使用设计 token 绘制双层焦点框。
+
+应用仍应提供上下文名称，例如：
+
+```cpp
+tabs->setAccessibleName(QStringLiteral("设备配置页面"));
+tabs->tabBar()->setAccessibleTabName(0, QStringLiteral("网络配置标签"));
+pageEditor->setAccessibleName(QStringLiteral("网络配置编辑器"));
+```
+
 ## 主题定制
 
 ### 样式变量
@@ -251,7 +313,7 @@ NTabWidget 继承自 `QTabWidget`，支持所有标准 QTabWidget 的方法和�
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | 选项卡高度 | `32px` | 选项卡标签高度 |
-| 边框圆角 | `4px` | 选项卡圆角半径 |
+| 边框圆角 | `CornerRadiusMedium`（默认 `8px`） | 整体外框和选中页签顶部圆角 |
 | 边框宽度 | `1px` | 选项卡边框宽度 |
 | 内容边距 | `8px` | 选项卡内容边距 |
 

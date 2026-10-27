@@ -1,10 +1,10 @@
-#ifndef QTNATIVEUI_NTABWIDGET_H
+﻿#ifndef QTNATIVEUI_NTABWIDGET_H
 #define QTNATIVEUI_NTABWIDGET_H
 
 #include <QTabWidget>
+#include "NTabBar.h"
 #include "stdafx.h"
 
-class NTabBar;
 class NTabWidgetPrivate;
 
 class QTNATIVEUI_EXPORT NTabWidget : public QTabWidget {
@@ -16,6 +16,8 @@ class QTNATIVEUI_EXPORT NTabWidget : public QTabWidget {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkBorderColor)
     Q_PROPERTY_CREATE_Q_H(int, BorderRadius)
     Q_PROPERTY_CREATE_Q_H(int, BorderWidth)
+    Q_PROPERTY_CREATE_Q_H(bool, AddButtonVisible)
+    Q_PROPERTY(bool tabsClosable READ tabsClosable WRITE setTabsClosable)
 
   public:
     explicit NTabWidget(QWidget* parent = nullptr);
@@ -23,8 +25,22 @@ class QTNATIVEUI_EXPORT NTabWidget : public QTabWidget {
 
     NTabBar* tabBar() const;
 
-    void setTabsClosable(bool closable);
-    bool tabsClosable() const;
+    void                            setTabsClosable(bool closable);
+    bool                            tabsClosable() const;
+    void                            setTabClosable(int index, bool closable);
+    bool                            getTabClosable(int index) const;
+    void                            setTabWidthMode(NTabBar::TabWidthMode mode);
+    NTabBar::TabWidthMode           getTabWidthMode() const;
+    void                            setCloseButtonDisplayMode(NTabBar::CloseButtonDisplayMode mode);
+    NTabBar::CloseButtonDisplayMode getCloseButtonDisplayMode() const;
+    void                            setTabDragEnabled(bool enabled);
+    bool                            getTabDragEnabled() const;
+    QSize                           sizeHint() const override;
+    QSize                           minimumSizeHint() const override;
+    int                             heightForWidth(int width) const override;
+
+  signals:
+    void tabAddRequested();
 
   protected:
     void changeEvent(QEvent* event) override;
@@ -32,6 +48,8 @@ class QTNATIVEUI_EXPORT NTabWidget : public QTabWidget {
     void resizeEvent(QResizeEvent* event) override;
     void tabInserted(int index) override;
     void showEvent(QShowEvent* event) override;
+    bool event(QEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
   private:
     void init();

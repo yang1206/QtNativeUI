@@ -1,11 +1,15 @@
-#ifndef QTNATIVEUI_NTABBAR_P_H
+﻿#ifndef QTNATIVEUI_NTABBAR_P_H
 #define QTNATIVEUI_NTABBAR_P_H
 
 #include <QObject>
-#include <QPixmap>
+#include <QPointer>
+#include <QUuid>
+#include <QVector>
 #include <QtNativeUI/NTabBar.h>
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/NToolTip.h"
+
+class QAbstractButton;
 
 class NTabBarPrivate : public QObject {
     Q_OBJECT
@@ -54,15 +58,46 @@ class NTabBarPrivate : public QObject {
     explicit NTabBarPrivate(QObject* parent = nullptr);
     ~NTabBarPrivate();
 
-    NThemeType::ThemeMode _themeMode;
-    bool                  _isDark{false};
-    int                   _hoverIndex{-1};
-    QPixmap               _lastDragPix;
-    bool                  _tabsClosable{false};
+    NThemeType::ThemeMode           _themeMode;
+    bool                            _isDark{false};
+    int                             _hoverIndex{-1};
+    NTabBar::TabWidthMode           _pTabWidthMode{NTabBar::TabWidthMode::Equal};
+    NTabBar::CloseButtonDisplayMode _pCloseButtonDisplayMode{NTabBar::CloseButtonDisplayMode::Always};
+    int                             _pTabMinimumWidth{100};
+    int                             _pTabMaximumWidth{240};
+    int                             _pTabHeight{32};
+    bool                            _pTabDragEnabled{false};
+    struct TabState {
+        QUuid id{QUuid::createUuid()};
+        bool  closable{true};
+    };
+    QVector<TabState>  tabs;
+    QUuid              sourceId{QUuid::createUuid()};
+    QUuid              pressedId;
+    QPoint             pressPosition;
+    bool               dragStarted{false};
+    bool               layoutPending{false};
+    bool               buttonsPending{false};
+    bool               acceptDropsBeforeTabDrag{false};
+    int                closeCurrentIndex{-1};
+    QPointer<NToolTip> tooltip;
+    QWidget*           tooltipAnchor{nullptr};
 
-    int       _tooltipTabIndex{-1};
-    QTimer*   _tooltipTimer{nullptr};
-    NToolTip* _currentTooltip{nullptr};
+    bool             vertical() const;
+    bool             compact(int index) const;
+    bool             reserveCloseButton(int index) const;
+    QAbstractButton* closeButton(int index) const;
+    bool             isCloseButton(const QObject* object) const;
+    int              closeButtonIndex(const QObject* button) const;
+    bool             initializeCloseButton(int index);
+    void             updateHover(int index);
+    void             updateCloseButtons();
+    void             updateCloseButton(int index);
+    void             scheduleCloseButtons();
+    void             scheduleLayout();
+    void             showToolTip(int index, const QString& text = QString());
+    void             hideToolTip();
+    int              droppedIndex(const QMimeData* data) const;
 };
 
 #endif // QTNATIVEUI_NTABBAR_P_H

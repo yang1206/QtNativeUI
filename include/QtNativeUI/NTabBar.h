@@ -1,4 +1,4 @@
-#ifndef QTNATIVEUI_NTABBAR_H
+﻿#ifndef QTNATIVEUI_NTABBAR_H
 #define QTNATIVEUI_NTABBAR_H
 
 #include <QTabBar>
@@ -49,6 +49,19 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
     Q_PROPERTY_CREATE_Q_H(QColor, DarkItemHeaderBorderColorSelected)
 
   public:
+    enum class TabWidthMode { Equal, SizeToContent, Compact };
+    Q_ENUM(TabWidthMode)
+    enum class CloseButtonDisplayMode { Always, OnHover, Never };
+    Q_ENUM(CloseButtonDisplayMode)
+    Q_PROPERTY_CREATE_Q_H(TabWidthMode, TabWidthMode)
+    Q_PROPERTY_CREATE_Q_H(CloseButtonDisplayMode, CloseButtonDisplayMode)
+    Q_PROPERTY_CREATE_Q_H(int, TabMinimumWidth)
+    Q_PROPERTY_CREATE_Q_H(int, TabMaximumWidth)
+    Q_PROPERTY_CREATE_Q_H(int, TabHeight)
+    Q_PROPERTY_CREATE_Q_H(bool, TabDragEnabled)
+    Q_PROPERTY(bool tabsClosable READ tabsClosable WRITE setTabsClosable)
+
+  public:
     explicit NTabBar(QWidget* parent = nullptr);
     ~NTabBar();
     int hoverIndex() const;
@@ -56,6 +69,12 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
     bool tabsClosable() const;
     void setTabsClosable(bool closable);
     void setTabToolTip(int index, const QString& tip);
+#if QT_CONFIG(accessibility)
+    void setAccessibleTabName(int index, const QString& name);
+#endif
+    void setTabClosable(int index, bool closable);
+    bool getTabClosable(int index) const;
+    void requestTabClose(int index);
 
   private slots:
     void onCloseButtonClicked();
@@ -66,18 +85,27 @@ class QTNATIVEUI_EXPORT NTabBar : public QTabBar {
     void tabDropped(QMimeData* data);
 
   protected:
-    bool event(QEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void leaveEvent(QEvent* event) override;
-    void changeEvent(QEvent* event) override;
-    void tabInserted(int index) override;
-    void tabRemoved(int index) override;
+    bool  event(QEvent* event) override;
+    bool  eventFilter(QObject* watched, QEvent* event) override;
+    void  mousePressEvent(QMouseEvent* event) override;
+    void  mouseMoveEvent(QMouseEvent* event) override;
+    void  mouseReleaseEvent(QMouseEvent* event) override;
+    void  leaveEvent(QEvent* event) override;
+    void  changeEvent(QEvent* event) override;
+    void  tabInserted(int index) override;
+    void  tabRemoved(int index) override;
+    void  tabLayoutChange() override;
+    QSize tabSizeHint(int index) const override;
+    QSize minimumTabSizeHint(int index) const override;
+    void  keyPressEvent(QKeyEvent* event) override;
+    void  dragEnterEvent(QDragEnterEvent* event) override;
+    void  dragMoveEvent(QDragMoveEvent* event) override;
+    void  dropEvent(QDropEvent* event) override;
 
   private:
     void init();
-    void setupCustomCloseButton(int index);
+    friend class NTabBarPrivate;
+    void invalidateTabLayout();
 };
 
 #endif // QTNATIVEUI_NTABBAR_H

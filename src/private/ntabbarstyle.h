@@ -1,8 +1,11 @@
-#ifndef QTNATIVEUI_NTABBARSTYLE_H
+﻿#ifndef QTNATIVEUI_NTABBARSTYLE_H
 #define QTNATIVEUI_NTABBARSTYLE_H
 
 #include <QProxyStyle>
 #include "QtNativeUI/NEnums.h"
+
+class QStyleOptionToolButton;
+void nPaintTabToolButton(QPainter* painter, const QStyleOptionToolButton& option, const QWidget* widget);
 
 class NTabBarStyle : public QProxyStyle {
     Q_OBJECT
@@ -27,6 +30,13 @@ class NTabBarStyle : public QProxyStyle {
                            const QWidget*      widget) const override;
 
     QRect subElementRect(SubElement element, const QStyleOption* option, const QWidget* widget) const override;
+    int   pixelMetric(PixelMetric         metric,
+                      const QStyleOption* option = nullptr,
+                      const QWidget*      widget = nullptr) const override;
+    int   styleHint(StyleHint           hint,
+                    const QStyleOption* option     = nullptr,
+                    const QWidget*      widget     = nullptr,
+                    QStyleHintReturn*   returnData = nullptr) const override;
 };
 
 #endif // QTNATIVEUI_NTABBARSTYLE_H
