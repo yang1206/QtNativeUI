@@ -9,6 +9,7 @@
 
 class NPageComponent;
 class NNavigationViewPrivate;
+class NNavigationRouter;
 class QWidget;
 
 class QTNATIVEUI_EXPORT NNavigationView : public QWidget {
@@ -96,6 +97,12 @@ class QTNATIVEUI_EXPORT NNavigationView : public QWidget {
     int         historyCount() const;
     void        clearNavigationHistory();
     bool        hasNavigationHistory() const;
+    NNavigationRouter* router() const;
+
+    // 显示模式是布局策略，面板打开状态可独立控制。
+    NNavigationType::NavigationDisplayMode effectiveDisplayMode() const;
+    void setPaneOpen(bool open);
+    bool isPaneOpen() const;
 
     // 动画设置
     void setPageTransitionDuration(int duration);
@@ -115,6 +122,7 @@ class QTNATIVEUI_EXPORT NNavigationView : public QWidget {
     void routeChanged(const QString& pageKey, const QVariantMap& params);
     void routeBack(const QString& fromPageKey, const QString& toPageKey, const QVariantMap& params);
     void navigationStateChanged(bool hasHistory);
+    void paneOpenChanged(bool open);
 
   protected:
     void resizeEvent(QResizeEvent* event) override;

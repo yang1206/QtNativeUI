@@ -16,7 +16,7 @@ NStackedWidget::NStackedWidget(QWidget* parent) : QStackedWidget(parent) {
         m_themeMode  = mode;
         update();
     });
-    setAttribute(Qt::WA_TranslucentBackground);
+    // 子控件依靠父背景传播清理每帧；TranslucentBackground 会同时禁用背景清理，留下拖影。
     setAutoFillBackground(false);
     setObjectName("NStackedWidget");
     QPalette pal = palette();
@@ -25,7 +25,10 @@ NStackedWidget::NStackedWidget(QWidget* parent) : QStackedWidget(parent) {
     setPalette(pal);
 }
 
-NStackedWidget::~NStackedWidget() {}
+NStackedWidget::~NStackedWidget() {
+    // 基类析构时会先释放栈布局，再发送 Hide；提前移除动画的事件过滤器。
+    delete m_animationManager;
+}
 
 void NStackedWidget::setBackGroundColor(QColor color) {
     m_background = color;

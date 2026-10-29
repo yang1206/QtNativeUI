@@ -107,10 +107,11 @@ void NNavigationFooterDelegate::paint(QPainter*                   painter,
     NNavigationFooterModel* model =
         dynamic_cast<NNavigationFooterModel*>(const_cast<QAbstractItemModel*>(index.model()));
     NNavigationNode* node = index.data(Qt::UserRole).value<NNavigationNode*>();
-    if (option.state.testFlag(QStyle::State_HasFocus)) {
-        viewOption.state &= ~QStyle::State_HasFocus;
-    }
-    QStyledItemDelegate::paint(painter, viewOption, index);
+    if (!model || !node) return;
+    // 基类 paint 会重新读取 DisplayRole，不能在自绘前调用，否则标题会绘制两次。
+    painter->save();
+    painter->setClipRect(option.rect, Qt::IntersectClip);
+    painter->setFont(viewOption.font);
 
     // 背景绘制
     QRect itemRect = option.rect;
@@ -238,6 +239,7 @@ void NNavigationFooterDelegate::paint(QPainter*                   painter,
                                  3,
                                  3);
     }
+    painter->restore();
     painter->restore();
 }
 

@@ -1,163 +1,193 @@
-#include "../../include/QtNativeUI/NNavigationRouter.h"
+#include "QtNativeUI/NNavigationRouter.h"
 
-#include "../private/nnavigationmanager.h"
-#include "QtNativeUI/NNavigationBar.h"
-#include "QtNativeUI/NPageComponent.h"
+#include <QScopeGuard>
+#include "nnavigationmanager.h"
 
 Q_SINGLETON_CREATE_CPP(NNavigationRouter)
 
-NNavigationRouter::NNavigationRouter(QObject* parent) : QObject(parent) { m_maxHistorySize = 25; }
+NNavigationRouter::NNavigationRouter(QObject* parent) : QObject(parent), m_maxHistorySize(25) {}
 
-NNavigationRouter::~NNavigationRouter() {}
-
-void NNavigationRouter::setMaxHistorySize(int size) {
-    if (size > 0) {
-        m_maxHistorySize = size;
-
-        // 如果当前历史记录超过新的最大值，则裁剪
-        while (m_history.size() > m_maxHistorySize) {
-            m_history.dequeue();
-        }
+NNavigationRouter::~NNavigationRouter() {
+    for (auto it = m_pages.cbegin(); it != m_pages.cend(); ++it) {
+        NNavigationManager::getInstance()->unregisterRoute(it.key(), this);
     }
 }
 
-int NNavigationRouter::maxHistorySize() const { return m_maxHistorySize; }
-
-NNavigationRouterType::NavigationRouteType NNavigationRouter::navigateTo(const QString&     pageKey,
-                                                                         const QVariantMap& params) {
-    // 获取目标页面组件
-    NPageComponent* toPage = NNavigationManager::getInstance()->getPageComponent(pageKey);
-    if (!toPage) {
-        return NNavigationRouterType::PageNotFound;
+NNavigationRouter* NNavigationRouter::activeRouter() const {
+    if (this == _instance) {
+        auto* router = NNavigationManager::getInstance()->activeRouter();
+        if (router && router != this) return router;
     }
+    return const_cast<NNavigationRouter*>(this);
+}
 
-    // 获取当前页面组件
-    NPageComponent* fromPage = nullptr;
-    if (!m_currentRoute.pageKey.isEmpty()) {
-        fromPage = NNavigationManager::getInstance()->getPageComponent(m_currentRoute.pageKey);
+void NNavigationRouter::setMaxHistorySize(int size) {
+    if (activeRouter() != this) {
+        activeRouter()->setMaxHistorySize(size);
+        return;
     }
+    if (size <= 0) return;
+    m_maxHistorySize = size;
+    while (m_history.size() > size) m_history.dequeue();
+}
 
-    // 执行页面生命周期方法
-    if (!executePageLifecycle(fromPage, toPage, params)) {
+int NNavigationRouter::maxHistorySize() const { return activeRouter()->m_maxHistorySize; }
+
+void NNavigationRouter::registerPage(const QString& pageKey, QWidget* page) {
+    if (pageKey.isEmpty() || !page || m_pages.contains(pageKey)) return;
+    m_pages.insert(pageKey, page);
+    NNavigationManager::getInstance()->registerRoute(pageKey, this);
+    connect(page, &QObject::destroyed, this, [this, pageKey] { unregisterPage(pageKey); });
+}
+
+bool NNavigationRouter::containsPage(const QString& pageKey) const { return !m_pages.value(pageKey).isNull(); }
+
+void NNavigationRouter::unregisterPage(const QString& pageKey) { unregisterPages({pageKey}); }
+
+void NNavigationRouter::unregisterPages(const QStringList& keys) {
+    QPointer<NNavigationRouter> self(this);
+    bool removed = false;
+    for (const auto& key : keys) {
+        if (!m_pages.remove(key)) continue;
+        removed = true;
+        NNavigationManager::getInstance()->unregisterRoute(key, this);
+    }
+    if (!removed) return;
+    for (int i = m_history.size() - 1; i >= 0; --i) {
+        if (!containsPage(m_history.at(i).pageKey)) m_history.removeAt(i);
+    }
+    if (!m_currentRoute.pageKey.isEmpty() && !containsPage(m_currentRoute.pageKey)) {
+        m_currentRoute = {};
+        emit routeChanged({}, {});
+        if (!self) return;
+    }
+    emit navigationStateChanged(!m_history.isEmpty());
+    if (self && this != _instance && NNavigationManager::getInstance()->activeRouter() == this) {
+        emit getInstance()->navigationStateChanged(!m_history.isEmpty());
+    }
+}
+
+NNavigationRouterType::NavigationRouteType NNavigationRouter::navigateTo(const QString& key, const QVariantMap& params) {
+    return navigateToImpl(key, params, true);
+}
+
+NNavigationRouterType::NavigationRouteType NNavigationRouter::replaceRoute(const QString& key, const QVariantMap& params) {
+    return navigateToImpl(key, params, false);
+}
+
+NNavigationRouterType::NavigationRouteType NNavigationRouter::navigateToImpl(const QString& pageKey,
+                                                                         const QVariantMap& params, bool recordHistory) {
+    if (this == _instance) {
+        auto* owner = NNavigationManager::getInstance()->routerForKey(pageKey);
+        if (owner && owner != this) return owner->navigateToImpl(pageKey, params, recordHistory);
+        // 兼容独立注册的页面组件。
+        if (!containsPage(pageKey)) {
+            if (auto* page = NNavigationManager::getInstance()->getPageComponent(pageKey)) registerPage(pageKey, page);
+        }
+    }
+    if (!containsPage(pageKey)) return NNavigationRouterType::PageNotFound;
+    if (m_isNavigating) return NNavigationRouterType::RouteRejected;
+    if (m_currentRoute.pageKey == pageKey && m_currentRoute.params == params) return NNavigationRouterType::Success;
+
+    QPointer<NNavigationRouter> self(this);
+    m_isNavigating = true;
+    const auto navigating = qScopeGuard([self] { if (self) self->m_isNavigating = false; });
+    QPointer<QWidget> target = m_pages.value(pageKey);
+    auto* fromPage = qobject_cast<NPageComponent*>(m_pages.value(m_currentRoute.pageKey).data());
+    auto* toPage = qobject_cast<NPageComponent*>(target.data());
+    if (!executePageLifecycle(fromPage, toPage, params) || !self || !target || !containsPage(pageKey)) {
         return NNavigationRouterType::RouteRejected;
     }
 
-    // 如果有当前路由，将其添加到历史记录中
-    if (!m_currentRoute.pageKey.isEmpty()) {
-        // 如果历史记录已满，移除最旧的记录
-        if (m_history.size() >= m_maxHistorySize) {
-            m_history.dequeue();
-        }
-
+    // 守卫通过后再提交历史、路由和可见页面。
+    if (recordHistory && !m_currentRoute.pageKey.isEmpty() && m_currentRoute.pageKey != pageKey) {
+        while (m_history.size() >= m_maxHistorySize) m_history.dequeue();
         m_history.enqueue(m_currentRoute);
     }
-
-    // 更新当前路由
-    m_currentRoute.pageKey = pageKey;
-    m_currentRoute.params  = params;
-
-    // 发出路由变更信号
+    m_currentRoute = {pageKey, params};
+    NNavigationManager::getInstance()->setActiveRouter(this);
     emit routeChanged(pageKey, params);
-
-    // 通知导航栏更新选中状态
-    NNavigationBar* navBar = NNavigationManager::getInstance()->currentNavigationBar();
-    if (navBar) {
-        navBar->navigation(pageKey, false);
+    if (!self) return NNavigationRouterType::ObjectInvalid;
+    if (target && containsPage(pageKey) && toPage) toPage->onRouteEnter(params);
+    if (!self) return NNavigationRouterType::ObjectInvalid;
+    const bool hasHistory = !m_history.isEmpty();
+    emit navigationStateChanged(hasHistory);
+    if (!self) return NNavigationRouterType::ObjectInvalid;
+    if (this != getInstance()) {
+        emit getInstance()->routeChanged(pageKey, params);
+        emit getInstance()->navigationStateChanged(hasHistory);
     }
-
-    // 调用页面的路由进入方法
-    toPage->onRouteEnter(params);
-
-    // 发出导航状态变更信号
-    emit navigationStateChanged(!m_history.isEmpty());
-
     return NNavigationRouterType::Success;
 }
 
 NNavigationRouterType::NavigationRouteType NNavigationRouter::navigateBack(const QVariantMap& params) {
-    if (m_history.isEmpty()) {
-        return NNavigationRouterType::NoHistory;
-    }
+    if (activeRouter() != this) return activeRouter()->navigateBack(params);
+    if (m_isNavigating) return NNavigationRouterType::RouteRejected;
+    // 已移除页面不再参与返回；拒绝守卫时保持有效历史不变。
+    while (!m_history.isEmpty() && !containsPage(m_history.last().pageKey)) m_history.removeLast();
+    if (m_history.isEmpty()) return NNavigationRouterType::NoHistory;
 
-    // 获取上一个路由
-    RouteInfo prevRoute = m_history.last();
-    m_history.removeLast();
-
-    // 获取当前页面和目标页面
-    NPageComponent* fromPage = NNavigationManager::getInstance()->getPageComponent(m_currentRoute.pageKey);
-    NPageComponent* toPage   = NNavigationManager::getInstance()->getPageComponent(prevRoute.pageKey);
-
-    if (!toPage) {
-        return NNavigationRouterType::PageNotFound;
-    }
-
-    // 合并参数
-    QVariantMap mergedParams = prevRoute.params;
-    for (auto it = params.constBegin(); it != params.constEnd(); ++it) {
-        mergedParams[it.key()] = it.value();
-    }
-
-    // 执行页面生命周期方法
-    if (!executePageLifecycle(fromPage, toPage, mergedParams)) {
-        // 如果被拒绝，恢复历史记录
-        m_history.append(prevRoute);
+    QPointer<NNavigationRouter> self(this);
+    m_isNavigating = true;
+    const auto navigating = qScopeGuard([self] { if (self) self->m_isNavigating = false; });
+    const RouteInfo previous = m_history.last();
+    QVariantMap merged = previous.params;
+    for (auto it = params.cbegin(); it != params.cend(); ++it) merged.insert(it.key(), it.value());
+    QPointer<QWidget> target = m_pages.value(previous.pageKey);
+    auto* fromPage = qobject_cast<NPageComponent*>(m_pages.value(m_currentRoute.pageKey).data());
+    auto* toPage = qobject_cast<NPageComponent*>(target.data());
+    if (!executePageLifecycle(fromPage, toPage, merged) || !self || !target || !containsPage(previous.pageKey)) {
         return NNavigationRouterType::RouteRejected;
     }
-
-    // 保存当前路由信息以便发送信号
-    QString fromPageKey = m_currentRoute.pageKey;
-
-    // 更新当前路由
-    m_currentRoute        = prevRoute;
-    m_currentRoute.params = mergedParams; // 使用合并后的参数
-
-    // 发出返回路由信号
-    emit routeBack(fromPageKey, prevRoute.pageKey, mergedParams);
-
-    // 通知导航栏更新选中状态
-    NNavigationBar* navBar = NNavigationManager::getInstance()->currentNavigationBar();
-    if (navBar) {
-        navBar->navigation(prevRoute.pageKey, false);
+    // 生命周期回调可以移除节点，所以通过页面键查找，避免弹出错误的历史项。
+    for (int i = m_history.size() - 1; i >= 0; --i) {
+        if (m_history.at(i).pageKey == previous.pageKey) {
+            m_history.removeAt(i);
+            break;
+        }
     }
-
-    // 调用页面的路由进入方法
-    toPage->onRouteEnter(mergedParams);
-
-    // 发出导航状态变更信号
-    emit navigationStateChanged(!m_history.isEmpty());
-
+    const QString fromKey = m_currentRoute.pageKey;
+    m_currentRoute = {previous.pageKey, merged};
+    NNavigationManager::getInstance()->setActiveRouter(this);
+    emit routeBack(fromKey, previous.pageKey, merged);
+    if (!self) return NNavigationRouterType::ObjectInvalid;
+    if (target && containsPage(previous.pageKey) && toPage) toPage->onRouteEnter(merged);
+    if (!self) return NNavigationRouterType::ObjectInvalid;
+    const bool hasHistory = !m_history.isEmpty();
+    emit navigationStateChanged(hasHistory);
+    if (!self) return NNavigationRouterType::ObjectInvalid;
+    if (this != getInstance()) {
+        emit getInstance()->routeBack(fromKey, previous.pageKey, merged);
+        emit getInstance()->navigationStateChanged(hasHistory);
+    }
     return NNavigationRouterType::Success;
 }
 
 void NNavigationRouter::clearHistory() {
+    if (activeRouter() != this) {
+        activeRouter()->clearHistory();
+        return;
+    }
     m_history.clear();
     emit navigationStateChanged(false);
+    if (this != _instance && NNavigationManager::getInstance()->activeRouter() == this) {
+        emit getInstance()->navigationStateChanged(false);
+    }
 }
 
-QString NNavigationRouter::currentRouteKey() const { return m_currentRoute.pageKey; }
+QString NNavigationRouter::currentRouteKey() const { return activeRouter()->m_currentRoute.pageKey; }
+QVariantMap NNavigationRouter::currentRouteParams() const { return activeRouter()->m_currentRoute.params; }
+int NNavigationRouter::historyCount() const { return activeRouter()->m_history.size(); }
 
-QVariantMap NNavigationRouter::currentRouteParams() const { return m_currentRoute.params; }
-
-int NNavigationRouter::historyCount() const { return m_history.size(); }
-
-bool NNavigationRouter::executePageLifecycle(NPageComponent*    fromPage,
-                                             NPageComponent*    toPage,
+bool NNavigationRouter::executePageLifecycle(NPageComponent* fromPage, NPageComponent* toPage,
                                              const QVariantMap& params) {
-    // 检查目标页面的进入守卫
-    if (toPage && !toPage->beforeRouteEnter(params)) {
-        return false;
-    }
-
-    // 检查当前页面的离开守卫
-    if (fromPage) {
-        QVariantMap outParams;
-        if (!fromPage->beforeRouteLeave(outParams)) {
-            return false;
-        }
-
-        // 调用离开生命周期方法
-        fromPage->onRouteLeave(outParams);
-    }
-
-    return true;
+    QPointer<NPageComponent> from = fromPage;
+    QPointer<NPageComponent> to = toPage;
+    if (to && !to->beforeRouteEnter(params)) return false;
+    if (toPage && !to) return false;
+    QVariantMap outParams;
+    if (from && !from->beforeRouteLeave(outParams)) return false;
+    if (toPage && !to) return false;
+    if (from) from->onRouteLeave(outParams);
+    return !toPage || !to.isNull();
 }

@@ -3,10 +3,12 @@
 
 #include <QMap>
 #include <QObject>
+#include <QPointer>
 #include "QtNativeUI/stdafx.h"
 
 class NNavigationBar;
 class NPageComponent;
+class NNavigationRouter;
 
 class QTNATIVEUI_EXPORT NNavigationManager : public QObject {
     Q_OBJECT
@@ -41,10 +43,18 @@ class QTNATIVEUI_EXPORT NNavigationManager : public QObject {
     // 获取所有页面组件
     QList<NPageComponent*> getAllPageComponents();
 
+    void registerRoute(const QString& key, NNavigationRouter* router);
+    void unregisterRoute(const QString& key, NNavigationRouter* router);
+    NNavigationRouter* routerForKey(const QString& key) const;
+    void setActiveRouter(NNavigationRouter* router);
+    NNavigationRouter* activeRouter() const;
+
   private:
-    QMap<QString, NNavigationBar*> m_navigationBars;
+    QMap<QString, QPointer<NNavigationBar>> m_navigationBars;
     QString                        m_currentNavBarName;
-    QMap<QString, NPageComponent*> m_pageComponents;
+    QMap<QString, QPointer<NPageComponent>> m_pageComponents;
+    QMap<QString, QPointer<NNavigationRouter>> m_routers;
+    QPointer<NNavigationRouter> m_activeRouter;
 };
 
 #endif // NNAVIGATIONMANAGER_P_H

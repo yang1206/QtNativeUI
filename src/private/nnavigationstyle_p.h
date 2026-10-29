@@ -1,7 +1,10 @@
 #ifndef NNAVIGATIONSTYLE_H
 #define NNAVIGATIONSTYLE_H
 
-#include <QModelIndex>
+#include <QPersistentModelIndex>
+#include <QPointer>
+#include "nnavigationnode_p.h"
+#include "nnavigationtreeview_p.h"
 #include <QProxyStyle>
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
@@ -12,15 +15,14 @@ class QPropertyAnimation;
 
 class NNavigationStyle : public QProxyStyle {
     Q_OBJECT
-    Q_PROPERTY_CREATE(qreal, Opacity)
     Q_PROPERTY_CREATE(qreal, Rotate)
     Q_PROPERTY_CREATE(int, ItemHeight)
-    Q_PRIVATE_CREATE(NNavigationTreeView*, NavigationView)
+    Q_PRIVATE_CREATE(QPointer<NNavigationTreeView>, NavigationView)
     Q_PROPERTY_CREATE(qreal, LastSelectMarkTop)
     Q_PROPERTY_CREATE(qreal, LastSelectMarkBottom)
     Q_PROPERTY_CREATE(qreal, SelectMarkTop)
     Q_PROPERTY_CREATE(qreal, SelectMarkBottom)
-    Q_PRIVATE_CREATE(QModelIndex, PressIndex)
+    Q_PRIVATE_CREATE(QPersistentModelIndex, PressIndex)
 
   public:
     explicit NNavigationStyle(QStyle* style = nullptr);
@@ -50,9 +52,9 @@ class NNavigationStyle : public QProxyStyle {
     int                   _iconAreaWidth{40};
     int                   _textRightSpacing{3};
     int                   _indicatorIconAreaWidth{34};
-    NNavigationNode*      _opacityAnimationTargetNode{nullptr};
-    NNavigationNode*      _expandAnimationTargetNode{nullptr};
-    NNavigationNode*      _lastSelectedNode{nullptr};
+    QPointer<NNavigationNode> _expandAnimationTargetNode{nullptr};
+    QPointer<NNavigationNode> _lastSelectedNode{nullptr};
+    QPropertyAnimation*   _expandAnimation{nullptr};
     QPropertyAnimation*   _lastSelectMarkTopAnimation{nullptr};
     QPropertyAnimation*   _lastSelectMarkBottomAnimation{nullptr};
     QPropertyAnimation*   _selectMarkTopAnimation{nullptr};

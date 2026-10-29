@@ -10,6 +10,7 @@
 class NPageComponent;
 class NNavigationBarPrivate;
 class NNavigationNode;
+class NNavigationRouter;
 
 class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
     Q_OBJECT
@@ -87,12 +88,15 @@ class QTNATIVEUI_EXPORT NNavigationBar : public QWidget {
 
     void navigation(QString pageKey, bool isLogClicked = true);
     void setDisplayMode(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation = true);
+    NNavigationRouter* router() const;
+    NNavigationType::NavigationDisplayMode displayMode() const;
 
   signals:
     void navigationNodeClicked(NNavigationType::NavigationNodeType nodeType, QString nodeKey);
     void navigationNodeAdded(NNavigationType::NavigationNodeType nodeType, QString nodeKey, QWidget* page);
     void navigationNodeRemoved(NNavigationType::NavigationNodeType nodeType, QString nodeKey);
     void displayModeChange(NNavigationType::NavigationDisplayMode displayMode);
+    void paneToggleRequested();
 
   protected:
     void paintEvent(QPaintEvent* event) override;

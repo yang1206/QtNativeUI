@@ -160,7 +160,7 @@ Q_BEGIN_ENUM_CREATE(NNavigationType)
 
 enum NavigationDisplayMode {
     Auto,    // 自动模式，根据窗口大小自动调整显示模式
-    Minimal, // 最小化模式，导航栏隐藏
+    Minimal, // 最小化模式，仅保留菜单入口
     Compact, // 紧凑模式，只显示图标
     Maximal  // 最大化模式，显示完整导航栏
 };
@@ -168,7 +168,8 @@ Q_ENUM_CREATE(NavigationDisplayMode)
 
 enum NavigationNodeType {
     PageNode,  // 页面节点
-    FooterNode // 页脚节点
+    FooterNode, // 页脚节点
+    ExpanderNode // 分组节点
 };
 Q_ENUM_CREATE(NavigationNodeType)
 

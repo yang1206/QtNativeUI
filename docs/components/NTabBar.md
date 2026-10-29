@@ -98,7 +98,7 @@ tabBar->setTabClosable(0, false); // 也禁止中键和 Ctrl+W / Ctrl+F4 关闭
 ```
 
 标签文字由 `setTabText()` 更新；`setTabData()` 只保存业务数据，不启用文字编辑。
-颜色、字体、间距和圆角继续使用本项目 token，原有颜色属性仍可覆盖。
+颜色、字体、间距和圆角由主题提供，可通过对应属性自定义。
 `Compact` 模式下，没有图标的标签会自动按 `SizeToContent` 显示，避免只剩无意义的省略号；
 带图标的非当前标签才折叠为图标，当前标签始终显示完整内容。
 页签顶部默认取 `CornerRadiusMedium`（当前 8px），底部外扩弧独立取 `CornerRadiusDefault`（当前 4px）。
@@ -118,7 +118,7 @@ tabBar->addTab("标签3");
 // 栏内重排使用 Qt 原生行为
 tabBar->setMovable(true);
 
-// 拖出通知默认关闭；越过栏边界并达到拖拽距离后才会创建截图
+// 启用栏外拖拽（默认关闭）
 tabBar->setTabDragEnabled(true);
 connect(tabBar, &NTabBar::tabDragStarted, [](QDrag* drag) {
     // 可在真正开始前调整热点、拖拽图或光标；不要在这里再次调用 exec()
@@ -134,13 +134,13 @@ connect(tabBar, &NTabBar::tabDropped, [](QMimeData* data) {
 组件会在 `tabDragStarted` 同步回调返回后自动执行 `QDrag::exec(Qt::MoveAction)`。
 该信号只用于开始前配置拖拽对象，不应再次调用 `exec()`。
 `QDrag*` 和 `tabDropped` 的 `QMimeData*` 都是临时借用对象，不应跨回调保存。
-内建放下处理只接受同一标签栏的稳定 ID；跨窗口转移页面由业务实现。
+内建拖放支持同一标签栏；跨窗口转移页面由应用处理。
 
 ### 与 QTabBar 兼容
 
 `NTabBar` 保留 `QTabBar` 的标签数据、助记键、逐项文字颜色、自定义左右按钮、滚动按钮、
-自动隐藏、移动和移除选择策略。`setTabButton()` 放入的业务按钮不会被当成关闭按钮，尺寸、
-可见性、焦点策略和绘制都仍由业务控件自己管理。
+自动隐藏、移动和移除选择策略。`setTabButton()` 可设置自定义按钮，按钮的尺寸、可见性、
+焦点和外观由应用控制。
 
 ```cpp
 tabBar->setTabTextColor(0, QColor(196, 43, 28));
@@ -151,8 +151,7 @@ statusButton->setAccessibleName(QStringLiteral("查看同步状态"));
 tabBar->setTabButton(0, QTabBar::RightSide, statusButton);
 ```
 
-未知 MIME 的拖放事件会继续交给 `QTabBar`，因此 `changeCurrentOnDrag` 等 Qt 原生行为不会被
-组件自己的页签拖出协议截断。
+可通过 `changeCurrentOnDrag` 设置拖动对象悬停在标签上时是否切换页面。
 
 ### 标签按下事件
 
@@ -340,7 +339,7 @@ tabBar->setDarkItemHeaderForegroundDisabled(QColor(100, 100, 100));
 | `setCloseButtonDisplayMode(CloseButtonDisplayMode)` | 设置 `Always`、`OnHover` 或 `Never` |
 | `setTabMinimumWidth(int)` / `setTabMaximumWidth(int)` | 设置标签宽度范围 |
 | `setTabHeight(int)` | 设置标签高度 |
-| `setTabDragEnabled(bool)` | 启用稳定 ID 的栏外拖出协议 |
+| `setTabDragEnabled(bool)` | 启用栏外拖拽 |
 
 ### 工具提示
 
@@ -387,9 +386,8 @@ tabBar->setDarkItemHeaderForegroundDisabled(QColor(100, 100, 100));
 
 ## 无障碍与键盘
 
-控件沿用 Qt 原生 `QAccessibleTabBar`，向 UI Automation/辅助技术暴露 `PageTabList`、
-`PageTab`、当前选择和按压动作。方向键、助记键以及 Qt 原生的 Ctrl+Tab 行为保持不变；
-当前标签的关闭按钮可通过 Tab 键获得焦点，并提供标签名称、说明和焦点视觉。
+控件支持读屏、方向键、助记键和 Ctrl+Tab 切换标签。
+当前标签的关闭按钮可通过 Tab 键获得焦点，并提供标签名称、说明和焦点提示。
 
 业务应为含义不够清楚的标签调用 `setAccessibleTabName()`，为自定义 `tabButton()` 设置
-`accessibleName`。关闭信号仍只是请求，页面是否允许关闭及销毁方式由业务处理。
+`accessibleName`。关闭信号表示关闭请求，页面是否允许关闭及销毁方式由应用处理。

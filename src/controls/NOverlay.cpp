@@ -44,10 +44,7 @@ QWidget* NOverlay::contentWidget() const {
 void NOverlay::showOverlay() {
     Q_D(NOverlay);
 
-    if (parentWidget()) {
-        move(0, 0);
-        resize(parentWidget()->size());
-    }
+    d->syncParentGeometry();
 
     setVisible(true);
     raise();

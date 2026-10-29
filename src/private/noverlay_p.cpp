@@ -1,5 +1,6 @@
 #include "noverlay_p.h"
 
+#include <QEvent>
 #include <QLabel>
 #include <QPropertyAnimation>
 #include <QVBoxLayout>
@@ -24,6 +25,43 @@ void NOverlayPrivate::init() {
 
     q->setAttribute(Qt::WA_TranslucentBackground);
     q->setVisible(false);
+    q->installEventFilter(this);
+    updateParentWidget();
+}
+
+void NOverlayPrivate::updateParentWidget() {
+    Q_Q(NOverlay);
+
+    if (_parentWidget) {
+        _parentWidget->removeEventFilter(this);
+    }
+    _parentWidget = q->parentWidget();
+    if (_parentWidget) {
+        _parentWidget->installEventFilter(this);
+    }
+    syncParentGeometry();
+}
+
+void NOverlayPrivate::syncParentGeometry() {
+    Q_Q(NOverlay);
+
+    if (_parentWidget) {
+        q->setGeometry(_parentWidget->rect());
+    }
+}
+
+bool NOverlayPrivate::eventFilter(QObject* watched, QEvent* event) {
+    if (watched == q_ptr) {
+        if (event->type() == QEvent::ParentChange) {
+            updateParentWidget();
+        } else if (event->type() == QEvent::Show) {
+            syncParentGeometry();
+        }
+    } else if (watched == _parentWidget && event->type() == QEvent::Resize) {
+        syncParentGeometry();
+    }
+
+    return QObject::eventFilter(watched, event);
 }
 
 void NOverlayPrivate::doAnimation(int endValue) {

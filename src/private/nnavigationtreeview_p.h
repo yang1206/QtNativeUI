@@ -26,6 +26,8 @@ class NNavigationTreeView : public QTreeView {
     virtual void mouseMoveEvent(QMouseEvent* event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
     virtual void mouseReleaseEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    void leaveEvent(QEvent* event) override;
     virtual bool eventFilter(QObject* watched, QEvent* event) override;
 
   private:

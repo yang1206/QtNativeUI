@@ -1,6 +1,7 @@
 #include "nnavigationmanager.h"
 #include "QtNativeUI/NNavigationBar.h"
 #include "QtNativeUI/NPageComponent.h"
+#include "QtNativeUI/NNavigationRouter.h"
 
 NNavigationManager* NNavigationManager::m_instance = nullptr;
 
@@ -54,4 +55,23 @@ NPageComponent* NNavigationManager::getPageComponent(const QString& routeKey) {
     return nullptr;
 }
 
-QList<NPageComponent*> NNavigationManager::getAllPageComponents() { return m_pageComponents.values(); }
+QList<NPageComponent*> NNavigationManager::getAllPageComponents() {
+    QList<NPageComponent*> pages;
+    for (const auto& page : m_pageComponents) {
+        if (page) pages.append(page.data());
+    }
+    return pages;
+}
+
+void NNavigationManager::registerRoute(const QString& key, NNavigationRouter* router) { m_routers[key] = router; }
+
+void NNavigationManager::unregisterRoute(const QString& key, NNavigationRouter* router) {
+    if (m_routers.value(key) == router) {
+        m_routers.remove(key);
+        m_pageComponents.remove(key);
+    }
+}
+
+NNavigationRouter* NNavigationManager::routerForKey(const QString& key) const { return m_routers.value(key); }
+void NNavigationManager::setActiveRouter(NNavigationRouter* router) { m_activeRouter = router; }
+NNavigationRouter* NNavigationManager::activeRouter() const { return m_activeRouter; }

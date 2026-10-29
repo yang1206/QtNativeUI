@@ -4,10 +4,8 @@
 
 选项卡控件用于在多个页面之间切换，每个选项卡对应一个页面内容。NTabWidget 基于 Qt 的 QTabWidget，提供了现代化的外观和增强的功能。
 
-标签栏与页面共用一个完整外框，标签栏两端和空白区使用 `SolidBackgroundFillColorBase`，
-选中页签与页面沿用 `LightSelectedBackground` / `DarkSelectedBackground`。
-`setBorderRadius()` 控制整体外框圆角，默认取 `CornerRadiusMedium`；`setBorderWidth()` 控制外框线宽。
-内部只绘制标签栏与页面的分隔线，并在当前页签处断开。
+标签栏与页面共用一个外框。`setBorderRadius()` 控制外框圆角，`setBorderWidth()` 控制外框线宽；
+选中标签和页面的背景色可通过 `setLightSelectedBackground()` / `setDarkSelectedBackground()` 设置。
 
 ### 基本用法
 
@@ -74,27 +72,24 @@ connect(tabWidget, &NTabWidget::tabAddRequested, tabWidget, [tabWidget]() {
 
 新增按钮及 Ctrl+T 发出 `tabAddRequested`，不会自动创建业务页面。
 中键、Ctrl+W 和 Ctrl+F4 发出关闭请求，遵守全局及逐页关闭权限。
-这些快捷键使用 `WidgetWithChildrenShortcut`，即使焦点位于当前页的文本编辑器等子控件中也有效。
-重排时页面由 Qt 同步移动。组件保留页面显式设置的调色板和背景填充策略。
-`Compact` 模式只折叠带图标的非当前标签；无图标标签会按内容显示，不会全部退化成省略号。
+焦点位于页面内的文本编辑器等子控件中时，这些快捷键也有效。
+拖动标签重排时，对应页面的顺序同步调整。
+`Compact` 模式将带图标的非当前标签折叠为图标；无图标标签和当前标签按内容显示。
 
 ### QTabWidget 兼容性
 
 默认 `documentMode` 与 `QTabWidget` 一致为 `false`，显示完整 Fluent 外框。调用
 `setDocumentMode(true)` 后去除外层圆角和外框，保留页签与内容区分隔线，适合嵌入主窗口文档区。
-`heightForWidth()`、角落控件、自定义页签按钮、逐页文字颜色、自动隐藏、溢出滚动、选择移除策略
-和页签重排继续遵循 Qt 语义。
+可使用 `QTabWidget` 的角落控件、自定义标签按钮、逐页文字颜色、自动隐藏和溢出滚动等功能。
 
-不要在应用级样式表中设置全局 `QTabWidget::pane` 规则。Qt 的 `QStyleSheetStyle` 会在命中该规则时
-绕过 `NTabWidget` 的自定义 pane/tab-bar 几何。需要透出父容器背景时，使用
-`setTransparentBackground(true)`；它只关闭组件表面和内容区填充，选中标签、边框与分隔线仍会保留。
+全局 `QTabWidget::pane` 样式表规则会影响组件布局。需要透明背景时，使用
+`setTransparentBackground(true)`，选中标签、边框与分隔线保持可见。
 
 `removeTab()` / `clear()` 与 Qt 一样只从容器移除页面，不负责销毁页面。`tabCloseRequested()`
 也只表示用户请求关闭，业务应保存数据、判断能否关闭，然后调用 `removeTab()` 和 `deleteLater()`。
 
-`setMovable(true)` 提供同一标签栏内的原生重排；`setTabDragEnabled(true)` 在指针越过标签栏边界后
-自动启动栏外拖拽。页签拖出窗口后的页面所有权迁移属于文档管理器能力，不是 `QTabWidget`
-自带能力，跨窗口接收和转移仍由业务实现。
+`setMovable(true)` 启用同一标签栏内的重排；`setTabDragEnabled(true)` 启用栏外拖拽。
+跨窗口接收和转移页面由应用处理。
 
 ### 带图标的选项卡
 
@@ -309,10 +304,9 @@ NTabWidget 继承自 `QTabWidget`，支持所有标准 QTabWidget 的方法和�
 
 ## 无障碍
 
-`NTabWidget` 和内建标签栏、添加按钮、关闭按钮均提供默认可访问名称；标签项继续使用 Qt 原生
-`PageTabList` / `PageTab` 语义、选择接口和按压动作。键盘焦点使用设计 token 绘制双层焦点框。
+`NTabWidget`、标签栏、添加按钮和关闭按钮均提供默认可访问名称，支持读屏和键盘焦点提示。
 
-应用仍应提供上下文名称，例如：
+应用可设置与页面内容相关的可访问名称，例如：
 
 ```cpp
 tabs->setAccessibleName(QStringLiteral("设备配置页面"));

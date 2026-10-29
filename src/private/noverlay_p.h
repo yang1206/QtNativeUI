@@ -24,6 +24,7 @@ class NOverlayPrivate : public QObject {
 
     void   init();
     void   doAnimation(int endValue);
+    void   syncParentGeometry();
     void   updateContentPosition();
     QColor currentOverlayColor() const;
     QWidget* createLoadingWidget(const QString& text);
@@ -32,6 +33,14 @@ class NOverlayPrivate : public QObject {
     QPointer<QWidget> _loadingWidget;
     bool              _isAnimating{false};
     bool              _closeAfterAnimation{false};
+
+  protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
+  private:
+    void updateParentWidget();
+
+    QPointer<QWidget> _parentWidget;
 };
 
 #endif // QTNATIVEUI_NOVERLAY_P_H

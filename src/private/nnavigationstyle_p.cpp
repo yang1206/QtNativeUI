@@ -13,7 +13,7 @@
 #include "nnavigationtreeview_p.h"
 
 NNavigationStyle::NNavigationStyle(QStyle* style) : QProxyStyle(style) {
-    _pOpacity              = 1;
+    _pRotate               = 0;
     _pItemHeight           = 40;
     _pLastSelectMarkTop    = 10.0;
     _pLastSelectMarkBottom = 10.0;
@@ -64,6 +64,19 @@ NNavigationStyle::NNavigationStyle(QStyle* style) : QProxyStyle(style) {
         _selectMarkTopAnimation->start();
     });
 
+    _expandAnimation = new QPropertyAnimation(this, "pRotate", this);
+    _expandAnimation->setEasingCurve(QEasingCurve::InOutSine);
+    connect(_expandAnimation, &QPropertyAnimation::valueChanged, this, [this] {
+        if (_pNavigationView && _expandAnimationTargetNode)
+            _pNavigationView->viewport()->update(_pNavigationView->visualRect(_expandAnimationTargetNode->getModelIndex()));
+    });
+    connect(_expandAnimation, &QPropertyAnimation::finished, this, [this] {
+        const auto node = _expandAnimationTargetNode;
+        _expandAnimationTargetNode.clear();
+        if (_pNavigationView && node)
+            _pNavigationView->viewport()->update(_pNavigationView->visualRect(node->getModelIndex()));
+    });
+
     _themeMode = nTheme->themeMode();
     connect(nTheme, &NTheme::themeModeChanged, this, [=](NThemeType::ThemeMode themeMode) { _themeMode = themeMode; });
 }
@@ -78,11 +91,7 @@ void NNavigationStyle::drawPrimitive(PrimitiveElement    element,
         case QStyle::PE_PanelItemViewItem: {
             if (const QStyleOptionViewItem* vopt = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
                 painter->save();
-                QModelIndex      index = vopt->index;
-                NNavigationNode* node  = static_cast<NNavigationNode*>(index.internalPointer());
-                if (this->_opacityAnimationTargetNode && node->getParentNode() == this->_opacityAnimationTargetNode) {
-                    painter->setOpacity(_pOpacity);
-                }
+                QModelIndex index = vopt->index;
                 painter->setRenderHint(QPainter::Antialiasing);
                 QRect itemRect = vopt->rect;
                 itemRect.setTop(itemRect.top() + 2);
@@ -147,9 +156,6 @@ void NNavigationStyle::drawControl(ControlElement      element,
                 NNavigationModel* model =
                     dynamic_cast<NNavigationModel*>(const_cast<QAbstractItemModel*>(vopt->index.model()));
 
-                if (this->_opacityAnimationTargetNode && node->getParentNode() == this->_opacityAnimationTargetNode) {
-                    painter->setOpacity(_pOpacity);
-                }
                 QColor accentColor =
                     nTheme->isDarkMode() ? nTheme->accentColor().dark() : nTheme->accentColor().light();
                 if (_isSelectMarkDisplay &&
@@ -321,65 +327,20 @@ QSize NNavigationStyle::sizeFromContents(ContentsType        type,
 }
 
 void NNavigationStyle::navigationNodeStateChange(QVariantMap data) {
-    if (data.contains("Expand")) {
-        NNavigationNode* lastExpandNode = _expandAnimationTargetNode;
-        _opacityAnimationTargetNode     = data.value("Expand").value<NNavigationNode*>();
-        _expandAnimationTargetNode      = _opacityAnimationTargetNode;
-
-        QPropertyAnimation* nodeOpacityAnimation = new QPropertyAnimation(this, "pOpacity");
-        connect(nodeOpacityAnimation, &QPropertyAnimation::finished, this, [=]() {
-            _opacityAnimationTargetNode = nullptr;
-        });
-        connect(nodeOpacityAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
-            if (_pNavigationView)
-                _pNavigationView->viewport()->update();
-        });
-        nodeOpacityAnimation->setDuration(600);
-        nodeOpacityAnimation->setEasingCurve(QEasingCurve::InOutSine);
-        nodeOpacityAnimation->setKeyValueAt(0.4, 0);
-        nodeOpacityAnimation->setStartValue(0);
-        nodeOpacityAnimation->setEndValue(1);
-        nodeOpacityAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-
-        QPropertyAnimation* rotateAnimation = new QPropertyAnimation(this, "pRotate");
-        connect(rotateAnimation, &QPropertyAnimation::finished, this, [=]() { _expandAnimationTargetNode = nullptr; });
-        connect(rotateAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
-            if (_pNavigationView)
-                _pNavigationView->viewport()->update();
-        });
-        rotateAnimation->setDuration(300);
-        rotateAnimation->setEasingCurve(QEasingCurve::InOutSine);
-        if (lastExpandNode == _expandAnimationTargetNode) {
-            rotateAnimation->setStartValue(_pRotate);
-        } else {
-            rotateAnimation->setStartValue(0);
-        }
-        rotateAnimation->setEndValue(-180);
-        rotateAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-    } else if (data.contains("Collapse")) {
-        NNavigationNode* lastExpandNode = _expandAnimationTargetNode;
-        _opacityAnimationTargetNode     = data.value("Collapse").value<NNavigationNode*>();
-        _expandAnimationTargetNode      = _opacityAnimationTargetNode;
-        _pOpacity                       = 0;
-
-        QPropertyAnimation* rotateAnimation = new QPropertyAnimation(this, "pRotate");
-        connect(rotateAnimation, &QPropertyAnimation::finished, this, [=]() {
-            _pOpacity                  = 1;
-            _expandAnimationTargetNode = nullptr;
-        });
-        connect(rotateAnimation, &QPropertyAnimation::valueChanged, this, [=](const QVariant& value) {
-            if (_pNavigationView)
-                _pNavigationView->viewport()->update();
-        });
-        rotateAnimation->setDuration(300);
-        rotateAnimation->setEasingCurve(QEasingCurve::InOutSine);
-        if (lastExpandNode == _expandAnimationTargetNode) {
-            rotateAnimation->setStartValue(_pRotate);
-        } else {
-            rotateAnimation->setStartValue(-180);
-        }
-        rotateAnimation->setEndValue(0);
-        rotateAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+    if (data.contains("Expand") || data.contains("Collapse")) {
+        const bool expanding = data.contains("Expand");
+        auto* node = data.value(expanding ? "Expand" : "Collapse").value<NNavigationNode*>();
+        if (!node) return;
+        const qreal start = _expandAnimationTargetNode == node ? _pRotate : (expanding ? 0.0 : -180.0);
+        const qreal end = expanding ? -180.0 : 0.0;
+        // 子项可见性由 QTreeView 的展开动画管理，快照不能再叠加透明遮蔽。
+        // 反向操作从当前角度接续，旧动画不能在完成时清掉新目标。
+        _expandAnimation->stop();
+        _expandAnimationTargetNode = node;
+        _expandAnimation->setStartValue(start);
+        _expandAnimation->setEndValue(end);
+        _expandAnimation->setDuration(qMax(1, qRound(300 * qAbs(end - start) / 180)));
+        _expandAnimation->start();
     } else if (data.contains("SelectMarkChanged")) {
         _lastSelectedNode             = data.value("LastSelectedNode").value<NNavigationNode*>();
         NNavigationNode* selectedNode = data.value("SelectedNode").value<NNavigationNode*>();

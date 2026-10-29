@@ -15,7 +15,7 @@ NNavigationView::NNavigationView(QWidget* parent) : QWidget(parent), d_ptr(new N
     setMinimumWidth(300);
     setMinimumHeight(200);
 
-    NNavigationRouter* router = NNavigationRouter::getInstance();
+    NNavigationRouter* router = d->_navigationBar->router();
     connect(router, &NNavigationRouter::routeChanged, this, &NNavigationView::routeChanged);
     connect(router, &NNavigationRouter::routeBack, this, &NNavigationView::routeBack);
     connect(router, &NNavigationRouter::navigationStateChanged, this, &NNavigationView::navigationStateChanged);
@@ -215,24 +215,38 @@ void NNavigationView::navigation(QString pageKey, bool isLogClicked) {
 }
 
 void NNavigationView::navigateTo(const QString& pageKey, const QVariantMap& params) {
-    NNavigationRouter::getInstance()->navigateTo(pageKey, params);
+    router()->navigateTo(pageKey, params);
 }
 
 void NNavigationView::navigateBack(const QVariantMap& params) {
-    NNavigationRouter::getInstance()->navigateBack(params);
+    router()->navigateBack(params);
 }
 
-QString NNavigationView::currentRouteKey() const { return NNavigationRouter::getInstance()->currentRouteKey(); }
+QString NNavigationView::currentRouteKey() const { return router()->currentRouteKey(); }
 
 QVariantMap NNavigationView::currentRouteParams() const {
-    return NNavigationRouter::getInstance()->currentRouteParams();
+    return router()->currentRouteParams();
 }
 
-int NNavigationView::historyCount() const { return NNavigationRouter::getInstance()->historyCount(); }
+int NNavigationView::historyCount() const { return router()->historyCount(); }
 
-void NNavigationView::clearNavigationHistory() { NNavigationRouter::getInstance()->clearHistory(); }
+void NNavigationView::clearNavigationHistory() { router()->clearHistory(); }
 
-bool NNavigationView::hasNavigationHistory() const { return NNavigationRouter::getInstance()->historyCount() > 0; }
+bool NNavigationView::hasNavigationHistory() const { return router()->historyCount() > 0; }
+
+NNavigationRouter* NNavigationView::router() const { return d_ptr->_navigationBar->router(); }
+
+NNavigationType::NavigationDisplayMode NNavigationView::effectiveDisplayMode() const { return d_ptr->_effectiveDisplayMode; }
+
+bool NNavigationView::isPaneOpen() const { return d_ptr->_isPaneOpen; }
+
+void NNavigationView::setPaneOpen(bool open) {
+    Q_D(NNavigationView);
+    if (d->_isPaneOpen == open) return;
+    d->_isPaneOpen = open;
+    d->updateLayout();
+    emit paneOpenChanged(open);
+}
 
 void NNavigationView::setNavigationBarVisible(bool visible) {
     Q_D(NNavigationView);
@@ -248,7 +262,7 @@ bool NNavigationView::isNavigationBarVisible() const {
 
 void NNavigationView::setPageTransitionDuration(int duration) {
     Q_D(NNavigationView);
-    d->_pageTransitionDuration = duration;
+    d->_pageTransitionDuration = qMax(0, duration);
 }
 
 int NNavigationView::pageTransitionDuration() const {
@@ -258,12 +272,12 @@ int NNavigationView::pageTransitionDuration() const {
 
 QWidget* NNavigationView::currentWidget() const {
     Q_D(const NNavigationView);
-    return d->_stackedWidget->currentWidget();
+    return d->_currentPage;
 }
 
 int NNavigationView::currentIndex() const {
     Q_D(const NNavigationView);
-    return d->_stackedWidget->currentIndex();
+    return d->_currentPageIndex;
 }
 
 int NNavigationView::count() const {

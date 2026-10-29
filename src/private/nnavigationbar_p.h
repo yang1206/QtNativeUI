@@ -3,6 +3,8 @@
 
 #include <QMap>
 #include <QObject>
+#include <QPointer>
+#include "nnavigationnode_p.h"
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
 
@@ -23,6 +25,8 @@ class QListView;
 class NNavigationFooterModel;
 class NNavigationFooterDelegate;
 class NToolButton;
+class NNavigationRouter;
+class QPropertyAnimation;
 
 class NNavigationBarPrivate : public QObject {
     Q_OBJECT
@@ -31,6 +35,7 @@ class NNavigationBarPrivate : public QObject {
     Q_PROPERTY_CREATE_D(bool, IsSearchVisible)
 
     Q_PROPERTY_CREATE(int, NavigationViewWidth);
+    Q_PROPERTY_CREATE(int, PaneAnimatedWidth);
 
   public:
     explicit NNavigationBarPrivate(QObject* parent = nullptr);
@@ -41,15 +46,16 @@ class NNavigationBarPrivate : public QObject {
     // 核心跳转逻辑
     void onTreeViewClicked(const QModelIndex& index, bool isLogRoute = true);
     void onFooterViewClicked(const QModelIndex& index, bool isLogRoute = true);
+    void syncSelection(const QString& key);
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
   private:
     NThemeType::ThemeMode             _themeMode;
     QMap<QString, QString>            _suggestKeyMap;
-    QMap<QString, const QMetaObject*> _pageMetaMap;
-    QMap<NNavigationNode*, NMenu*>    _compactMenuMap;
+    NNavigationRouter* _router{nullptr};
     QVBoxLayout*                      _navigationLayout{nullptr};
 
-    QWidget*                   _headerWidget{nullptr};
+    QPointer<QWidget>          _headerWidget{nullptr};
     QVBoxLayout*               _headerLayout{nullptr};
     NToolButton*               _navigationButton{nullptr};
     NToolButton*               _searchButton{nullptr};
@@ -60,16 +66,17 @@ class NNavigationBarPrivate : public QObject {
     NNavigationFooterDelegate* _footerDelegate{nullptr};
     NAutoSuggestBox*           _navigationSuggestBox{nullptr};
 
-    QList<NNavigationNode*> _lastExpandedNodesList;
+    QStringList _lastExpandedNodeKeys;
 
     NNavigationType::NavigationDisplayMode _currentDisplayMode{NNavigationType::NavigationDisplayMode::Maximal};
 
-    bool _isAnimating{false};
+    QPointer<NNavigationNode> _displayedNode;
+    QPropertyAnimation* _widthAnimation{nullptr};
+    QPropertyAnimation* _viewWidthAnimation{nullptr};
 
     QVBoxLayout* _navigationButtonLayout{nullptr};  // 导航按钮布局
     QVBoxLayout* _navigationSuggestLayout{nullptr}; // 搜索框布局
 
-    void _initNodeModelIndex(const QModelIndex& parentIndex);
     void _resetNodeSelected();
     void _expandSelectedNodeParent();
     void _expandOrCollpaseExpanderNode(NNavigationNode* node, bool isExpand);
@@ -78,6 +85,7 @@ class NNavigationBarPrivate : public QObject {
     void _addFooterPage(QWidget* page, QString footKey);
     void _raiseNavigationBar();
     void _showSearchAndFocus();
+    void _showCompactMenu(NNavigationNode* node);
 
     void _doComponentAnimation(NNavigationType::NavigationDisplayMode displayMode, bool isAnimation);
     void _handleNavigationExpandState(bool isSave);

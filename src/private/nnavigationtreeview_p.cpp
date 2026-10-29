@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QModelIndex>
 #include <QMouseEvent>
+#include <QKeyEvent>
 #include <QPalette>
 #include <QScroller>
 
@@ -28,6 +29,7 @@ NNavigationTreeView::NNavigationTreeView(QWidget* parent) : QTreeView(parent) {
     setAutoScroll(false);
     setMouseTracking(true);
     setSelectionMode(QAbstractItemView::NoSelection);
+    connect(this, &QTreeView::clicked, this, &NNavigationTreeView::navigationClicked);
 
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -40,7 +42,8 @@ NNavigationTreeView::NNavigationTreeView(QWidget* parent) : QTreeView(parent) {
     NScrollBar* floatVScrollBar = new NScrollBar(verticalScrollBar(), this);
     floatVScrollBar->installEventFilter(this);
 
-    _navigationStyle = new NNavigationStyle(this->style());
+    _navigationStyle = new NNavigationStyle();
+    _navigationStyle->setParent(this);
     _navigationStyle->setNavigationView(this);
     setStyle(_navigationStyle);
 
@@ -57,7 +60,7 @@ NNavigationTreeView::NNavigationTreeView(QWidget* parent) : QTreeView(parent) {
 
     connect(scroller, &QScroller::stateChanged, this, [=](QScroller::State newstate) {
         if (newstate == QScroller::Pressed) {
-            _navigationStyle->setPressIndex(indexAt(mapFromGlobal(QCursor::pos())));
+            _navigationStyle->setPressIndex(indexAt(viewport()->mapFromGlobal(QCursor::pos())));
             viewport()->update();
         } else if (newstate == QScroller::Scrolling || newstate == QScroller::Inactive) {
             _navigationStyle->setPressIndex(QModelIndex());
@@ -111,7 +114,7 @@ void NNavigationTreeView::mouseMoveEvent(QMouseEvent* event) {
         NNavigationNode* posNode = static_cast<NNavigationNode*>(posIndex.internalPointer());
         NToolTip*        tip     = compactToolTip();
         tip->setText(posNode->getNodeTitle());
-        tip->move(mapToGlobal(QPoint(width() + 5, event->pos().y() - tip->height() / 2)));
+        tip->move(viewport()->mapToGlobal(QPoint(width() + 5, event->pos().y() - tip->height() / 2)));
         tip->show();
     } else if (_compactToolTip) {
         _compactToolTip->hide();
@@ -130,13 +133,22 @@ void NNavigationTreeView::mouseReleaseEvent(QMouseEvent* event) {
     QTreeView::mouseReleaseEvent(event);
 
     if (event->button() == Qt::LeftButton) {
-        QModelIndex index = indexAt(event->pos());
-        if (index.isValid()) {
-            Q_EMIT navigationClicked(index);
-        }
-
         _navigationStyle->setPressIndex(QModelIndex());
     }
+}
+
+void NNavigationTreeView::keyPressEvent(QKeyEvent* event) {
+    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter || event->key() == Qt::Key_Space) {
+        if (currentIndex().isValid()) emit navigationClicked(currentIndex());
+        event->accept();
+        return;
+    }
+    QTreeView::keyPressEvent(event);
+}
+
+void NNavigationTreeView::leaveEvent(QEvent* event) {
+    if (_compactToolTip) _compactToolTip->hide();
+    QTreeView::leaveEvent(event);
 }
 
 bool NNavigationTreeView::eventFilter(QObject* watched, QEvent* event) {
@@ -144,7 +156,7 @@ bool NNavigationTreeView::eventFilter(QObject* watched, QEvent* event) {
         case QEvent::MouseMove:
         case QEvent::HoverMove: {
             if (width() <= 60) {
-                QModelIndex posIndex = indexAt(mapFromGlobal(QCursor::pos()));
+                QModelIndex posIndex = indexAt(viewport()->mapFromGlobal(QCursor::pos()));
                 if (!posIndex.isValid()) {
                     compactToolTip()->hide();
                     break;
@@ -153,7 +165,7 @@ bool NNavigationTreeView::eventFilter(QObject* watched, QEvent* event) {
                 NNavigationNode* posNode = static_cast<NNavigationNode*>(posIndex.internalPointer());
                 NToolTip*        tip     = compactToolTip();
                 tip->setText(posNode->getNodeTitle());
-                tip->move(mapToGlobal(QPoint(width() + 5, QCursor::pos().y() - tip->height() / 2)));
+                tip->move(viewport()->mapToGlobal(QPoint(width() + 5, viewport()->mapFromGlobal(QCursor::pos()).y() - tip->height() / 2)));
                 tip->show();
             } else if (_compactToolTip) {
                 _compactToolTip->hide();

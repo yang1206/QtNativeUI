@@ -1,71 +1,44 @@
 #ifndef NNAVIGATIONANIMATION_P_H
 #define NNAVIGATIONANIMATION_P_H
 
-#include <QGraphicsBlurEffect>
 #include <QObject>
 #include <QPixmap>
+#include <QPointer>
 #include <QWidget>
 #include "QtNativeUI/NEnums.h"
 
 class QStackedWidget;
+class QPropertyAnimation;
+class QGraphicsBlurEffect;
 
-    class NNavigationAnimationManager : public QObject {
+class NNavigationAnimationManager : public QObject {
     Q_OBJECT
-    Q_PROPERTY(int popupAnimationYOffset READ popupAnimationYOffset WRITE setPopupAnimationYOffset)
-    Q_PROPERTY(qreal scaleAnimationRatio READ scaleAnimationRatio WRITE setScaleAnimationRatio)
-    Q_PROPERTY(qreal scaleAnimationPixOpacity READ scaleAnimationPixOpacity WRITE setScaleAnimationPixOpacity)
-    Q_PROPERTY(qreal flipAnimationRatio READ flipAnimationRatio WRITE setFlipAnimationRatio)
-    Q_PROPERTY(int blurAnimationRadius READ blurAnimationRadius WRITE setBlurAnimationRadius)
-    Q_PROPERTY(qreal cubeAnimationAngle READ cubeAnimationAngle WRITE setCubeAnimationAngle)
-    Q_PROPERTY(qreal rippleAnimationRadius READ rippleAnimationRadius WRITE setRippleAnimationRadius)
+    Q_PROPERTY(qreal progress READ progress WRITE setProgress)
 
   public:
     explicit NNavigationAnimationManager(QStackedWidget* stackedWidget, QObject* parent = nullptr);
-    ~NNavigationAnimationManager();
+    ~NNavigationAnimationManager() override;
 
     void executeTransition(NNavigationType::PageTransitionType type, int targetIndex, bool isRouteBack, int duration = 300);
     void paintTransition(QPainter* painter, const QRect& rect, int borderRadius);
+    void cancelTransition();
+    qreal progress() const { return m_progress; }
+    void setProgress(qreal progress);
 
-    int popupAnimationYOffset() const { return m_popupAnimationYOffset; }
-    void setPopupAnimationYOffset(int offset) { m_popupAnimationYOffset = offset; }
-
-    qreal scaleAnimationRatio() const { return m_scaleAnimationRatio; }
-    void setScaleAnimationRatio(qreal ratio) { m_scaleAnimationRatio = ratio; }
-
-    qreal scaleAnimationPixOpacity() const { return m_scaleAnimationPixOpacity; }
-    void setScaleAnimationPixOpacity(qreal opacity) { m_scaleAnimationPixOpacity = opacity; }
-
-    qreal flipAnimationRatio() const { return m_flipAnimationRatio; }
-    void setFlipAnimationRatio(qreal ratio) { m_flipAnimationRatio = ratio; }
-
-    int blurAnimationRadius() const { return m_blurAnimationRadius; }
-    void setBlurAnimationRadius(int radius) { m_blurAnimationRadius = radius; }
-
-    qreal cubeAnimationAngle() const { return m_cubeAnimationAngle; }
-    void setCubeAnimationAngle(qreal angle) { m_cubeAnimationAngle = angle; }
-
-    qreal rippleAnimationRadius() const { return m_rippleAnimationRadius; }
-    void setRippleAnimationRadius(qreal radius) { m_rippleAnimationRadius = radius; }
-
+  protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
   private:
-    bool getCurrentStackPix();
-    void getTargetStackPix();
-
-    QStackedWidget*                     m_stackedWidget{nullptr};
+    QStackedWidget* m_stackedWidget{nullptr};
     NNavigationType::PageTransitionType m_transitionType{NNavigationType::NoTransition};
-    QPixmap                             m_targetStackPix;
-    QPixmap                             m_currentStackPix;
-    QGraphicsBlurEffect*                m_blurEffect{nullptr};
-    bool                                m_isDrawNewPix{false};
-
-    int   m_popupAnimationYOffset{0};
-    qreal m_scaleAnimationRatio{1.0};
-    qreal m_scaleAnimationPixOpacity{1.0};
-    qreal m_flipAnimationRatio{0.0};
-    int   m_blurAnimationRadius{0};
-    qreal m_cubeAnimationAngle{0.0};
-    qreal m_rippleAnimationRadius{0.0};
+    QPixmap m_targetStackPix;
+    QPixmap m_currentStackPix;
+    QPointer<QGraphicsBlurEffect> m_blurEffect;
+    QPropertyAnimation* m_animation{nullptr};
+    qreal m_progress{0};
+    bool m_isRouteBack{false};
+    quint64 m_requestId{0};
+    QPointer<QWidget> m_hiddenPage;
 };
 
 #endif // NNAVIGATIONANIMATION_P_H

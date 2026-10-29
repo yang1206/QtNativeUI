@@ -72,6 +72,9 @@ class NNavigationModel : public QAbstractItemModel {
     QList<NNavigationNode*> getRootExpandedNodes() const;
 
   private:
+    NNavigationType::NodeOperateReturnType insertNode(const QString& title, QString& key,
+        const QString& parentKey, bool expander, int keyPoints,
+        NRegularIconType::Icon regular, NFilledIconType::Icon filled);
     QMap<QString, NNavigationNode*> _nodesMap;
     NNavigationNode*                _rootNode{nullptr};
 };

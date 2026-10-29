@@ -7,11 +7,12 @@ NNavigationFooterModel::NNavigationFooterModel(QObject* parent) : QAbstractListM
 NNavigationFooterModel::~NNavigationFooterModel() { qDeleteAll(_footerNodeList); }
 
 int NNavigationFooterModel::rowCount(const QModelIndex& parent) const {
-    Q_UNUSED(parent);
-    return _footerNodeList.count();
+    return parent.isValid() ? 0 : _footerNodeList.count();
 }
 
 QVariant NNavigationFooterModel::data(const QModelIndex& index, int role) const {
+    if (!index.isValid() || index.model() != this || index.row() < 0 || index.row() >= _footerNodeList.count()) return {};
+    if (role == Qt::DisplayRole || role == Qt::AccessibleTextRole || role == Qt::ToolTipRole) return _footerNodeList.at(index.row())->getNodeTitle();
     if (role == Qt::UserRole) {
         if (index.row() < _footerNodeList.count()) {
             return QVariant::fromValue(_footerNodeList[index.row()]);
@@ -25,20 +26,17 @@ NNavigationType::NodeOperateReturnType NNavigationFooterModel::addFooterNode(QSt
                                                                              bool                   isHasFooterPage,
                                                                              int                    keyPoints,
                                                                              NRegularIconType::Icon icon) {
-    if (_footerNodeList.count() >= 3) {
-        return NNavigationType::FooterUpperLimit;
-    }
-
     NNavigationNode* node = new NNavigationNode(footerTitle);
-    node->setKeyPoints(keyPoints);
+    node->setKeyPoints(qMax(0, keyPoints));
     node->setIsFooterNode(true);
     node->setIsHasFooterPage(isHasFooterPage);
     node->setIcon(icon);
     footerKey = node->getNodeKey();
 
-    beginResetModel();
+    const int row = _footerNodeList.size();
+    beginInsertRows({}, row, row);
     _footerNodeList.append(node);
-    endResetModel();
+    endInsertRows();
 
     node->setModelIndex(this->index(_footerNodeList.count() - 1));
     return NNavigationType::Success;
@@ -49,20 +47,17 @@ NNavigationType::NodeOperateReturnType NNavigationFooterModel::addFooterNode(QSt
                                                                              bool                  isHasFooterPage,
                                                                              int                   keyPoints,
                                                                              NFilledIconType::Icon icon) {
-    if (_footerNodeList.count() >= 3) {
-        return NNavigationType::FooterUpperLimit;
-    }
-
     NNavigationNode* node = new NNavigationNode(footerTitle);
-    node->setKeyPoints(keyPoints);
+    node->setKeyPoints(qMax(0, keyPoints));
     node->setIsFooterNode(true);
     node->setIsHasFooterPage(isHasFooterPage);
     node->setFilledIcon(icon);
     footerKey = node->getNodeKey();
 
-    beginResetModel();
+    const int row = _footerNodeList.size();
+    beginInsertRows({}, row, row);
     _footerNodeList.append(node);
-    endResetModel();
+    endInsertRows();
 
     node->setModelIndex(this->index(_footerNodeList.count() - 1));
     return NNavigationType::Success;
@@ -80,10 +75,14 @@ NNavigationNode* NNavigationFooterModel::getNavigationNode(QString footerKey) {
 }
 
 void NNavigationFooterModel::removeNavigationNode(QString footerKey) {
-    for (auto node : _footerNodeList) {
-        if (node->getNodeKey() == footerKey) {
-            _footerNodeList.removeOne(node);
-            break;
-        }
+    for (int row = 0; row < _footerNodeList.size(); ++row) {
+        auto* node = _footerNodeList.at(row);
+        if (node->getNodeKey() != footerKey) continue;
+        beginRemoveRows({}, row, row);
+        if (_pSelectedNode == node) _pSelectedNode = nullptr;
+        _footerNodeList.removeAt(row);
+        delete node;
+        endRemoveRows();
+        return;
     }
 }

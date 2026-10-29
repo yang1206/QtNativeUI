@@ -40,7 +40,8 @@ void NPageComponent::setRouteKey(const QString& key) {
 }
 
 void NPageComponent::navigateTo(const QString& pageKey, const QVariantMap& params) {
-    NNavigationRouter::getInstance()->navigateTo(pageKey, params);
+    auto* router = NNavigationManager::getInstance()->routerForKey(_routeKey);
+    (router ? router : NNavigationRouter::getInstance())->navigateTo(pageKey, params);
 }
 
 QString NPageComponent::pageTitle() const { return m_pageTitle; }
@@ -48,9 +49,6 @@ QString NPageComponent::pageTitle() const { return m_pageTitle; }
 void NPageComponent::setPageTitle(const QString& title) { m_pageTitle = title; }
 
 void NPageComponent::navigateBack(const QVariantMap& params) {
-    QVariantMap outParams = params;
-    if (beforeRouteLeave(outParams)) {
-        onRouteLeave(outParams);
-        NNavigationRouter::getInstance()->navigateBack(outParams);
-    }
+    auto* router = NNavigationManager::getInstance()->routerForKey(_routeKey);
+    (router ? router : NNavigationRouter::getInstance())->navigateBack(params);
 }

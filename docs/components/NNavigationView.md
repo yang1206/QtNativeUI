@@ -198,7 +198,10 @@ navView->setPageTransitionDuration(300);
 | 方法 | 说明 | 参数 |
 |------|------|------|
 | `setDisplayMode(NNavigationType::NavigationDisplayMode mode)` | 设置显示模式 | 显示模式枚举 |
-| `displayMode()` | 获取显示模式 | - |
+| `getDisplayMode()` | 获取配置的显示模式 | - |
+| `effectiveDisplayMode()` | 获取当前宽度对应的显示模式 | - |
+| `setPaneOpen(bool open)` | 展开或收起导航面板 | `true` / `false` |
+| `isPaneOpen()` | 获取导航面板是否展开 | - |
 | `setNavigationBarVisible(bool visible)` | 设置导航栏可见性 | `true` / `false` |
 | `isNavigationBarVisible()` | 获取导航栏可见性 | - |
 
@@ -242,6 +245,7 @@ navView->setPageTransitionDuration(300);
 | `historyCount()` | 获取历史记录数量 | - |
 | `clearNavigationHistory()` | 清除导航历史 | - |
 | `hasNavigationHistory()` | 是否有导航历史 | - |
+| `router()` | 获取当前视图的路由器 | - |
 
 ### 页面管理
 
@@ -256,7 +260,7 @@ navView->setPageTransitionDuration(300);
 | 方法 | 说明 | 参数 |
 |------|------|------|
 | `setPageTransitionType(NNavigationType::PageTransitionType type)` | 设置过渡动画类型 | 动画类型枚举 |
-| `pageTransitionType()` | 获取过渡动画类型 | - |
+| `getPageTransitionType()` | 获取过渡动画类型 | - |
 | `setPageTransitionDuration(int duration)` | 设置动画时长 | 毫秒数 |
 | `pageTransitionDuration()` | 获取动画时长 | - |
 
@@ -272,6 +276,7 @@ navView->setPageTransitionDuration(300);
 | `routeChanged(const QString&, const QVariantMap&)` | 路由改变 | 页面键值、参数 |
 | `routeBack(const QString&, const QString&, const QVariantMap&)` | 路由返回 | 来源页面、目标页面、参数 |
 | `navigationStateChanged(bool)` | 导航状态改变 | 是否有历史记录 |
+| `paneOpenChanged(bool)` | 导航面板展开状态改变 | 是否展开 |
 
 ### 枚举
 
@@ -280,7 +285,7 @@ navView->setPageTransitionDuration(300);
 | 值 | 说明 |
 |----|------|
 | `Auto` | 自动模式（根据窗口大小自适应） |
-| `Minimal` | 最小模式（导航栏隐藏） |
+| `Minimal` | 最小模式（保留菜单按钮，展开后覆盖内容） |
 | `Compact` | 紧凑模式（只显示图标） |
 | `Maximal` | 完整模式（显示完整导航栏） |
 
@@ -302,8 +307,8 @@ navView->setPageTransitionDuration(300);
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| 导航栏宽度（完整） | `320px` | Maximal 模式下的导航栏宽度 |
-| 导航栏宽度（紧凑） | `48px` | Compact 模式下的导航栏宽度 |
+| 导航栏宽度（完整） | `300px` | Maximal 模式下的导航栏宽度 |
+| 导航栏宽度（紧凑） | `47px` | Compact 模式下的导航栏宽度 |
 | 节点高度 | `40px` | 导航节点高度 |
 | 动画时长 | `250ms` | 默认页面过渡动画时长 |
 
@@ -315,3 +320,35 @@ connect(nTheme, &NTheme::themeModeChanged, [](NThemeType::ThemeMode mode) {
     // 导航栏和页面颜色会自动更新
 });
 ```
+
+## 状态、路由与生命周期
+
+每个导航视图独立维护当前页面、选中状态和返回历史。通过 `router()` 可设置历史容量或获取导航结果。
+
+普通 `QWidget` 页面支持导航历史；`NPageComponent` 可提供进入、离开守卫及生命周期回调。守卫拒绝时，当前页面与历史保持不变。生命周期回调内的重入导航请求返回 `RouteRejected`。
+
+`navigation(key, false)` 执行守卫并更新当前路由，不追加历史。以相同参数导航到当前页面时，不重复触发生命周期。
+
+`NNavigationRouter::getInstance()` 按目标键定位页面所属的导航视图；返回、查询和清空历史作用于最近成功导航的视图。多窗口程序可使用视图自身的方法或 `router()` 指定操作对象。
+
+移除分组会同时移除其所有子节点。`navigationNodeRemoved` 的节点类型为 `PageNode`、`FooterNode` 或 `ExpanderNode`。移除当前页面后，优先显示相邻页面。
+
+`removeNavigationNode()` 将页面移出内容栈并隐藏，不销毁页面对象。页面由原父对象持有，调用方可重新挂接或显式销毁。外部销毁已注册页面时，对应节点自动移除。同一个页面对象只能注册到一个导航视图。
+
+页脚超过三项时可滚动查看。无页面的页脚项作为动作项，点击时发出 `FooterNode` 信号，不切换页面或记录历史。
+
+## 面板打开状态
+
+`getDisplayMode()` 返回配置策略，`effectiveDisplayMode()` 返回当前宽度对应的模式。`Auto` 模式下，宽度小于 550 为 `Minimal`，550 到 849 为 `Compact`，850 及以上为 `Maximal`。
+
+```cpp
+navView->setDisplayMode(NNavigationType::Compact);
+navView->setPaneOpen(true);  // 在内容上方展开，不挤压页面
+connect(navView, &NNavigationView::paneOpenChanged, [](bool open) {
+    qDebug() << "导航面板打开:" << open;
+});
+```
+
+`Minimal` 保留菜单按钮并为它预留顶部空间。`Minimal` 和 `Compact` 中点击菜单按钮可覆盖式展开；选择页面、点击遮罩或按 Escape 收起。`Maximal` 中展开和收起会调整页面可用宽度。快速改变模式或页面时，以最后一次有效请求为准；页面过渡时长为 0 表示直接切换。
+
+树和页脚均支持用方向键定位、Enter / Space 激活。紧凑模式的分组菜单支持嵌套分组和页面组件。

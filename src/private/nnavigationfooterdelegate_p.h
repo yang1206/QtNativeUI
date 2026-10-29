@@ -1,7 +1,9 @@
 #ifndef NNavigationFooterDelegate_H
 #define NNavigationFooterDelegate_H
 
-#include <QModelIndex>
+#include <QPersistentModelIndex>
+#include <QPointer>
+#include "nnavigationnode_p.h"
 #include <QStyledItemDelegate>
 #include "QtNativeUI/NEnums.h"
 #include "QtNativeUI/stdafx.h"
@@ -12,8 +14,8 @@ class QPropertyAnimation;
 
 class NNavigationFooterDelegate : public QStyledItemDelegate {
     Q_OBJECT
-    Q_PRIVATE_CREATE(NBaseListView*, ListView)
-    Q_PRIVATE_CREATE(QModelIndex, PressIndex)
+    Q_PRIVATE_CREATE(QPointer<NBaseListView>, ListView)
+    Q_PRIVATE_CREATE(QPersistentModelIndex, PressIndex)
 
   public:
     explicit NNavigationFooterDelegate(QObject* parent = nullptr);
@@ -35,7 +37,7 @@ class NNavigationFooterDelegate : public QStyledItemDelegate {
     qreal                 _selectMarkTop{10};
     qreal                 _selectMarkBottom{10};
     bool                  _isSelectMarkDisplay{true};
-    NNavigationNode*      _lastSelectedNode{nullptr};
+    QPointer<NNavigationNode> _lastSelectedNode{nullptr};
     NThemeType::ThemeMode _themeMode{NThemeType::Light};
     QPropertyAnimation*   _lastSelectMarkTopAnimation{nullptr};
     QPropertyAnimation*   _lastSelectMarkBottomAnimation{nullptr};
